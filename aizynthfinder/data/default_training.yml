@@ -1,0 +1,27 @@
+library_headers: ["index", "ID", "reaction_hash", "reactants", "products", "classification", "retro_template", "template_hash", "selectivity", "outcomes", "template_code"]
+metadata_headers: ["template_hash", "classification"]
+output_path: "."
+file_prefix: ""
+file_postfix:
+  raw_library: _raw_template_library.csv
+  library: _template_library.csv
+  false_library: _template_library_false.csv
+  training_labels: _training_labels.npz
+  validation_labels: _validation_labels.npz
+  testing_labels: _testing_labels.npz
+  training_inputs: _training_inputs.npz
+  validation_inputs: _validation_inputs.npz
+  testing_inputs: _testing_inputs.npz
+  training_library: _training.csv
+  validation_library: _validation.csv
+  testing_library: _testing.csv
+  unique_templates: _unique_templates.hdf5
+split_size:
+  training: 0.9
+  testing: 0.05
+  validation: 0.05
+batch_size: 256
+epochs: 100
+fingerprint_radius: 2
+fingerprint_len: 2048
+template_occurance: 3

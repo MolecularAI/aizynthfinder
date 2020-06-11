@@ -1,0 +1,26 @@
+version: 1
+formatters:
+  file:
+    format: '%(asctime)s - %(name)s - %(levelname)s - %(message)s'
+  console:
+    format: '%(message)s'
+handlers:
+  console:
+    class: logging.StreamHandler
+    level: INFO
+    formatter: console
+    stream: ext://sys.stdout
+  file:
+    class: logging.FileHandler
+    level: DEBUG
+    formatter: file
+    filename: aizynthfinder.log
+loggers:
+  aizynthfinder:
+    level: DEBUG
+    handlers:
+      - console
+      - file
+root:
+  level: ERROR
+  handlers: []

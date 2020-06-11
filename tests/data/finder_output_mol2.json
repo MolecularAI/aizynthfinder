@@ -1,0 +1,962 @@
+[
+  {
+    "type": "mol",
+    "smiles": "COc1cc2cc(-c3ccc(O)c(O)c3)[n+](C)c(C)c2cc1OC",
+    "is_chemical": true,
+    "in_stock": false,
+    "children": [
+      {
+        "type": "reaction",
+        "smiles": "[O:1][c:2]([cH2:3])[cH2:4]>>O=C[c:2]([cH2:3])[cH2:4].OOC(c1cccc(Cl)c1)=[O:1]",
+        "is_reaction": true,
+        "children": [
+          {
+            "type": "mol",
+            "smiles": "COc1cc2cc(-c3ccc(C=O)c(O)c3)[n+](C)c(C)c2cc1OC",
+            "is_chemical": true,
+            "in_stock": false,
+            "children": [
+              {
+                "type": "reaction",
+                "smiles": "[O:1][cH3:2]>>COC[O:1][cH3:2]",
+                "is_reaction": true,
+                "children": [
+                  {
+                    "type": "mol",
+                    "smiles": "COCOc1cc(-c2cc3cc(OC)c(OC)cc3c(C)[n+]2C)ccc1C=O",
+                    "is_chemical": true,
+                    "in_stock": false,
+                    "children": [
+                      {
+                        "type": "reaction",
+                        "smiles": "[C:1]([OH:2])[O:3][cH3:4]>>Cl[C:1][OH:2].[O:3][cH3:4]",
+                        "is_reaction": true,
+                        "children": [
+                          {
+                            "type": "mol",
+                            "smiles": "COCCl",
+                            "is_chemical": true,
+                            "in_stock": true
+                          },
+                          {
+                            "type": "mol",
+                            "smiles": "COc1cc2cc(-c3ccc(C=O)c(O)c3)[n+](C)c(C)c2cc1OC",
+                            "is_chemical": true,
+                            "in_stock": false,
+                            "children": [
+                              {
+                                "type": "reaction",
+                                "smiles": "[O:1]=[C:2][c:4]([cH2:3])[cH2:5]>>C[O:1][C:2](Cl)Cl.[cH2:3][c:4][cH2:5]",
+                                "is_reaction": true,
+                                "children": [
+                                  {
+                                    "type": "mol",
+                                    "smiles": "COC(Cl)Cl",
+                                    "is_chemical": true,
+                                    "in_stock": true
+                                  },
+                                  {
+                                    "type": "mol",
+                                    "smiles": "COc1cc2cc(-c3cccc(O)c3)[n+](C)c(C)c2cc1OC",
+                                    "is_chemical": true,
+                                    "in_stock": false,
+                                    "children": [
+                                      {
+                                        "type": "reaction",
+                                        "smiles": "[cH3:1][O:2]>>c1ccc(C[O:2][cH3:1])cc1",
+                                        "is_reaction": true,
+                                        "children": [
+                                          {
+                                            "type": "mol",
+                                            "smiles": "COc1cc2cc(-c3cccc(OCc4ccccc4)c3)[n+](C)c(C)c2cc1OC",
+                                            "is_chemical": true,
+                                            "in_stock": false,
+                                            "children": [
+                                              {
+                                                "type": "reaction",
+                                                "smiles": "[C:1]([cH3:2])[O:3][cH3:4]>>Br[C:1][cH3:2].[O:3][cH3:4]",
+                                                "is_reaction": true,
+                                                "children": [
+                                                  {
+                                                    "type": "mol",
+                                                    "smiles": "BrCc1ccccc1",
+                                                    "is_chemical": true,
+                                                    "in_stock": true
+                                                  },
+                                                  {
+                                                    "type": "mol",
+                                                    "smiles": "COc1cc2cc(-c3cccc(O)c3)[n+](C)c(C)c2cc1OC",
+                                                    "is_chemical": true,
+                                                    "in_stock": false
+                                                  }
+                                                ]
+                                              }
+                                            ]
+                                          }
+                                        ]
+                                      }
+                                    ]
+                                  }
+                                ]
+                              }
+                            ]
+                          }
+                        ]
+                      }
+                    ]
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "type": "mol",
+            "smiles": "O=C(OO)c1cccc(Cl)c1",
+            "is_chemical": true,
+            "in_stock": true
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "type": "mol",
+    "smiles": "COc1cc2cc(-c3ccc(O)c(O)c3)[n+](C)c(C)c2cc1OC",
+    "is_chemical": true,
+    "in_stock": false,
+    "children": [
+      {
+        "type": "reaction",
+        "smiles": "[O:1][c:2]([cH2:3])[cH2:4]>>O=C[c:2]([cH2:3])[cH2:4].O[O:1]",
+        "is_reaction": true,
+        "children": [
+          {
+            "type": "mol",
+            "smiles": "COc1cc2cc(-c3ccc(O)c(C=O)c3)[n+](C)c(C)c2cc1OC",
+            "is_chemical": true,
+            "in_stock": false,
+            "children": [
+              {
+                "type": "reaction",
+                "smiles": "[O:1]=[C:2][c:4]([cH2:3])[cH2:5]>>C[O:1][C:2](Cl)Cl.[cH2:3][c:4][cH2:5]",
+                "is_reaction": true,
+                "children": [
+                  {
+                    "type": "mol",
+                    "smiles": "COC(Cl)Cl",
+                    "is_chemical": true,
+                    "in_stock": true
+                  },
+                  {
+                    "type": "mol",
+                    "smiles": "COc1cc2cc(-c3ccc(O)cc3)[n+](C)c(C)c2cc1OC",
+                    "is_chemical": true,
+                    "in_stock": false,
+                    "children": [
+                      {
+                        "type": "reaction",
+                        "smiles": "[cH3:1][O:2]>>c1ccc(C[O:2][cH3:1])cc1",
+                        "is_reaction": true,
+                        "children": [
+                          {
+                            "type": "mol",
+                            "smiles": "COc1cc2cc(-c3ccc(OCc4ccccc4)cc3)[n+](C)c(C)c2cc1OC",
+                            "is_chemical": true,
+                            "in_stock": false,
+                            "children": [
+                              {
+                                "type": "reaction",
+                                "smiles": "[C:1]([cH3:2])[O:3][cH3:4]>>Br[C:1][cH3:2].[O:3][cH3:4]",
+                                "is_reaction": true,
+                                "children": [
+                                  {
+                                    "type": "mol",
+                                    "smiles": "BrCc1ccccc1",
+                                    "is_chemical": true,
+                                    "in_stock": true
+                                  },
+                                  {
+                                    "type": "mol",
+                                    "smiles": "COc1cc2cc(-c3ccc(O)cc3)[n+](C)c(C)c2cc1OC",
+                                    "is_chemical": true,
+                                    "in_stock": false,
+                                    "children": [
+                                      {
+                                        "type": "reaction",
+                                        "smiles": "[cH3:1][O:2]>>c1ccc(C[O:2][cH3:1])cc1",
+                                        "is_reaction": true,
+                                        "children": [
+                                          {
+                                            "type": "mol",
+                                            "smiles": "COc1cc2cc(-c3ccc(OCc4ccccc4)cc3)[n+](C)c(C)c2cc1OC",
+                                            "is_chemical": true,
+                                            "in_stock": false,
+                                            "children": [
+                                              {
+                                                "type": "reaction",
+                                                "smiles": "[C:1]([cH3:2])[O:3][cH3:4]>>Br[C:1][cH3:2].[O:3][cH3:4]",
+                                                "is_reaction": true,
+                                                "children": [
+                                                  {
+                                                    "type": "mol",
+                                                    "smiles": "BrCc1ccccc1",
+                                                    "is_chemical": true,
+                                                    "in_stock": true
+                                                  },
+                                                  {
+                                                    "type": "mol",
+                                                    "smiles": "COc1cc2cc(-c3ccc(O)cc3)[n+](C)c(C)c2cc1OC",
+                                                    "is_chemical": true,
+                                                    "in_stock": false
+                                                  }
+                                                ]
+                                              }
+                                            ]
+                                          }
+                                        ]
+                                      }
+                                    ]
+                                  }
+                                ]
+                              }
+                            ]
+                          }
+                        ]
+                      }
+                    ]
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "type": "mol",
+            "smiles": "OO",
+            "is_chemical": true,
+            "in_stock": true
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "type": "mol",
+    "smiles": "COc1cc2cc(-c3ccc(O)c(O)c3)[n+](C)c(C)c2cc1OC",
+    "is_chemical": true,
+    "in_stock": false,
+    "children": [
+      {
+        "type": "reaction",
+        "smiles": "[c:1](:[NH:2])([cH2:3])-[c:4]([cH2:5])[cH2:6]>>Br[c:1](:[NH:2])[cH2:3].OB(O)[c:4]([cH2:5])[cH2:6]",
+        "is_reaction": true,
+        "children": [
+          {
+            "type": "mol",
+            "smiles": "COc1cc2cc(Br)[n+](C)c(C)c2cc1OC",
+            "is_chemical": true,
+            "in_stock": false,
+            "children": [
+              {
+                "type": "reaction",
+                "smiles": "[C:1][O:2][cH3:3]>>I[C:1].[O:2][cH3:3]",
+                "is_reaction": true,
+                "children": [
+                  {
+                    "type": "mol",
+                    "smiles": "CI",
+                    "is_chemical": true,
+                    "in_stock": true
+                  },
+                  {
+                    "type": "mol",
+                    "smiles": "COc1cc2c(C)[n+](C)c(Br)cc2cc1O",
+                    "is_chemical": true,
+                    "in_stock": false,
+                    "children": [
+                      {
+                        "type": "reaction",
+                        "smiles": "[cH3:1][O:2]>>c1ccc(C[O:2][cH3:1])cc1",
+                        "is_reaction": true,
+                        "children": [
+                          {
+                            "type": "mol",
+                            "smiles": "COc1cc2c(C)[n+](C)c(Br)cc2cc1OCc1ccccc1",
+                            "is_chemical": true,
+                            "in_stock": false,
+                            "children": [
+                              {
+                                "type": "reaction",
+                                "smiles": "[C:1]([cH3:2])[O:3][cH3:4]>>Br[C:1][cH3:2].[O:3][cH3:4]",
+                                "is_reaction": true,
+                                "children": [
+                                  {
+                                    "type": "mol",
+                                    "smiles": "BrCc1ccccc1",
+                                    "is_chemical": true,
+                                    "in_stock": true
+                                  },
+                                  {
+                                    "type": "mol",
+                                    "smiles": "COc1cc2c(C)[n+](C)c(Br)cc2cc1O",
+                                    "is_chemical": true,
+                                    "in_stock": false,
+                                    "children": [
+                                      {
+                                        "type": "reaction",
+                                        "smiles": "[cH3:1][O:2]>>c1ccc(C[O:2][cH3:1])cc1",
+                                        "is_reaction": true,
+                                        "children": [
+                                          {
+                                            "type": "mol",
+                                            "smiles": "COc1cc2c(C)[n+](C)c(Br)cc2cc1OCc1ccccc1",
+                                            "is_chemical": true,
+                                            "in_stock": false,
+                                            "children": [
+                                              {
+                                                "type": "reaction",
+                                                "smiles": "[C:1]([cH3:2])[O:3][cH3:4]>>Br[C:1][cH3:2].[O:3][cH3:4]",
+                                                "is_reaction": true,
+                                                "children": [
+                                                  {
+                                                    "type": "mol",
+                                                    "smiles": "BrCc1ccccc1",
+                                                    "is_chemical": true,
+                                                    "in_stock": true
+                                                  },
+                                                  {
+                                                    "type": "mol",
+                                                    "smiles": "COc1cc2c(C)[n+](C)c(Br)cc2cc1O",
+                                                    "is_chemical": true,
+                                                    "in_stock": false
+                                                  }
+                                                ]
+                                              }
+                                            ]
+                                          }
+                                        ]
+                                      }
+                                    ]
+                                  }
+                                ]
+                              }
+                            ]
+                          }
+                        ]
+                      }
+                    ]
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "type": "mol",
+            "smiles": "OB(O)c1ccc(O)c(O)c1",
+            "is_chemical": true,
+            "in_stock": true
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "type": "mol",
+    "smiles": "COc1cc2cc(-c3ccc(O)c(O)c3)[n+](C)c(C)c2cc1OC",
+    "is_chemical": true,
+    "in_stock": false,
+    "children": [
+      {
+        "type": "reaction",
+        "smiles": "[O:1][c:2]([cH2:3])[cH2:4]>>O=C[c:2]([cH2:3])[cH2:4].OOC(c1cccc(Cl)c1)=[O:1]",
+        "is_reaction": true,
+        "children": [
+          {
+            "type": "mol",
+            "smiles": "COc1cc2cc(-c3ccc(C=O)c(O)c3)[n+](C)c(C)c2cc1OC",
+            "is_chemical": true,
+            "in_stock": false,
+            "children": [
+              {
+                "type": "reaction",
+                "smiles": "[O:1]=[C:2][c:4]([cH2:3])[cH2:5]>>C[O:1][C:2](Cl)Cl.[cH2:3][c:4][cH2:5]",
+                "is_reaction": true,
+                "children": [
+                  {
+                    "type": "mol",
+                    "smiles": "COC(Cl)Cl",
+                    "is_chemical": true,
+                    "in_stock": true
+                  },
+                  {
+                    "type": "mol",
+                    "smiles": "COc1cc2cc(-c3cccc(O)c3)[n+](C)c(C)c2cc1OC",
+                    "is_chemical": true,
+                    "in_stock": false,
+                    "children": [
+                      {
+                        "type": "reaction",
+                        "smiles": "[cH3:1][O:2]>>c1ccc(C[O:2][cH3:1])cc1",
+                        "is_reaction": true,
+                        "children": [
+                          {
+                            "type": "mol",
+                            "smiles": "COc1cc2cc(-c3cccc(OCc4ccccc4)c3)[n+](C)c(C)c2cc1OC",
+                            "is_chemical": true,
+                            "in_stock": false,
+                            "children": [
+                              {
+                                "type": "reaction",
+                                "smiles": "[C:1]([cH3:2])[O:3][cH3:4]>>Br[C:1][cH3:2].[O:3][cH3:4]",
+                                "is_reaction": true,
+                                "children": [
+                                  {
+                                    "type": "mol",
+                                    "smiles": "BrCc1ccccc1",
+                                    "is_chemical": true,
+                                    "in_stock": true
+                                  },
+                                  {
+                                    "type": "mol",
+                                    "smiles": "COc1cc2cc(-c3cccc(O)c3)[n+](C)c(C)c2cc1OC",
+                                    "is_chemical": true,
+                                    "in_stock": false,
+                                    "children": [
+                                      {
+                                        "type": "reaction",
+                                        "smiles": "[cH3:1][O:2]>>c1ccc(C[O:2][cH3:1])cc1",
+                                        "is_reaction": true,
+                                        "children": [
+                                          {
+                                            "type": "mol",
+                                            "smiles": "COc1cc2cc(-c3cccc(OCc4ccccc4)c3)[n+](C)c(C)c2cc1OC",
+                                            "is_chemical": true,
+                                            "in_stock": false,
+                                            "children": [
+                                              {
+                                                "type": "reaction",
+                                                "smiles": "[C:1]([cH3:2])[O:3][cH3:4]>>Br[C:1][cH3:2].[O:3][cH3:4]",
+                                                "is_reaction": true,
+                                                "children": [
+                                                  {
+                                                    "type": "mol",
+                                                    "smiles": "BrCc1ccccc1",
+                                                    "is_chemical": true,
+                                                    "in_stock": true
+                                                  },
+                                                  {
+                                                    "type": "mol",
+                                                    "smiles": "COc1cc2cc(-c3cccc(O)c3)[n+](C)c(C)c2cc1OC",
+                                                    "is_chemical": true,
+                                                    "in_stock": false
+                                                  }
+                                                ]
+                                              }
+                                            ]
+                                          }
+                                        ]
+                                      }
+                                    ]
+                                  }
+                                ]
+                              }
+                            ]
+                          }
+                        ]
+                      }
+                    ]
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "type": "mol",
+            "smiles": "O=C(OO)c1cccc(Cl)c1",
+            "is_chemical": true,
+            "in_stock": true
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "type": "mol",
+    "smiles": "COc1cc2cc(-c3ccc(O)c(O)c3)[n+](C)c(C)c2cc1OC",
+    "is_chemical": true,
+    "in_stock": false,
+    "children": [
+      {
+        "type": "reaction",
+        "smiles": "[c:1](:[NH:2])([cH2:3])-[c:4]([cH2:5])[cH2:6]>>Br[c:1](:[NH:2])[cH2:3].OB(O)[c:4]([cH2:5])[cH2:6]",
+        "is_reaction": true,
+        "children": [
+          {
+            "type": "mol",
+            "smiles": "COc1cc2cc(Br)[n+](C)c(C)c2cc1OC",
+            "is_chemical": true,
+            "in_stock": false,
+            "children": [
+              {
+                "type": "reaction",
+                "smiles": "[C:1][O:2][cH3:3]>>I[C:1].[O:2][cH3:3]",
+                "is_reaction": true,
+                "children": [
+                  {
+                    "type": "mol",
+                    "smiles": "CI",
+                    "is_chemical": true,
+                    "in_stock": true
+                  },
+                  {
+                    "type": "mol",
+                    "smiles": "COc1cc2cc(Br)[n+](C)c(C)c2cc1O",
+                    "is_chemical": true,
+                    "in_stock": false,
+                    "children": [
+                      {
+                        "type": "reaction",
+                        "smiles": "[O:1][cH3:2]>>CC(=O)[O:1][cH3:2]",
+                        "is_reaction": true,
+                        "children": [
+                          {
+                            "type": "mol",
+                            "smiles": "COc1cc2cc(Br)[n+](C)c(C)c2cc1OC(C)=O",
+                            "is_chemical": true,
+                            "in_stock": false,
+                            "children": [
+                              {
+                                "type": "reaction",
+                                "smiles": "[C:1]([CH3:2])(=[O:3])[O:4][cH3:5]>>CC(=O)O[C:1]([CH3:2])=[O:3].[O:4][cH3:5]",
+                                "is_reaction": true,
+                                "children": [
+                                  {
+                                    "type": "mol",
+                                    "smiles": "CC(=O)OC(C)=O",
+                                    "is_chemical": true,
+                                    "in_stock": true
+                                  },
+                                  {
+                                    "type": "mol",
+                                    "smiles": "COc1cc2cc(Br)[n+](C)c(C)c2cc1O",
+                                    "is_chemical": true,
+                                    "in_stock": false,
+                                    "children": [
+                                      {
+                                        "type": "reaction",
+                                        "smiles": "[O:1][cH3:2]>>CC(=O)[O:1][cH3:2]",
+                                        "is_reaction": true,
+                                        "children": [
+                                          {
+                                            "type": "mol",
+                                            "smiles": "COc1cc2cc(Br)[n+](C)c(C)c2cc1OC(C)=O",
+                                            "is_chemical": true,
+                                            "in_stock": false,
+                                            "children": [
+                                              {
+                                                "type": "reaction",
+                                                "smiles": "[C:1]([CH3:2])(=[O:3])[O:4][cH3:5]>>CC(=O)O[C:1]([CH3:2])=[O:3].[O:4][cH3:5]",
+                                                "is_reaction": true,
+                                                "children": [
+                                                  {
+                                                    "type": "mol",
+                                                    "smiles": "CC(=O)OC(C)=O",
+                                                    "is_chemical": true,
+                                                    "in_stock": true
+                                                  },
+                                                  {
+                                                    "type": "mol",
+                                                    "smiles": "COc1cc2cc(Br)[n+](C)c(C)c2cc1O",
+                                                    "is_chemical": true,
+                                                    "in_stock": false
+                                                  }
+                                                ]
+                                              }
+                                            ]
+                                          }
+                                        ]
+                                      }
+                                    ]
+                                  }
+                                ]
+                              }
+                            ]
+                          }
+                        ]
+                      }
+                    ]
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "type": "mol",
+            "smiles": "OB(O)c1ccc(O)c(O)c1",
+            "is_chemical": true,
+            "in_stock": true
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "type": "mol",
+    "smiles": "COc1cc2cc(-c3ccc(O)c(O)c3)[n+](C)c(C)c2cc1OC",
+    "is_chemical": true,
+    "in_stock": false,
+    "children": [
+      {
+        "type": "reaction",
+        "smiles": "[O:1][c:2]([cH2:3])[cH2:4]>>O=C[c:2]([cH2:3])[cH2:4].O[O:1]",
+        "is_reaction": true,
+        "children": [
+          {
+            "type": "mol",
+            "smiles": "COc1cc2cc(-c3ccc(C=O)c(O)c3)[n+](C)c(C)c2cc1OC",
+            "is_chemical": true,
+            "in_stock": false,
+            "children": [
+              {
+                "type": "reaction",
+                "smiles": "[O:1]=[C:2][c:4]([cH2:3])[cH2:5]>>C[O:1][C:2](Cl)Cl.[cH2:3][c:4][cH2:5]",
+                "is_reaction": true,
+                "children": [
+                  {
+                    "type": "mol",
+                    "smiles": "COC(Cl)Cl",
+                    "is_chemical": true,
+                    "in_stock": true
+                  },
+                  {
+                    "type": "mol",
+                    "smiles": "COc1cc2cc(-c3cccc(O)c3)[n+](C)c(C)c2cc1OC",
+                    "is_chemical": true,
+                    "in_stock": false,
+                    "children": [
+                      {
+                        "type": "reaction",
+                        "smiles": "[cH3:1][O:2]>>c1ccc(C[O:2][cH3:1])cc1",
+                        "is_reaction": true,
+                        "children": [
+                          {
+                            "type": "mol",
+                            "smiles": "COc1cc2cc(-c3cccc(OCc4ccccc4)c3)[n+](C)c(C)c2cc1OC",
+                            "is_chemical": true,
+                            "in_stock": false,
+                            "children": [
+                              {
+                                "type": "reaction",
+                                "smiles": "[C:1]([cH3:2])[O:3][cH3:4]>>Br[C:1][cH3:2].[O:3][cH3:4]",
+                                "is_reaction": true,
+                                "children": [
+                                  {
+                                    "type": "mol",
+                                    "smiles": "BrCc1ccccc1",
+                                    "is_chemical": true,
+                                    "in_stock": true
+                                  },
+                                  {
+                                    "type": "mol",
+                                    "smiles": "COc1cc2cc(-c3cccc(O)c3)[n+](C)c(C)c2cc1OC",
+                                    "is_chemical": true,
+                                    "in_stock": false,
+                                    "children": [
+                                      {
+                                        "type": "reaction",
+                                        "smiles": "[cH3:1][O:2]>>c1ccc(C[O:2][cH3:1])cc1",
+                                        "is_reaction": true,
+                                        "children": [
+                                          {
+                                            "type": "mol",
+                                            "smiles": "COc1cc2cc(-c3cccc(OCc4ccccc4)c3)[n+](C)c(C)c2cc1OC",
+                                            "is_chemical": true,
+                                            "in_stock": false,
+                                            "children": [
+                                              {
+                                                "type": "reaction",
+                                                "smiles": "[C:1]([cH3:2])[O:3][cH3:4]>>Br[C:1][cH3:2].[O:3][cH3:4]",
+                                                "is_reaction": true,
+                                                "children": [
+                                                  {
+                                                    "type": "mol",
+                                                    "smiles": "BrCc1ccccc1",
+                                                    "is_chemical": true,
+                                                    "in_stock": true
+                                                  },
+                                                  {
+                                                    "type": "mol",
+                                                    "smiles": "COc1cc2cc(-c3cccc(O)c3)[n+](C)c(C)c2cc1OC",
+                                                    "is_chemical": true,
+                                                    "in_stock": false
+                                                  }
+                                                ]
+                                              }
+                                            ]
+                                          }
+                                        ]
+                                      }
+                                    ]
+                                  }
+                                ]
+                              }
+                            ]
+                          }
+                        ]
+                      }
+                    ]
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "type": "mol",
+            "smiles": "OO",
+            "is_chemical": true,
+            "in_stock": true
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "type": "mol",
+    "smiles": "COc1cc2cc(-c3ccc(O)c(O)c3)[n+](C)c(C)c2cc1OC",
+    "is_chemical": true,
+    "in_stock": false,
+    "children": [
+      {
+        "type": "reaction",
+        "smiles": "[O:1][c:2]([cH2:3])[cH2:4]>>O=C[c:2]([cH2:3])[cH2:4].O[O:1]",
+        "is_reaction": true,
+        "children": [
+          {
+            "type": "mol",
+            "smiles": "COc1cc2cc(-c3ccc(C=O)c(O)c3)[n+](C)c(C)c2cc1OC",
+            "is_chemical": true,
+            "in_stock": false,
+            "children": [
+              {
+                "type": "reaction",
+                "smiles": "[O:1][cH3:2]>>COC[O:1][cH3:2]",
+                "is_reaction": true,
+                "children": [
+                  {
+                    "type": "mol",
+                    "smiles": "COCOc1cc(-c2cc3cc(OC)c(OC)cc3c(C)[n+]2C)ccc1C=O",
+                    "is_chemical": true,
+                    "in_stock": false,
+                    "children": [
+                      {
+                        "type": "reaction",
+                        "smiles": "[C:1]([OH:2])[O:3][cH3:4]>>Cl[C:1][OH:2].[O:3][cH3:4]",
+                        "is_reaction": true,
+                        "children": [
+                          {
+                            "type": "mol",
+                            "smiles": "COCCl",
+                            "is_chemical": true,
+                            "in_stock": true
+                          },
+                          {
+                            "type": "mol",
+                            "smiles": "COc1cc2cc(-c3ccc(C=O)c(O)c3)[n+](C)c(C)c2cc1OC",
+                            "is_chemical": true,
+                            "in_stock": false,
+                            "children": [
+                              {
+                                "type": "reaction",
+                                "smiles": "[O:1]=[C:2][c:4]([cH2:3])[cH2:5]>>C[O:1][C:2](Cl)Cl.[cH2:3][c:4][cH2:5]",
+                                "is_reaction": true,
+                                "children": [
+                                  {
+                                    "type": "mol",
+                                    "smiles": "COC(Cl)Cl",
+                                    "is_chemical": true,
+                                    "in_stock": true
+                                  },
+                                  {
+                                    "type": "mol",
+                                    "smiles": "COc1cc2cc(-c3cccc(O)c3)[n+](C)c(C)c2cc1OC",
+                                    "is_chemical": true,
+                                    "in_stock": false,
+                                    "children": [
+                                      {
+                                        "type": "reaction",
+                                        "smiles": "[cH3:1][O:2]>>c1ccc(C[O:2][cH3:1])cc1",
+                                        "is_reaction": true,
+                                        "children": [
+                                          {
+                                            "type": "mol",
+                                            "smiles": "COc1cc2cc(-c3cccc(OCc4ccccc4)c3)[n+](C)c(C)c2cc1OC",
+                                            "is_chemical": true,
+                                            "in_stock": false,
+                                            "children": [
+                                              {
+                                                "type": "reaction",
+                                                "smiles": "[C:1]([cH3:2])[O:3][cH3:4]>>Br[C:1][cH3:2].[O:3][cH3:4]",
+                                                "is_reaction": true,
+                                                "children": [
+                                                  {
+                                                    "type": "mol",
+                                                    "smiles": "BrCc1ccccc1",
+                                                    "is_chemical": true,
+                                                    "in_stock": true
+                                                  },
+                                                  {
+                                                    "type": "mol",
+                                                    "smiles": "COc1cc2cc(-c3cccc(O)c3)[n+](C)c(C)c2cc1OC",
+                                                    "is_chemical": true,
+                                                    "in_stock": false
+                                                  }
+                                                ]
+                                              }
+                                            ]
+                                          }
+                                        ]
+                                      }
+                                    ]
+                                  }
+                                ]
+                              }
+                            ]
+                          }
+                        ]
+                      }
+                    ]
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "type": "mol",
+            "smiles": "OO",
+            "is_chemical": true,
+            "in_stock": true
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "type": "mol",
+    "smiles": "COc1cc2cc(-c3ccc(O)c(O)c3)[n+](C)c(C)c2cc1OC",
+    "is_chemical": true,
+    "in_stock": false,
+    "children": [
+      {
+        "type": "reaction",
+        "smiles": "[O:1][c:2]([cH2:3])[cH2:4]>>O=C[c:2]([cH2:3])[cH2:4].OOC(c1cccc(Cl)c1)=[O:1]",
+        "is_reaction": true,
+        "children": [
+          {
+            "type": "mol",
+            "smiles": "COc1cc2cc(-c3ccc(O)c(C=O)c3)[n+](C)c(C)c2cc1OC",
+            "is_chemical": true,
+            "in_stock": false,
+            "children": [
+              {
+                "type": "reaction",
+                "smiles": "[O:1]=[C:2][c:4]([cH2:3])[cH2:5]>>C[O:1][C:2](Cl)Cl.[cH2:3][c:4][cH2:5]",
+                "is_reaction": true,
+                "children": [
+                  {
+                    "type": "mol",
+                    "smiles": "COC(Cl)Cl",
+                    "is_chemical": true,
+                    "in_stock": true
+                  },
+                  {
+                    "type": "mol",
+                    "smiles": "COc1cc2cc(-c3ccc(O)cc3)[n+](C)c(C)c2cc1OC",
+                    "is_chemical": true,
+                    "in_stock": false,
+                    "children": [
+                      {
+                        "type": "reaction",
+                        "smiles": "[cH3:1][O:2]>>c1ccc(C[O:2][cH3:1])cc1",
+                        "is_reaction": true,
+                        "children": [
+                          {
+                            "type": "mol",
+                            "smiles": "COc1cc2cc(-c3ccc(OCc4ccccc4)cc3)[n+](C)c(C)c2cc1OC",
+                            "is_chemical": true,
+                            "in_stock": false,
+                            "children": [
+                              {
+                                "type": "reaction",
+                                "smiles": "[C:1]([cH3:2])[O:3][cH3:4]>>Br[C:1][cH3:2].[O:3][cH3:4]",
+                                "is_reaction": true,
+                                "children": [
+                                  {
+                                    "type": "mol",
+                                    "smiles": "BrCc1ccccc1",
+                                    "is_chemical": true,
+                                    "in_stock": true
+                                  },
+                                  {
+                                    "type": "mol",
+                                    "smiles": "COc1cc2cc(-c3ccc(O)cc3)[n+](C)c(C)c2cc1OC",
+                                    "is_chemical": true,
+                                    "in_stock": false,
+                                    "children": [
+                                      {
+                                        "type": "reaction",
+                                        "smiles": "[cH3:1][O:2]>>c1ccc(C[O:2][cH3:1])cc1",
+                                        "is_reaction": true,
+                                        "children": [
+                                          {
+                                            "type": "mol",
+                                            "smiles": "COc1cc2cc(-c3ccc(OCc4ccccc4)cc3)[n+](C)c(C)c2cc1OC",
+                                            "is_chemical": true,
+                                            "in_stock": false,
+                                            "children": [
+                                              {
+                                                "type": "reaction",
+                                                "smiles": "[C:1]([cH3:2])[O:3][cH3:4]>>Br[C:1][cH3:2].[O:3][cH3:4]",
+                                                "is_reaction": true,
+                                                "children": [
+                                                  {
+                                                    "type": "mol",
+                                                    "smiles": "BrCc1ccccc1",
+                                                    "is_chemical": true,
+                                                    "in_stock": true
+                                                  },
+                                                  {
+                                                    "type": "mol",
+                                                    "smiles": "COc1cc2cc(-c3ccc(O)cc3)[n+](C)c(C)c2cc1OC",
+                                                    "is_chemical": true,
+                                                    "in_stock": false
+                                                  }
+                                                ]
+                                              }
+                                            ]
+                                          }
+                                        ]
+                                      }
+                                    ]
+                                  }
+                                ]
+                              }
+                            ]
+                          }
+                        ]
+                      }
+                    ]
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "type": "mol",
+            "smiles": "O=C(OO)c1cccc(Cl)c1",
+            "is_chemical": true,
+            "in_stock": true
+          }
+        ]
+      }
+    ]
+  }
+]

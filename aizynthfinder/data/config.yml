@@ -1,0 +1,12 @@
+properties:
+  C: 1.4
+  cutoff_cumulative: 0.995
+  cutoff_number: 50
+  max_transforms: 6
+  default_prior: 0.5
+  use_prior: True
+  iteration_limit: 100
+  return_first: false
+  time_limit: 120
+  exclude_target_from_stock: True
+  template_column: retro_template
