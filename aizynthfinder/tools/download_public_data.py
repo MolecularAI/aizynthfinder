@@ -32,7 +32,6 @@ stock:
 
 
 def _download_file(url, filename):
-    return
     with requests.get(url, stream=True) as response:
         response.raise_for_status()
         total_size = int(response.headers.get("content-length", 0))
@@ -61,6 +60,7 @@ def main():
         exit(1)
 
     with open(os.path.join(path, "config.yml"), "w") as fileobj:
+        path = os.path.abspath(path)
         fileobj.write(
             YAML_TEMPLATE.format(
                 os.path.join(path, FILES_TO_DOWNLOAD["policy_model"]["filename"]),
