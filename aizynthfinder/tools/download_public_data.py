@@ -32,6 +32,7 @@ stock:
 
 
 def _download_file(url, filename):
+    return
     with requests.get(url, stream=True) as response:
         response.raise_for_status()
         total_size = int(response.headers.get("content-length", 0))
@@ -62,9 +63,9 @@ def main():
     with open(os.path.join(path, "config.yml"), "w") as fileobj:
         fileobj.write(
             YAML_TEMPLATE.format(
-                FILES_TO_DOWNLOAD["policy_model"]["filename"],
-                FILES_TO_DOWNLOAD["template_file"]["filename"],
-                FILES_TO_DOWNLOAD["stock"]["filename"],
+                os.path.join(path, FILES_TO_DOWNLOAD["policy_model"]["filename"]),
+                os.path.join(path, FILES_TO_DOWNLOAD["template_file"]["filename"]),
+                os.path.join(path, FILES_TO_DOWNLOAD["stock"]["filename"]),
             )
         )
     print("Configuration file written to config.yml")
