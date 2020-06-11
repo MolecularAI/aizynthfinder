@@ -20,6 +20,7 @@ setup(
             "smiles2stock = aizynthfinder.tools.make_stock:main",
             "preprocess_rollout = aizynthfinder.training.preprocess_rollout:main",
             "aizynth_training = aizynthfinder.training.training:main",
+            "download_public_data = aizynthfinder.tools.download_public_data:main",
         ]
     },
 )

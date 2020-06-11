@@ -53,13 +53,23 @@ aizynthcli --config config_local.yml --smiles smiles.txt
 aizynthapp --config config_local.yml
 ```
 
-Consult the documentation here for more information.
+Consult the documentation [here](https://molecularai.github.io/aizynthfinder/) for more information.
 
 To use tool you need
 
     1. A stock file
     2. A trained rollout policy network (including the Keras model and the list of unique templates)
 
+Such files can be downloaded from [figshare](https://figshare.com/articles/AiZynthFinder_a_fast_robust_and_flexible_open-source_software_for_retrosynthetic_planning/12334577)
+
+or they can be downloaded automatically using
+
+```
+download_public_data my_folder
+```
+
+where ``my_folder`` is the folder you want download to. 
+This will create a ``config.yml`` file that you can use with either ``aizynthcli`` or ``aizynthapp``.
 
 ### Testing
 
@@ -97,9 +107,9 @@ Please use ``black`` package for formatting, and follow ``pep8`` style guide.
 
 ## Contributors
 
-* @SGenheden
-* @EBjerrum
-* @A-Thakkar
+* [@SGenheden](www.github.com/SGenheden)
+* [@EBjerrum](www.github.com/EBjerrum)
+* [@A-Thakkar](www.github.com/A-Thakkar)
 
 The contributors have limited time for support questions, but pleae do not hesitate to submit an issue (see above).
 
