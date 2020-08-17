@@ -10,7 +10,7 @@ Before you begin, ensure you have met the following requirements:
 
 The tool has been developed on a Linux platform, but the software has been tested on Windows 10 and macOS Catalina.
 
-* You have installed anaconda or miniconda with python 3.6 or later
+* You have installed anaconda or miniconda with python 3.6 or 3.7
 
 
 ## Installation
@@ -20,7 +20,7 @@ To install aizynthfinder, follow these steps:
 * First, install these conda packages
 
 ```
-conda install -c rdkit rdkit -y
+conda install -c rdkit "rdkit=>2019.09.1" -y
 conda install -c anaconda tensorflow>=2.1.0 -y
 conda install graphviz -y
 ```
