@@ -43,6 +43,8 @@ python -m pip install -e .
 
 if you are a developer, using the repository.
 
+Note on the graphviz installation: this package does not depend on any third-party python interfaces to graphviz but instead calls the `neato` and `dot` executables directly. If these executable are not in the `$PATH` environmental variable, the generation of route images will not work. If unable to install it properly with the default conda chanel, try using `-c anaconda`. 
+
 ## Usage
 
 The tool will install the ``aizynthcli`` and ``aizynthapp`` tools
