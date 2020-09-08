@@ -5,6 +5,8 @@ from rdkit import Chem, DataStructs
 from rdkit.Chem import AllChem
 from rdchiral import main as rdc
 
+from aizynthfinder.utils.logging import logger
+
 
 class MoleculeException(Exception):
     """ An exception that is raised by the Molecule class
@@ -276,7 +278,13 @@ class Reaction:
         """
         reaction = rdc.rdchiralReaction(self.smarts)
         rct = rdc.rdchiralReactants(self.mol.smiles)
-        reactants = rdc.rdchiralRun(reaction, rct)
+        try:
+            reactants = rdc.rdchiralRun(reaction, rct)
+        except RuntimeError as err:
+            logger().debug(
+                f"Runtime error in RDChiral with template {self.smarts} on {self.mol.smiles}\n{err}"
+            )
+            reactants = []
 
         # Turning rdchiral outcome into rdkit tuple of tuples to maintain compatibility
         outcomes = []
