@@ -183,10 +183,10 @@ def test_smiles_to_fingerprint(default_config):
 def test_is_sanitizable():
 
     flag = is_sanitizable(["O"])
-    assert flag is True
+    assert flag
 
     flag = is_sanitizable(["c1ccccc1(C)(C)"])
-    assert flag is False
+    assert not flag
 
 
 def test_rollout_model_sequence_loading(rollout_model_sequence):

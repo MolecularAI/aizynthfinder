@@ -29,7 +29,6 @@ def _filter_dataset(config):
         filename, index_col=False, header=None, names=config["library_headers"][:-1],
     )
 
-    # remove rows with unsanitizable product SMILES
     if config["remove_unsanitizable_products"]:    
         products = full_data["products"].to_numpy()
         idx = np.apply_along_axis(is_sanitizable, 0, [products])
