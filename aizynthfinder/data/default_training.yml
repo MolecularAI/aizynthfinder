@@ -25,3 +25,4 @@ epochs: 100
 fingerprint_radius: 2
 fingerprint_len: 2048
 template_occurance: 3
+remove_unsanitizable_products: False

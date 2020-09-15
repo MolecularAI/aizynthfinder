@@ -11,7 +11,7 @@ from sklearn.model_selection import train_test_split
 
 
 from aizynthfinder.utils.paths import data_path
-from aizynthfinder.chem import Molecule
+from aizynthfinder.chem import Molecule, MoleculeException
 
 
 class Config:
@@ -139,3 +139,21 @@ def smiles_to_fingerprint(args, config):
     return Molecule(smiles=smiles).fingerprint(
         config["fingerprint_radius"], config["fingerprint_len"],
     )
+
+
+def is_sanitizable(args):
+    """
+    Check whether a SMILES is sanitizable
+
+    :param args: the SMILES in the first element
+    :type args: tuple
+    :return: whether the SMILES is sanitizable
+    :rtype: bool
+    """
+    smiles = args[0]
+    try:
+        Molecule(smiles=smiles, sanitize=True)
+    except MoleculeException:
+        return False
+    else:
+        return True

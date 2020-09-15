@@ -12,6 +12,7 @@ from aizynthfinder.training.utils import (
     Config,
     split_and_save_data,
     smiles_to_fingerprint,
+    is_sanitizable,
 )
 
 
@@ -27,6 +28,12 @@ def _filter_dataset(config):
     full_data = pd.read_csv(
         filename, index_col=False, header=None, names=config["library_headers"][:-1],
     )
+
+    if config["remove_unsanitizable_products"]:    
+        products = full_data["products"].to_numpy()
+        idx = np.apply_along_axis(is_sanitizable, 0, [products])
+        full_data = full_data[idx]
+
     full_data = full_data.drop_duplicates(subset="reaction_hash")
     template_group = full_data.groupby("template_hash")
     template_group = template_group.size().sort_values(ascending=False)
