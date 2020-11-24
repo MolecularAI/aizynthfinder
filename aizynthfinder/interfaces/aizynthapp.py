@@ -159,11 +159,25 @@ class AiZynthApp:
         display(tab)
 
     def _create_route_widgets(self):
+        self._input["scorer"] = widgets.Dropdown(
+            options=self.finder.scorers.names(),
+            description="Reorder by:",
+            style={"description_width": "initial"},
+        )
+        self._input["scorer"].observe(self._on_change_scorer)
         self._buttons["show_routes"] = Button(description="Show Reactions")
         self._buttons["show_routes"].on_click(self._on_display_button_clicked)
         self._input["route"] = Dropdown(options=[], description="Routes: ",)
         self._input["route"].observe(self._on_change_route_option)
-        display(HBox([self._buttons["show_routes"], self._input["route"]]))
+        display(
+            HBox(
+                [
+                    self._buttons["show_routes"],
+                    self._input["route"],
+                    self._input["scorer"],
+                ]
+            )
+        )
 
         self._output["routes"] = widgets.Output(
             layout={"border": "1px solid silver", "width": "99%"}
@@ -202,6 +216,13 @@ class AiZynthApp:
             return
         self._show_route(self._input["route"].index)
 
+    def _on_change_scorer(self, change):
+        if self.finder.routes is None or change["name"] != "index":
+            return
+        scorer = self.finder.scorers[self._input["scorer"].value]
+        self.finder.routes.rescore(scorer)
+        self._show_route(self._input["route"].index)
+
     def _on_exec_button_clicked(self, _):
         self._toggle_button(False)
         self._prepare_search()
@@ -217,6 +238,7 @@ class AiZynthApp:
         self._toggle_button(False)
         self.finder.build_routes()
         self.finder.routes.make_images()
+        self.finder.routes.compute_scores(*self.finder.scorers.objects())
         self._input["route"].options = [
             f"Option {i}" for i, _ in enumerate(self.finder.routes, 1)
         ]
@@ -261,14 +283,18 @@ class AiZynthApp:
         if index is None or index >= len(self.finder.routes):
             return
 
-        node = self.finder.routes[index]["node"]
-        state = node.state
+        route = self.finder.routes[index]
+        state = route["node"].state
         status = "Solved" if state.is_solved else "Not Solved"
 
         self._output["routes"].clear_output()
         with self._output["routes"]:
             display(HTML("<H2>%s" % status))
-            display("Route Score: %0.3F" % state.score)
+            table_content = "".join(
+                f"<tr><td>{name}</td><td>{score:.4f}</td></tr>"
+                for name, score in route["all_score"].items()
+            )
+            display(HTML(f"<table>{table_content}</table>"))
             display(HTML("<H2>Compounds to Procure"))
             display(state.to_image())
             display(HTML("<H2>Steps"))

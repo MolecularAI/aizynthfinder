@@ -2,6 +2,7 @@
 """
 import functools
 
+import tensorflow as tf
 from tensorflow.keras.metrics import top_k_categorical_accuracy
 from tensorflow.keras.models import load_model
 
@@ -11,7 +12,7 @@ top10_acc.__name__ = "top10_acc"
 top50_acc = functools.partial(top_k_categorical_accuracy, k=50)
 top50_acc.__name__ = "top50_acc"
 
-CUSTOM_OBJECTS = {"top10_acc": top10_acc, "top50_acc": top50_acc}
+CUSTOM_OBJECTS = {"top10_acc": top10_acc, "top50_acc": top50_acc, "tf": tf}
 
 
 class LocalKerasModel:
@@ -22,6 +23,8 @@ class LocalKerasModel:
 
     :ivar model: the compiled model
     :vartype model: tensorflow.keras.models.Model
+    :ivar output_size: the length of the output vector
+    :vartype output_size: int
 
     :param filename: the path to a Keras checkpoint file
     :type filename: str
@@ -33,6 +36,7 @@ class LocalKerasModel:
             self._model_dimensions = int(self.model.input.shape[1])
         except AttributeError:
             self._model_dimensions = int(self.model.input[0].shape[1])
+        self.output_size = int(self.model.output.shape[1])
 
     def __len__(self):
         return self._model_dimensions

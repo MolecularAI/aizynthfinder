@@ -2,6 +2,7 @@
 """
 import numpy as np
 import pandas as pd
+from deprecated import deprecated
 
 from aizynthfinder.chem import Reaction
 from aizynthfinder.utils.logging import logger
@@ -37,26 +38,42 @@ class Policy:
         self._config = config
         self._logger = logger()
         self._policies = {}
-        self._selected_policy = None
-        self._policy_model = None
+        self._selected_policies = []
         self._stock = config.stock
-        self._templates = None
 
     def __getitem__(self, key):
         return self._policies[key]
 
     @property
+    def selected_policies(self):
+        """
+        Returns the keys of the selected policy models.
+
+        :return: the selected policy models
+        :rtype: str
+        """
+        return self._selected_policies
+
+    @property
+    @deprecated(
+        reason="This is being superseded by the selected_policies property",
+        version="1.1.0",
+    )
     def selected_policy(self):
         """
-        Returns the key of the selected policy model.
+        Returns the key of the first selected policy model.
         If set it will update the selection of policy.
 
         :return: the selected policy model
         :rtype: str
         """
-        return self._selected_policy
+        return self._selected_policies[0]
 
     @selected_policy.setter
+    @deprecated(
+        reason="This is being removed in favour of the select_policies method",
+        version="1.1.0",
+    )
     def selected_policy(self, key):
         self.select_policy(key)
 
@@ -71,7 +88,7 @@ class Policy:
 
     def get_actions(self, molecules):
         """
-        Get all the probable actions of a set of molecules, using the policy and given cutoffs
+        Get all the probable actions of a set of molecules, using the selected policies and given cutoffs
 
         :param molecules: the molecules to consider
         :type molecules: list of Molecule
@@ -84,21 +101,28 @@ class Policy:
         for mol in molecules:
             if mol in self._stock:
                 continue
-            all_transforms_prop = self._predict(mol)
-            probable_transforms_idx = self._cutoff_predictions(all_transforms_prop)
-            possible_moves = self._templates.iloc[probable_transforms_idx]
-            probs = all_transforms_prop[probable_transforms_idx]
 
-            priors.extend(probs)
-            for idx, (move_index, move) in enumerate(possible_moves.iterrows()):
-                metadata = dict(move)
-                del metadata[self._config.template_column]
-                metadata["policy_probability"] = float(probs[idx])
-                metadata["template_code"] = move_index
+            for policy_key in self._selected_policies:
+                model = self[policy_key]["model"]
+                templates = self[policy_key]["templates"]
 
-                possible_actions.append(
-                    Reaction(mol, move[self._config.template_column], metadata=metadata)
-                )
+                all_transforms_prop = self._predict(mol, model)
+                probable_transforms_idx = self._cutoff_predictions(all_transforms_prop)
+                possible_moves = templates.iloc[probable_transforms_idx]
+                probs = all_transforms_prop[probable_transforms_idx]
+
+                priors.extend(probs)
+                for idx, (move_index, move) in enumerate(possible_moves.iterrows()):
+                    metadata = dict(move)
+                    del metadata[self._config.template_column]
+                    metadata["policy_probability"] = float(probs[idx])
+                    metadata["policy_name"] = policy_key
+                    metadata["template_code"] = move_index
+                    possible_actions.append(
+                        Reaction(
+                            mol, move[self._config.template_column], metadata=metadata
+                        )
+                    )
         return possible_actions, priors
 
     def load_policy(self, source, templatefile, key):
@@ -117,17 +141,46 @@ class Policy:
         :type templatefile: str
         :param key: the key or label
         :type key: str
+        :raises PolicyException: if the length of the model output vector is not same as the number of templates
         """
         self._logger.info(
             f"Loading policy model from {source} and templates from {templatefile} to {key}"
         )
         model = self._load_model(source)
         templates = pd.read_hdf(templatefile, "table")
+
+        if hasattr(model, "output_size") and len(templates) != model.output_size:
+            raise PolicyException(
+                f"The number of templates ({len(templates)}) does not agree with the "
+                f"output dimensions of the model ({model.output_size})"
+            )
+
         self._policies[key] = {"model": model, "templates": templates}
+
+    def select_policies(self, keys):
+        """
+        Select the policies to use.
+
+        :param key: the key of the policies to select
+        :type key: str or list of str
+        """
+        if isinstance(keys, str):
+            keys = [keys]
+
+        for key in keys:
+            if key not in self._policies:
+                raise PolicyException(
+                    f"Invalid key specified {key} when selecting policy"
+                )
+
+        self._selected_policies = list(keys)
+        self._logger.info(f"Selected policies: {', '.join(self._selected_policies)}")
 
     def select_policy(self, key):
         """
-        Select and prepare the policy
+        Select another policy to use.
+
+        Use ``select_policies`` to set multiple policies at once.
 
         :param key: the key of the policy
         :type key: str
@@ -135,11 +188,8 @@ class Policy:
         if key not in self._policies:
             raise PolicyException(f"Invalid key specified {key} when selecting policy")
 
-        self._selected_policy = key
-        self._policy_model = self._policies[key]["model"]
-        self._templates = self._policies[key]["templates"]
-
-        self._logger.info(f"Selected policy is {key}")
+        self._selected_policies.append(key)
+        self._logger.info(f"Selected policies: {', '.join(self._selected_policies)}")
 
     def _cutoff_predictions(self, predictions):
         """
@@ -161,10 +211,11 @@ class Policy:
             return LocalKerasModel(source)
         return source
 
-    def _mol_to_fingerprint(self, mol):
-        fingerprint = mol.fingerprint(radius=2, nbits=len(self._policy_model))
-        return fingerprint.reshape([1, len(self._policy_model)])
+    def _predict(self, mol, model):
+        fp_arr = self._mol_to_fingerprint(mol, model)
+        return np.array(model.predict(fp_arr)).flatten()
 
-    def _predict(self, mol):
-        fp_arr = self._mol_to_fingerprint(mol)
-        return np.array(self._policy_model.predict(fp_arr)).flatten()
+    @staticmethod
+    def _mol_to_fingerprint(mol, model):
+        fingerprint = mol.fingerprint(radius=2, nbits=len(model))
+        return fingerprint.reshape([1, len(model)])

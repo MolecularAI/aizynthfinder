@@ -36,12 +36,12 @@ def test_expand_root_with_default_priors(generate_root, set_default_prior, mock_
     assert view["objects"] == [None, None, None]
 
 
-def test_expand_when_solved(generate_root, mock_policy, mock_stock):
+def test_expand_when_solved(generate_root, mock_policy, mock_stock, default_config):
     root = generate_root("CCCCOc1ccc(CC(=O)N(C)O)cc1")
     mock_policy(root.state.mols[0])
     root.expand()
     child = root.promising_child()
-    mock_stock([True, True])
+    mock_stock(default_config, root.state.mols[0])
 
     child.expand()
 

@@ -1,10 +1,16 @@
+import os
+import glob
+
 import pandas as pd
+import yaml
 
 from aizynthfinder.interfaces import AiZynthApp
 from aizynthfinder.interfaces.aizynthapp import main as app_main
 from aizynthfinder.interfaces.aizynthcli import main as cli_main
 from aizynthfinder.tools.make_stock import main as make_stock_main
+from aizynthfinder.tools.cat_output import main as cat_main
 from aizynthfinder.training.preprocess_rollout import main as rollout_main
+from aizynthfinder.tools.download_public_data import main as download_main
 from aizynthfinder.training.utils import Config
 
 
@@ -98,6 +104,17 @@ def test_make_stock_from_plain_file(shared_datadir, tmpdir, add_cli_arguments, s
     assert len(stock) == 3
 
 
+def test_cat_main(shared_datadir, tmpdir, add_cli_arguments):
+    filename = str(tmpdir / "output.hdf")
+    inputs = [str(shared_datadir / "stock1.h5"), str(shared_datadir / "stock2.h5")]
+    add_cli_arguments(f"--files {inputs[0]} {inputs[1]} --output {filename}")
+
+    cat_main()
+
+    data = pd.read_hdf(filename, "table")
+    assert len(data) == 4
+
+
 def test_preprocess_rollout(write_yaml, shared_datadir, add_cli_arguments):
     config_path = write_yaml(
         {
@@ -132,3 +149,28 @@ def test_preprocess_rollout(write_yaml, shared_datadir, add_cli_arguments):
     assert "library_occurence" in data.columns
     for column in config["metadata_headers"]:
         assert column in data.columns
+
+
+def test_download_public_data(tmpdir, mocker, add_cli_arguments):
+    request_mock = mocker.patch("aizynthfinder.tools.download_public_data.requests.get")
+    response_mock = request_mock.return_value
+    filecontent = [b"abc", b"def"]
+    response_mock.__enter__.return_value.iter_content.return_value = filecontent
+    add_cli_arguments(str(tmpdir))
+
+    download_main()
+
+    filenames = glob.glob(str(tmpdir / "*.hdf5"))
+    assert len(filenames) == 3
+    for filename in filenames:
+        with open(filename, "r") as fileobj:
+            assert fileobj.read() == "abcdef"
+
+    assert os.path.exists(tmpdir / "config.yml")
+    with open(tmpdir / "config.yml", "r") as fileobj:
+        config = yaml.load(fileobj.read(), Loader=yaml.SafeLoader)
+    policies = config.get("policy", {}).get("files", {})
+    assert "uspto" in policies
+    assert len(policies["uspto"]) == 2
+    stocks = config.get("stock", {}).get("files", {})
+    assert "zinc" in stocks

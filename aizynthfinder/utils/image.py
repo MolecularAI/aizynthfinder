@@ -169,14 +169,14 @@ class GraphvizReactionGraph:
 
         _, output_dot = tempfile.mkstemp(suffix=".dot")
         subprocess.call([f"dot{ext}", "-T", "dot", f"-o{output_dot}", input_name])
-        if not os.path.exists(output_dot):
+        if not os.path.exists(output_dot) or os.path.getsize(output_dot) == 0:
             raise FileNotFoundError(
                 "Could not produce graph with layout - check that 'dot' command is in path"
             )
 
-        _, output_img = tempfile.mkstemp(suffix=".img")
+        _, output_img = tempfile.mkstemp(suffix=".png")
         subprocess.call([f"neato{ext}", "-T", "png", f"-o{output_img}", output_dot])
-        if not os.path.exists(output_img):
+        if not os.path.exists(output_img) or os.path.getsize(output_img) == 0:
             raise FileNotFoundError(
                 "Could not produce reaction image - check that 'neato' command is in path"
             )

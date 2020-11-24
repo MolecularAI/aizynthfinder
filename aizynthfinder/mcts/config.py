@@ -8,12 +8,13 @@ from aizynthfinder.utils.logging import logger
 from aizynthfinder.utils.paths import data_path
 from aizynthfinder.mcts.policy import Policy
 from aizynthfinder.mcts.stock import Stock, MongoDbInchiKeyQuery
+from aizynthfinder.scoring import ScorerCollection
 
 
 class Configuration:
     """
     Encapsulating the settings of the tree search, including the policy,
-    the stock and various parameters.
+    the stock, the loaded scorers and various parameters.
 
     All the parameters can be retrieved as attributes of the Configuration
     object, e.g.
@@ -37,6 +38,7 @@ class Configuration:
 
         self.stock = Stock()
         self.policy = Policy(self)
+        self.scorers = ScorerCollection(self)
         self._logger = logger()
 
     def __eq__(self, other):

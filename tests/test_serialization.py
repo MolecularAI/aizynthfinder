@@ -140,6 +140,10 @@ def test_serialize_node(generate_root, simple_actions, mock_policy):
         expected.index == actual["index"]
         for expected, actual in zip(action_list, node_serialized["children_actions"])
     )
+    assert all(
+        expected.metadata == actual["metadata"]
+        for expected, actual in zip(action_list, node_serialized["children_actions"])
+    )
     assert node_serialized["children"] == [None, None, None]
     assert node_serialized["is_expanded"]
 

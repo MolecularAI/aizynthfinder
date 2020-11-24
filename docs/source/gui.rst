@@ -35,6 +35,8 @@ To use the interface, follow these steps:
 
 .. image:: gui_results.png
 
+You can also choose to select and sort the top-ranked routes based on another scoring function.
+
 
 Creating the notebook
 ---------------------

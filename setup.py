@@ -5,7 +5,7 @@ with open("requirements.txt", "r") as fileobj:
 
 setup(
     name="aizynthfinder",
-    version="1.0.0",
+    version="1.1.0",
     description="Retrosynthetic route finding using neural network guided Monte-Carlo tree search.",
     author="Molecular AI group",
     author_email="samuel.genheden@astrazeneca.com",
@@ -18,6 +18,7 @@ setup(
             "aizynthapp = aizynthfinder.interfaces.aizynthapp:main",
             "aizynthcli = aizynthfinder.interfaces.aizynthcli:main",
             "smiles2stock = aizynthfinder.tools.make_stock:main",
+            "cat_aizynth_output = aizynthfinder.tools.cat_output:main",
             "preprocess_rollout = aizynthfinder.training.preprocess_rollout:main",
             "aizynth_training = aizynthfinder.training.training:main",
             "download_public_data = aizynthfinder.tools.download_public_data:main",

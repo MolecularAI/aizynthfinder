@@ -63,6 +63,7 @@ whereas if the SMILEs is provided on the command-line it is printed directly to 
     python_interface
     configuration
     stocks
+    scoring
     training    
     aizynthfinder
     sequences

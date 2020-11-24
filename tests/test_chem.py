@@ -65,13 +65,3 @@ def test_reaction(simple_actions):
 
     products2 = reactions[2].apply()
     assert products2 == ()
-
-
-def test_reaction_failure_rdchiral(simple_actions, mocker):
-    patched_rchiral_run = mocker.patch("aizynthfinder.chem.rdc.rdchiralRun")
-    patched_rchiral_run.side_effect = RuntimeError("Oh no!")
-    mol = TreeMolecule(parent=None, smiles="CCCCOc1ccc(CC(=O)N(C)O)cc1")
-    reactions, _ = simple_actions(mol)
-
-    products = reactions[0].apply()
-    assert not products

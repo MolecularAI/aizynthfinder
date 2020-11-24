@@ -49,6 +49,7 @@ class AiZynthFinder:
 
         self.policy = self.config.policy
         self.stock = self.config.stock
+        self.scorers = self.config.scorers
         self.tree = None
         self._target_mol = None
         self.search_stats = {}
@@ -83,7 +84,7 @@ class AiZynthFinder:
     def target_mol(self, mol):
         self._target_mol = mol
 
-    def build_routes(self, min_nodes=5):
+    def build_routes(self, min_nodes=5, scorer="state score"):
         """
         Build reaction routes
 
@@ -92,8 +93,10 @@ class AiZynthFinder:
 
         :param min_nodes: the minimum number of top-ranked nodes to consider, defaults to 5
         :type min_nodes: int, optional
+        :param scorer: the object used to score the nodes
+        :type scorer: str, optional
         """
-        self.analysis = TreeAnalysis(self.tree)
+        self.analysis = TreeAnalysis(self.tree, scorer=self.scorers[scorer])
         self.routes = RouteCollection.from_analysis(self.analysis, min_nodes)
 
     def extract_statistics(self):
@@ -128,7 +131,7 @@ class AiZynthFinder:
         :rtype: dict
         """
         self.stock.select_stocks(params["stocks"])
-        self.policy.select_policy(params["policy"])
+        self.policy.select_policies(params.get("policy", params.get("policies", "")))
         self.config.C = params["C"]
         self.config.max_transforms = params["max_transforms"]
         self.config.cutoff_cumulative = params["cutoff_cumulative"]
@@ -142,9 +145,16 @@ class AiZynthFinder:
         self.prepare_tree()
         self.tree_search()
         self.build_routes()
+        if not params.get("score_trees", False):
+            return {
+                "request": self._get_settings(),
+                "trees": self.routes.dicts,
+            }
+
+        self.routes.compute_scores(*self.scorers.objects())
         return {
             "request": self._get_settings(),
-            "trees": self.routes.dicts,
+            "trees": self.routes.dict_with_scores(),
         }
 
     def tree_search(self, show_progress=False):
@@ -197,9 +207,17 @@ class AiZynthFinder:
     def _get_settings(self):
         """Get the current settings as a dictionary
         """
+        # To be backward-compatible
+        if len(self.policy.selected_policies) == 1:
+            policy_value = self.policy.selected_policies[0]
+            policy_key = "policy"
+        else:
+            policy_value = self.policy.selected_policies
+            policy_key = "policies"
+
         return {
             "stocks": self.stock.selected_stocks,
-            "policy": self.policy.selected_policy,
+            policy_key: policy_value,
             "C": self.config.C,
             "max_transforms": self.config.max_transforms,
             "cutoff_cumulative": self.config.cutoff_cumulative,

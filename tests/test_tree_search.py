@@ -87,23 +87,6 @@ def mock_create_root(mocker):
     return wrapper
 
 
-@pytest.fixture
-def mock_stock(tmpdir):
-    """
-    Fixture for setting up stock of inchi keys in a textfile.
-    Will return a function that should be called with any number of Molecule objects as arguments
-    """
-
-    def wrapper(config, *molecules):
-        filename = str(tmpdir / "stock.txt")
-        with open(filename, "w") as fileobj:
-            fileobj.write("\n".join([mol.inchi_key for mol in molecules]))
-        config.stock.load_stock(filename, "stock")
-        config.stock.select_stocks("stock")
-
-    return wrapper
-
-
 def test_one_expansion(mock_get_actions, mock_create_root, mock_stock):
     """
     Test the building of this tree:

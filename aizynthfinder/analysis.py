@@ -2,6 +2,7 @@
 """
 import json
 import hashlib
+from collections import defaultdict
 
 import numpy as np
 import networkx as nx
@@ -15,15 +16,26 @@ class TreeAnalysis:
     Class that encapsulate various analysis that can be
     performed on a search tree.
 
+    :ivar scorer: the object used to score the nodes
+    :type scorer: Scorer
     :ivar search_tree: the search tree
     :vartype search_tree: SearchTree
 
+    :param scorer: the object used to score the nodes, defaults to StateScorer
+    :type scorer: Scorer, optional
     :parameter search_tree: the search tree to do the analysis on
     :type search_tree: SearchTree
     """
 
-    def __init__(self, search_tree):
+    def __init__(self, search_tree, scorer=None):
         self.search_tree = search_tree
+        if scorer is None:
+            # Do import here to avoid circular imports
+            from aizynthfinder.scoring import StateScorer
+
+            self.scorer = StateScorer()
+        else:
+            self.scorer = scorer
 
     def best_node(self):
         """
@@ -33,10 +45,9 @@ class TreeAnalysis:
         :return: the top scoring node
         :rtype: Node
         """
-        nodes = list(self.search_tree.graph())
-        scores = [node.state.score for node in nodes]
-        idx = np.argmax(scores)
-        return nodes[idx]
+        nodes = self._all_nodes()
+        sorted_nodes, _ = self.scorer.sort(nodes)
+        return sorted_nodes[0]
 
     def sort_nodes(self, min_return=5):
         """
@@ -48,16 +59,18 @@ class TreeAnalysis:
         :type min_return: int, optional
         :return: the nodes
         :rtype: list of Node
+        :return: the score
+        :rtype: list of float
         """
-        nodes = list(self.search_tree.graph())
-        scores = np.array([node.state.score for node in nodes])
+        nodes = self._all_nodes()
+        sorted_nodes, sorted_scores = self.scorer.sort(nodes)
 
-        sortidx = np.argsort(scores)
-        sorted_scores = scores[sortidx][::-1]
-        sorted_nodes = [nodes[idx] for idx in sortidx][::-1]
+        if len(nodes) <= min_return:
+            return sorted_nodes, sorted_scores
 
         seen_hashes = set()
         best_nodes = []
+        best_scores = []
         last_score = 1e16
         for score, node in zip(sorted_scores, sorted_nodes):
             if len(best_nodes) >= min_return and score < last_score:
@@ -69,9 +82,10 @@ class TreeAnalysis:
                 continue
             seen_hashes.add(route_hash)
             best_nodes.append(node)
+            best_scores.append(score)
             last_score = score
 
-        return best_nodes
+        return best_nodes, best_scores
 
     def tree_statistics(self):
         """
@@ -97,18 +111,37 @@ class TreeAnalysis:
             for mol, instock in zip(top_state.mols, top_state.in_stock_list)
             if not instock
         )
+
+        policy_used_counts = defaultdict(lambda: 0)
+        for node in nodes:
+            for child in node.children():
+                policy_used = node[child]["action"].metadata.get("policy_name")
+                if policy_used:
+                    policy_used_counts[policy_used] += 1
+
         return {
             "number_of_nodes": len(nodes),
             "max_transforms": max(node.state.max_transforms for node in nodes),
             "max_children": max(len(node.children()) for node in nodes),
-            "top_score": top_state.score,
+            "number_of_leafs": sum(1 for node in nodes if not node.children()),
+            "number_of_solved_leafs": sum(
+                1 for node in nodes if not node.children() and node.state.is_solved
+            ),
+            "top_score": self.scorer(top_node),
             "is_solved": top_state.is_solved,
             "number_of_steps": top_state.max_transforms,
             "number_of_precursors": len(top_state.mols),
             "number_of_precursors_in_stock": sum(top_state.in_stock_list),
             "precursors_in_stock": mols_in_stock,
             "precursors_not_in_stock": mols_not_in_stock,
+            "policy_used_counts": dict(policy_used_counts),
         }
+
+    def _all_nodes(self):
+        # This is to keep backwards compatibility, this should be investigate further
+        if repr(self.scorer) == "state score":
+            return list(self.search_tree.graph())
+        return [node for node in self.search_tree.graph() if not node.children()]
 
     @staticmethod
     def _routehash(actions):
@@ -138,6 +171,7 @@ class ReactionTree:
         self._stock = None
         self.graph = nx.DiGraph()
         self.root = None
+        self.has_repeating_patterns = False
 
     @classmethod
     def from_analysis(cls, analysis, from_node=None):
@@ -170,6 +204,7 @@ class ReactionTree:
         for child, action in zip(nodes[1:], actions):
             obj._add_bipartite(child, action, unique_mols)
 
+        obj._find_repeating_patterns()
         return obj
 
     @classmethod
@@ -200,7 +235,42 @@ class ReactionTree:
         obj._stock = []
         ReactionTree._parse_tree_dict(tree_dict, obj, ProxyReaction)
 
+        obj._find_repeating_patterns()
         return obj
+
+    def leafs(self):
+        """
+        Generates the molecules nodes of the reaction tree that has no predecessors,
+        i.e. molecules that has not been broken down
+
+        :yield: the next leaf molecule in the tree
+        :rtype: UniqueMolecule
+        """
+        for node in self.graph:
+            if isinstance(node, Molecule) and not self.graph[node]:
+                yield node
+
+    def molecules(self):
+        """
+        Generates the molecule nodes of the reaction tree
+
+        :yield: the next molecule in the tree
+        :rtype: UniqueMolecule
+        """
+        for node in self.graph:
+            if isinstance(node, Molecule):
+                yield node
+
+    def reactions(self):
+        """
+        Generates the reaction nodes of the reaction tree
+
+        :yield: the next reaction in the tree
+        :rtype: Reaction
+        """
+        for node in self.graph:
+            if not isinstance(node, Molecule):
+                yield node
 
     def to_dict(self):
         """
@@ -211,19 +281,27 @@ class ReactionTree:
         """
         return self._build_dict(self.root)
 
-    def to_image(self, in_stock_colors={True: "green", False: "orange"}):
+    def to_image(self, in_stock_colors={True: "green", False: "orange"}, show_all=True):
         """
         Return a pictoral representation of the route
 
         :raises ValueError: if image could not be produced
         :param in_stock_colors: the colors around molecules, defaults to {True: "green", False: "orange"}
         :type in_stock_colors: dict, optional
+        :param show_all: if True, also show nodes that are marked as hidden
+        :type show_all: bool, optional
         :return: the image of the route
         :rtype: PIL.Image
         """
+
+        def hide(node):
+            return self.graph.nodes[node].get("hide", False)
+
         img_graph = GraphvizReactionGraph()
 
         for node in self.graph:
+            if not show_all and hide(node):
+                continue
             if isinstance(node, Molecule):
                 img_graph.add_molecule(
                     node, frame_color=in_stock_colors[node in self._stock]
@@ -231,6 +309,8 @@ class ReactionTree:
             else:
                 img_graph.add_reaction(node)
         for node1, node2 in self.graph.edges:
+            if not show_all and (hide(node1) or hide(node2)):
+                continue
             img_graph.add_edge(node1, node2)
 
         try:
@@ -264,6 +344,7 @@ class ReactionTree:
             dict_ = {}
 
         dict_["type"] = "mol" if isinstance(node, Molecule) else "reaction"
+        dict_["hide"] = self.graph.nodes[node].get("hide", False)
         if isinstance(node, Molecule):
             dict_["smiles"] = node.smiles
             dict_["is_chemical"] = True
@@ -283,6 +364,72 @@ class ReactionTree:
             del dict_["children"]
         return dict_
 
+    def _find_repeating_patterns(self):
+        """
+        Identify repeating patterns of reactions and mark them as hidden.
+
+        A unit of the repetition is the hash of two consecutive reactions,
+        where the first unit should be the first two reactions of the route.
+
+        This is for hiding repeating patterns of e.g. protection followed by deprotection,
+        which is a common behaviour for the tree search when it fails to solve a route.
+        """
+        for node in self.reactions():
+            # We are only interesting of starting at the very first reaction
+            if any(self.graph[mol] for mol in self._reactants_nodes(node)):
+                continue
+            actions = self._list_reactions(node)
+            if len(actions) < 5:
+                continue
+
+            hashes = [
+                self._reaction_hash(rxn1, rxn2)
+                for rxn1, rxn2 in zip(actions[:-1:2], actions[1::2])
+            ]
+            for idx, (hash1, hash2) in enumerate(zip(hashes[:-1], hashes[1:])):
+                if hash1 == hash2:
+                    self._hide_reaction(actions[idx * 2])
+                    self._hide_reaction(actions[idx * 2 + 1])
+                    self.has_repeating_patterns = True
+                # The else-clause prevents removing repeating patterns in the middle of a route
+                else:
+                    break
+
+    def _hide_reaction(self, reaction_node):
+        self.graph.nodes[reaction_node]["hide"] = True
+        for reactants in self._reactants_nodes(reaction_node):
+            self.graph.nodes[reactants]["hide"] = True
+
+    def _list_reactions(self, reaction_node):
+        """ List all reaction nodes from the given one to the last
+        """
+        reactions = [reaction_node]
+        curr_rxn = reaction_node
+        products = self._product_nodes(reaction_node)
+        while products[0] is not self.root:
+            curr_rxn = next(self.graph.predecessors(products[0]))
+            products = self._product_nodes(curr_rxn)
+            reactions.append(curr_rxn)
+        return reactions
+
+    def _product_nodes(self, reaction_node):
+        return list(self.graph.predecessors(reaction_node))
+
+    def _reactants_nodes(self, reaction_node):
+        return list(self.graph.successors(reaction_node))
+
+    def _reaction_hash(self, *reaction_nodes):
+        hash_list = []
+        for node in reaction_nodes:
+            hash_list.extend(
+                [
+                    hashlib.sha224(reactant.smiles.encode("utf8")).hexdigest()
+                    for reactant in self._reactants_nodes(node)
+                ]
+            )
+        hash_list = ".".join(hash_list)
+        return hashlib.sha224(hash_list.encode("utf8")).hexdigest()
+
     @staticmethod
     def _parse_tree_dict(tree_dict, rt_object, reaction_cls):
         if tree_dict["type"] == "mol":
@@ -295,7 +442,7 @@ class ReactionTree:
             node = reaction_cls(
                 smiles=tree_dict["smiles"], metadata=tree_dict.get("metadata", {})
             )
-        rt_object.graph.add_node(node)
+        rt_object.graph.add_node(node, hide=tree_dict.get("hide", False))
 
         for child_dict in tree_dict.get("children", []):
             child = ReactionTree._parse_tree_dict(child_dict, rt_object, reaction_cls)
@@ -318,9 +465,11 @@ class RouteCollection:
 
         route0 = collection[0]
 
+    :ivar all_scores: all the computed scores for the routes
+    :vartype all_scores: list of dict
     :ivar nodes: the top-ranked nodes
     :vartype nodes: list of Node
-    :ivar scores: scores of top-ranked nodes
+    :ivar scores: initial scores of top-ranked nodes
     :vartype scores: list of float
     :ivar reaction_trees: the reaction trees created from the top-ranked nodes
     :vartype reaction_trees: list of Reaction Tree
@@ -340,7 +489,11 @@ class RouteCollection:
 
         self.scores = self._unpack_kwarg("scores", **kwargs)
         if not self.scores:
-            self.score = [np.nan] * len(self.reaction_trees)
+            self.scores = [np.nan] * len(self.reaction_trees)
+
+        self.all_scores = self._unpack_kwarg("all_scores", **kwargs)
+        if not self.all_scores:
+            self.all_scores = [dict() for _ in range(len(self.reaction_trees))]
 
         self._dicts = self._unpack_kwarg("dicts", **kwargs)
         self._images = self._unpack_kwarg("images", **kwargs)
@@ -358,10 +511,15 @@ class RouteCollection:
         :return: the created collection
         :rtype: RouteCollection
         """
-        nodes = analysis.sort_nodes(min_return=min_nodes)
-        scores = [node.state.score for node in nodes]
+        nodes, scores = analysis.sort_nodes(min_return=min_nodes)
         reaction_trees = [ReactionTree.from_analysis(analysis, node) for node in nodes]
-        return cls(reaction_trees=reaction_trees, nodes=nodes, scores=scores)
+        all_scores = [{repr(analysis.scorer): score} for score in scores]
+        return cls(
+            reaction_trees=reaction_trees,
+            nodes=nodes,
+            scores=scores,
+            all_scores=all_scores,
+        )
 
     def __getitem__(self, index):
         if index < 0 or index >= len(self):
@@ -395,6 +553,35 @@ class RouteCollection:
             self.make_jsons()
         return self._jsons
 
+    def compute_scores(self, *scorers):
+        """
+        Compute new scores for all routes in this collection.
+        They can then be accessed with the ``all_scores`` attribute.
+        """
+        if self.nodes[0]:
+            list_ = self.nodes
+        else:
+            list_ = self.reaction_trees
+
+        for idx, item in enumerate(list_):
+            scores = {repr(scorer): scorer(item) for scorer in scorers}
+            self.all_scores[idx].update(scores)
+        self._update_route_dict(self.all_scores, "all_score")
+
+    def dict_with_scores(self):
+        """
+        Return the routes as dictionaries with all scores added
+        to the root (target) node.
+
+        :return: the routes as dictionaries
+        :rtype: list of dict
+        """
+        dicts = []
+        for dict_, scores in zip(self.dicts, self.all_scores):
+            dicts.append(dict(dict_))
+            dicts[-1]["scores"] = dict(scores)
+        return dicts
+
     def make_dicts(self):
         """ Convert all reaction trees to dictionaries
         """
@@ -412,6 +599,38 @@ class RouteCollection:
         """
         self._jsons = [tree.to_json() for tree in self.reaction_trees]
         self._update_route_dict(self._jsons, "json")
+
+    def rescore(self, scorer):
+        """
+        Rescore the routes in the collection, and thereby re-order them.
+
+        This will replace the ``scores`` attribute, and update the ``all_scores``
+        attribute with another entry.
+
+        :param scorer: the scorer to use
+        :type scorer: Scorer
+        """
+        if self.nodes[0]:
+            self.nodes, self.scores, sortidx = scorer.sort(
+                self.nodes, return_sort_indices=True
+            )
+            self.reaction_trees = [self.reaction_trees[idx] for idx in sortidx]
+        else:
+            self.reaction_trees, self.scores, sortidx = scorer.sort(
+                self.reaction_trees, return_sort_indices=True
+            )
+        self._routes = [self._routes[idx] for idx in sortidx]
+        self.all_scores = [self.all_scores[idx] for idx in sortidx]
+        if self._dicts:
+            self._dicts = [self._dicts[idx] for idx in sortidx]
+        if self._images:
+            self._images = [self._images[idx] for idx in sortidx]
+        if self._jsons:
+            self._jsons = [self._jsons[idx] for idx in sortidx]
+
+        for idx, score in enumerate(self.scores):
+            self.all_scores[idx][repr(scorer)] = score
+        self._update_route_dict(self.all_scores, "all_score")
 
     def _unpack_kwarg(self, key, **kwargs):
         if key not in kwargs:

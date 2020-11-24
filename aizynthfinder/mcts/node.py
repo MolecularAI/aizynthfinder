@@ -51,7 +51,7 @@ class Node:
         self.state = state
         self._config = config
         self._policy = config.policy
-        self._tree = owner
+        self.tree = owner
         self.is_expanded = False
         self.is_expandable = not self.state.is_terminal
         self.parent = parent
@@ -117,7 +117,12 @@ class Node:
         node._children_priors = dict_["children_priors"]
         node._children_visitations = dict_["children_visitations"]
         node._children_actions = [
-            Reaction(molecules[action["mol"]], action["smarts"], action["index"])
+            Reaction(
+                molecules[action["mol"]],
+                action["smarts"],
+                action["index"],
+                action.get("metadata", {}),
+            )
             for action in dict_["children_actions"]
         ]
         node._children = [
@@ -259,6 +264,7 @@ class Node:
                     "mol": molecule_store[action.mol],
                     "smarts": action.smarts,
                     "index": action.index,
+                    "metadata": dict(action.metadata),
                 }
                 for action in self._children_actions
             ],
@@ -311,9 +317,7 @@ class Node:
 
         children = []
         for i, state in enumerate(states):
-            child = Node(
-                state=state, owner=self._tree, config=self._config, parent=self
-            )
+            child = Node(state=state, owner=self.tree, config=self._config, parent=self)
             children.append(child)
             # If there's more than one outcome, the lists need be expanded
             if i > 0:

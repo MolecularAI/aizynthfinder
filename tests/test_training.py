@@ -9,7 +9,6 @@ from aizynthfinder.training.utils import (
     Config,
     split_and_save_data,
     smiles_to_fingerprint,
-    is_sanitizable,
 )
 from aizynthfinder.training.keras_models import RolloutModelSequence
 
@@ -178,15 +177,6 @@ def test_smiles_to_fingerprint(default_config):
     fingerprint = smiles_to_fingerprint(["O"], default_config)
 
     assert sum(fingerprint) == 1
-
-
-def test_is_sanitizable():
-
-    flag = is_sanitizable(["O"])
-    assert flag
-
-    flag = is_sanitizable(["c1ccccc1(C)(C)"])
-    assert not flag
 
 
 def test_rollout_model_sequence_loading(rollout_model_sequence):

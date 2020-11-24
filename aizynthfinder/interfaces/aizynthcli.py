@@ -6,10 +6,12 @@ import os
 import warnings
 import logging
 import importlib
+import tempfile
 from collections import defaultdict
 
 import pandas as pd
 
+from aizynthfinder.utils.files import cat_hdf_files, split_file, start_processes
 from aizynthfinder.aizynthfinder import AiZynthFinder
 from aizynthfinder.utils.logging import logger, setup_logger
 
@@ -36,6 +38,11 @@ def _get_arguments():
         action="store_true",
         default=False,
         help="if provided, detailed logging to file is enabled",
+    )
+    parser.add_argument(
+        "--nproc",
+        type=int,
+        help="if given, the input is split over a number of processes",
     )
     return parser.parse_args()
 
@@ -102,10 +109,48 @@ def _process_multi_smiles(filename, finder, output_name):
     logger().info(f"Output saved to {output_name}")
 
 
+def _multiprocess_smiles(args):
+    def create_cmd(index, filename):
+        cmd_args = [
+            "aizynthcli",
+            "--smiles",
+            filename,
+            "--config",
+            args.config,
+            "--output",
+            hdf_files[index - 1],
+        ]
+        if args.policy:
+            cmd_args.extend(["--policy", args.policy])
+        if args.stocks:
+            cmd_args.append("--stocks")
+            cmd_args.extend(args.stocks)
+        return cmd_args
+
+    if not os.path.exists(args.smiles):
+        raise ValueError(
+            "For multiprocessing execution the --smiles argument needs to be a filename"
+        )
+
+    setup_logger(logging.INFO)
+    filenames = split_file(args.smiles, args.nproc)
+    hdf_files = [tempfile.mktemp(suffix=".hdf") for _ in range(args.nproc)]
+    start_processes(filenames, "aizynthcli", create_cmd)
+
+    if not all(os.path.exists(filename) for filename in hdf_files):
+        raise FileNotFoundError(
+            "Not all output files produced. Please check the individual log files: 'aizynthcli*.log'"
+        )
+    cat_hdf_files(hdf_files, args.output or "output.hdf5")
+
+
 def main():
     """ Entry point for the aizynthcli command
     """
     args = _get_arguments()
+    if args.nproc:
+        return _multiprocess_smiles(args)
+
     multi_smiles = os.path.exists(args.smiles)
 
     file_level_logging = logging.DEBUG if args.log_to_file else None

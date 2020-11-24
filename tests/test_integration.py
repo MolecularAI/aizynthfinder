@@ -38,7 +38,7 @@ def setup_finder(read_options):
     finder.config.stock.load_stock(stock_file, "test_stock")
     finder.config.stock.select_stocks("test_stock")
     finder.config.policy.load_policy(policy_model, policy_templates, "test")
-    finder.config.policy.select_policy("test")
+    finder.config.policy.select_policies("test")
     return finder
 
 
@@ -90,7 +90,17 @@ def test_full_flow(finder_output, setup_finder, smiles):
 
 
 @pytest.mark.integration
-def test_run_from_json(finder_output, setup_finder):
+@pytest.mark.parametrize(
+    "include_scores", [False, True],
+)
+def test_run_from_json(finder_output, setup_finder, include_scores):
+    def _extract_scores(trees):
+        scores = []
+        for tree in trees:
+            scores.append(tree["scores"])
+            del tree["scores"]
+        return scores
+
     smiles = "CN1CCC(C(=O)c2cccc(NC(=O)c3ccc(F)cc3)c2F)CC1"
     params = {
         "stocks": ["test_stock"],
@@ -105,9 +115,22 @@ def test_run_from_json(finder_output, setup_finder):
         "iteration_limit": setup_finder.config.iteration_limit,
         "exclude_target_from_stock": True,
     }
+    if include_scores:
+        params["score_trees"] = True
+    expected_scores = {
+        "state score": 0.994039853898894,
+        "number of reactions": 2,
+        "average template occurence": 0,
+    }
     expected_output = finder_output(smiles)
 
     result = setup_finder.run_from_json(params)
+
+    if include_scores:
+        del params["score_trees"]
+        assert all(
+            scores == expected_scores for scores in _extract_scores(result["trees"])
+        )
 
     for tree in result["trees"]:
         _remove_meta_data(tree)
