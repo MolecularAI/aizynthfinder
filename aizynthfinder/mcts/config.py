@@ -1,6 +1,7 @@
 """ Module containing a class for encapsulating the settings of the tree search
 """
 import os
+import importlib
 
 import yaml
 
@@ -45,6 +46,29 @@ class Configuration:
         return self._properties == other._properties
 
     @classmethod
+    def from_dict(cls, source):
+        """
+        Loads a configuration from a dictionary structure.
+        The parameters not set in the dictionary are taken from the default values.
+        The policies and stocks specified are directly loaded.
+
+        :param source: the dictionary source
+        :type source: dict
+        :return: a Configuration object with settings from the source
+        :rtype: Configuration
+        """
+        config_obj = Configuration()
+        config_obj._update_from_config(source)
+
+        for key, policy_spec in source.get("policy", {}).get("files", {}).items():
+            modelfile, templatefile = policy_spec
+            config_obj.policy.load_policy(modelfile, templatefile, key)
+
+        config_obj._load_stocks(source)
+
+        return config_obj
+
+    @classmethod
     def from_file(cls, filename):
         """
         Loads a configuration from a yaml file.
@@ -56,24 +80,9 @@ class Configuration:
         :return: a Configuration object with settings from the yaml file
         :rtype: Configuration
         """
-        config_obj = Configuration()
         with open(filename, "r") as fileobj:
             _config = yaml.load(fileobj.read(), Loader=yaml.SafeLoader)
-
-        config_obj._update_from_config(_config)
-
-        for key, policy_spec in _config.get("policy", {}).get("files", {}).items():
-            modelfile, templatefile = policy_spec
-            config_obj.policy.load_policy(modelfile, templatefile, key)
-
-        for key, stockfile in _config.get("stock", {}).get("files", {}).items():
-            config_obj.stock.load_stock(stockfile, key)
-
-        if "mongodb" in _config.get("stock", {}):
-            query_obj = MongoDbInchiKeyQuery(**(_config["stock"]["mongodb"] or {}))
-            config_obj.stock.load_stock(query_obj, "mongodb_stock")
-
-        return config_obj
+        return Configuration.from_dict(_config)
 
     def update(self, **settings):
         """ Update the configuration using dictionary of parameters
@@ -81,6 +90,36 @@ class Configuration:
         for setting, value in settings.items():
             setattr(self, setting, value)
             self._logger.info(f"Setting {setting.replace('_', ' ')} to {value}")
+
+    def _load_stocks(self, config):
+        for key, stockfile in config.get("stock", {}).get("files", {}).items():
+            self.stock.load_stock(stockfile, key)
+
+        if "mongodb" in config.get("stock", {}):
+            query_obj = MongoDbInchiKeyQuery(**(config["stock"]["mongodb"] or {}))
+            self.stock.load_stock(query_obj, "mongodb_stock")
+
+        # Load stocks specifying a module and class, e.g. package.module.MyQueryClass
+        for name, stock_config in config.get("stock", {}).items():
+            if name in ["files", "mongodb"] or name.find(".") == -1:
+                continue
+
+            module_name, class_name = name.rsplit(".", maxsplit=1)
+            try:
+                module = importlib.import_module(module_name)
+            except ImportError:
+                self._logger.warning(
+                    f"Unable to load module '{module_name}' containing stock query classes"
+                )
+                continue
+
+            if hasattr(module, class_name):
+                query_obj = getattr(module, class_name)(**(stock_config or {}))
+                self.stock.load_stock(query_obj, class_name)
+            else:
+                self._logger.warning(
+                    f"Unable to find query class '{class_name}' in '{module_name}''"
+                )
 
     def _update_from_config(self, config):
         self._properties.update(config.get("finder", {}).get("properties", {}))

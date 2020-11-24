@@ -1,4 +1,11 @@
 from aizynthfinder.mcts.config import Configuration
+from aizynthfinder.aizynthfinder import AiZynthFinder
+
+
+def test_load_empty_dict(default_config):
+    config = Configuration.from_dict({})
+
+    assert config == default_config
 
 
 def test_load_empty_file(default_config, write_yaml):
@@ -77,3 +84,100 @@ def test_load_specific_mongodb(write_yaml, mocker):
     config.stock["mongodb_stock"].database.__getitem__.assert_called_with(
         "mycollection"
     )
+
+
+def test_load_external_stock(write_yaml, shared_datadir):
+    stock_filename = str(shared_datadir / "stock1.h5")
+    filename = write_yaml(
+        {
+            "stock": {
+                "aizynthfinder.mcts.stock.InMemoryInchiKeyQuery": {
+                    "filename": stock_filename
+                }
+            }
+        }
+    )
+
+    config = Configuration.from_file(filename)
+
+    assert config.stock.available_stocks() == ["InMemoryInchiKeyQuery"]
+
+
+def test_load_external_stock_incorrect_module(write_yaml, shared_datadir):
+    stock_filename = str(shared_datadir / "stock1.h5")
+    filename = write_yaml(
+        {
+            "stock": {
+                "aizynthfinder.mcts.InMemoryInchiKeyQuery": {"filename": stock_filename}
+            }
+        }
+    )
+
+    config = Configuration.from_file(filename)
+
+    assert config.stock.available_stocks() == []
+
+
+def test_load_external_stock_incorrect_class(write_yaml, shared_datadir):
+    stock_filename = str(shared_datadir / "stock1.h5")
+    filename = write_yaml(
+        {
+            "stock": {
+                "aizynthfinder.mcts.stock.InnMemoryInchiKeyQuery": {
+                    "filename": stock_filename
+                }
+            }
+        }
+    )
+
+    config = Configuration.from_file(filename)
+
+    assert config.stock.available_stocks() == []
+
+
+def test_init_search_yaml(write_yaml):
+    filename = write_yaml(
+        {
+            "properties": {"cutoff_number": 300},
+            "policy": {"properties": {"C": 1.9}},
+            "finder": {"properties": {"time_limit": 300}},
+        }
+    )
+
+    finder = AiZynthFinder(filename)
+
+    assert finder.config.cutoff_number == 300
+    assert finder.config.C == 1.9
+    assert finder.config.time_limit == 300
+
+
+def test_init_search_dict():
+    dict_ = {
+        "properties": {"cutoff_number": 300},
+        "policy": {"properties": {"C": 1.9}},
+        "finder": {"properties": {"time_limit": 300}},
+    }
+
+    finder = AiZynthFinder(configdict=dict_)
+
+    assert finder.config.cutoff_number == 300
+    assert finder.config.C == 1.9
+    assert finder.config.time_limit == 300
+
+
+def test_init_search_yaml_dict(write_yaml):
+    filename = write_yaml({"properties": {"cutoff_number": 300}})
+    dict_ = {
+        "properties": {"cutoff_number": 100},
+    }
+
+    finder = AiZynthFinder(filename, configdict=dict_)
+
+    assert finder.config.cutoff_number == 300
+
+
+def test_init_search_none(default_config):
+
+    finder = AiZynthFinder()
+
+    assert finder.config == default_config

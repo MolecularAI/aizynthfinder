@@ -65,6 +65,18 @@ Alternatively the custom query class can be used by the ``aizynthapp`` tool.
   app.setup()
 
 
+Lastly, it is possible to specify a custom stock class in the configuration file if it is located in a module that 
+is known by the python interpreter.
+
+.. code-block::
+
+    stock:
+        aizynthfinder.contrib.stocks.CriteriaStock
+
+
+can be used if the `aizynthfinder.contrib.stocks` is an existing sub-package and module.
+
+
 Making stocks
 -------------
 

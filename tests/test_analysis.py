@@ -233,6 +233,25 @@ def test_find_repetetive_patterns_created_tree_no_patterns(
     assert not rt.has_repeating_patterns
 
 
+def test_route_node_depth(load_reaction_tree):
+    dict_ = load_reaction_tree("finder_output_mol2.json", 0)
+    rt = ReactionTree.from_dict(dict_)
+
+    mols = list(rt.molecules())
+
+    assert rt.depth(mols[0]) == 0
+    assert rt.depth(mols[1]) == 2
+    assert rt.depth(mols[2]) == 4
+    assert rt.depth(mols[3]) == 6
+    assert rt.depth(mols[4]) == 6
+    assert rt.depth(mols[5]) == 8
+    assert rt.depth(mols[6]) == 8
+    assert rt.depth(mols[7]) == 10
+    assert rt.depth(mols[8]) == 12
+    assert rt.depth(mols[9]) == 12
+    assert rt.depth(mols[10]) == 2
+
+
 def test_create_route_collection_full(setup_analysis, mocker):
     analysis, _ = setup_analysis()
 

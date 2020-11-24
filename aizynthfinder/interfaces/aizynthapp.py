@@ -252,7 +252,7 @@ class AiZynthApp:
                 cb.description for cb in self._input["stocks"] if cb.value
             ]
             self.finder.stock.select_stocks(selected_stocks)
-            self.finder.policy.select_policy(self._input["policy"].value)
+            self.finder.policy.select_policies(self._input["policy"].value)
             self.finder.config.update(
                 **{
                     "C": self._input["C"].value,

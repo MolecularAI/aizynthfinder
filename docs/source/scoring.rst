@@ -9,7 +9,6 @@ Currently, there are a few scoring functions available
     * State score - a function of the number of precursors in stock and the length of the route
     * Number of reactions - the number of steps in the route
     * Average template occurence - the average occurence of the templates used in the route
-    * Average product similarity - the average maximum similarity of each reaction product in the route to the reaction products in the template library that uses the same template
 
 
 The *State score* is the score that is guiding the tree search in the :doc:`update phase <sequences>`, and 

@@ -128,9 +128,13 @@ def test_run_from_json(finder_output, setup_finder, include_scores):
 
     if include_scores:
         del params["score_trees"]
-        assert all(
-            scores == expected_scores for scores in _extract_scores(result["trees"])
-        )
+        for scores in _extract_scores(result["trees"]):
+            # fmt: off
+            assert scores["state score"] == expected_scores["state score"]
+            assert scores["number of reactions"] == expected_scores["number of reactions"]
+            assert scores["average template occurence"] == expected_scores["average template occurence"]
+            assert scores["number of pre-cursors"] == scores["number of pre-cursors in stock"]
+            # fmt: on
 
     for tree in result["trees"]:
         _remove_meta_data(tree)

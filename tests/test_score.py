@@ -5,6 +5,8 @@ from aizynthfinder.scoring import (
     StateScorer,
     NumberOfReactionsScorer,
     AverageTemplateOccurenceScorer,
+    NumberOfPrecursorsScorer,
+    NumberOfPrecursorsInStockScorer,
     ScorerCollection,
     ScorerException,
 )
@@ -80,6 +82,7 @@ def test_template_occurence_scorer(shared_datadir, default_config):
     nodes[0][nodes[1]]["action"].metadata["library_occurence"] = 5
     scorer = AverageTemplateOccurenceScorer()
 
+    assert scorer(nodes[0]) == 0
     assert scorer(nodes[1]) == 5
 
 
@@ -90,10 +93,40 @@ def test_template_occurence_scorer_tree(load_reaction_tree):
     assert scorer(tree) == 0
 
 
+def test_template_occurence_scorer_tree_one_node():
+    rt = ReactionTree()
+    rt.root = Molecule(smiles="CCCCOc1ccc(CC(=O)N(C)O)cc1")
+    rt.graph.add_node(rt.root)
+    scorer = AverageTemplateOccurenceScorer()
+
+    assert scorer(rt) == 0.0
+
+
+def test_scoring_branched_mcts_tree(shared_datadir, default_config):
+    search_tree = SearchTree.from_json(
+        shared_datadir / "tree_with_branching.json", default_config
+    )
+    nodes = list(search_tree.graph())
+
+    assert pytest.approx(StateScorer()(nodes[-1]), abs=1e-6) == 0.00012363
+    assert NumberOfReactionsScorer()(nodes[-1]) == 14
+    assert NumberOfPrecursorsScorer(default_config)(nodes[-1]) == 8
+    assert NumberOfPrecursorsInStockScorer(default_config)(nodes[-1]) == 0
+
+
+def test_scoring_branched_route(load_reaction_tree, default_config):
+    tree = ReactionTree.from_dict(load_reaction_tree("branched_route.json"))
+
+    assert pytest.approx(StateScorer(default_config)(tree), abs=1e-6) == 0.00012363
+    assert NumberOfReactionsScorer(default_config)(tree) == 14
+    assert NumberOfPrecursorsScorer(default_config)(tree) == 8
+    assert NumberOfPrecursorsInStockScorer(default_config)(tree) == 0
+
+
 def test_create_scorer_collection(default_config):
     collection = ScorerCollection(default_config)
 
-    assert len(collection) == 3
+    assert len(collection) == 5
 
     assert "state score" in collection.names()
     assert "number of reactions" in collection.names()

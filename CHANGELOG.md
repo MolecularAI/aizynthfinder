@@ -1,5 +1,23 @@
 # CHANGELOG
 
+## Version 1.2.0 - 2020-11-24 (2020-09-04)
+
+### Features
+
+- Add score "number of pre-cursors"
+- Add score "number of pre-cursors in stock"
+- Enable the loading of MCTS configuration from dict
+
+### Bugfixes
+
+- Fix bug in State score for branched reaction trees
+- Fix bug in "Number of reaction" score for branched MCTS trees
+- Fix bug in Jupyter GUI when selecting policies of several available
+
+### Trivial changes
+
+- Update python requirement specifications
+
 ## Version 1.1.0 - 2020-11-24 (2020-06-30)
 
 ### Features

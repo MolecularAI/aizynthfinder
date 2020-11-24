@@ -84,14 +84,13 @@ class StateScorer(Scorer):
         return node.state.score
 
     def _score_reaction_tree(self, tree):
-        # This implementation is rather invasive to the State interface,
-        # but it is certainly faster than computing the depth of each leaf molecule
         mols = [
-            TreeMolecule(parent=None, transform=0, smiles=leaf.smiles)
+            TreeMolecule(
+                parent=None, transform=tree.depth(leaf) // 2, smiles=leaf.smiles
+            )
             for leaf in tree.leafs()
         ]
         state = State(mols, self._config)
-        state.max_transforms = len(list(tree.reactions()))
         return state.score
 
 
@@ -107,10 +106,43 @@ class NumberOfReactionsScorer(Scorer):
         return "number of reactions"
 
     def _score_node(self, node):
-        return node.state.max_transforms
+        reactions, _ = node.tree.route_to_node(node)
+        return len(reactions)
 
     def _score_reaction_tree(self, tree):
         return len(list(tree.reactions()))
+
+
+class NumberOfPrecursorsScorer(Scorer):
+    """ Class for scoring nodes based on the number of pre-cursors in a node or route
+    """
+
+    def __init__(self, config=None):
+        super().__init__(config)
+        self._reverse_order = False
+
+    def __repr__(self):
+        return "number of pre-cursors"
+
+    def _score_node(self, node):
+        return len(node.state.mols)
+
+    def _score_reaction_tree(self, tree):
+        return len(list(tree.leafs()))
+
+
+class NumberOfPrecursorsInStockScorer(Scorer):
+    """ Class for scoring nodes based on the number of pre-cursors in stock a node or route
+    """
+
+    def __repr__(self):
+        return "number of pre-cursors in stock"
+
+    def _score_node(self, node):
+        return len([mol for mol in node.state.mols if mol in self._config.stock])
+
+    def _score_reaction_tree(self, tree):
+        return len([mol for mol in tree.leafs() if mol in self._config.stock])
 
 
 class AverageTemplateOccurenceScorer(Scorer):
@@ -122,6 +154,8 @@ class AverageTemplateOccurenceScorer(Scorer):
 
     def _score_node(self, node):
         reactions, _ = node.tree.route_to_node(node)
+        if not reactions:
+            return 0.0
         occurences = [
             reaction.metadata.get("library_occurence", 0) for reaction in reactions
         ]
@@ -129,6 +163,8 @@ class AverageTemplateOccurenceScorer(Scorer):
 
     def _score_reaction_tree(self, tree):
         reactions = list(tree.reactions())
+        if not reactions:
+            return 0.0
         occurences = [
             reaction.metadata.get("library_occurence", 0) for reaction in reactions
         ]
@@ -138,6 +174,8 @@ class AverageTemplateOccurenceScorer(Scorer):
 _SIMPLE_SCORERS = [
     StateScorer,
     NumberOfReactionsScorer,
+    NumberOfPrecursorsScorer,
+    NumberOfPrecursorsInStockScorer,
     AverageTemplateOccurenceScorer,
 ]
 

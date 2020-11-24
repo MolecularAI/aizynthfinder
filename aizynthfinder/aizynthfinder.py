@@ -16,8 +16,9 @@ class AiZynthFinder:
     """
     Public API to the aizynthfinder tool
 
-    If intantiated with the path to yaml file the stocks and policy networks are
-    loaded directly. Otherwise, the user is responsible for loading them prior to
+    If intantiated with the path to a yaml file or dictionary of settings 
+    the stocks and policy networks are loaded directly. 
+    Otherwise, the user is responsible for loading them prior to
     executing the tree search.
 
     :ivar config: the configuration of the search
@@ -35,15 +36,19 @@ class AiZynthFinder:
     :ivar search_stats: statistics of the latest search: time, number of iterations and if it returned first solution
     :vartype search_stats: dict
 
-    :param configfile: the path to yaml file with configuration, default to None
+    :param configfile: the path to yaml file with configuration (has priority over configdict), defaults to None
     :type configfile: str, optional
+    :param configdict: the config as a dictionary source, defaults to None
+    :type configdict: dict, optional
     """
 
-    def __init__(self, configfile=None):
+    def __init__(self, configfile=None, configdict=None):
         self._logger = logger()
 
         if configfile:
             self.config = Configuration.from_file(configfile)
+        elif configdict:
+            self.config = Configuration.from_dict(configdict)
         else:
             self.config = Configuration()
 

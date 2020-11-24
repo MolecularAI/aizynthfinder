@@ -238,6 +238,19 @@ class ReactionTree:
         obj._find_repeating_patterns()
         return obj
 
+    def depth(self, node):
+        """
+        Calculate the depth of a node in the route
+
+        :param node: the query node
+        :type node: UniqueMolecule or Reaction
+        :return: the depth
+        :rtype: float
+        """
+        if node is self.root:
+            return 0
+        return nx.shortest_path_length(self.graph, self.root, node)
+
     def leafs(self):
         """
         Generates the molecules nodes of the reaction tree that has no predecessors,
