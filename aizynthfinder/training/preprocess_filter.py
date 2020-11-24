@@ -1,0 +1,72 @@
+""" Module routines for pre-processing data for filter policy training
+"""
+import argparse
+
+import pandas as pd
+import numpy as np
+from scipy import sparse
+
+from aizynthfinder.training.utils import (
+    Config,
+    split_and_save_data,
+    smiles_to_fingerprint,
+    reaction_to_fingerprints,
+)
+
+
+def _get_config():
+    parser = argparse.ArgumentParser(
+        "Tool to pre-process a template library to be used to train a in-scope filter network policy"
+    )
+    parser.add_argument("config", help="the filename to a configuration file")
+    args = parser.parse_args()
+
+    return Config(args.config)
+
+
+def main():
+    """ Entry-point for the preprocess_filter tool
+    """
+    config = _get_config()
+
+    true_dataset = pd.read_csv(
+        config.filename("library"),
+        index_col=False,
+        header=None,
+        names=config["library_headers"][:-1],
+    )
+    true_dataset["true_product"] = 1
+    false_dataset = pd.read_csv(
+        config.filename("false_library"),
+        index_col=False,
+        header=None,
+        names=config["library_headers"][:-1],
+    )
+    false_dataset["true_product"] = 0
+    dataset = true_dataset.append(false_dataset, sort=False)
+
+    print("Dataset loaded, generating Labels...", flush=True)
+    labels = dataset["true_product"].to_numpy()
+    split_and_save_data(labels, "labels", config)
+
+    print("Labels created and splitted, generating Inputs...", flush=True)
+    products = dataset["products"].to_numpy()
+    reactants = dataset["reactants"].to_numpy()
+    inputs = np.apply_along_axis(
+        reaction_to_fingerprints, 0, [products, reactants], config
+    ).astype(np.int8)
+    inputs = sparse.lil_matrix(inputs.T).tocsr()
+    split_and_save_data(inputs, "inputs2", config)
+
+    inputs = np.apply_along_axis(smiles_to_fingerprint, 0, [products], config).astype(
+        np.int8
+    )
+    inputs = sparse.lil_matrix(inputs.T).tocsr()
+    split_and_save_data(inputs, "inputs", config)
+
+    print("Inputs created and splitted, splitting Full Dataset...", flush=True)
+    split_and_save_data(dataset, "library", config)
+
+
+if __name__ == "__main__":
+    main()

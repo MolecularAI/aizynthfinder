@@ -4,7 +4,7 @@ import pytest
 from PIL import Image, ImageDraw
 
 from aizynthfinder.utils import image
-from aizynthfinder.chem import TreeMolecule, Reaction
+from aizynthfinder.chem import TreeMolecule, RetroReaction
 
 
 @pytest.fixture
@@ -37,7 +37,7 @@ def test_rounded_rectangle(new_image):
 @pytest.fixture
 def setup_graphviz_graph():
     mol1 = TreeMolecule(smiles="CCCO", parent=None)
-    reaction = Reaction(mol=mol1, smarts="")
+    reaction = RetroReaction(mol=mol1, smarts="")
     graph = image.GraphvizReactionGraph()
 
     graph.add_molecule(mol1, "green")

@@ -72,7 +72,7 @@ This can be accomplished with
 
 .. code-block:: 
 
-    preprocess_rollout.py config.yaml
+    preprocess_expansion config.yaml
 
 
 where ``config.yaml`` is your local configuration file for the training (see above).
@@ -84,7 +84,7 @@ Once this is done, you can train the network using
 
 .. code-block::
 
-    aizynth_training config.yaml
+    aizynth_training config.yaml expansion
 
 
 Note that this might take a long time to converge.
@@ -95,3 +95,61 @@ to the tree search algorithm.
 The pre-processing script created a file that ends with ``unique_templates.hdf5`` - 
 this contains the unique templates and is the second input that you need for the tree search algorithm
 
+
+Filter policy
+-------------
+
+To train a filter policy an array of tools are available. 
+
+First, you need to generate negative data, i.e. reactions that are unfeasible. 
+
+.. code-block::
+
+    make_false_products config.yml strict
+    make_false_products config.yml random
+    make_false_products config.yml recommender
+
+
+The first argument is a configuration file, similar to the one used above with the ``preprocess_expansion`` tool. 
+The second argument should be "strict", "random" or "recommender" depending on what method you want to use.
+
+When using the "recommender" method it is important to add the following to the configuration file:
+
+.. code-block:: yaml
+
+    recommender_model: "some_path/checkpoints/keras_model.hdf"
+
+which points to the trained "recommender" model (see below).
+
+The second step is pre-processing the training data:
+
+.. code-block:: 
+
+    preprocess_filter.py config.yaml
+
+
+And the third and final step is the actual training:
+
+
+.. code-block::
+
+    aizynth_training config.yaml filter
+
+
+The folder ``checkpoint`` will contain the Keras model that you can use as input 
+to the tree search algorithm.
+
+
+Training recommender model
+--------------------------
+
+Training to recommender model is very similar to training the expansion policy 
+
+
+.. code-block:: 
+
+    preprocess_recommender config.yaml
+    aizynth_training config.yaml recommender
+
+
+The folder ``checkpoint`` will contain the Keras model that you can use to generate negative data.

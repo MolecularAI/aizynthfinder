@@ -1,5 +1,27 @@
 # CHANGELOG
 
+## Version 2.0.0 - 2020-11-24 (2020-09-29)
+
+### Breaking changes
+
+- The `Reaction` class is renamed to `RetroReaction`
+- The `Policy` class is renamed to `ExpansionPolicy`
+- `config`, `stock`, `policy` and `scoring` modules moved to `aizynthfinder.context` package
+- Tool "preprocess_rollout" is now called "preprocess_expansion"
+- Some of the public methods of `Stock`, `Policy` and `ScorerCollection` classes are renamed
+- Setting target molecule now destroys the search tree
+
+### Features
+
+- Add a filter policy to MCTS to remove unfeasible reactions
+- Add tools to train filter policy
+- Add logic to prevent cycle forming in MCTS by rejecting creation of parent molecule when expanding
+- Introduce new `context` subpackage that contains the `config`, `stock`, `policy` and `scoring` modules
+- The `Stock`, `ExpansionPolicy`, `FilterPolicy` and `ScorerCollection` classes now has a common interface for selection and loading 
+- Introduce possibility to remove unsantizable reactions from template library when training
+- Catch exceptions from RDChiral more gracefully
+
+
 ## Version 1.2.0 - 2020-11-24 (2020-09-04)
 
 ### Features

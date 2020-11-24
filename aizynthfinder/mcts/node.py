@@ -2,7 +2,7 @@
 """
 import numpy as np
 
-from aizynthfinder.chem import Reaction, TreeMolecule
+from aizynthfinder.chem import RetroReaction, TreeMolecule
 from aizynthfinder.mcts.state import State
 from aizynthfinder.utils.logging import logger
 
@@ -50,7 +50,8 @@ class Node:
     def __init__(self, state, owner, config, parent=None):
         self.state = state
         self._config = config
-        self._policy = config.policy
+        self._expansion_policy = config.expansion_policy
+        self._filter_policy = config.filter_policy
         self.tree = owner
         self.is_expanded = False
         self.is_expandable = not self.state.is_terminal
@@ -117,7 +118,7 @@ class Node:
         node._children_priors = dict_["children_priors"]
         node._children_visitations = dict_["children_visitations"]
         node._children_actions = [
-            Reaction(
+            RetroReaction(
                 molecules[action["mol"]],
                 action["smarts"],
                 action["index"],
@@ -195,9 +196,10 @@ class Node:
 
         # Calculate the possible actions, fill the child_info lists
         # Actions by default only assumes 1 set of reactants
-        self._children_actions, self._children_priors = self._policy.get_actions(
-            self.state.mols
-        )
+        (
+            self._children_actions,
+            self._children_priors,
+        ) = self._expansion_policy.get_actions(self.state.mols)
         nactions = len(self._children_actions)
         self._children_visitations = [1] * nactions
         self._children = [None] * nactions
@@ -276,6 +278,29 @@ class Node:
             "is_expandable": self.is_expandable,
         }
 
+    def _check_child_reaction(self, reaction):
+        if not reaction.reactants:
+            self._logger.debug(
+                f"Reaction {reaction.smarts} on {reaction.mol.smiles} did not produce any reactants"
+            )
+            return False
+
+        # fmt: off
+        reactants0 = reaction.reactants[0]
+        if (len(reaction.reactants) == 1 and len(reactants0) == 1 and reaction.mol == reactants0[0]):
+            return False
+
+        check_cycling = self._config.prune_cycles_in_search and reaction.mol.parent
+        if check_cycling and len(reaction.reactants) == 1 and (reaction.mol.parent in reactants0):
+            self._logger.debug(
+                "Removing cycle-producing reaction on mol %s with parent %s and transformation %s"
+                % (reaction.mol.smiles, reaction.mol.parent.smiles, reaction.smarts)
+            )
+            return False
+        # fmt: on
+
+        return True
+
     def _children_q(self):
         return np.array(self._children_values) / np.array(self._children_visitations)
 
@@ -284,52 +309,79 @@ class Node:
         child_visits = np.array(self._children_visitations)
         return self._config.C * np.sqrt(2 * total_visits / child_visits)
 
-    def _make_child_states(self, reaction):
-        mols = [mol for mol in self.state.mols if mol is not reaction.mol]
-        reactants_list = reaction.apply()
+    def _create_children_nodes(self, states, child_idx):
+        new_nodes = []
+        first_child_idx = child_idx
+        for state_index, state in enumerate(states):
+            # If there's more than one outcome, the lists need be expanded
+            if state_index > 0:
+                child_idx = self._expand_children_lists(first_child_idx, state_index)
 
-        if not reactants_list:
+            if self._filter_child_reaction(self._children_actions[child_idx]):
+                self._children_values[child_idx] = -1e6
+            else:
+                self._children[child_idx] = Node(
+                    state=state, owner=self.tree, config=self._config, parent=self
+                )
+                new_nodes.append(self._children[child_idx])
+        return new_nodes
+
+    def _expand_children_lists(self, old_index, action_index):
+        new_action = self._children_actions[old_index].copy(index=action_index)
+        self._children_actions.append(new_action)
+        self._children_priors.append(self._children_priors[old_index])
+        self._children_values.append(self._children_values[old_index])
+        self._children_visitations.append(self._children_visitations[old_index])
+        self._children.append(None)
+        return len(self._children) - 1
+
+    def _filter_child_reaction(self, reaction):
+        if not self._filter_policy.selection:
+            return False
+        feasible, prob = self._filter_policy.is_feasible(reaction, True)
+        if not feasible:
             self._logger.debug(
-                "Reactants_list empty %s, for mol %s and transformation %s"
-                % (repr(reactants_list), reaction.mol.smiles, reaction.smarts)
+                f"Reaction {reaction.reaction_smiles()} from template {reaction.smarts } was filtered out with prob {prob}"
             )
-            return []
+            return True
 
-        # fmt: off
-        if (len(reactants_list) == 1 and len(reactants_list[0]) == 1 and reaction.mol == reactants_list[0][0]):
-            return []
-        # fmt: on
+        self._logger.debug(
+            f"Reaction {reaction.reaction_smiles()} from template {reaction.smarts } was kept with prob {prob}"
+        )
+        return False
 
-        return [
-            State(mols + list(reactants), self._config) for reactants in reactants_list
-        ]
+    def _select_child(self, child_idx):
+        """
+        Selecting a child node implies instantiating the children nodes
 
-    def _select_child(self, idx):
-        reaction = self._children_actions[idx]
+        The algorithm is:
+        * If the child has already been instantiated, return immediately
+        * Apply the reaction associated with the child
+        * If the application of the action failed, set value to -1e6 and return None
+        * Create a new state array, one new state for each of the reaction outcomes
+        * Create new child nodes
+            - If a filter policy is available and the reaction outcome is unlikely
+              set value of child to -1e6
+        * Select a random node of the feasible ones to return
+        """
+        if self._children[child_idx]:
+            return self._children[child_idx]
 
-        if self._children[idx]:
-            return self._children[idx]
+        reaction = self._children_actions[child_idx]
+        if not reaction.reactants:
+            reaction.apply()
 
-        states = self._make_child_states(reaction)
-        if not states:
-            self._children_values[idx] = -1e6
+        if not self._check_child_reaction(reaction):
+            self._children_values[child_idx] = -1e6
             return None
 
-        children = []
-        for i, state in enumerate(states):
-            child = Node(state=state, owner=self.tree, config=self._config, parent=self)
-            children.append(child)
-            # If there's more than one outcome, the lists need be expanded
-            if i > 0:
-                new_action = Reaction(
-                    reaction.mol, reaction.smarts, index=i, metadata=reaction.metadata
-                )
-                self._children_actions.append(new_action)
-                self._children_priors.append(self._children_priors[idx])
-                self._children_values.append(self._children_values[idx])
-                self._children_visitations.append(self._children_visitations[idx])
-                self._children.append(child)
-            else:
-                self._children[idx] = child
+        keep_mols = [mol for mol in self.state.mols if mol is not reaction.mol]
+        new_states = [
+            State(keep_mols + list(reactants), self._config)
+            for reactants in reaction.reactants
+        ]
+        new_nodes = self._create_children_nodes(new_states, child_idx)
 
-        return np.random.choice(children)
+        if new_nodes:
+            return np.random.choice(new_nodes)
+        return None

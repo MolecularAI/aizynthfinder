@@ -108,10 +108,10 @@ def test_serialize_deserialize_state(default_config):
     assert state1.score == state0.score
 
 
-def test_serialize_node(generate_root, simple_actions, mock_policy):
+def test_serialize_node(generate_root, simple_actions, mock_expansion_policy):
     serializer = MoleculeSerializer()
     root = generate_root("CCCCOc1ccc(CC(=O)N(C)O)cc1")
-    action_list, prior_list = mock_policy(root.state.mols[0])
+    action_list, prior_list = mock_expansion_policy(root.state.mols[0])
 
     state_serialized = root.state.serialize(serializer)
     node_serialized = root.serialize(serializer)
@@ -162,10 +162,12 @@ def test_serialize_node(generate_root, simple_actions, mock_policy):
     assert not node_serialized["children"][0]["is_expanded"]
 
 
-def test_deserialize_node(generate_root, simple_actions, mock_policy, default_config):
+def test_deserialize_node(
+    generate_root, simple_actions, mock_expansion_policy, default_config
+):
     serializer = MoleculeSerializer()
     root = generate_root("CCCCOc1ccc(CC(=O)N(C)O)cc1")
-    action_list, prior_list = mock_policy(root.state.mols[0])
+    action_list, prior_list = mock_expansion_policy(root.state.mols[0])
     root.expand()
     child = root.promising_child()
     node_serialized = root.serialize(serializer)
@@ -195,7 +197,7 @@ def test_serialize_deserialize_tree(
     fresh_tree,
     generate_root,
     simple_actions,
-    mock_policy,
+    mock_expansion_policy,
     default_config,
     mocker,
     tmpdir,
@@ -203,7 +205,7 @@ def test_serialize_deserialize_tree(
     serializer = MoleculeSerializer()
     root = generate_root("CCCCOc1ccc(CC(=O)N(C)O)cc1")
     fresh_tree.root = root
-    action_list, prior_list = mock_policy(root.state.mols[0])
+    action_list, prior_list = mock_expansion_policy(root.state.mols[0])
     root.expand()
     child = root.promising_child()
     mocked_json_dump = mocker.patch("aizynthfinder.mcts.mcts.json.dump")

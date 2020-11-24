@@ -55,9 +55,9 @@ def _select_stocks(finder, args):
         pass
     else:
         if hasattr(module, "stock"):
-            finder.stock.load_stock(module.stock, "custom_stock")
+            finder.stock.load(module.stock, "custom_stock")
             stocks.append("custom_stock")
-    finder.stock.select_stocks(stocks or finder.stock.available_stocks())
+    finder.stock.select(stocks or finder.stock.items)
 
 
 def _process_single_smiles(smiles, finder, output_name):
@@ -158,7 +158,11 @@ def main():
 
     finder = AiZynthFinder(configfile=args.config)
     _select_stocks(finder, args)
-    finder.policy.select_policy(args.policy or finder.policy.available_policies()[0])
+    finder.expansion_policy.select(args.policy or finder.expansion_policy.items[0])
+    try:
+        finder.filter_policy.select(args.policy)
+    except KeyError:
+        pass
 
     if multi_smiles:
         _process_multi_smiles(args.smiles, finder, args.output)

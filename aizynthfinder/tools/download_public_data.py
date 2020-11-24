@@ -18,6 +18,10 @@ FILES_TO_DOWNLOAD = {
         "filename": "zinc_stock.hdf5",
         "url": "https://ndownloader.figshare.com/files/23086469",
     },
+    "filter_policy": {
+        "filename": "uspto_filter_model.hdf5",
+        "url": "https://ndownloader.figshare.com/files/25584743"
+    }
 }
 
 YAML_TEMPLATE = """policy:
@@ -25,6 +29,9 @@ YAML_TEMPLATE = """policy:
     uspto:
       - {}
       - {}
+filter:
+  files:
+    uspto: {}
 stock:
   files:
     zinc: {}
@@ -65,6 +72,7 @@ def main():
             YAML_TEMPLATE.format(
                 os.path.join(path, FILES_TO_DOWNLOAD["policy_model"]["filename"]),
                 os.path.join(path, FILES_TO_DOWNLOAD["template_file"]["filename"]),
+                os.path.join(path, FILES_TO_DOWNLOAD["filter_policy"]["filename"]),
                 os.path.join(path, FILES_TO_DOWNLOAD["stock"]["filename"]),
             )
         )

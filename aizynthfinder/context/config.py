@@ -1,15 +1,14 @@
 """ Module containing a class for encapsulating the settings of the tree search
 """
 import os
-import importlib
 
 import yaml
 
 from aizynthfinder.utils.logging import logger
 from aizynthfinder.utils.paths import data_path
-from aizynthfinder.mcts.policy import Policy
-from aizynthfinder.mcts.stock import Stock, MongoDbInchiKeyQuery
-from aizynthfinder.scoring import ScorerCollection
+from aizynthfinder.context.policy import ExpansionPolicy, FilterPolicy
+from aizynthfinder.context.stock import Stock
+from aizynthfinder.context.scoring import ScorerCollection
 
 
 class Configuration:
@@ -38,7 +37,8 @@ class Configuration:
         self._update_from_config(_config)
 
         self.stock = Stock()
-        self.policy = Policy(self)
+        self.expansion_policy = ExpansionPolicy(self)
+        self.filter_policy = FilterPolicy(self)
         self.scorers = ScorerCollection(self)
         self._logger = logger()
 
@@ -60,11 +60,13 @@ class Configuration:
         config_obj = Configuration()
         config_obj._update_from_config(source)
 
-        for key, policy_spec in source.get("policy", {}).get("files", {}).items():
-            modelfile, templatefile = policy_spec
-            config_obj.policy.load_policy(modelfile, templatefile, key)
-
-        config_obj._load_stocks(source)
+        config_obj.expansion_policy.load_from_config(
+            **source.get("policy", {}).get("files", {})
+        )
+        config_obj.filter_policy.load_from_config(
+            **source.get("filter", {}).get("files", {})
+        )
+        config_obj.stock.load_from_config(**source.get("stock", {}))
 
         return config_obj
 
@@ -85,44 +87,20 @@ class Configuration:
         return Configuration.from_dict(_config)
 
     def update(self, **settings):
-        """ Update the configuration using dictionary of parameters
+        """
+        Update the configuration using dictionary of parameters
+
+        If a value is None that setting is ignored.
         """
         for setting, value in settings.items():
+            if value is None:
+                continue
             setattr(self, setting, value)
             self._logger.info(f"Setting {setting.replace('_', ' ')} to {value}")
-
-    def _load_stocks(self, config):
-        for key, stockfile in config.get("stock", {}).get("files", {}).items():
-            self.stock.load_stock(stockfile, key)
-
-        if "mongodb" in config.get("stock", {}):
-            query_obj = MongoDbInchiKeyQuery(**(config["stock"]["mongodb"] or {}))
-            self.stock.load_stock(query_obj, "mongodb_stock")
-
-        # Load stocks specifying a module and class, e.g. package.module.MyQueryClass
-        for name, stock_config in config.get("stock", {}).items():
-            if name in ["files", "mongodb"] or name.find(".") == -1:
-                continue
-
-            module_name, class_name = name.rsplit(".", maxsplit=1)
-            try:
-                module = importlib.import_module(module_name)
-            except ImportError:
-                self._logger.warning(
-                    f"Unable to load module '{module_name}' containing stock query classes"
-                )
-                continue
-
-            if hasattr(module, class_name):
-                query_obj = getattr(module, class_name)(**(stock_config or {}))
-                self.stock.load_stock(query_obj, class_name)
-            else:
-                self._logger.warning(
-                    f"Unable to find query class '{class_name}' in '{module_name}''"
-                )
 
     def _update_from_config(self, config):
         self._properties.update(config.get("finder", {}).get("properties", {}))
         self._properties.update(config.get("policy", {}).get("properties", {}))
+        self._properties.update(config.get("filter", {}).get("properties", {}))
         self._properties.update(config.get("properties", {}))
         self.__dict__.update(self._properties)

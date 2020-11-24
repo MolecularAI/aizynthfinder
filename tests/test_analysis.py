@@ -5,7 +5,7 @@ import numpy as np
 from aizynthfinder.chem import Molecule
 from aizynthfinder.analysis import TreeAnalysis, ReactionTree, RouteCollection
 from aizynthfinder.mcts.mcts import SearchTree
-from aizynthfinder.scoring import StateScorer, NumberOfReactionsScorer
+from aizynthfinder.context.scoring import StateScorer, NumberOfReactionsScorer
 
 
 def test_sort_nodes(setup_analysis):
@@ -130,7 +130,7 @@ def test_reactiontree_to_image_hiding(load_reaction_tree, mocker):
     )
     mocker.patch("aizynthfinder.utils.image.GraphvizReactionGraph.to_image")
 
-    tree = load_reaction_tree("finder_output_mol2.json", 1)
+    tree = load_reaction_tree("sample_reaction_with_hidden.json", 1)
     rt = ReactionTree.from_dict(tree)
     assert rt.has_repeating_patterns
 
@@ -152,7 +152,9 @@ def test_reactiontree_to_image_hiding(load_reaction_tree, mocker):
 
 
 def test_find_repetetive_patterns(load_reaction_tree):
-    tree_with_repetetive_patterns = load_reaction_tree("finder_output_mol2.json", 1)
+    tree_with_repetetive_patterns = load_reaction_tree(
+        "sample_reaction_with_hidden.json", 1
+    )
 
     rt = ReactionTree.from_dict(tree_with_repetetive_patterns)
 
@@ -161,7 +163,9 @@ def test_find_repetetive_patterns(load_reaction_tree):
 
 
 def test_find_repetetive_patterns_no_patterns(load_reaction_tree):
-    tree_with_no_repetetive_patterns = load_reaction_tree("finder_output_mol2.json", 0)
+    tree_with_no_repetetive_patterns = load_reaction_tree(
+        "sample_reaction_with_hidden.json", 0
+    )
 
     rt = ReactionTree.from_dict(tree_with_no_repetetive_patterns)
 
@@ -234,7 +238,7 @@ def test_find_repetetive_patterns_created_tree_no_patterns(
 
 
 def test_route_node_depth(load_reaction_tree):
-    dict_ = load_reaction_tree("finder_output_mol2.json", 0)
+    dict_ = load_reaction_tree("sample_reaction_with_hidden.json", 0)
     rt = ReactionTree.from_dict(dict_)
 
     mols = list(rt.molecules())

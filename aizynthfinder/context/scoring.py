@@ -7,6 +7,7 @@ from aizynthfinder.mcts.node import Node
 from aizynthfinder.analysis import ReactionTree
 from aizynthfinder.mcts.state import State
 from aizynthfinder.chem import TreeMolecule
+from aizynthfinder.context.collection import ContextCollection
 
 
 class ScorerException(Exception):
@@ -180,7 +181,7 @@ _SIMPLE_SCORERS = [
 ]
 
 
-class ScorerCollection:
+class ScorerCollection(ContextCollection):
     """
     Store scorer objects for the aizynthfinder interface.
 
@@ -198,26 +199,15 @@ class ScorerCollection:
     :type config: Configuration
     """
 
+    _collection_name = "scorer"
+
     def __init__(self, config):
+        super().__init__()
         self._config = config
-        self._scorers = {}
         for cls in _SIMPLE_SCORERS:
-            self.add(cls(config))
+            self.load(cls(config))
 
-    def __delitem__(self, name):
-        if name not in self._scorers:
-            raise KeyError(f"Scorer with name {name} not initialized.")
-        del self._scorers[name]
-
-    def __getitem__(self, name):
-        if name not in self._scorers:
-            raise KeyError(f"Scorer with name {name} not initialized.")
-        return self._scorers[name]
-
-    def __len__(self):
-        return len(self._scorers)
-
-    def add(self, scorer):
+    def load(self, scorer):
         """
         Add a pre-initialized scorer object to the collection
 
@@ -228,14 +218,14 @@ class ScorerCollection:
             raise ScorerException(
                 "Only objects of classes inherited from Scorer can be added"
             )
-        self._scorers[repr(scorer)] = scorer
+        self._items[repr(scorer)] = scorer
 
-    def load(self, **scorers_config):
+    def load_from_config(self, **scorers_config):
         """
         Load one or several scorers from a configuration dictionary
 
         The keys are the name of scorer class. If a scorer is not
-        defined in the ``aizynthfinder.scoring`` module, the module
+        defined in the ``aizynthfinder.context.scoring`` module, the module
         name can be appended, e.g. ``mypackage.scoring.AwesomeScore``.
 
         The values of the configuration is passed directly to the scorer
@@ -261,14 +251,14 @@ class ScorerCollection:
                 )
 
             obj = getattr(loaded_module, name)(self._config, **scorer_config)
-            self._scorers[repr(obj)] = obj
+            self._items[repr(obj)] = obj
 
     def names(self):
         """ Return a list of the names of all the loaded scorers
         """
-        return list(self._scorers.keys())
+        return self.items
 
     def objects(self):
         """ Return a list of all the loaded scorer objects
         """
-        return list(self._scorers.values())
+        return list(self._items.values())

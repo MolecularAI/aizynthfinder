@@ -1,6 +1,7 @@
 """ Module containing various classes and routines used in training tools
 """
 import os
+import hashlib
 from collections.abc import Mapping
 
 import yaml
@@ -11,7 +12,7 @@ from sklearn.model_selection import train_test_split
 
 
 from aizynthfinder.utils.paths import data_path
-from aizynthfinder.chem import Molecule
+from aizynthfinder.chem import Molecule, MoleculeException
 
 
 class Config:
@@ -76,6 +77,8 @@ class Config:
 
     @staticmethod
     def _update_dict(original, other):
+        # Used to complement the update method of the built-in dict type
+        # it works for recursive dicts (to 1 level)
         for key, val in original.items():
             if key not in other or not isinstance(other[key], type(val)):
                 continue
@@ -83,7 +86,79 @@ class Config:
                 original[key] = Config._update_dict(original[key], other[key])
             else:
                 original[key] = other[key]
+        for key, val in other.items():
+            if key not in original:
+                original[key] = val
         return original
+
+
+def create_reactants_molecules(reactants_str):
+    """
+    Create Molecule objects from a SMILE string of reactants.
+
+    Only molecules with atom mapping is kept.
+
+    :param reactants_str: the SMILES string of the reactants
+    :type reactants_str: str
+    :return: the Molecule objects
+    :rtype: list of Molecule
+    """
+    mols = mols = []
+    for smiles in reactants_str.split("."):
+        try:
+            mol = Molecule(smiles=smiles, sanitize=True)
+        except MoleculeException:
+            pass
+        else:
+            if mol.has_atom_mapping():
+                mols.append(mol)
+    return mols
+
+
+def is_sanitizable(args):
+    """
+    Check whether a SMILES is sanitizable
+    :param args: the SMILES in the first element
+    :type args: tuple
+    :return: whether the SMILES is sanitizable
+    :rtype: bool
+    """
+    smiles = args[0]
+    try:
+        Molecule(smiles=smiles, sanitize=True)
+    except MoleculeException:
+        return False
+    else:
+        return True
+
+
+def reverse_template(retro_template):
+    """
+    Reverse the reaction template to swith product and reactants
+
+    :param retro_template: the reaction template
+    :type retro_template: str
+    :return: the reverse template
+    :rtype: str
+    """
+    return ">>".join(retro_template.split(">>")[::-1])
+
+
+def reaction_hash(reactants_smiles, product):
+    """
+    Create a reaction hash
+
+    :param reactants_smiles: the SMILES string of the reactants
+    :type reactants_smiles: str
+    :param product: the product molecule
+    :type product: Molecule
+    :return: the hash
+    :rtype: str
+    """
+    reactant_inchi = Molecule(smiles=reactants_smiles).inchi
+    product_inchi = product.inchi
+    concat_inchi = reactant_inchi + "++" + product_inchi
+    return hashlib.sha224(concat_inchi.encode("utf8")).hexdigest()
 
 
 def split_and_save_data(data, data_label, config):
@@ -136,6 +211,54 @@ def smiles_to_fingerprint(args, config):
     :rtype: numpy.ndarray
     """
     smiles = args[0]
-    return Molecule(smiles=smiles).fingerprint(
-        config["fingerprint_radius"], config["fingerprint_len"],
+    return (
+        Molecule(smiles=smiles)
+        .fingerprint(config["fingerprint_radius"], config["fingerprint_len"],)
+        .astype(np.int8)
     )
+
+
+def reactants_to_fingerprint(args, config):
+    """
+    Convert a SMILES string of reactants to a fingerprint
+
+    :param args: the SMILES in the first element
+    :type args: tuple
+    :param config: the settings
+    :type config: Config
+    :return: the fingerprint
+    :rtype: numpy.ndarray
+    """
+    reactants_smiles = args[0]
+    fingerprints = []
+    for smiles in reactants_smiles.split("."):
+        try:
+            mol = Molecule(smiles=smiles, sanitize=True)
+        except MoleculeException:
+            pass
+        else:
+            if mol.has_atom_mapping():
+                fingerprints.append(
+                    mol.fingerprint(
+                        config["fingerprint_radius"], config["fingerprint_len"]
+                    )
+                )
+    return sum(fingerprints)
+
+
+def reaction_to_fingerprints(args, config):
+    """
+    Convert a reaction SMILEs string  a fingerprint
+
+    :param args: the product SMILES in the first element, and reactants SMILES in the second
+    :type args: tuple
+    :param config: the settings
+    :type config: Config
+    :return: the fingerprint
+    :rtype: numpy.ndarray
+    """
+    product_smiles, reactants_smiles = args
+    product_fp = smiles_to_fingerprint([product_smiles], config)
+    reactant_fp = reactants_to_fingerprint([reactants_smiles], config)
+
+    return (product_fp - reactant_fp).astype(np.int8)

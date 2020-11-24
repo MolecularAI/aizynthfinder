@@ -31,7 +31,7 @@ class TreeAnalysis:
         self.search_tree = search_tree
         if scorer is None:
             # Do import here to avoid circular imports
-            from aizynthfinder.scoring import StateScorer
+            from aizynthfinder.context.scoring import StateScorer
 
             self.scorer = StateScorer()
         else:

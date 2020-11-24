@@ -82,7 +82,7 @@ class AiZynthApp:
 
         self._input["stocks"] = [
             Checkbox(value=True, description=key, layout={"justify": "left"})
-            for key in self.finder.stock.available_stocks()
+            for key in self.finder.stock.items
         ]
         box_stocks = VBox(
             [Label("Stocks")] + self._input["stocks"],
@@ -90,8 +90,14 @@ class AiZynthApp:
         )
 
         self._input["policy"] = widgets.Dropdown(
-            options=self.finder.policy.available_policies(),
-            description="Neural Policy:",
+            options=self.finder.expansion_policy.items,
+            description="Expansion Policy:",
+            style={"description_width": "initial"},
+        )
+
+        self._input["filter"] = widgets.Dropdown(
+            options=["None"] + self.finder.filter_policy.items,
+            description="Filter Policy:",
             style={"description_width": "initial"},
         )
 
@@ -108,6 +114,7 @@ class AiZynthApp:
         vbox = VBox(
             [
                 self._input["policy"],
+                self._input["filter"],
                 max_time_box,
                 max_iter_box,
                 self._input["return_first"],
@@ -137,6 +144,13 @@ class AiZynthApp:
             value=self.finder.config.cutoff_number,
             style={"description_width": "initial"},
         )
+        self._input["filter_cutoff"] = BoundedFloatText(
+            description="Filter cutoff",
+            min=0,
+            max=1,
+            value=self.finder.config.filter_cutoff,
+            style={"description_width": "initial"},
+        )
         self._input["exclude_target_from_stock"] = widgets.Checkbox(
             value=self.finder.config.exclude_target_from_stock,
             description="Exclude target from stock",
@@ -147,6 +161,7 @@ class AiZynthApp:
                 self._input["max_transforms"],
                 self._input["cutoff_cumulative"],
                 self._input["cutoff_number"],
+                self._input["filter_cutoff"],
                 self._input["exclude_target_from_stock"],
             ]
         )
@@ -251,8 +266,12 @@ class AiZynthApp:
             selected_stocks = [
                 cb.description for cb in self._input["stocks"] if cb.value
             ]
-            self.finder.stock.select_stocks(selected_stocks)
-            self.finder.policy.select_policies(self._input["policy"].value)
+            self.finder.stock.select(selected_stocks)
+            self.finder.expansion_policy.select(self._input["policy"].value)
+            if self._input["filter"].value == "None":
+                self.finder.filter_policy.deselect()
+            else:
+                self.finder.filter_policy.select(self._input["policy"].value)
             self.finder.config.update(
                 **{
                     "C": self._input["C"].value,
@@ -262,6 +281,7 @@ class AiZynthApp:
                     "return_first": self._input["return_first"].value,
                     "time_limit": self._input["time_limit"].value * 60,
                     "iteration_limit": self._input["iteration_limit"].value,
+                    "filter_cutoff": self._input["filter_cutoff"].value,
                     "exclude_target_from_stock": self._input[
                         "exclude_target_from_stock"
                     ].value,

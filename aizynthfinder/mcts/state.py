@@ -42,14 +42,12 @@ class State:
     def __init__(self, mols, config):
         self.mols = mols
         self.stock = config.stock
-        self.policy = config.policy
-        self._config = config
         self.in_stock_list = [mol in self.stock for mol in self.mols]
         self._stock_availability = None
         self.is_solved = all(self.in_stock_list)
         self.max_transforms = max(mol.transform for mol in self.mols)
         self.is_terminal = (
-            self.max_transforms > self._config.max_transforms
+            self.max_transforms > config.max_transforms
         ) or self.is_solved
         self._score = None
 

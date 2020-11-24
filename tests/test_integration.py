@@ -7,14 +7,6 @@ import pytest
 from aizynthfinder.aizynthfinder import AiZynthFinder
 
 
-def _remove_meta_data(dict_):
-    if "metadata" in dict_:
-        del dict_["metadata"]
-    if "children" in dict_:
-        for child in dict_["children"]:
-            _remove_meta_data(child)
-
-
 @pytest.fixture(scope="module")
 def read_options(request):
     policy_model = os.environ.get("TEST_POLICY_MODEL")
@@ -35,10 +27,10 @@ def setup_finder(read_options):
     policy_model, policy_templates, stock_file = read_options
     random.seed(350)
     finder = AiZynthFinder()
-    finder.config.stock.load_stock(stock_file, "test_stock")
-    finder.config.stock.select_stocks("test_stock")
-    finder.config.policy.load_policy(policy_model, policy_templates, "test")
-    finder.config.policy.select_policies("test")
+    finder.config.stock.load(stock_file, "test_stock")
+    finder.config.stock.select("test_stock")
+    finder.config.expansion_policy.load(policy_model, policy_templates, "dummy")
+    finder.config.expansion_policy.select("dummy")
     return finder
 
 
@@ -50,11 +42,6 @@ def finder_output(shared_datadir):
 
     def wrapper(smiles):
         expected_output = expected_outputs[smiles]
-
-        trees_filename = str(shared_datadir / expected_output["trees"])
-        with open(trees_filename, "r") as fileobj:
-            expected_output["trees"] = json.load(fileobj)
-
         return expected_output
 
     return wrapper
@@ -64,7 +51,7 @@ def finder_output(shared_datadir):
 @pytest.mark.parametrize(
     "smiles",
     [
-        "CN1CCC(C(=O)c2cccc(NC(=O)c3ccc(F)cc3)c2F)CC1",
+        "CCn1nc(CC(C)C)cc1C(=O)NCc1c(C)cc(C)nc1OC",
         "COc1cc2cc(-c3ccc(O)c(O)c3)[n+](C)c(C)c2cc1OC",
     ],
 )
@@ -76,17 +63,13 @@ def test_full_flow(finder_output, setup_finder, smiles):
     finder.tree_search()
     finder.build_routes()
 
-    best_score = finder.routes.scores
-    assert all(
-        abs(actual - expected) < 0.001
-        for actual, expected in zip(best_score, expected_output["best_scores"])
-    )
+    assert len(finder.routes) == len(expected_output["trees"])
 
-    trees = finder.routes.dicts
-    for tree in trees:
-        _remove_meta_data(tree)
-    assert all(tree in expected_output["trees"] for tree in trees)
-    assert all(tree in trees for tree in expected_output["trees"])
+    for actual, expected in zip(finder.routes.scores, expected_output["scores"]):
+        assert actual == expected
+
+    for actual, expected in zip(finder.routes.dicts, expected_output["trees"]):
+        assert actual == expected
 
 
 @pytest.mark.integration
@@ -94,17 +77,11 @@ def test_full_flow(finder_output, setup_finder, smiles):
     "include_scores", [False, True],
 )
 def test_run_from_json(finder_output, setup_finder, include_scores):
-    def _extract_scores(trees):
-        scores = []
-        for tree in trees:
-            scores.append(tree["scores"])
-            del tree["scores"]
-        return scores
 
-    smiles = "CN1CCC(C(=O)c2cccc(NC(=O)c3ccc(F)cc3)c2F)CC1"
+    smiles = "CCn1nc(CC(C)C)cc1C(=O)NCc1c(C)cc(C)nc1OC"
     params = {
         "stocks": ["test_stock"],
-        "policy": "test",
+        "policy": "dummy",
         "C": setup_finder.config.C,
         "max_transforms": setup_finder.config.max_transforms,
         "cutoff_cumulative": setup_finder.config.cutoff_cumulative,
@@ -114,30 +91,21 @@ def test_run_from_json(finder_output, setup_finder, include_scores):
         "time_limit": setup_finder.config.time_limit,
         "iteration_limit": setup_finder.config.iteration_limit,
         "exclude_target_from_stock": True,
+        "filter_cutoff": setup_finder.config.filter_cutoff,
     }
     if include_scores:
         params["score_trees"] = True
-    expected_scores = {
-        "state score": 0.994039853898894,
-        "number of reactions": 2,
-        "average template occurence": 0,
-    }
     expected_output = finder_output(smiles)
 
     result = setup_finder.run_from_json(params)
 
     if include_scores:
         del params["score_trees"]
-        for scores in _extract_scores(result["trees"]):
-            # fmt: off
-            assert scores["state score"] == expected_scores["state score"]
-            assert scores["number of reactions"] == expected_scores["number of reactions"]
-            assert scores["average template occurence"] == expected_scores["average template occurence"]
-            assert scores["number of pre-cursors"] == scores["number of pre-cursors in stock"]
-            # fmt: on
+        for tree, expected in zip(result["trees"], expected_output["all_scores"]):
+            assert tree["scores"] == expected
+            del tree["scores"]
 
-    for tree in result["trees"]:
-        _remove_meta_data(tree)
     assert result["request"] == params
-    assert all(tree in expected_output["trees"] for tree in result["trees"])
-    assert all(tree in result["trees"] for tree in expected_output["trees"])
+
+    for actual, expected in zip(result["trees"], expected_output["trees"]):
+        assert actual == expected

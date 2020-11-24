@@ -6,11 +6,11 @@ import pytest
 import numpy as np
 import yaml
 
-from aizynthfinder.mcts.config import Configuration
-from aizynthfinder.mcts.policy import Policy
-from aizynthfinder.mcts.stock import Stock
+from aizynthfinder.context.config import Configuration
+from aizynthfinder.context.policy import ExpansionPolicy, FilterPolicy
+from aizynthfinder.context.stock import Stock
 from aizynthfinder.mcts.node import Node
-from aizynthfinder.chem import Molecule, TreeMolecule, Reaction
+from aizynthfinder.chem import Molecule, TreeMolecule, RetroReaction
 from aizynthfinder.mcts.mcts import SearchTree
 from aizynthfinder.analysis import TreeAnalysis
 
@@ -64,6 +64,12 @@ def default_config():
 
 
 @pytest.fixture
+def filter_policy(default_config):
+    policy = FilterPolicy(default_config)
+    return policy
+
+
+@pytest.fixture
 def fresh_tree(default_config):
     return SearchTree(config=default_config, root_smiles=None)
 
@@ -72,6 +78,19 @@ def fresh_tree(default_config):
 def generate_root(default_config):
     def wrapper(smiles):
         return Node.create_root(smiles, tree=None, config=default_config)
+
+    return wrapper
+
+
+@pytest.fixture
+def mock_expansion_policy(mocker, simple_actions):
+    mocked_get_action = mocker.patch(
+        "aizynthfinder.context.policy.ExpansionPolicy.get_actions"
+    )
+
+    def wrapper(mol):
+        mocked_get_action.return_value = simple_actions(mol)
+        return mocked_get_action.return_value
 
     return wrapper
 
@@ -86,17 +105,6 @@ def load_reaction_tree(shared_datadir):
             return trees
         else:
             return trees[index]
-
-    return wrapper
-
-
-@pytest.fixture
-def mock_policy(mocker, simple_actions):
-    mocked_get_action = mocker.patch("aizynthfinder.mcts.policy.Policy.get_actions")
-
-    def wrapper(mol):
-        mocked_get_action.return_value = simple_actions(mol)
-        return mocked_get_action.return_value
 
     return wrapper
 
@@ -146,15 +154,15 @@ def mock_stock(tmpdir):
         filename = str(tmpdir / "stock.txt")
         with open(filename, "w") as fileobj:
             fileobj.write("\n".join([mol.inchi_key for mol in molecules]))
-        config.stock.load_stock(filename, "stock")
-        config.stock.select_stocks("stock")
+        config.stock.load(filename, "stock")
+        config.stock.select("stock")
 
     return wrapper
 
 
 @pytest.fixture
-def policy(default_config):
-    policy = Policy(default_config)
+def expansion_policy(default_config):
+    policy = ExpansionPolicy(default_config)
     return policy
 
 
@@ -201,7 +209,7 @@ def setup_complete_tree(fresh_tree, mocker, mock_stock):
         "([C:2]-[CH;D3;+0:1](-[C:3])-[C;H0;D3;+0:4](=[O;H0;D1;+0:6])-[c:5])"
         ">>(Cl-[CH;D3;+0:1](-[C:2])-[C:3]).(N#[C;H0;D2;+0:4]-[c:5]).([OH2;D0;+0:6])"
     )
-    reaction1 = Reaction(state1.mols[0], action1)
+    reaction1 = RetroReaction(state1.mols[0], action1)
     reaction1.apply()
     node1.__getitem__.return_value = {"action": reaction1}
     tree.root = node1
@@ -226,7 +234,7 @@ def setup_complete_tree(fresh_tree, mocker, mock_stock):
         "([O;D1;H0:2]=[C;H0;D3;+0:1](-[c:3])-[NH;D2;+0:4]-[c:5])"
         ">>(Cl-[C;H0;D3;+0:1](=[O;D1;H0:2])-[c:3]).([NH2;D1;+0:4]-[c:5])"
     )
-    reaction2 = Reaction(state2.mols[1], action2)
+    reaction2 = RetroReaction(state2.mols[1], action2)
     reaction2.apply()
     node2.__getitem__.return_value = {"action": reaction2}
 
@@ -292,9 +300,9 @@ def simple_actions():
         }
         action1, action2, action3 = actions[mol.smiles]
         action_list = [
-            Reaction(mol, action1, metadata={"dummy": 1}),
-            Reaction(mol, action2, metadata={"dummy": 2}),
-            Reaction(mol, action3, metadata={"dummy": 3}),
+            RetroReaction(mol, action1, metadata={"dummy": 1}),
+            RetroReaction(mol, action2, metadata={"dummy": 2}),
+            RetroReaction(mol, action3, metadata={"dummy": 3}),
         ]
         prior_list = [0.7, 0.5, 0.3]
         return action_list, prior_list

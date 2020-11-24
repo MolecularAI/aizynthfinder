@@ -7,9 +7,9 @@ def test_root_state_properties(generate_root):
     assert hash(root.state) == hash(root2.state)
 
 
-def test_expand_root_node(generate_root, mock_policy):
+def test_expand_root_node(generate_root, mock_expansion_policy):
     root = generate_root("CCCCOc1ccc(CC(=O)N(C)O)cc1")
-    action_list, prior_list = mock_policy(root.state.mols[0])
+    action_list, prior_list = mock_expansion_policy(root.state.mols[0])
 
     root.expand()
 
@@ -21,9 +21,11 @@ def test_expand_root_node(generate_root, mock_policy):
     assert view["objects"] == [None, None, None]
 
 
-def test_expand_root_with_default_priors(generate_root, set_default_prior, mock_policy):
+def test_expand_root_with_default_priors(
+    generate_root, set_default_prior, mock_expansion_policy
+):
     root = generate_root("CCCCOc1ccc(CC(=O)N(C)O)cc1")
-    action_list, prior_list = mock_policy(root.state.mols[0])
+    action_list, prior_list = mock_expansion_policy(root.state.mols[0])
     set_default_prior(0.01)
 
     root.expand()
@@ -36,9 +38,11 @@ def test_expand_root_with_default_priors(generate_root, set_default_prior, mock_
     assert view["objects"] == [None, None, None]
 
 
-def test_expand_when_solved(generate_root, mock_policy, mock_stock, default_config):
+def test_expand_when_solved(
+    generate_root, mock_expansion_policy, mock_stock, default_config
+):
     root = generate_root("CCCCOc1ccc(CC(=O)N(C)O)cc1")
-    mock_policy(root.state.mols[0])
+    mock_expansion_policy(root.state.mols[0])
     root.expand()
     child = root.promising_child()
     mock_stock(default_config, root.state.mols[0])
@@ -49,9 +53,9 @@ def test_expand_when_solved(generate_root, mock_policy, mock_stock, default_conf
     assert child.is_terminal
 
 
-def test_promising_child_of_root(generate_root, simple_actions, mock_policy):
+def test_promising_child_of_root(generate_root, mock_expansion_policy):
     root = generate_root("CCCCOc1ccc(CC(=O)N(C)O)cc1")
-    action_list, _ = mock_policy(root.state.mols[0])
+    action_list, _ = mock_expansion_policy(root.state.mols[0])
     root.expand()
 
     child = root.promising_child()
@@ -67,7 +71,9 @@ def test_promising_child_of_root(generate_root, simple_actions, mock_policy):
 
 def test_promising_child_of_root_invalid_action(generate_root, simple_actions, mocker):
     root = generate_root("CCCCOc1ccc(CC(=O)N(C)O)cc1")
-    mocked_get_action = mocker.patch("aizynthfinder.mcts.policy.Policy.get_actions")
+    mocked_get_action = mocker.patch(
+        "aizynthfinder.context.policy.ExpansionPolicy.get_actions"
+    )
     action_list, prior_list = simple_actions(root.state.mols[0])
     prior_list[2] = 0.9  # This will select the invalid action
     mocked_get_action.return_value = action_list, prior_list
@@ -81,9 +87,50 @@ def test_promising_child_of_root_invalid_action(generate_root, simple_actions, m
     assert root.children() == [child]
 
 
-def test_backpropagate(generate_root, simple_actions, mock_policy):
+def test_promising_child_with_filter(
+    generate_root, mock_expansion_policy, mock_policy_model, default_config, mocker
+):
     root = generate_root("CCCCOc1ccc(CC(=O)N(C)O)cc1")
-    action_list, _ = mock_policy(root.state.mols[0])
+    action_list, _ = mock_expansion_policy(root.state.mols[0])
+    default_config.filter_policy.load("dummy", "test")
+    default_config.filter_policy.select("test")
+    mocked_is_feasible = mocker.patch(
+        "aizynthfinder.context.policy.FilterPolicy.is_feasible"
+    )
+    mocked_is_feasible.return_value = True, 0.5
+    root.expand()
+
+    child = root.promising_child()
+
+    view = root.children_view()
+    assert view["objects"][0] is child
+    assert child is not None
+    assert root.children() == [child]
+    mocked_is_feasible.assert_called_once()
+
+
+def test_promising_child_with_filter_reject(
+    generate_root, mock_expansion_policy, mock_policy_model, default_config, mocker
+):
+    root = generate_root("CCCCOc1ccc(CC(=O)N(C)O)cc1")
+    action_list, _ = mock_expansion_policy(root.state.mols[0])
+    default_config.filter_policy.load("dummy", "test")
+    default_config.filter_policy.select("test")
+    mocked_is_feasible = mocker.patch(
+        "aizynthfinder.context.policy.FilterPolicy.is_feasible"
+    )
+    mocked_is_feasible.return_value = False, 0.0
+    root.expand()
+
+    child = root.promising_child()
+
+    assert child is None
+    mocked_is_feasible.assert_called()
+
+
+def test_backpropagate(generate_root, simple_actions, mock_expansion_policy):
+    root = generate_root("CCCCOc1ccc(CC(=O)N(C)O)cc1")
+    action_list, _ = mock_expansion_policy(root.state.mols[0])
     root.expand()
     child = root.promising_child()
     view_prior = root.children_view()

@@ -3,7 +3,11 @@
 import argparse
 
 from aizynthfinder.training.utils import Config
-from aizynthfinder.training.keras_models import train_rollout_keras_model
+from aizynthfinder.training.keras_models import (
+    train_expansion_keras_model,
+    train_filter_keras_model,
+    train_recommender_keras_model,
+)
 
 
 def main():
@@ -11,10 +15,20 @@ def main():
     """
     parser = argparse.ArgumentParser("Tool to train a network policy")
     parser.add_argument("config", help="the filename to a configuration file")
+    parser.add_argument(
+        "model",
+        choices=["expansion", "filter", "recommender"],
+        help="the model to train",
+    )
     args = parser.parse_args()
 
     config = Config(args.config)
-    train_rollout_keras_model(config)
+    if args.model == "expansion":
+        train_expansion_keras_model(config)
+    elif args.model == "filter":
+        train_filter_keras_model(config)
+    elif args.model == "recommender":
+        train_recommender_keras_model(config)
 
 
 if __name__ == "__main__":

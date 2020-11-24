@@ -61,7 +61,7 @@ Alternatively the custom query class can be used by the ``aizynthapp`` tool.
   from aizynthfinder import AiZynthApp
   configfile="config_local.yml"
   app = AiZynthApp(configfile, setup=False)
-  app.finder.stock.load_stock(CriteriaStock(), "criteria") # This loads the custom stock class
+  app.finder.stock.load(CriteriaStock(), "criteria") # This loads the custom stock class
   app.setup()
 
 

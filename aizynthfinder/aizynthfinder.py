@@ -6,7 +6,7 @@ from tqdm import tqdm
 
 # This must be imported first to setup logging for rdkit, tensorflow etc
 from aizynthfinder.utils.logging import logger
-from aizynthfinder.mcts.config import Configuration
+from aizynthfinder.context.config import Configuration
 from aizynthfinder.mcts.mcts import SearchTree
 from aizynthfinder.analysis import TreeAnalysis, RouteCollection
 from aizynthfinder.chem import Molecule
@@ -16,8 +16,8 @@ class AiZynthFinder:
     """
     Public API to the aizynthfinder tool
 
-    If intantiated with the path to a yaml file or dictionary of settings 
-    the stocks and policy networks are loaded directly. 
+    If intantiated with the path to a yaml file or dictionary of settings
+    the stocks and policy networks are loaded directly.
     Otherwise, the user is responsible for loading them prior to
     executing the tree search.
 
@@ -52,7 +52,8 @@ class AiZynthFinder:
         else:
             self.config = Configuration()
 
-        self.policy = self.config.policy
+        self.expansion_policy = self.config.expansion_policy
+        self.filter_policy = self.config.filter_policy
         self.stock = self.config.stock
         self.scorers = self.config.scorers
         self.tree = None
@@ -87,6 +88,7 @@ class AiZynthFinder:
 
     @target_mol.setter
     def target_mol(self, mol):
+        self.tree = None
         self._target_mol = mol
 
     def build_routes(self, min_nodes=5, scorer="state score"):
@@ -135,8 +137,12 @@ class AiZynthFinder:
         :return: dictionary with all settings and top scored routes
         :rtype: dict
         """
-        self.stock.select_stocks(params["stocks"])
-        self.policy.select_policies(params.get("policy", params.get("policies", "")))
+        self.stock.select(params["stocks"])
+        self.expansion_policy.select(params.get("policy", params.get("policies", "")))
+        if "filter" in params:
+            self.filter_policy.select(params["filter"])
+        else:
+            self.filter_policy.deselect()
         self.config.C = params["C"]
         self.config.max_transforms = params["max_transforms"]
         self.config.cutoff_cumulative = params["cutoff_cumulative"]
@@ -146,6 +152,7 @@ class AiZynthFinder:
         self.config.time_limit = params["time_limit"]
         self.config.iteration_limit = params["iteration_limit"]
         self.config.exclude_target_from_stock = params["exclude_target_from_stock"]
+        self.config.filter_cutoff = params["filter_cutoff"]
 
         self.prepare_tree()
         self.tree_search()
@@ -213,15 +220,15 @@ class AiZynthFinder:
         """Get the current settings as a dictionary
         """
         # To be backward-compatible
-        if len(self.policy.selected_policies) == 1:
-            policy_value = self.policy.selected_policies[0]
+        if len(self.expansion_policy.selection) == 1:
+            policy_value = self.expansion_policy.selection[0]
             policy_key = "policy"
         else:
-            policy_value = self.policy.selected_policies
+            policy_value = self.expansion_policy.selection
             policy_key = "policies"
 
-        return {
-            "stocks": self.stock.selected_stocks,
+        dict_ = {
+            "stocks": self.stock.selection,
             policy_key: policy_value,
             "C": self.config.C,
             "max_transforms": self.config.max_transforms,
@@ -232,4 +239,8 @@ class AiZynthFinder:
             "time_limit": self.config.time_limit,
             "iteration_limit": self.config.iteration_limit,
             "exclude_target_from_stock": self.config.exclude_target_from_stock,
+            "filter_cutoff": self.config.filter_cutoff,
         }
+        if self.filter_policy.selection:
+            dict_["filter"] = self.filter_policy.selection
+        return dict_

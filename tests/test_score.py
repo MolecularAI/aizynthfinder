@@ -1,7 +1,7 @@
 import pytest
 import numpy as np
 
-from aizynthfinder.scoring import (
+from aizynthfinder.context.scoring import (
     StateScorer,
     NumberOfReactionsScorer,
     AverageTemplateOccurenceScorer,
@@ -149,7 +149,7 @@ def test_add_scorer_to_collection(default_config):
     collection = ScorerCollection(default_config)
     del collection["state score"]
 
-    collection.add(StateScorer())
+    collection.load(StateScorer())
 
     assert "state score" in collection.names()
 
@@ -158,14 +158,14 @@ def test_add_scorer_to_collection_no_scorer(default_config):
     collection = ScorerCollection(default_config)
 
     with pytest.raises(ScorerException):
-        collection.add(Molecule(smiles="CCC"))
+        collection.load(Molecule(smiles="CCC"))
 
 
 def test_load_scorer_to_collection_only_class(default_config):
     collection = ScorerCollection(default_config)
     del collection["state score"]
 
-    collection.load(**{"StateScorer": {}})
+    collection.load_from_config(**{"StateScorer": {}})
 
     assert "state score" in collection.names()
 
@@ -174,7 +174,7 @@ def test_load_scorer_to_collection_full_package(default_config):
     collection = ScorerCollection(default_config)
     del collection["state score"]
 
-    collection.load(**{"aizynthfinder.scoring.StateScorer": {}})
+    collection.load_from_config(**{"aizynthfinder.context.scoring.StateScorer": {}})
 
     assert "state score" in collection.names()
 
@@ -183,7 +183,7 @@ def test_load_scorer_to_collection_failures(default_config):
     collection = ScorerCollection(default_config)
 
     with pytest.raises(ScorerException, match=".*load module.*"):
-        collection.load(**{"mypackage.scoring.StateScorer": {}})
+        collection.load_from_config(**{"mypackage.scoring.StateScorer": {}})
 
     with pytest.raises(ScorerException, match=".*class.*"):
-        collection.load(**{"aizynthfinder.scoring.NoScorer": {}})
+        collection.load_from_config(**{"aizynthfinder.context.scoring.NoScorer": {}})

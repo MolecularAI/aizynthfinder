@@ -1,12 +1,13 @@
 """ Module containing classes that interfaces different stocks and query classes
 """
 import os
+import importlib
 
 import pandas as pd
 from pymongo import MongoClient
 
 from aizynthfinder.chem import Molecule
-from aizynthfinder.utils.logging import logger
+from aizynthfinder.context.collection import ContextCollection
 
 
 class StockException(Exception):
@@ -109,7 +110,7 @@ class MongoDbInchiKeyQuery:
         return ",".join(sources)
 
 
-class Stock:
+class Stock(ContextCollection):
     """
     A collection of molecules that are in stock
 
@@ -134,61 +135,23 @@ class Stock:
 
     """
 
+    _collection_name = "stock"
+
     def __init__(self):
-        self._stocks = {}
+        super().__init__()
         self._exclude = set()
-        self._selected_stocks = []
-        self._logger = logger()
 
     def __contains__(self, mol):
         if mol.inchi_key in self._exclude:
             return False
 
-        for key in self._selected_stocks:
+        for key in self.selection:
             if mol in self[key]:
                 return True
         return False
 
-    def __getitem__(self, key):
-        return self._stocks[key]
-
     def __len__(self):
-        return sum(len(self[key]) for key in self._selected_stocks)
-
-    @property
-    def selected_stocks(self):
-        """
-        Returns the selected sub stocks.
-        If set it will update the selection of stocks.
-
-        :return: the selected sub stocks
-        :rtype: list of str
-        """
-        return self._selected_stocks
-
-    @selected_stocks.setter
-    def selected_stocks(self, keys):
-        self.select_stocks(keys)
-
-    def add_stock(self, key):
-        """
-        Add a single key to the list of selected stocks
-
-        :param key: the key of the stock
-        :type key: str
-        """
-        if key not in self._stocks:
-            raise StockException(f"The {key} stock is not loaded")
-        self._selected_stocks.append(key)
-
-    def available_stocks(self):
-        """
-        Return a list of available stock keys
-
-        :return: the list
-        :rtype: list of str
-        """
-        return list(self._stocks.keys())
+        return sum(len(self[key]) for key in self.selection)
 
     def availability_string(self, mol):
         """
@@ -203,7 +166,7 @@ class Stock:
         :rtype: str
         """
         availability = []
-        for key in self._selected_stocks:
+        for key in self.selection:
             if mol not in self[key]:
                 continue
             if hasattr(self[key], "availability_string"):
@@ -225,7 +188,7 @@ class Stock:
         """
         self._exclude.add(mol.inchi_key)
 
-    def load_stock(self, source, key):
+    def load(self, source, key):
         """
         Load a stock.
 
@@ -247,44 +210,63 @@ class Stock:
 
         if isinstance(source, str):
             source = InMemoryInchiKeyQuery(source)
-        self._stocks[key] = source
+        self._items[key] = source
 
-    def remove_stock(self, key):
+    def load_from_config(self, **config):
         """
-        Remove a single key from the list of selected stocks
+        Load stocks from a configuration
 
-        :param key: The key of the stock
-        :type key: str
+        The key can be "files" in case stocks are loaded from a file
+        The key can be "mongodb" in case a ``MongoDbInchiKeyQuery`` object is instantiated
+        The key can point to a custom stock class, e.g. ``mypackage.mymodule.MyStock`` in case this stock object is instantiated
+
+        :param config: the configuration
+        :type config: key value pairs
         """
-        if key not in self._selected_stocks:
-            raise StockException(
-                f"Could not find key {key} in selected stocks: {self.available_stocks}"
-            )
-        self._selected_stocks.remove(key)
+        for key, stockfile in config.get("files", {}).items():
+            self.load(stockfile, key)
+
+        if "mongodb" in config:
+            query_obj = MongoDbInchiKeyQuery(**(config["mongodb"] or {}))
+            self.load(query_obj, "mongodb_stock")
+
+        # Load stocks specifying a module and class, e.g. package.module.MyQueryClass
+        for name, stock_config in config.items():
+            if name in ["files", "mongodb"] or name.find(".") == -1:
+                continue
+
+            module_name, class_name = name.rsplit(".", maxsplit=1)
+            try:
+                module = importlib.import_module(module_name)
+            except ImportError:
+                self._logger.warning(
+                    f"Unable to load module '{module_name}' containing stock query classes"
+                )
+                continue
+
+            if hasattr(module, class_name):
+                query_obj = getattr(module, class_name)(**(stock_config or {}))
+                self.load(query_obj, class_name)
+            else:
+                self._logger.warning(
+                    f"Unable to find query class '{class_name}' in '{module_name}''"
+                )
 
     def reset_exclusion_list(self):
         """Remove all molecules in the exclusion list
         """
         self._exclude = set()
 
-    def select_stocks(self, keys):
+    def select(self, value, append=False):
         """
-        Select what stocks to include by providing a list of keys, or a single key
+        Select one or more stock queries
 
-        :param keys: keys to select
-        :type keys: list of str or str
+        :param value: the key of the stocks to select
+        :type value: str or list
+        :param append: if True and ``value`` is a single key append it to the current selection
+        :type append: bool, optional
         """
-        if isinstance(keys, str):
-            keys = [keys]
-
-        for key in keys:
-            if key not in self._stocks:
-                raise StockException(
-                    f"Invalid key specified {key} when selecting stocks"
-                )
-
-        self._selected_stocks = list(keys)
-        self._logger.info(f"Selected stocks: {', '.join(keys)}")
+        super().select(value, append)
         try:
             self._logger.info(f"Compounds in stock: {len(self)}")
         except (TypeError, ValueError):  # In case len is not possible to compute

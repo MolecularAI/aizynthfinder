@@ -1,4 +1,4 @@
-""" Module routines for pre-processing data for rollout policy training
+""" Module routines for pre-processing data for expansion policy training
 """
 import argparse
 import os
@@ -12,6 +12,7 @@ from aizynthfinder.training.utils import (
     Config,
     split_and_save_data,
     smiles_to_fingerprint,
+    is_sanitizable,
 )
 
 
@@ -27,6 +28,12 @@ def _filter_dataset(config):
     full_data = pd.read_csv(
         filename, index_col=False, header=None, names=config["library_headers"][:-1],
     )
+
+    if config["remove_unsanitizable_products"]:
+        products = full_data["products"].to_numpy()
+        idx = np.apply_along_axis(is_sanitizable, 0, [products])
+        full_data = full_data[idx]
+
     full_data = full_data.drop_duplicates(subset="reaction_hash")
     template_group = full_data.groupby("template_hash")
     template_group = template_group.size().sort_values(ascending=False)
@@ -45,7 +52,7 @@ def _filter_dataset(config):
 
 def _get_config():
     parser = argparse.ArgumentParser(
-        "Tool to pre-process a template library to be used in training a rollout network policy"
+        "Tool to pre-process a template library to be used in training a expansion network policy"
     )
     parser.add_argument("config", help="the filename to a configuration file")
     args = parser.parse_args()
@@ -56,6 +63,7 @@ def _get_config():
 def _save_unique_templates(dataset, config):
     template_group = dataset.groupby("template_hash", sort=False).size()
     dataset = dataset[["retro_template", "template_code"] + config["metadata_headers"]]
+    dataset["classification"].fillna("-", inplace=True)
     dataset = dataset.drop_duplicates(subset="template_code", keep="first")
     dataset["library_occurence"] = template_group.values
     dataset.set_index("template_code", inplace=True)
@@ -64,7 +72,7 @@ def _save_unique_templates(dataset, config):
 
 
 def main():
-    """ Entry-point for the preprocess_rollout tool
+    """ Entry-point for the preprocess_expansion tool
     """
     config = _get_config()
 

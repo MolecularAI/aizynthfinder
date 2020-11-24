@@ -27,13 +27,15 @@ First, a leaf is selected using the ``select_leaf()`` method of the ``SearchTree
 
 1.	Set the current node to the root
 2.	Loop while the current is expanded, and the state of the current node is not solved
-    a. Select the most promising child of the current node by calling the ``promising_child()`` method of the ``Node`` class.
-    b. If there is such a child set current node to the child
+
+  a. Select the most promising child of the current node by calling the ``promising_child()`` method of the ``Node`` class.
+  b. If there is such a child set current node to the child
+
 3.	Return current node
 
 The loop condition in 2. will use the ``is_expanded`` flag of the current node and the ``is_solved`` flag of the state of the current node (see below). 2.a. might not return any child if all the children of the current node were rejected by the tree search (the templates were not applicable). 
 
-Second, the selected leaf node is expanded. This is called the `Expansion` phase in the literature and is used to add new children to a node. The ``expand()`` method of the ``Node`` class takes care of this, but it actually does not instantiate any children nodes. What it does is to use the rollout policy to extract ``Reaction`` objects and the probability of each such action. The probability for each action will also be the initial value of each child node. The ``expand()`` method will also set the visitation count for each child to 1. If the ``is_expanded`` flag of the ``Node`` is set or if the ``is_expandable`` flag is not set (see below), the ``expand()`` method will not do anything. 
+Second, the selected leaf node is expanded. This is called the `Expansion` phase in the literature and is used to add new children to a node. The ``expand()`` method of the ``Node`` class takes care of this, but it actually does not instantiate any children nodes. What it does is to use the expansion policy to extract ``RetroReaction`` objects and the probability of each such action. The probability for each action will also be the initial value of each child node. The ``expand()`` method will also set the visitation count for each child to 1. If the ``is_expanded`` flag of the ``Node`` is set or if the ``is_expandable`` flag is not set (see below), the ``expand()`` method will not do anything. 
 
 Third, we enter the inner loop of the tree search or the `Rollout` phase, which has the purpose of expanding the tree until we reach a terminal state., i.e. until the ``is_terminal`` flag of the current leaf node is set. The inner loop will execute the following steps:
 
@@ -44,7 +46,7 @@ If 1. does return any child, the ``is_terminal`` flag of the leaf node will have
 
 Fourth, and finally the algorithm enters the `Backpropagation` phase, which is used to update the value of each node, from the current leaf node all the way to the root. This is done by calling the ``backpropagate()`` method of the ``TreeSearch`` class, which in turn will call the ``backpropagate()`` method of each node on the path between the current leaf and the root.
 
-A few things are worth mentioning about the ``promising_child()`` method of the ``Node`` class. If will select the most promising child by sorting them on the upper confidence bound (UCB) score. The child with the highest score will be selected for instantiation, which means that the ``Reaction`` associated with the child will be applied to create new precursors. These precursors will form the state of the new ``Node`` object that is the child. If the application of the reaction failed to produce any precursors, the child value will be set to a large negative value that prevents it from being selected again. Furthermore, ``promising_child()`` will be called recursively until a child can be instantiated (the reaction can be applied). If none of the children can be instantiated the ``is_expanded`` and ``expandable`` flags are updated, and the method returns no child (``None``).
+A few things are worth mentioning about the ``promising_child()`` method of the ``Node`` class. If will select the most promising child by sorting them on the upper confidence bound (UCB) score. The child with the highest score will be selected for instantiation, which means that the ``RetroReaction`` associated with the child will be applied to create new precursors. These precursors will form the state of the new ``Node`` object that is the child. If the application of the reaction failed to produce any precursors, the child value will be set to a large negative value that prevents it from being selected again. The child value will be set to a large negative value also if a filter policy is used in the search and the filter rejects the reaction. Furthermore, ``promising_child()`` will be called recursively until a child can be instantiated (the reaction can be applied). If none of the children can be instantiated the ``is_expanded`` and ``expandable`` flags are updated, and the method returns no child (``None``).
 
 This list explains the different flags of the Node and State objects that are used at various points in the tree search algorithm
 

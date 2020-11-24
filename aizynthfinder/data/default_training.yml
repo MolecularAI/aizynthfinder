@@ -12,6 +12,9 @@ file_postfix:
   training_inputs: _training_inputs.npz
   validation_inputs: _validation_inputs.npz
   testing_inputs: _testing_inputs.npz
+  training_inputs2: _training_inputs2.npz
+  validation_inputs2: _validation_inputs2.npz
+  testing_inputs2: _testing_inputs2.npz
   training_library: _training.csv
   validation_library: _validation.csv
   testing_library: _testing.csv
@@ -25,3 +28,11 @@ epochs: 100
 fingerprint_radius: 2
 fingerprint_len: 2048
 template_occurance: 3
+remove_unsanitizable_products: False
+negative_data:
+  random_trials: 1000
+  recommender_model: ""
+  recommender_topn: 20
+model:
+  drop_out: 0.4
+  hidden_nodes: 512

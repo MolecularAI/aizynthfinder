@@ -8,7 +8,8 @@ Currently, there are a few scoring functions available
 
     * State score - a function of the number of precursors in stock and the length of the route
     * Number of reactions - the number of steps in the route
-    * Average template occurence - the average occurence of the templates used in the route
+    * Number of pre-cursors - the number of pre-cursors in the route
+    * Number of pre-cursors in stock - the number of the pre-cursors that are purchaseable
 
 
 The *State score* is the score that is guiding the tree search in the :doc:`update phase <sequences>`, and 
@@ -23,14 +24,14 @@ Add new scoring functions
 -------------------------
 
 
-Additional scoring functions can be implemented by inheriting from the class ``Scorer`` in the ``aizynthfinder.scoring`` module.
+Additional scoring functions can be implemented by inheriting from the class ``Scorer`` in the ``aizynthfinder.context.scoring`` module.
 The scoring class needs to implement the ``_score_node``, ``_score_reaction_tree`` and the ``__repr__`` methods.
 
 This is an example of that.
 
 .. code-block:: python
 
-    from aizynthfinder.scoring import Scorer
+    from aizynthfinder.context.scoring import Scorer
 
     class DeltaNumberOfTransformsScorer(Scorer):
 
@@ -54,6 +55,6 @@ For instance to use this in the Jupyter notebook GUI, one can do
     from aizynthfinder.interfaces import AiZynthApp
     app = AiZynthApp("config_local.yml", setup=False)
     scorer = DeltaNumberOfTransformsScorer(app.finder.config)
-    app.finder.scorers.add(scorer)
+    app.finder.scorers.load(scorer)
     app.setup()
 

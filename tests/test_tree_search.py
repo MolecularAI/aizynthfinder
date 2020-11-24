@@ -6,6 +6,18 @@ from aizynthfinder.mcts.state import State
 from aizynthfinder.mcts.node import Node
 
 
+def test_reset_tree():
+    finder = AiZynthFinder()
+    finder.target_smiles = "CCCO"
+    finder.prepare_tree()
+
+    assert finder.tree is not None
+
+    finder.target_smiles = "CCO"
+
+    assert finder.tree is None
+
+
 @pytest.fixture
 def mocked_reaction(mocker):
     """
@@ -20,8 +32,12 @@ def mocked_reaction(mocker):
             def mol(self):
                 return parent
 
-            def apply(self, *_):
+            @property
+            def reactants(self):
                 return [return_value] if return_value else []
+
+            def apply(self, *_):
+                return self.reactants
 
         return MockedReaction()
 
@@ -49,7 +65,9 @@ def mock_get_actions(mocker, mocked_reaction):
         key = tuple(mol.smiles for mol in mols)
         return actions[key]
 
-    mocked_get_actions = mocker.patch("aizynthfinder.mcts.policy.Policy.get_actions")
+    mocked_get_actions = mocker.patch(
+        "aizynthfinder.context.policy.ExpansionPolicy.get_actions"
+    )
     mocked_get_actions.side_effect = get_action
 
     def wrapper(parent, key_smiles, child_smiles_list, probs):
@@ -548,3 +566,73 @@ def test_two_expansions_no_reactants_second_child(
     assert nodes[2].state.mols == [child1_mol[0], child1_mol[2]] + grandchild1_mol
     assert nodes[3].state.mols == child2_mol
     assert finder.search_stats["iterations"] == 10
+
+
+def test_two_expansions_cyclic(mock_get_actions, mock_create_root, mock_stock):
+    """
+    Test the building of this tree:
+                root
+                  |
+                child 1
+                  |
+                child 2
+    But making child 2 should be rejected because child 2 == root
+    """
+    finder = AiZynthFinder()
+    root_smi = "COc1cc2cc(-c3ccc(OC(C)=O)c(OC(C)=O)c3)[n+](C)c(C)c2cc1OC"
+    root_mol = mock_create_root(root_smi, finder.config)
+    child1_smi = ["COc1cc2cc(-c3ccc(O)c(OC(C)=O)c3)[n+](C)c(C)c2cc1OC"]
+    child2_smi = ["COc1cc2cc(-c3ccc(OC(C)=O)c(OC(C)=O)c3)[n+](C)c(C)c2cc1OC"]
+    child1_mol, *_ = mock_get_actions(root_mol, tuple([root_smi]), [child1_smi], [0.3])
+    child2_mol, *_ = mock_get_actions(
+        child1_mol[0], tuple(child1_smi), [child2_smi], [0.3],
+    )
+    mock_stock(finder.config)
+    finder.target_mol = root_mol
+    finder.config.iteration_limit = 1
+
+    finder.tree_search()
+
+    nodes = list(finder.tree.graph())
+    assert len(nodes) == 2
+    assert nodes[0].state.mols == [root_mol]
+    assert nodes[1].state.mols == child1_mol
+    assert finder.search_stats["iterations"] == 1
+
+
+def test_two_expansions_prune_cyclic(mock_get_actions, mock_create_root, mock_stock):
+    """
+    Test the building of this tree:
+                root
+                  |
+                child 1
+                  |
+                child 2
+    Child 2 will not be rejected, but the tree search will not end, so catch an exception and
+    assert on what we got.
+    """
+    finder = AiZynthFinder()
+    root_smi = "COc1cc2cc(-c3ccc(OC(C)=O)c(OC(C)=O)c3)[n+](C)c(C)c2cc1OC"
+    root_mol = mock_create_root(root_smi, finder.config)
+    child1_smi = ["COc1cc2cc(-c3ccc(O)c(OC(C)=O)c3)[n+](C)c(C)c2cc1OC"]
+    child2_smi = ["COc1cc2cc(-c3ccc(OC(C)=O)c(OC(C)=O)c3)[n+](C)c(C)c2cc1OC"]
+    child1_mol, *_ = mock_get_actions(root_mol, tuple([root_smi]), [child1_smi], [0.3])
+    child2_mol, *_ = mock_get_actions(
+        child1_mol[0], tuple(child1_smi), [child2_smi], [0.3],
+    )
+    mock_stock(finder.config)
+    finder.target_mol = root_mol
+    finder.config.iteration_limit = 1
+    finder.config.prune_cycles_in_search = False
+
+    try:
+        finder.tree_search()
+    except KeyError:
+        pass
+
+    nodes = list(finder.tree.graph())
+    assert len(nodes) == 4
+    assert nodes[0].state.mols == [root_mol]
+    assert nodes[1].state.mols == child1_mol
+    assert nodes[2].state.mols == child2_mol
+    assert finder.search_stats["iterations"] == 1

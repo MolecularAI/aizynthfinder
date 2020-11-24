@@ -3,15 +3,20 @@ import glob
 
 import pandas as pd
 import yaml
+import pytest
 
 from aizynthfinder.interfaces import AiZynthApp
 from aizynthfinder.interfaces.aizynthapp import main as app_main
 from aizynthfinder.interfaces.aizynthcli import main as cli_main
 from aizynthfinder.tools.make_stock import main as make_stock_main
 from aizynthfinder.tools.cat_output import main as cat_main
-from aizynthfinder.training.preprocess_rollout import main as rollout_main
+from aizynthfinder.training.preprocess_expansion import main as expansion_main
+from aizynthfinder.training.preprocess_recommender import main as recommender_main
+from aizynthfinder.training.preprocess_filter import main as filter_main
+from aizynthfinder.training.make_false_products import main as make_false_main
 from aizynthfinder.tools.download_public_data import main as download_main
 from aizynthfinder.training.utils import Config
+from aizynthfinder.chem import MoleculeException
 
 
 def test_create_gui_app(mocker):
@@ -99,8 +104,8 @@ def test_make_stock_from_plain_file(shared_datadir, tmpdir, add_cli_arguments, s
 
     make_stock_main()
 
-    stock.load_stock(filename, "stock1")
-    stock.select_stocks(["stock1"])
+    stock.load(filename, "stock1")
+    stock.select(["stock1"])
     assert len(stock) == 3
 
 
@@ -115,7 +120,7 @@ def test_cat_main(shared_datadir, tmpdir, add_cli_arguments):
     assert len(data) == 4
 
 
-def test_preprocess_rollout(write_yaml, shared_datadir, add_cli_arguments):
+def test_preprocess_expansion(write_yaml, shared_datadir, add_cli_arguments):
     config_path = write_yaml(
         {
             "file_prefix": str(shared_datadir / "dummy"),
@@ -124,7 +129,7 @@ def test_preprocess_rollout(write_yaml, shared_datadir, add_cli_arguments):
     )
     add_cli_arguments(config_path)
 
-    rollout_main()
+    expansion_main()
 
     with open(shared_datadir / "dummy_template_library.csv", "r") as fileobj:
         lines = fileobj.read().splitlines()
@@ -151,6 +156,147 @@ def test_preprocess_rollout(write_yaml, shared_datadir, add_cli_arguments):
         assert column in data.columns
 
 
+def test_preprocess_expansion_bad_product(
+    write_yaml, shared_datadir, add_cli_arguments
+):
+    config_path = write_yaml(
+        {
+            "file_prefix": str(shared_datadir / "dummy_sani"),
+            "split_size": {"training": 0.6, "testing": 0.2, "validation": 0.2},
+        }
+    )
+    add_cli_arguments(config_path)
+    with pytest.raises(MoleculeException):
+        expansion_main()
+
+
+def test_preprocess_expansion_skip_bad_product(
+    write_yaml, shared_datadir, add_cli_arguments
+):
+    config_path = write_yaml(
+        {
+            "file_prefix": str(shared_datadir / "dummy_sani"),
+            "split_size": {"training": 0.6, "testing": 0.2, "validation": 0.2},
+            "remove_unsanitizable_products": True,
+        }
+    )
+    add_cli_arguments(config_path)
+
+    expansion_main()
+
+    with open(shared_datadir / "dummy_sani_template_library.csv", "r") as fileobj:
+        lines = fileobj.read().splitlines()
+    assert len(lines) == 10
+
+
+def test_preprocess_recommender(write_yaml, shared_datadir, add_cli_arguments):
+    config_path = write_yaml(
+        {
+            "file_prefix": str(shared_datadir / "dummy"),
+            "split_size": {"training": 0.6, "testing": 0.2, "validation": 0.2},
+        }
+    )
+    add_cli_arguments(config_path)
+
+    expansion_main()
+
+    with open(shared_datadir / "dummy_template_library.csv", "r") as fileobj:
+        lines = fileobj.read().splitlines()
+    assert len(lines) == 10
+
+    os.remove(shared_datadir / "dummy_training.csv")
+    os.remove(shared_datadir / "dummy_testing.csv")
+    os.remove(shared_datadir / "dummy_validation.csv")
+    os.remove(shared_datadir / "dummy_unique_templates.hdf5")
+
+    recommender_main()
+
+    with open(shared_datadir / "dummy_training.csv", "r") as fileobj:
+        lines = fileobj.read().splitlines()
+    assert len(lines) == 6
+
+    with open(shared_datadir / "dummy_testing.csv", "r") as fileobj:
+        lines = fileobj.read().splitlines()
+    assert len(lines) == 2
+
+    with open(shared_datadir / "dummy_validation.csv", "r") as fileobj:
+        lines = fileobj.read().splitlines()
+    assert len(lines) == 2
+
+    data = pd.read_hdf(shared_datadir / "dummy_unique_templates.hdf5", "table")
+    assert len(data) == 2
+
+
+def test_preprocess_filter(write_yaml, shared_datadir, add_cli_arguments):
+    def duplicate_file(filename):
+        with open(shared_datadir / filename, "r") as fileobj:
+            lines = fileobj.read().splitlines()
+        lines = lines + lines
+        with open(shared_datadir / filename, "w") as fileobj:
+            fileobj.write("\n".join(lines))
+
+    config_path = write_yaml(
+        {
+            "file_prefix": str(shared_datadir / "make_false"),
+            "split_size": {"training": 0.6, "testing": 0.2, "validation": 0.2},
+            "library_headers": [
+                "index",
+                "reaction_hash",
+                "reactants",
+                "products",
+                "retro_template",
+                "template_hash",
+                "template_code",
+            ],
+        }
+    )
+
+    add_cli_arguments(f"{config_path} strict")
+    make_false_main()
+
+    duplicate_file("make_false_template_library_false.csv")
+    duplicate_file("make_false_template_library.csv")
+
+    add_cli_arguments(config_path)
+    filter_main()
+
+    with open(shared_datadir / "make_false_training.csv", "r") as fileobj:
+        lines = fileobj.read().splitlines()
+    assert len(lines) == 6
+
+    with open(shared_datadir / "make_false_testing.csv", "r") as fileobj:
+        lines = fileobj.read().splitlines()
+    assert len(lines) == 2
+
+    with open(shared_datadir / "make_false_validation.csv", "r") as fileobj:
+        lines = fileobj.read().splitlines()
+    assert len(lines) == 2
+
+
+def test_make_false_products(write_yaml, shared_datadir, add_cli_arguments):
+    config_path = write_yaml(
+        {
+            "file_prefix": str(shared_datadir / "make_false"),
+            "library_headers": [
+                "index",
+                "reaction_hash",
+                "reactants",
+                "products",
+                "retro_template",
+                "template_hash",
+                "template_code",
+            ],
+        }
+    )
+    add_cli_arguments(f"{config_path} strict")
+
+    make_false_main()
+
+    with open(shared_datadir / "make_false_template_library_false.csv", "r") as fileobj:
+        lines = fileobj.read().splitlines()
+    assert len(lines) == 2
+
+
 def test_download_public_data(tmpdir, mocker, add_cli_arguments):
     request_mock = mocker.patch("aizynthfinder.tools.download_public_data.requests.get")
     response_mock = request_mock.return_value
@@ -161,7 +307,7 @@ def test_download_public_data(tmpdir, mocker, add_cli_arguments):
     download_main()
 
     filenames = glob.glob(str(tmpdir / "*.hdf5"))
-    assert len(filenames) == 3
+    assert len(filenames) == 4
     for filename in filenames:
         with open(filename, "r") as fileobj:
             assert fileobj.read() == "abcdef"

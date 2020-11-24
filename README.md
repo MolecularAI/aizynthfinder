@@ -10,7 +10,7 @@ Before you begin, ensure you have met the following requirements:
 
 The tool has been developed on a Linux platform, but the software has been tested on Windows 10 and macOS Catalina.
 
-* You have installed anaconda or miniconda with python 3.6 or 3.7
+* You have installed anaconda or miniconda with python 3.6, 3.7 or 3.8
 
 
 ## Installation
@@ -30,7 +30,7 @@ if you have GPU and CUDA libraries enabled on your machine, you can install the 
 * Secondly, install the ``aizynthfinder`` package
 
 ```
-python -m pip install https://github.com/MolecularAI/aizynthfinder/archive/v1.0.0.tar.gz
+python -m pip install https://github.com/MolecularAI/aizynthfinder/archive/v2.0.0.tar.gz
 ```
 
 if you want to install the latest version
@@ -61,8 +61,9 @@ To use the tool you need
 
     1. A stock file
     2. A trained rollout policy network (including the Keras model and the list of unique templates)
+    3. A trained filer policy network (optional)
 
-Such files can be downloaded from [figshare](https://figshare.com/articles/AiZynthFinder_a_fast_robust_and_flexible_open-source_software_for_retrosynthetic_planning/12334577) or they can be downloaded automatically using
+Such files can be downloaded from [figshare](https://figshare.com/articles/AiZynthFinder_a_fast_robust_and_flexible_open-source_software_for_retrosynthetic_planning/12334577) and [here](https://figshare.com/articles/dataset/A_quick_policy_to_filter_reactions_based_on_feasibility_in_AI-guided_retrosynthetic_planning/13280507) or they can be downloaded automatically using
 
 ```
 download_public_data my_folder
@@ -111,7 +112,7 @@ Please use ``black`` package for formatting, and follow ``pep8`` style guide.
 * [@EBjerrum](https://www.github.com/EBjerrum)
 * [@A-Thakkar](https://www.github.com/A-Thakkar)
 
-The contributors have limited time for support questions, but pleae do not hesitate to submit an issue (see above).
+The contributors have limited time for support questions, but please do not hesitate to submit an issue (see above).
 
 ## License
 
@@ -120,4 +121,4 @@ The software is licensed under the MIT license (see LICENSE file), and is free a
 ## References
 
 1. Thakkar A, Kogej T, Reymond J-L, et al (2019) Datasets and their influence on the development of computer assisted synthesis planning tools in the pharmaceutical domain. Chem Sci. https://doi.org/10.1039/C9SC04944D
-2. Genheden S, Thakkar A, Chadimova V, et al (2020) AiZynthFinder: a fast, robust and flexible open-source software for retrosynthetic planning. ChemRxiv. Preprint. https://doi.org/10.26434/chemrxiv.12465371.v1
+2. Genheden S, Thakkar A, Chadimova V, et al (2020) AiZynthFinder: a fast, robust and flexible open-source software for retrosynthetic planning. J. Cheminf. https://jcheminf.biomedcentral.com/articles/10.1186/s13321-020-00472-1

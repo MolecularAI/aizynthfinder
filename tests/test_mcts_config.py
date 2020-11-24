@@ -1,4 +1,4 @@
-from aizynthfinder.mcts.config import Configuration
+from aizynthfinder.context.config import Configuration
 from aizynthfinder.aizynthfinder import AiZynthFinder
 
 
@@ -16,7 +16,7 @@ def test_load_empty_file(default_config, write_yaml):
     assert config == default_config
 
 
-def test_update_properties(write_yaml):
+def test_load_from_file(write_yaml):
     filename = write_yaml(
         {
             "properties": {"cutoff_number": 300},
@@ -32,13 +32,27 @@ def test_update_properties(write_yaml):
     assert config.time_limit == 300
 
 
+def test_update_properties(default_config):
+    config = default_config
+
+    assert config.C != 2.0
+    assert config.time_limit != 300
+    assert config.max_transforms == 6
+
+    config.update(C=2.0, time_limit=300, max_transforms=None)
+
+    assert config.C == 2.0
+    assert config.time_limit == 300
+    assert config.max_transforms == 6
+
+
 def test_load_stock(write_yaml, shared_datadir):
     stock_filename = str(shared_datadir / "stock1.h5")
     filename = write_yaml({"stock": {"files": {"test": stock_filename}}})
 
     config = Configuration.from_file(filename)
 
-    assert config.stock.available_stocks() == ["test"]
+    assert config.stock.items == ["test"]
 
 
 def test_load_policy(write_yaml, shared_datadir, mock_policy_model):
@@ -49,21 +63,32 @@ def test_load_policy(write_yaml, shared_datadir, mock_policy_model):
 
     config = Configuration.from_file(filename)
 
-    assert config.policy.available_policies() == ("test",)
+    assert config.expansion_policy.items == ["test"]
+
+
+def test_load_filter_policy(write_yaml, shared_datadir, mock_policy_model):
+    templates_filename = str(shared_datadir / "templates.hdf5")
+    filename = write_yaml(
+        {"filter": {"files": {"test": ["dummy", templates_filename]}}}
+    )
+
+    config = Configuration.from_file(filename)
+
+    assert config.filter_policy.items == ["test"]
 
 
 def test_load_default_mongodb(write_yaml, mocker):
-    mocked_client = mocker.patch("aizynthfinder.mcts.stock.MongoClient")
+    mocked_client = mocker.patch("aizynthfinder.context.stock.MongoClient")
     filename = write_yaml({"stock": {"mongodb": {}}})
 
     config = Configuration.from_file(filename)
 
     mocked_client.assert_called_with(None)
-    assert config.stock.available_stocks() == ["mongodb_stock"]
+    assert config.stock.items == ["mongodb_stock"]
 
 
 def test_load_specific_mongodb(write_yaml, mocker):
-    mocked_client = mocker.patch("aizynthfinder.mcts.stock.MongoClient")
+    mocked_client = mocker.patch("aizynthfinder.context.stock.MongoClient")
     filename = write_yaml(
         {
             "stock": {
@@ -79,7 +104,7 @@ def test_load_specific_mongodb(write_yaml, mocker):
     config = Configuration.from_file(filename)
 
     mocked_client.assert_called_with("myhost")
-    assert config.stock.available_stocks() == ["mongodb_stock"]
+    assert config.stock.items == ["mongodb_stock"]
     config.stock["mongodb_stock"].client.__getitem__.assert_called_with("mydatabase")
     config.stock["mongodb_stock"].database.__getitem__.assert_called_with(
         "mycollection"
@@ -91,7 +116,7 @@ def test_load_external_stock(write_yaml, shared_datadir):
     filename = write_yaml(
         {
             "stock": {
-                "aizynthfinder.mcts.stock.InMemoryInchiKeyQuery": {
+                "aizynthfinder.context.stock.InMemoryInchiKeyQuery": {
                     "filename": stock_filename
                 }
             }
@@ -100,7 +125,7 @@ def test_load_external_stock(write_yaml, shared_datadir):
 
     config = Configuration.from_file(filename)
 
-    assert config.stock.available_stocks() == ["InMemoryInchiKeyQuery"]
+    assert config.stock.items == ["InMemoryInchiKeyQuery"]
 
 
 def test_load_external_stock_incorrect_module(write_yaml, shared_datadir):
@@ -108,22 +133,7 @@ def test_load_external_stock_incorrect_module(write_yaml, shared_datadir):
     filename = write_yaml(
         {
             "stock": {
-                "aizynthfinder.mcts.InMemoryInchiKeyQuery": {"filename": stock_filename}
-            }
-        }
-    )
-
-    config = Configuration.from_file(filename)
-
-    assert config.stock.available_stocks() == []
-
-
-def test_load_external_stock_incorrect_class(write_yaml, shared_datadir):
-    stock_filename = str(shared_datadir / "stock1.h5")
-    filename = write_yaml(
-        {
-            "stock": {
-                "aizynthfinder.mcts.stock.InnMemoryInchiKeyQuery": {
+                "aizynthfinder.context.stocks.InMemoryInchiKeyQuery": {
                     "filename": stock_filename
                 }
             }
@@ -132,7 +142,24 @@ def test_load_external_stock_incorrect_class(write_yaml, shared_datadir):
 
     config = Configuration.from_file(filename)
 
-    assert config.stock.available_stocks() == []
+    assert config.stock.items == []
+
+
+def test_load_external_stock_incorrect_class(write_yaml, shared_datadir):
+    stock_filename = str(shared_datadir / "stock1.h5")
+    filename = write_yaml(
+        {
+            "stock": {
+                "aizynthfinder.context.stock.InnMemoryInchiKeyQuery": {
+                    "filename": stock_filename
+                }
+            }
+        }
+    )
+
+    config = Configuration.from_file(filename)
+
+    assert config.stock.items == []
 
 
 def test_init_search_yaml(write_yaml):

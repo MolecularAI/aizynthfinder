@@ -6,7 +6,7 @@ import importlib
 import pandas as pd
 
 from aizynthfinder.chem import Molecule, MoleculeException
-from aizynthfinder.mcts.stock import MongoDbInchiKeyQuery
+from aizynthfinder.context.stock import MongoDbInchiKeyQuery
 
 
 def _get_arguments():
