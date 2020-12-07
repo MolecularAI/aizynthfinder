@@ -1,0 +1,63 @@
+<html>
+
+<head>
+  <script type="text/javascript" src="https://unpkg.com/vis-network/standalone/umd/vis-network.min.js"></script>
+</head>
+
+<body>
+  <div id="mynetwork"></div>
+
+  <script type="text/javascript">
+    nodes = [];
+    edges = [];
+
+    {% for molecule, image_filepath in molecules.items() %}
+    nodes.push({
+      id: {{ id(molecule) }},
+      image: "{{ image_filepath }}",
+      shape: "image",
+      title: "{{ molecule.smiles }}"
+    });
+    {% endfor %}
+
+    {% for reaction in reactions %}
+    nodes.push({
+      id: {{ id(reaction) }},
+      color: "black",
+      size: 5,
+      shape: "dot",
+      title: "{{ reaction.smiles }}"
+    });
+    {% endfor %}
+
+    {% for nodes in edges %}
+    edges.push({
+      from: {{ id(nodes[0]) }},
+      to: {{ id(nodes[1]) }},
+      color: "black"
+    });
+    {% endfor %}
+
+    var container = document.getElementById('mynetwork');
+
+    var data = {
+      nodes: nodes,
+      edges: edges
+    };
+    var options = {
+      {% if hierarchical %}
+      layout: {
+        hierarchical: {
+          direction: "RL",
+          sortMethod: "directed",
+          shakeTowards: "roots"
+        },
+      }
+      {% endif %}
+    };
+
+    var network = new vis.Network(container, data, options);
+  </script>
+</body>
+
+</html>

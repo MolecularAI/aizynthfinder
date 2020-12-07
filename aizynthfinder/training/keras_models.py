@@ -17,7 +17,7 @@ from tensorflow.keras import regularizers
 from sklearn.utils import shuffle
 from scipy import sparse
 
-from aizynthfinder.utils.keras_utils import top10_acc, top50_acc
+from aizynthfinder.utils.models import top10_acc, top50_acc
 
 
 class _InMemorySequence(Sequence):

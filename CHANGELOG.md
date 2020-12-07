@@ -1,5 +1,16 @@
 # CHANGELOG
 
+## Version 2.1.0 - 2020-12-07 (2020-11-03)
+
+### Features
+
+- Possibility to extract a combined tree for all predicted routes
+- New classes to use Tensorflow servers as policies
+
+### Trivial changes
+
+- Improved code for route visualizaition
+
 ## Version 2.0.0 - 2020-11-24 (2020-09-29)
 
 ### Breaking changes

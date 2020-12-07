@@ -1,5 +1,7 @@
 """ Module containing classes to deal with Molecules and Reactions - mostly wrappers around rdkit routines.
 """
+import hashlib
+
 import numpy as np
 from rdkit import Chem, DataStructs
 from rdkit.Chem import AllChem
@@ -317,7 +319,10 @@ class Reaction:
         :rtype: str
         """
         if self._smiles is None:
-            self._smiles = AllChem.ReactionToSmiles(self.rd_reaction)
+            try:
+                self._smiles = AllChem.ReactionToSmiles(self.rd_reaction)
+            except ValueError:
+                self._smiles = ""
         return self._smiles
 
     def apply(self):
@@ -336,6 +341,16 @@ class Reaction:
         self._products = tuple(outcomes)
 
         return self._products
+
+    def hash_list(self):
+        """
+        Return all the products and reactants as hashed SMILES
+
+        :return: the hashes of the SMILES string
+        :rtype: list of str
+        """
+        mols = self.reaction_smiles().replace(".", ">>").split(">>")
+        return [hashlib.sha224(mol.encode("utf8")).hexdigest() for mol in mols]
 
     def rd_reaction_from_smiles(self):
         """
@@ -372,6 +387,8 @@ class RetroReaction(Reaction):
     :type smarts: str
     :param index: the index, defaults to 0
     :type index: int, optional
+    :ivar metadata: some meta data
+    :vartype metadata: dict, optional
     """
 
     def __init__(self, mol, smarts, index=0, metadata=None):
@@ -483,3 +500,76 @@ class RetroReaction(Reaction):
             mol.fingerprint(radius, nbits) for mol in self.reactants[self.index]
         )
         return product_fp - reactants_fp
+
+
+class FixedRetroReaction(RetroReaction):
+    """
+    A retrosynthesis reaction that has the same interface as `RetroReaction`
+    but it is fixed so it does not support SMARTS application.
+
+    The reactants are set by using the `reactants` property.
+
+    :param mol: the molecule
+    :type mol: TreeMolecule
+    :param smiles: the SMILES of the reaction
+    :type smiles: str, optional
+    :ivar metadata: some meta data
+    :vartype metadata: dict, optional
+    """
+
+    def __init__(self, mol, smiles="", metadata=None):
+        super().__init__(mol, smarts=None, index=0, metadata=metadata)
+        self._smiles = smiles
+
+    @property
+    def rd_reaction(self):
+        """
+        The reaction as a RDkit reaction object
+
+        :raises ValueError: always, because this is a fixed reaction
+        """
+        raise ValueError(
+            "Cannot create reaction object because SMART is not set for fixed reaction"
+        )
+
+    @property
+    def reactants(self):
+        """
+        Returns the reactant molcules.
+
+        :return: the products of the reaction
+        :rtype: tuple of tuple of TreeMolecule
+        """
+        return self._products
+
+    @reactants.setter
+    def reactants(self, value):
+        if isinstance(value, Molecule):
+            self._products = ((value),)
+        elif isinstance(value[0], Molecule):
+            self._products = (value,)
+        else:
+            self._products = value
+
+    def apply(self):
+        raise NotImplementedError("Cannot apply reaction because it is fixed")
+
+
+def hash_reactions(reactions, sort=True):
+    """
+    Creates a hash for a list of reactions
+
+    :param reactions: the reactions to hash
+    :type reactions: list of Reaction
+    :param sort: if True will sort all molecules, defaults to True
+    :type sort: bool, optional
+    :return: the hash string
+    :rtype: str
+    """
+    hash_list = []
+    for reaction in reactions:
+        hash_list.extend(reaction.hash_list())
+    if sort:
+        hash_list.sort()
+    hash_list = ".".join(hash_list)
+    return hashlib.sha224(hash_list.encode("utf8")).hexdigest()

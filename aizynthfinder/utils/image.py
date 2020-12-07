@@ -4,10 +4,26 @@ import sys
 import subprocess
 import os
 import tempfile
+import atexit
+import shutil
 
+from jinja2 import Template
 from PIL import Image, ImageDraw
 from rdkit.Chem import Draw
 from rdkit import Chem
+
+from aizynthfinder.utils.paths import data_path
+
+IMAGE_FOLDER = tempfile.mkdtemp()
+
+
+@atexit.register
+def _clean_up_images():
+    global IMAGE_FOLDER
+    try:
+        shutil.rmtree(IMAGE_FOLDER, ignore_errors=True)
+    except Exception:  # Don't care if we fail clean-up
+        pass
 
 
 def molecule_to_image(mol, frame_color):
@@ -101,88 +117,128 @@ def draw_rounded_rectangle(img, color, arc_size=20):
     return copy
 
 
-class GraphvizReactionGraph:
+def save_molecule_images(molecules, frame_colors):
     """
-    Class to create a reaction graph image using the graphviz set of tools
+    Create images of a list of molecules and save them to disc
+    a globally managed folder.
 
-    The .dot files that are produced by this class is specifally made for this
-    application. It is not at all intended for generic usage.
+    :param molecules: the molecules to save as images
+    :type molecules: list of Molecule
+    :param frame_colors: the color of the frame around each image
+    :type frame_colors: list of str
+    :return: the filename of the created images
+    :rtype: dict
+    """
+    global IMAGE_FOLDER
+    spec = {}
+    for molecule, frame_color in zip(molecules, frame_colors):
+        image_filepath = os.path.join(
+            IMAGE_FOLDER, f"{molecule.inchi_key}_{frame_color}.png"
+        )
+        if not os.path.exists(image_filepath):
+            image_obj = molecule_to_image(molecule, frame_color)
+            image_obj.save(image_filepath)
+        spec[molecule] = image_filepath
+    return spec
+
+
+def make_graphviz_image(molecules, reactions, edges, frame_colors):
+    """
+    Create an image of a bipartite graph of molecules and reactions
+    using the dot program of graphviz
+
+    :param molecules: the molecules nodes
+    :type molecules: list of Molecules
+    :param reactions: the reaction nodes
+    :type reactions: list of Reactions
+    :param edges: the edges of the graph
+    :type edges: list of tuples
+    :param frame_colors: the color of the frame around each image
+    :type frame_colors: list of str
+    :raises FileNotFoundError: if the image could not be produced
+    :return: the create image
+    :rtype: PIL.Image
     """
 
-    def __init__(self):
-        self._graph_props = {"layout": "dot", "rankdir": "RL", "splines": "ortho"}
-        self._mol_props = {"label": "", "color": "white", "shape": "none"}
-        self._react_props = {
-            "label": "",
-            "fillcolor": "black",
-            "shape": "circle",
-            "style": "filled",
-            "width": 0.1,
-            "fixedsize": "true",
-        }
-        self._lines = [
-            'strict digraph "" {',
-            f"\t graph [{self._get_props_strings(self._graph_props)}\n\t];",
-            'node [label="\\N"];',
-        ]
-
-    def add_edge(self, node1, node2):
-        """ Add an edge to the graph between to nodes
-        """
-        self._lines.append(f'\t{id(node1)} -> {id(node2)} [arrowhead="none"];')
-
-    def add_molecule(self, molecule, frame_color):
-        """
-        Add a node that is a molecule to the graph.
-        The image of the molecule will have a rectangular frame around it with a given color.
-        """
-        img = molecule_to_image(molecule, frame_color=frame_color)
-        _, filename = tempfile.mkstemp(suffix=".png")
-        img.save(filename)
-        self._mol_props["image"] = filename
-        self._lines.append(
-            f"\t{id(molecule)} [{self._get_props_strings(self._mol_props)}\n\t];"
+    def _create_image(use_splines):
+        txt = template.render(
+            molecules=mol_spec,
+            reactions=reactions,
+            edges=edges,
+            use_splines=use_splines,
         )
-
-    def add_reaction(self, reaction):
-        """ Add a node that is a reaction to the graph.
-        """
-        self._lines.append(
-            f"\t{id(reaction)} [{self._get_props_strings(self._react_props)}\n\t];"
-        )
-
-    def to_image(self):
-        """
-        Produce the image using the 'dot' program for layout and
-        'neato' for creating the image.
-
-        :raises FileNotFoundError: if the intermediate files could not be created
-        :return: the image of the reaction
-        :rtype: PIL.Image
-        """
-        ext = ".bat" if sys.platform.startswith("win") else ""
-
-        self._lines.append("}")
         _, input_name = tempfile.mkstemp(suffix=".dot")
         with open(input_name, "w") as fileobj:
-            fileobj.write("\n".join(self._lines))
+            fileobj.write(txt)
 
-        _, output_dot = tempfile.mkstemp(suffix=".dot")
-        subprocess.call([f"dot{ext}", "-T", "dot", f"-o{output_dot}", input_name])
-        if not os.path.exists(output_dot) or os.path.getsize(output_dot) == 0:
+        _, output_img = tempfile.mkstemp(suffix=".png")
+        ext = ".bat" if sys.platform.startswith("win") else ""
+        subprocess.call([f"dot{ext}", "-T", "png", f"-o{output_img}", input_name])
+        if not os.path.exists(output_img) or os.path.getsize(output_img) == 0:
             raise FileNotFoundError(
                 "Could not produce graph with layout - check that 'dot' command is in path"
             )
+        return output_img
 
-        _, output_img = tempfile.mkstemp(suffix=".png")
-        subprocess.call([f"neato{ext}", "-T", "png", f"-o{output_img}", output_dot])
-        if not os.path.exists(output_img) or os.path.getsize(output_img) == 0:
-            raise FileNotFoundError(
-                "Could not produce reaction image - check that 'neato' command is in path"
+    mol_spec = save_molecule_images(molecules, frame_colors)
+
+    template_filepath = os.path.join(data_path(), "templates", "reaction_tree.dot")
+    with open(template_filepath, "r") as fileobj:
+        template = Template(fileobj.read())
+    template.globals["id"] = id
+
+    try:
+        output_img = _create_image(use_splines=True)
+    except FileNotFoundError:
+        output_img = _create_image(use_splines=False)
+
+    return Image.open(output_img)
+
+
+def make_visjs_page(
+    filename, molecules, reactions, edges, frame_colors, hierarchical=False
+):
+    """
+    Create HTML code of a bipartite graph of molecules and reactions
+    using the vis.js network library.
+
+    Package the created HTML page and all images as tar-ball.
+
+    :param filename: the basename of the archive
+    :type filename: str
+    :param molecules: the molecules nodes
+    :type molecules: list of Molecules
+    :param reactions: the reaction nodes
+    :type reactions: list of Reactions
+    :param edges: the edges of the graph
+    :type edges: list of tuples
+    :param frame_colors: the color of the frame around each image
+    :type frame_colors: list of str
+    :param hierarchical: if True, will produce a hierarchical layout
+    :type hierarchical: bool, optional
+    """
+    mol_spec = save_molecule_images(molecules, frame_colors)
+
+    template_filepath = os.path.join(data_path(), "templates", "reaction_tree.thtml")
+    with open(template_filepath, "r") as fileobj:
+        template = Template(fileobj.read())
+    template.globals["id"] = id
+
+    tmpdir = tempfile.mkdtemp()
+    for image_filepath in mol_spec.values():
+        shutil.copy(image_filepath, tmpdir)
+    mol_spec = {molecule: os.path.basename(path) for molecule, path in mol_spec.items()}
+
+    input_name = os.path.join(tmpdir, "route.html")
+    with open(input_name, "w") as fileobj:
+        fileobj.write(
+            template.render(
+                molecules=mol_spec,
+                reactions=reactions,
+                edges=edges,
+                hierarchical=hierarchical,
             )
+        )
 
-        return Image.open(output_img)
-
-    @staticmethod
-    def _get_props_strings(props):
-        return ",\n\t\t".join(f'{key}="{value}"' for key, value in props.items())
+    basename, _ = os.path.splitext(filename)
+    shutil.make_archive(basename, "tar", root_dir=tmpdir)

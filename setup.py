@@ -5,7 +5,7 @@ with open("requirements.txt", "r") as fileobj:
 
 setup(
     name="aizynthfinder",
-    version="2.0.0",
+    version="2.1.0",
     description="Retrosynthetic route finding using neural network guided Monte-Carlo tree search.",
     author="Molecular AI group",
     author_email="samuel.genheden@astrazeneca.com",

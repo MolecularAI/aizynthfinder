@@ -2,6 +2,7 @@
 """
 import time
 
+from deprecated import deprecated
 from tqdm import tqdm
 
 # This must be imported first to setup logging for rdkit, tensorflow etc
@@ -128,6 +129,7 @@ class AiZynthFinder:
         self.analysis = None
         self.routes = None
 
+    @deprecated(version="2.1.0", reason="Not supported anymore")
     def run_from_json(self, params):
         """
         Run a search tree by reading settings from a JSON

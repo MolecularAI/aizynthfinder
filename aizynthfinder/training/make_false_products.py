@@ -15,7 +15,7 @@ from aizynthfinder.training.utils import (
     reaction_hash,
     reactants_to_fingerprint,
 )
-from aizynthfinder.utils.keras_utils import CUSTOM_OBJECTS, load_model
+from aizynthfinder.utils.models import CUSTOM_OBJECTS, load_keras_model
 
 
 class _ReactionException(Exception):
@@ -57,7 +57,7 @@ def recommender_application(library, config, _):
     :rtype: pandas.DataFrame
     """
 
-    model = load_model(
+    model = load_keras_model(
         config["negative_data"]["recommender_model"], custom_objects=CUSTOM_OBJECTS
     )
     topn = config["negative_data"]["recommender_topn"]

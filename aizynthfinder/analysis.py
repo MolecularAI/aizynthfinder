@@ -1,14 +1,21 @@
 """ Module containing classes to perform analysis of the tree search results.
 """
 import json
-import hashlib
 from collections import defaultdict
 
 import numpy as np
 import networkx as nx
 
-from aizynthfinder.chem import Molecule, UniqueMolecule
-from aizynthfinder.utils.image import GraphvizReactionGraph
+from aizynthfinder.chem import (
+    Molecule,
+    hash_reactions,
+)
+from aizynthfinder.utils.image import make_graphviz_image
+from aizynthfinder.utils.analysis_helpers import (
+    ReactionTreeFromDict,
+    ReactionTreeFromMcts,
+    CombinedReactionTrees,
+)
 
 
 class TreeAnalysis:
@@ -76,7 +83,7 @@ class TreeAnalysis:
             if len(best_nodes) >= min_return and score < last_score:
                 break
             route_actions, _ = self.search_tree.route_to_node(node)
-            route_hash = self._routehash(route_actions)
+            route_hash = hash_reactions(route_actions)
 
             if route_hash in seen_hashes:
                 continue
@@ -143,35 +150,27 @@ class TreeAnalysis:
             return list(self.search_tree.graph())
         return [node for node in self.search_tree.graph() if not node.children()]
 
-    @staticmethod
-    def _routehash(actions):
-        reaction_str = ">>".join(action.reaction_smiles() for action in actions)
-        reaction_list = reaction_str.replace(".", ">>").split(">>")
-        hash_list = [
-            hashlib.sha224(reactant.encode("utf8")).hexdigest()
-            for reactant in reaction_list
-        ]
-        hash_list.sort()
-        hash_list = ".".join(hash_list)
-        return hashlib.sha224(hash_list.encode("utf8")).hexdigest()
-
 
 class ReactionTree:
     """
     Encapsulation of a bipartite reaction tree of a single route.
-    The nodes consists of either Reaction objects and UniqueMolecule objects.
+    The nodes consists of either FixedRetroReaction or UniqueMolecule objects.
 
+    :ivar has_repeating_patterns: if the graph has repetetive elements
+    :vartype has_repeating_patterns: bool
     :ivar graph: the bipartite graph
     :vartype graph: networkx.DiGraph
+    :ivar is_solved: if all of the leaf nodes are in stock
+    :vartype is_solved: bool
     :ivar root: the root of the tree
     :vartype root: UniqueMolecule
     """
 
     def __init__(self):
-        self._stock = None
         self.graph = nx.DiGraph()
         self.root = None
         self.has_repeating_patterns = False
+        self.is_solved = False
 
     @classmethod
     def from_analysis(cls, analysis, from_node=None):
@@ -188,24 +187,11 @@ class ReactionTree:
         :returns: the reaction tree
         :rtype: ReactionTree
         """
-        obj = cls()
         if not from_node:
             from_node = analysis.best_node()
 
-        obj._stock = from_node.state.stock
         actions, nodes = analysis.search_tree.route_to_node(from_node)
-        unique_mols = {}
-
-        root_mol = nodes[0].state.mols[0]
-        obj.root = root_mol.make_unique()
-        unique_mols[id(root_mol)] = obj.root
-        obj.graph.add_node(obj.root)
-
-        for child, action in zip(nodes[1:], actions):
-            obj._add_bipartite(child, action, unique_mols)
-
-        obj._find_repeating_patterns()
-        return obj
+        return ReactionTreeFromMcts(actions=actions, nodes=nodes).tree
 
     @classmethod
     def from_dict(cls, tree_dict):
@@ -216,7 +202,7 @@ class ReactionTree:
         but because that format loses information, the returned
         object is not a full copy:
         * The stock will only contain the list of molecules marked as ``in_stock`` in the dictionary.
-        * The reaction nodes will not be of type Reaction, but a proxy class that only stores the SMILES
+        * The reaction nodes will be of type `FixedRetroReaction`
 
         The returned object should be sufficient to e.g. generate an image of the route.
 
@@ -225,31 +211,31 @@ class ReactionTree:
         :returns: the reaction tree
         :rtype: ReactionTree
         """
-
-        class ProxyReaction:
-            def __init__(self, smiles, metadata):
-                self.smiles = smiles
-                self.metadata = metadata
-
-        obj = cls()
-        obj._stock = []
-        ReactionTree._parse_tree_dict(tree_dict, obj, ProxyReaction)
-
-        obj._find_repeating_patterns()
-        return obj
+        return ReactionTreeFromDict(tree_dict).tree
 
     def depth(self, node):
         """
-        Calculate the depth of a node in the route
+        Return the depth of a node in the route
 
         :param node: the query node
         :type node: UniqueMolecule or Reaction
         :return: the depth
         :rtype: float
         """
-        if node is self.root:
-            return 0
-        return nx.shortest_path_length(self.graph, self.root, node)
+        return self.graph.nodes[node].get("depth", -1)
+
+    def in_stock(self, node):
+        """
+        Return if a node in the route is in stock
+
+        Note that is a property set on creation and as such is not updated.
+
+        :param node: the query node
+        :type node: UniqueMolecule
+        :return: if the molecule is in stock
+        :rtype: bool
+        """
+        return self.graph.nodes[node].get("in_stock", False)
 
     def leafs(self):
         """
@@ -307,27 +293,26 @@ class ReactionTree:
         :rtype: PIL.Image
         """
 
-        def hide(node):
-            return self.graph.nodes[node].get("hide", False)
+        def show(node):
+            return not self.graph.nodes[node].get("hide", False)
 
-        img_graph = GraphvizReactionGraph()
+        molecules = []
+        frame_colors = []
+        for node in self.molecules():
+            if not show_all and not show(node):
+                continue
+            molecules.append(node)
+            frame_colors.append(in_stock_colors[self.in_stock(node)])
 
-        for node in self.graph:
-            if not show_all and hide(node):
-                continue
-            if isinstance(node, Molecule):
-                img_graph.add_molecule(
-                    node, frame_color=in_stock_colors[node in self._stock]
-                )
-            else:
-                img_graph.add_reaction(node)
-        for node1, node2 in self.graph.edges:
-            if not show_all and (hide(node1) or hide(node2)):
-                continue
-            img_graph.add_edge(node1, node2)
+        reactions = [node for node in self.reactions() if show_all or show(node)]
+        edges = [
+            (node1, node2)
+            for node1, node2 in self.graph.edges()
+            if show_all or (show(node1) and show(node2))
+        ]
 
         try:
-            return img_graph.to_image()
+            return make_graphviz_image(molecules, reactions, edges, frame_colors)
         except FileNotFoundError as err:
             raise ValueError(str(err))
 
@@ -340,30 +325,17 @@ class ReactionTree:
         """
         return json.dumps(self.to_dict(), sort_keys=False, indent=2)
 
-    def _add_bipartite(self, child, action, unique_mols):
-        def unique_mol(molecule):
-            id_ = id(molecule)
-            if id_ not in unique_mols:
-                unique_mols[id_] = molecule.make_unique()
-            return unique_mols[id_]
-
-        self.graph.add_edge(unique_mol(action.mol), action)
-        for mol in child.state.mols:
-            if mol.parent is action.mol:
-                self.graph.add_edge(action, unique_mol(mol))
-
     def _build_dict(self, node, dict_=None):
         if dict_ is None:
             dict_ = {}
 
         dict_["type"] = "mol" if isinstance(node, Molecule) else "reaction"
         dict_["hide"] = self.graph.nodes[node].get("hide", False)
+        dict_["smiles"] = node.smiles
         if isinstance(node, Molecule):
-            dict_["smiles"] = node.smiles
             dict_["is_chemical"] = True
-            dict_["in_stock"] = node in self._stock
+            dict_["in_stock"] = self.in_stock(node)
         else:
-            dict_["smiles"] = node.smiles
             dict_["is_reaction"] = True
             dict_["metadata"] = dict(node.metadata)
 
@@ -376,91 +348,6 @@ class ReactionTree:
         if not dict_["children"]:
             del dict_["children"]
         return dict_
-
-    def _find_repeating_patterns(self):
-        """
-        Identify repeating patterns of reactions and mark them as hidden.
-
-        A unit of the repetition is the hash of two consecutive reactions,
-        where the first unit should be the first two reactions of the route.
-
-        This is for hiding repeating patterns of e.g. protection followed by deprotection,
-        which is a common behaviour for the tree search when it fails to solve a route.
-        """
-        for node in self.reactions():
-            # We are only interesting of starting at the very first reaction
-            if any(self.graph[mol] for mol in self._reactants_nodes(node)):
-                continue
-            actions = self._list_reactions(node)
-            if len(actions) < 5:
-                continue
-
-            hashes = [
-                self._reaction_hash(rxn1, rxn2)
-                for rxn1, rxn2 in zip(actions[:-1:2], actions[1::2])
-            ]
-            for idx, (hash1, hash2) in enumerate(zip(hashes[:-1], hashes[1:])):
-                if hash1 == hash2:
-                    self._hide_reaction(actions[idx * 2])
-                    self._hide_reaction(actions[idx * 2 + 1])
-                    self.has_repeating_patterns = True
-                # The else-clause prevents removing repeating patterns in the middle of a route
-                else:
-                    break
-
-    def _hide_reaction(self, reaction_node):
-        self.graph.nodes[reaction_node]["hide"] = True
-        for reactants in self._reactants_nodes(reaction_node):
-            self.graph.nodes[reactants]["hide"] = True
-
-    def _list_reactions(self, reaction_node):
-        """ List all reaction nodes from the given one to the last
-        """
-        reactions = [reaction_node]
-        curr_rxn = reaction_node
-        products = self._product_nodes(reaction_node)
-        while products[0] is not self.root:
-            curr_rxn = next(self.graph.predecessors(products[0]))
-            products = self._product_nodes(curr_rxn)
-            reactions.append(curr_rxn)
-        return reactions
-
-    def _product_nodes(self, reaction_node):
-        return list(self.graph.predecessors(reaction_node))
-
-    def _reactants_nodes(self, reaction_node):
-        return list(self.graph.successors(reaction_node))
-
-    def _reaction_hash(self, *reaction_nodes):
-        hash_list = []
-        for node in reaction_nodes:
-            hash_list.extend(
-                [
-                    hashlib.sha224(reactant.smiles.encode("utf8")).hexdigest()
-                    for reactant in self._reactants_nodes(node)
-                ]
-            )
-        hash_list = ".".join(hash_list)
-        return hashlib.sha224(hash_list.encode("utf8")).hexdigest()
-
-    @staticmethod
-    def _parse_tree_dict(tree_dict, rt_object, reaction_cls):
-        if tree_dict["type"] == "mol":
-            node = UniqueMolecule(smiles=tree_dict["smiles"])
-            if not rt_object.root:
-                rt_object.root = node
-            if tree_dict["in_stock"]:
-                rt_object._stock.append(node)
-        else:
-            node = reaction_cls(
-                smiles=tree_dict["smiles"], metadata=tree_dict.get("metadata", {})
-            )
-        rt_object.graph.add_node(node, hide=tree_dict.get("hide", False))
-
-        for child_dict in tree_dict.get("children", []):
-            child = ReactionTree._parse_tree_dict(child_dict, rt_object, reaction_cls)
-            rt_object.graph.add_edge(node, child)
-        return node
 
 
 class RouteCollection:
@@ -511,6 +398,7 @@ class RouteCollection:
         self._dicts = self._unpack_kwarg("dicts", **kwargs)
         self._images = self._unpack_kwarg("images", **kwargs)
         self._jsons = self._unpack_kwarg("jsons", **kwargs)
+        self._combined_reaction_trees = None
 
     @classmethod
     def from_analysis(cls, analysis, min_nodes):
@@ -566,6 +454,19 @@ class RouteCollection:
             self.make_jsons()
         return self._jsons
 
+    def combined_reaction_trees(self, recreate=False):
+        """
+        Return an object that combines all the reaction tree into a single reaction tree graph
+
+        :param recreate: if False will return a cached object if available, defaults to False
+        :type recreate: bool, optional
+        :return: the combined trees
+        :rtype: CombinedReactionTrees
+        """
+        if not self._combined_reaction_trees or recreate:
+            self._combined_reaction_trees = CombinedReactionTrees(self.reaction_trees)
+        return self._combined_reaction_trees
+
     def compute_scores(self, *scorers):
         """
         Compute new scores for all routes in this collection.
@@ -604,7 +505,15 @@ class RouteCollection:
     def make_images(self):
         """ Convert all reaction trees to images
         """
-        self._images = [tree.to_image() for tree in self.reaction_trees]
+
+        self._images = []
+        for tree in self.reaction_trees:
+            try:
+                img = tree.to_image()
+            except ValueError:
+                self._images.append(None)
+            else:
+                self._images.append(img)
         self._update_route_dict(self._images, "image")
 
     def make_jsons(self):

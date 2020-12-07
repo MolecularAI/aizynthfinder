@@ -73,7 +73,7 @@ def test_get_actions_two_policies(
 
 
 def test_load_filter_policy(filter_policy, mocker):
-    mocked_load_model = mocker.patch("aizynthfinder.utils.keras_utils.load_model")
+    mocked_load_model = mocker.patch("aizynthfinder.utils.models.load_keras_model")
 
     filter_policy.load("dummy.hdf5", "policy1")
 

@@ -7,7 +7,10 @@ from aizynthfinder.chem import (
     TreeMolecule,
     Reaction,
     RetroReaction,
+    FixedRetroReaction,
+    hash_reactions,
 )
+from aizynthfinder.analysis import ReactionTree
 
 
 def test_no_input():
@@ -168,3 +171,63 @@ def test_make_reaction_from_smiles():
     assert len(rxn.reactants[0]) == 2
     assert rxn.reactants[0][0].smiles == "CCCCOc1ccc(CC(=O)Cl)cc1"
     assert rxn.reactants[0][1].smiles == "CNO"
+
+
+def test_create_fixed_reaction():
+    smiles = "[C:1](=[O:2])([cH3:3])[N:4][cH3:5]>>Cl[C:1](=[O:2])[cH3:3].[N:4][cH3:5]"
+    mol = TreeMolecule(parent=None, smiles="N#Cc1cccc(NC(=O)c2ccc(F)cc2)c1F")
+
+    rxn = FixedRetroReaction(mol, smiles=smiles)
+
+    assert rxn.smiles == smiles
+
+    with pytest.raises(ValueError):
+        rxn.rd_reaction
+
+    with pytest.raises(NotImplementedError):
+        rxn.apply()
+
+
+def test_set_reactants_single():
+    mol = TreeMolecule(parent=None, smiles="N#Cc1cccc(NC(=O)c2ccc(F)cc2)c1F")
+    reactant1 = TreeMolecule(parent=mol, smiles="N#Cc1cccc(N)c1F")
+    rxn = FixedRetroReaction(mol)
+
+    rxn.reactants = reactant1
+
+    assert rxn.reactants == ((reactant1),)
+
+
+def test_set_reactants_list():
+    mol = TreeMolecule(parent=None, smiles="N#Cc1cccc(NC(=O)c2ccc(F)cc2)c1F")
+    reactant1 = TreeMolecule(parent=mol, smiles="N#Cc1cccc(N)c1F")
+    reactant2 = TreeMolecule(parent=mol, smiles="O=C(Cl)c1ccc(F)cc1")
+    rxn = FixedRetroReaction(mol)
+
+    rxn.reactants = (reactant1, reactant2)
+
+    assert rxn.reactants == ((reactant1, reactant2),)
+
+
+def test_set_reactants_list_of_list():
+    mol = TreeMolecule(parent=None, smiles="N#Cc1cccc(NC(=O)c2ccc(F)cc2)c1F")
+    reactant1 = TreeMolecule(parent=mol, smiles="N#Cc1cccc(N)c1F")
+    reactant2 = TreeMolecule(parent=mol, smiles="O=C(Cl)c1ccc(F)cc1")
+    rxn = FixedRetroReaction(mol)
+
+    rxn.reactants = ((reactant1, reactant2),)
+
+    assert rxn.reactants == ((reactant1, reactant2),)
+
+
+def test_reaction_hash(load_reaction_tree):
+    rt = ReactionTree.from_dict(load_reaction_tree("branched_route.json"))
+    reactions = list(rt.reactions())[:4]
+
+    hash_ = hash_reactions(reactions)
+
+    assert hash_ == "359045e74d757c7895304337c855817748b9eefe0e1e680258d4574e"
+
+    hash_ = hash_reactions(reactions, sort=False)
+
+    assert hash_ == "d0cf86e9a5e3a8539964ae62dab51952f64db8c84d750a3cc5b381a6"

@@ -356,7 +356,7 @@ def test_random_application(library_data):
 
 def test_recommender_application(library_data, mocker):
     mocked_load_model = mocker.patch(
-        "aizynthfinder.training.make_false_products.load_model"
+        "aizynthfinder.training.make_false_products.load_keras_model"
     )
     mocked_model = mocked_load_model.return_value
     mocked_model.predict.return_value = np.asarray([0.5, 0.3, 0.2])

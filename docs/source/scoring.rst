@@ -10,6 +10,7 @@ Currently, there are a few scoring functions available
     * Number of reactions - the number of steps in the route
     * Number of pre-cursors - the number of pre-cursors in the route
     * Number of pre-cursors in stock - the number of the pre-cursors that are purchaseable
+    * Average template occurence - the average occurence of the templates used in the route
 
 
 The *State score* is the score that is guiding the tree search in the :doc:`update phase <sequences>`, and 

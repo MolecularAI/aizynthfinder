@@ -136,7 +136,7 @@ def mock_policy_model(mocker):
     )
 
     return mocker.patch(
-        "aizynthfinder.utils.keras_utils.load_model", return_value=MockedKerasModel
+        "aizynthfinder.utils.models.load_keras_model", return_value=MockedKerasModel
     )
 
 

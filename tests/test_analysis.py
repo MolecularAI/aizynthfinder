@@ -1,4 +1,6 @@
 import json
+import os
+from tarfile import TarFile
 
 import numpy as np
 
@@ -97,38 +99,20 @@ def test_reactiontree_from_dict(load_reaction_tree):
 
 
 def test_reactiontree_to_image(load_reaction_tree, mocker):
-    patched_add_mol = mocker.patch(
-        "aizynthfinder.utils.image.GraphvizReactionGraph.add_molecule"
-    )
-    patched_add_reaction = mocker.patch(
-        "aizynthfinder.utils.image.GraphvizReactionGraph.add_reaction"
-    )
-    patched_add_edge = mocker.patch(
-        "aizynthfinder.utils.image.GraphvizReactionGraph.add_edge"
-    )
-    mocker.patch("aizynthfinder.utils.image.GraphvizReactionGraph.to_image")
+    patched_make_image = mocker.patch("aizynthfinder.analysis.make_graphviz_image")
 
     tree = load_reaction_tree("sample_reaction.json")
     rt = ReactionTree.from_dict(tree)
 
     rt.to_image()
 
-    assert patched_add_mol.call_count == len(list(rt.molecules()))
-    assert patched_add_reaction.call_count == len(list(rt.reactions()))
-    assert patched_add_edge.call_count == len(rt.graph.edges)
+    patched_make_image.assert_called_once()
+    assert len(patched_make_image.call_args[0][0]) == len(list(rt.molecules()))
+    assert len(patched_make_image.call_args[0][1]) == len(list(rt.reactions()))
 
 
 def test_reactiontree_to_image_hiding(load_reaction_tree, mocker):
-    patched_add_mol = mocker.patch(
-        "aizynthfinder.utils.image.GraphvizReactionGraph.add_molecule"
-    )
-    patched_add_reaction = mocker.patch(
-        "aizynthfinder.utils.image.GraphvizReactionGraph.add_reaction"
-    )
-    patched_add_edge = mocker.patch(
-        "aizynthfinder.utils.image.GraphvizReactionGraph.add_edge"
-    )
-    mocker.patch("aizynthfinder.utils.image.GraphvizReactionGraph.to_image")
+    patched_make_image = mocker.patch("aizynthfinder.analysis.make_graphviz_image")
 
     tree = load_reaction_tree("sample_reaction_with_hidden.json", 1)
     rt = ReactionTree.from_dict(tree)
@@ -136,19 +120,16 @@ def test_reactiontree_to_image_hiding(load_reaction_tree, mocker):
 
     rt.to_image(show_all=True)
 
-    assert patched_add_mol.call_count == len(list(rt.molecules()))
-    assert patched_add_reaction.call_count == len(list(rt.reactions()))
-    assert patched_add_edge.call_count == len(rt.graph.edges)
+    patched_make_image.assert_called_once()
+    assert len(patched_make_image.call_args[0][0]) == len(list(rt.molecules()))
+    assert len(patched_make_image.call_args[0][1]) == len(list(rt.reactions()))
 
-    patched_add_mol.reset_mock()
-    patched_add_reaction.reset_mock()
-    patched_add_edge.reset_mock()
+    patched_make_image.reset_mock()
 
     rt.to_image(show_all=False)
 
-    assert patched_add_mol.call_count == len(list(rt.molecules())) - 3
-    assert patched_add_reaction.call_count == len(list(rt.reactions())) - 2
-    assert patched_add_edge.call_count == len(rt.graph.edges) - 5
+    assert len(patched_make_image.call_args[0][0]) == len(list(rt.molecules())) - 3
+    assert len(patched_make_image.call_args[0][1]) == len(list(rt.reactions())) - 2
 
 
 def test_find_repetetive_patterns(load_reaction_tree):
@@ -237,7 +218,28 @@ def test_find_repetetive_patterns_created_tree_no_patterns(
     assert not rt.has_repeating_patterns
 
 
-def test_route_node_depth(load_reaction_tree):
+def test_route_node_depth_from_analysis(default_config, mock_stock, shared_datadir):
+    mock_stock(default_config, Molecule(smiles="CC"), Molecule(smiles="CCCO"))
+    search_tree = SearchTree.from_json(
+        shared_datadir / "tree_without_repetition.json", default_config
+    )
+    analysis = TreeAnalysis(search_tree)
+    rt = ReactionTree.from_analysis(analysis)
+
+    mols = list(rt.molecules())
+
+    assert rt.depth(mols[0]) == 0
+    assert rt.depth(mols[1]) == 2
+    assert rt.depth(mols[2]) == 2
+
+    rxns = list(rt.reactions())
+    assert rt.depth(rxns[0]) == 1
+
+    for mol in rt.molecules():
+        assert rt.depth(mol) == 2 * rt.graph.nodes[mol]["transform"]
+
+
+def test_route_node_depth_from_json(load_reaction_tree):
     dict_ = load_reaction_tree("sample_reaction_with_hidden.json", 0)
     rt = ReactionTree.from_dict(dict_)
 
@@ -254,6 +256,14 @@ def test_route_node_depth(load_reaction_tree):
     assert rt.depth(mols[8]) == 12
     assert rt.depth(mols[9]) == 12
     assert rt.depth(mols[10]) == 2
+
+    rxns = list(rt.reactions())
+
+    assert rt.depth(rxns[0]) == 1
+    assert rt.depth(rxns[1]) == 3
+
+    for mol in rt.molecules():
+        assert rt.depth(mol) == 2 * rt.graph.nodes[mol]["transform"]
 
 
 def test_create_route_collection_full(setup_analysis, mocker):
@@ -274,8 +284,7 @@ def test_create_route_collection_full(setup_analysis, mocker):
 
     mocker.patch("aizynthfinder.analysis.ReactionTree.to_dict")
     mocker.patch("aizynthfinder.analysis.json.dumps")
-    mocker.patch("aizynthfinder.utils.image.GraphvizReactionGraph.to_image")
-    mocker.patch("aizynthfinder.utils.image.GraphvizReactionGraph.add_molecule")
+    mocker.patch("aizynthfinder.utils.image.make_graphviz_image")
 
     # Just see that the code does not crash, does not verify content
     assert len(routes.images) == 7
@@ -355,3 +364,73 @@ def test_rescore_collection_for_trees(default_config, mock_stock, load_reaction_
     assert routes.scores[0] == 2
     assert np.round(routes.all_scores[0]["state score"], 3) == 0.994
     assert routes.all_scores[0]["number of reactions"] == 2
+
+
+def test_create_combine_tree_dict_from_json(load_reaction_tree):
+    collection = RouteCollection(
+        reaction_trees=[
+            ReactionTree.from_dict(load_reaction_tree("routes_for_clustering.json", 0)),
+            ReactionTree.from_dict(load_reaction_tree("routes_for_clustering.json", 1)),
+            ReactionTree.from_dict(load_reaction_tree("routes_for_clustering.json", 2)),
+        ]
+    )
+    expected = load_reaction_tree("combined_example_tree.json")
+
+    combined_dict = collection.combined_reaction_trees().to_dict()
+
+    assert len(combined_dict["children"]) == 2
+    assert combined_dict["children"][0]["is_reaction"]
+    assert len(combined_dict["children"][0]["children"]) == 2
+    assert len(combined_dict["children"][1]["children"]) == 2
+    assert len(combined_dict["children"][1]["children"][0]["children"]) == 2
+    assert combined_dict["children"][1]["children"][0]["children"][0]["is_reaction"]
+    assert combined_dict == expected
+
+
+def test_create_combine_tree_dict_from_tree(
+    mock_stock, default_config, load_reaction_tree, shared_datadir
+):
+    mock_stock(
+        default_config,
+        "Nc1ccc(NC(=S)Nc2ccccc2)cc1",
+        "Cc1ccc2nc3ccccc3c(Cl)c2c1",
+        "Nc1ccc(N)cc1",
+        "S=C=Nc1ccccc1",
+        "Cc1ccc2nc3ccccc3c(N)c2c1",
+        "Nc1ccc(Br)cc1",
+    )
+    search_tree = SearchTree.from_json(
+        shared_datadir / "tree_for_clustering.json", default_config
+    )
+    analysis = TreeAnalysis(search_tree)
+    collection = RouteCollection.from_analysis(analysis, 3)
+    expected = load_reaction_tree("combined_example_tree.json")
+
+    combined_dict = collection.combined_reaction_trees().to_dict()
+
+    assert len(combined_dict["children"]) == 2
+    assert combined_dict["children"][0]["is_reaction"]
+    assert len(combined_dict["children"][0]["children"]) == 2
+    assert len(combined_dict["children"][1]["children"]) == 2
+    assert len(combined_dict["children"][1]["children"][0]["children"]) == 2
+    assert combined_dict["children"][1]["children"][0]["children"][0]["is_reaction"]
+    assert combined_dict == expected
+
+
+def test_create_combine_tree_to_visjs(load_reaction_tree, tmpdir):
+    collection = RouteCollection(
+        reaction_trees=[
+            ReactionTree.from_dict(load_reaction_tree("routes_for_clustering.json", 0)),
+            ReactionTree.from_dict(load_reaction_tree("routes_for_clustering.json", 1)),
+            ReactionTree.from_dict(load_reaction_tree("routes_for_clustering.json", 2)),
+        ]
+    )
+    tar_filename = str(tmpdir / "routes.tar")
+    combined = collection.combined_reaction_trees()
+
+    combined.to_visjs_page(tar_filename)
+
+    assert os.path.exists(tar_filename)
+    with TarFile(tar_filename) as tarobj:
+        assert "./route.html" in tarobj.getnames()
+        assert len([name for name in tarobj.getnames() if name.endswith(".png")]) == 8

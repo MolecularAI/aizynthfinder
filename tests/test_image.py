@@ -1,4 +1,5 @@
 import os
+from tarfile import TarFile
 
 import pytest
 from PIL import Image, ImageDraw
@@ -34,28 +35,42 @@ def test_rounded_rectangle(new_image):
     assert modified.getpixel((150, 299)) == color
 
 
+def test_save_molecule_images():
+    nfiles = len(os.listdir(image.IMAGE_FOLDER))
+
+    mols = [
+        TreeMolecule(smiles="CCCO", parent=None),
+        TreeMolecule(smiles="CCCO", parent=None),
+        TreeMolecule(smiles="CCCCO", parent=None),
+    ]
+
+    image.save_molecule_images(mols, ["green", "green", "green"])
+
+    assert len(os.listdir(image.IMAGE_FOLDER)) == nfiles + 2
+
+    image.save_molecule_images(mols, ["green", "orange", "green"])
+
+    assert len(os.listdir(image.IMAGE_FOLDER)) == nfiles + 3
+
+
 @pytest.fixture
 def setup_graphviz_graph():
     mol1 = TreeMolecule(smiles="CCCO", parent=None)
     reaction = RetroReaction(mol=mol1, smarts="")
-    graph = image.GraphvizReactionGraph()
 
-    graph.add_molecule(mol1, "green")
-    graph.add_reaction(reaction)
-    graph.add_edge(mol1, reaction)
-    return graph
+    return [mol1], [reaction], [(mol1, reaction)], ["green"]
 
 
 def test_graphviz_usage(mocker, tmpdir, setup_graphviz_graph):
     mkstemp_patch = mocker.patch("aizynthfinder.utils.image.tempfile.mkstemp")
     files = [
         (None, str(tmpdir / "graph1.dot")),
-        (None, str(tmpdir / "graph2.dot")),
         (None, str(tmpdir / "img2.png")),
     ]
     mkstemp_patch.side_effect = files
+    molecules, reactions, edges, frame_colors = setup_graphviz_graph
 
-    img = setup_graphviz_graph.to_image()
+    img = image.make_graphviz_image(molecules, reactions, edges, frame_colors)
 
     assert img.height > 0
     assert img.width > 0
@@ -65,15 +80,33 @@ def test_graphviz_usage(mocker, tmpdir, setup_graphviz_graph):
 
 def test_graphviz_usage_exception_dot(mocker, tmpdir, setup_graphviz_graph):
     exists_patch = mocker.patch("aizynthfinder.utils.image.os.path.exists")
+    exists_patch.side_effect = [False, True]
+    molecules, reactions, edges, frame_colors = setup_graphviz_graph
+
+    img = image.make_graphviz_image(molecules, reactions, edges, frame_colors)
+    assert img.height > 0
+    assert img.width > 0
+
+
+def test_graphviz_usage_exception_dot_both(mocker, tmpdir, setup_graphviz_graph):
+    exists_patch = mocker.patch("aizynthfinder.utils.image.os.path.exists")
     exists_patch.return_value = False
+    molecules, reactions, edges, frame_colors = setup_graphviz_graph
 
     with pytest.raises(FileNotFoundError, match=".*'dot'.*"):
-        setup_graphviz_graph.to_image()
+        image.make_graphviz_image(molecules, reactions, edges, frame_colors)
 
 
-def test_graphviz_usage_exception_neato(mocker, tmpdir, setup_graphviz_graph):
-    exists_patch = mocker.patch("aizynthfinder.utils.image.os.path.exists")
-    exists_patch.side_effect = [True, False]
+def test_visjs_page(mocker, tmpdir, setup_graphviz_graph):
+    mkdtemp_patch = mocker.patch("aizynthfinder.utils.image.tempfile.mkdtemp")
+    mkdtemp_patch.return_value = str(tmpdir / "tmp")
+    os.mkdir(tmpdir / "tmp")
+    molecules, reactions, edges, frame_colors = setup_graphviz_graph
+    filename = str(tmpdir / "arch.tar")
 
-    with pytest.raises(FileNotFoundError, match=".*'neato'.*"):
-        setup_graphviz_graph.to_image()
+    image.make_visjs_page(filename, molecules, reactions, edges, frame_colors)
+
+    assert os.path.exists(filename)
+    with TarFile(filename) as tarobj:
+        assert "./route.html" in tarobj.getnames()
+        assert len([name for name in tarobj.getnames() if name.endswith(".png")]) == 1

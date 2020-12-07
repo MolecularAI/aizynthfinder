@@ -1,0 +1,30 @@
+strict digraph "" {
+         graph [layout="dot",
+                rankdir="RL",
+                {% if use_splines %}
+                splines="ortho"
+                {% endif %}
+        ];
+node [label="\N"];
+    {% for molecule, image_filepath in molecules.items() %}
+    {{ id(molecule) }} [
+        label="",
+        color="white",
+        shape="none",
+        image="{{ image_filepath }}"
+    ];
+    {% endfor %}
+    {% for reaction in reactions %}
+    {{ id(reaction) }} [
+        label="",
+        fillcolor="black",
+        shape="circle",
+        style="filled",
+        width="0.1",
+        fixedsize="true"
+    ];
+    {% endfor %}
+    {% for nodes in edges %}
+    {{ id(nodes[0]) }} -> {{ id(nodes[1]) }} [arrowhead="none"];
+    {% endfor %}
+}
