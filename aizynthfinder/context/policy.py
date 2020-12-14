@@ -96,7 +96,7 @@ class ExpansionPolicy(ContextCollection):
         :raises PolicyException: if the length of the model output vector is not same as the number of templates
         """
         self._logger.info(f"Loading expansion policy model from {source} to {key}")
-        model = load_model(source, key)
+        model = load_model(source, key, self._config.use_remote_models)
 
         self._logger.info(f"Loading templates from {templatefile} to {key}")
         templates = pd.read_hdf(templatefile, "table")
@@ -206,7 +206,9 @@ class FilterPolicy(ContextCollection):
         :type key: str
         """
         self._logger.info(f"Loading filter policy model from {source} to {key}")
-        self._items[key] = {"model": load_model(source, key)}
+        self._items[key] = {
+            "model": load_model(source, key, self._config.use_remote_models)
+        }
 
     def load_from_config(self, **config):
         """

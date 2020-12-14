@@ -6,6 +6,7 @@ import yaml
 import pytest
 
 from aizynthfinder.interfaces import AiZynthApp
+from aizynthfinder.interfaces.gui import ClusteringGui
 from aizynthfinder.interfaces.aizynthapp import main as app_main
 from aizynthfinder.interfaces.aizynthcli import main as cli_main
 from aizynthfinder.tools.make_stock import main as make_stock_main
@@ -17,6 +18,7 @@ from aizynthfinder.training.make_false_products import main as make_false_main
 from aizynthfinder.tools.download_public_data import main as download_main
 from aizynthfinder.training.utils import Config
 from aizynthfinder.chem import MoleculeException
+from aizynthfinder.analysis import RouteCollection, ReactionTree
 
 
 def test_create_gui_app(mocker):
@@ -26,6 +28,21 @@ def test_create_gui_app(mocker):
     display_patch.assert_not_called()
 
     AiZynthApp(configfile=None)
+
+    display_patch.assert_called()
+
+
+def test_create_clustering_gui(mocker, load_reaction_tree):
+    collection = RouteCollection(
+        reaction_trees=[
+            ReactionTree.from_dict(
+                load_reaction_tree("routes_for_clustering.json", idx)
+            )
+            for idx in range(3)
+        ]
+    )
+    display_patch = mocker.patch("aizynthfinder.interfaces.gui.clustering.display")
+    ClusteringGui(collection)
 
     display_patch.assert_called()
 

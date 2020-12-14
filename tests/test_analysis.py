@@ -3,6 +3,7 @@ import os
 from tarfile import TarFile
 
 import numpy as np
+import pytest
 
 from aizynthfinder.chem import Molecule
 from aizynthfinder.analysis import TreeAnalysis, ReactionTree, RouteCollection
@@ -266,6 +267,24 @@ def test_route_node_depth_from_json(load_reaction_tree):
         assert rt.depth(mol) == 2 * rt.graph.nodes[mol]["transform"]
 
 
+def test_route_distance_self(load_reaction_tree):
+    dict_ = load_reaction_tree("sample_reaction_with_hidden.json", 0)
+    rt = ReactionTree.from_dict(dict_)
+
+    assert rt.distance_to(rt) == 0.0
+
+
+def test_route_distance_other(load_reaction_tree):
+    dict_ = load_reaction_tree("routes_for_clustering.json", 0)
+    rt1 = ReactionTree.from_dict(dict_)
+    dict_ = load_reaction_tree("routes_for_clustering.json", 1)
+    rt2 = ReactionTree.from_dict(dict_)
+
+    dist = rt1.distance_to(rt2, content="molecules")
+
+    assert pytest.approx(dist, abs=1e-2) == 2.6522
+
+
 def test_create_route_collection_full(setup_analysis, mocker):
     analysis, _ = setup_analysis()
 
@@ -434,3 +453,43 @@ def test_create_combine_tree_to_visjs(load_reaction_tree, tmpdir):
     with TarFile(tar_filename) as tarobj:
         assert "./route.html" in tarobj.getnames()
         assert len([name for name in tarobj.getnames() if name.endswith(".png")]) == 8
+
+
+def test_distance_collection(load_reaction_tree):
+    collection = RouteCollection(
+        reaction_trees=[
+            ReactionTree.from_dict(
+                load_reaction_tree("routes_for_clustering.json", idx)
+            )
+            for idx in range(3)
+        ]
+    )
+
+    dist_mat1 = collection.distance_matrix()
+    dist_mat2 = collection.distance_matrix(recreate=True)
+
+    assert (dist_mat1 - dist_mat2).sum() == 0
+
+    dist_mat3 = collection.distance_matrix(content="molecules")
+
+    assert (dist_mat1 - dist_mat3).sum() != 0
+    assert len(dist_mat3) == 3
+    assert pytest.approx(dist_mat3[0, 1], abs=1e-2) == 2.6522
+    assert pytest.approx(dist_mat3[0, 2], abs=1e-2) == 3.0779
+    assert pytest.approx(dist_mat3[2, 1], abs=1e-2) == 0.7483
+
+
+def test_clustering_collection(load_reaction_tree):
+    collection = RouteCollection(
+        reaction_trees=[
+            ReactionTree.from_dict(
+                load_reaction_tree("routes_for_clustering.json", idx)
+            )
+            for idx in range(3)
+        ]
+    )
+    collection.cluster(n_clusters=1)
+
+    assert len(collection.clusters) == 2
+    assert collection.clusters[0].reaction_trees == collection.reaction_trees[1:3]
+    assert collection.clusters[1].reaction_trees == [collection.reaction_trees[0]]

@@ -2,13 +2,47 @@ import pytest
 import sys
 
 from aizynthfinder.chem import Molecule
-from aizynthfinder.context.stock import MongoDbInchiKeyQuery
+from aizynthfinder.context.stock import (
+    MongoDbInchiKeyQuery,
+    StockQueryMixin,
+    StockException,
+)
 from aizynthfinder.tools.make_stock import (
     extract_plain_smiles,
     extract_smiles_from_module,
     make_hdf5_stock,
     make_mongo_stock,
 )
+
+
+@pytest.fixture
+def make_stock_query():
+    class StockQuery(StockQueryMixin):
+        def __init__(self, mols, price, amount):
+            self.mols = mols
+            self._price = price
+            self._amount = amount
+
+        def __contains__(self, mol):
+            return mol in self.mols
+
+        def __len__(self):
+            return len(self.mols)
+
+        def amount(self, mol):
+            if mol in self._amount:
+                return self._amount[mol]
+            raise StockException()
+
+        def price(self, mol):
+            if mol in self._price:
+                return self._price[mol]
+            raise StockException()
+
+    def wrapper(mols, amount=None, price=None):
+        return StockQuery(mols, price or {}, amount or {})
+
+    return wrapper
 
 
 def test_load_stock(stock, shared_datadir):
@@ -104,9 +138,122 @@ def test_exclude_many(stock, shared_datadir):
     assert toluene not in stock
 
 
+def test_price_no_price(stock, shared_datadir):
+    filename = str(shared_datadir / "stock1.h5")
+    stock.load(filename, "stock1")
+    stock.select(["stock1"])
+
+    with pytest.raises(StockException):
+        stock.price(Molecule(smiles="c1ccccc1"))
+
+
+def test_price_with_price(stock, make_stock_query):
+    mol = Molecule(smiles="c1ccccc1")
+    price = {mol: 14}
+    stock.load(make_stock_query([mol], price=price), "stock1")
+    stock.select(["stock1"])
+
+    assert stock.price(mol) == 14
+
+
+def test_price_with_price_raises(stock, make_stock_query):
+    mol = Molecule(smiles="c1ccccc1")
+    stock.load(make_stock_query([mol]), "stock1")
+    stock.select(["stock1"])
+
+    with pytest.raises(StockException):
+        stock.price(Molecule(smiles="c1ccccc1"))
+
+
+def test_amount_no_amount(stock, shared_datadir):
+    filename = str(shared_datadir / "stock1.h5")
+    stock.load(filename, "stock1")
+    stock.select(["stock1"])
+
+    with pytest.raises(StockException):
+        stock.amount(Molecule(smiles="c1ccccc1"))
+
+
+def test_amount_with_amount(stock, make_stock_query):
+    mol = Molecule(smiles="c1ccccc1")
+    amount = {mol: 14}
+    stock.load(make_stock_query([mol], amount=amount), "stock1")
+    stock.select(["stock1"])
+
+    assert stock.amount(mol) == 14
+
+
+def test_amount_with_amount_raises(stock, make_stock_query):
+    mol = Molecule(smiles="c1ccccc1")
+    stock.load(make_stock_query([mol]), "stock1")
+    stock.select(["stock1"])
+
+    with pytest.raises(StockException):
+        stock.amount(Molecule(smiles="c1ccccc1"))
+
+
+def test_counts_filter(stock, make_stock_query):
+    mol1 = Molecule(smiles="c1ccccc1")
+    mol2 = Molecule(smiles="CC(=O)CO")
+    stock.load(make_stock_query([mol1, mol2]), "stock1")
+    stock.select(["stock1"])
+
+    stock.set_stop_criteria({"size": {"C": 2}})
+
+    assert mol1 not in stock
+
+    stock.set_stop_criteria({"size": {"C": 10}})
+
+    assert mol1 in stock
+
+    stock.set_stop_criteria({"size": {"C": 10, "O": 0}})
+
+    assert mol1 in stock
+    assert mol2 not in stock
+
+
+def test_no_entries_filter(stock, make_stock_query):
+    stock.load(make_stock_query([]), "stock1")
+    stock.select(["stock1"])
+
+    stock.set_stop_criteria({"size": {"C": 10, "O": 0}})
+
+    assert Molecule(smiles="c1ccccc1") not in stock
+
+
+def test_amounts_filter(stock, make_stock_query):
+    mol1 = Molecule(smiles="c1ccccc1")
+    mol2 = Molecule(smiles="CC(=O)CO")
+    mol3 = Molecule(smiles="CCC")
+    query = make_stock_query([mol1, mol2, mol3], amount={mol1: 10, mol2: 5})
+    stock.load(query, "stock1")
+    stock.select(["stock1"])
+
+    stock.set_stop_criteria({"amount": 10})
+
+    assert mol1 in stock
+    assert mol2 not in stock
+    assert mol3 in stock
+
+
+def test_price_filter(stock, make_stock_query):
+    mol1 = Molecule(smiles="c1ccccc1")
+    mol2 = Molecule(smiles="CC(=O)CO")
+    mol3 = Molecule(smiles="CCC")
+    query = make_stock_query([mol1, mol2, mol3], price={mol1: 10, mol2: 5})
+    stock.load(query, "stock1")
+    stock.select(["stock1"])
+
+    stock.set_stop_criteria({"price": 5})
+
+    assert mol1 not in stock
+    assert mol2 in stock
+    assert mol3 in stock
+
+
 @pytest.fixture
 def mocked_mongo_db_query(mocker):
-    mocked_client = mocker.patch("aizynthfinder.context.stock.MongoClient")
+    mocked_client = mocker.patch("aizynthfinder.context.stock.get_mongo_client")
 
     def wrapper(**kwargs):
         return mocked_client, MongoDbInchiKeyQuery(**kwargs)
@@ -117,7 +264,7 @@ def mocked_mongo_db_query(mocker):
 def test_mongodb_load_default(mocked_mongo_db_query):
     mocked_client, query = mocked_mongo_db_query()
 
-    mocked_client.assert_called_with(None)
+    mocked_client.assert_called_with("localhost")
     query.client.__getitem__.assert_called_with("stock_db")
     query.database.__getitem__.assert_called_with("molecules")
 

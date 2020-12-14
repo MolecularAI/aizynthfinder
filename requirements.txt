@@ -12,6 +12,8 @@ more-itertools>=8.2.0,<9.0.0
 scikit-learn>=0.17.0,<1.0.0
 requests>=2.23.0,<3.0.0
 deprecated>=1.2.10,<2.0.0
-grpcio==1.24.3
-tensorflow-serving-api==2.1.0
-# rdkit, tensorflow and pygraphviz needs to be installed with conda
+grpcio>=1.24.0,<2.0.0
+tensorflow-serving-api>=2.1.0,<3.0.0
+apted>=1.0.3,<2.0.0
+matplotlib>=3.0.0,<4.0.0
+# rdkit, tensorflow and graphviz needs to be installed with conda

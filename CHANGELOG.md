@@ -1,5 +1,20 @@
 # CHANGELOG
 
+## Version 2.2.0 - 2020-12-14 (2020-11-23)
+
+### Features
+
+- Add support for clustering of routes
+- Add new scorers for total price and route score
+- Add support for adding stop criteria to all stocks
+- Add stop criteria UI for Jupyter notebook
+
+### Trivial changes
+
+- Refactor handling of MongoDB instances
+- Refactor code to connect with REST and gRPC servers
+
+
 ## Version 2.1.0 - 2020-12-07 (2020-11-03)
 
 ### Features

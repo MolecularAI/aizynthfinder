@@ -11,6 +11,8 @@ Currently, there are a few scoring functions available
     * Number of pre-cursors - the number of pre-cursors in the route
     * Number of pre-cursors in stock - the number of the pre-cursors that are purchaseable
     * Average template occurence - the average occurence of the templates used in the route
+    * Sum of prices - the plain sum of the price of all pre-cursors
+    * Route cost score - the cost of the synthesizing the route (Badowski et al. Chem Sci. 2019, 10, 4640)
 
 
 The *State score* is the score that is guiding the tree search in the :doc:`update phase <sequences>`, and 

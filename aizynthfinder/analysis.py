@@ -6,6 +6,7 @@ from collections import defaultdict
 import numpy as np
 import networkx as nx
 
+
 from aizynthfinder.chem import (
     Molecule,
     hash_reactions,
@@ -16,6 +17,7 @@ from aizynthfinder.utils.analysis_helpers import (
     ReactionTreeFromMcts,
     CombinedReactionTrees,
 )
+from aizynthfinder.utils.route_clustering import ReactionTreeWrapper, ClusteringHelper
 
 
 class TreeAnalysis:
@@ -56,7 +58,7 @@ class TreeAnalysis:
         sorted_nodes, _ = self.scorer.sort(nodes)
         return sorted_nodes[0]
 
-    def sort_nodes(self, min_return=5):
+    def sort_nodes(self, min_return=5, max_return=25):
         """
         Sort and select the nodes, so that the best scoring routes are returned.
         The algorithm filter away identical routes and returns at minimum the number specified.
@@ -64,6 +66,8 @@ class TreeAnalysis:
 
         :param min_return: the minium number of routes to return, defaults to 5
         :type min_return: int, optional
+        :param max_return: the maximum number of routes to return
+        :type max_return: int, optional
         :return: the nodes
         :rtype: list of Node
         :return: the score
@@ -91,6 +95,9 @@ class TreeAnalysis:
             best_nodes.append(node)
             best_scores.append(score)
             last_score = score
+
+            if max_return and len(best_nodes) == max_return:
+                break
 
         return best_nodes, best_scores
 
@@ -224,6 +231,24 @@ class ReactionTree:
         """
         return self.graph.nodes[node].get("depth", -1)
 
+    def distance_to(self, other, content="both"):
+        """
+        Calculate the distance to another reaction tree
+
+        This is a tree edit distance, with unit cost to
+        insert and deleted nodes, and the Jaccard distance for substituting nodes
+
+        :param other: the reaction tree to compare to
+        :type other: ReactionTree
+        :param content: determine what part of the tree to include in the calculation
+        :type content: TreeContent or str, optional
+        :return: the distance between the routes
+        :rtype: float
+        """
+        self_wrapper = ReactionTreeWrapper(self, content)
+        other_wrapper = ReactionTreeWrapper(other, content)
+        return self_wrapper.distance_to(other_wrapper)
+
     def in_stock(self, node):
         """
         Return if a node in the route is in stock
@@ -352,9 +377,11 @@ class ReactionTree:
 
 class RouteCollection:
     """
-    Holds a collections of reaction routes, i.e. the top
-    scored nodes, their scores and the reaction trees created
-    from them.
+    Holds a collections of reaction routes.
+
+    If can be the top scored nodes, their scores and
+    the reaction trees created from them.
+    It can also be a cluster of such routes.
 
     The class has the functionality to compute collective results
     for the different routes such as images.
@@ -373,6 +400,8 @@ class RouteCollection:
     :vartype scores: list of float
     :ivar reaction_trees: the reaction trees created from the top-ranked nodes
     :vartype reaction_trees: list of Reaction Tree
+    :ivar clusters: the created clusters from the collection
+    :vartype clusters: list of RouteCollection
 
     :param reaction_trees: the trees to base the collection on
     :type reaction_trees: list of ReactionTree
@@ -398,6 +427,8 @@ class RouteCollection:
         self._dicts = self._unpack_kwarg("dicts", **kwargs)
         self._images = self._unpack_kwarg("images", **kwargs)
         self._jsons = self._unpack_kwarg("jsons", **kwargs)
+        self._clusters = self._unpack_kwarg("clusters", **kwargs)
+        self._distance_matrix = {}
         self._combined_reaction_trees = None
 
     @classmethod
@@ -454,6 +485,34 @@ class RouteCollection:
             self.make_jsons()
         return self._jsons
 
+    def cluster(self, n_clusters, max_clusters=5, **kwargs):
+        """
+        Cluster the route collection into a number of clusters.
+
+        Additional arguments to the distance or clustering algorithm
+        can be passed in as key-word arguments.
+
+        If the number of reaction trees are less than 3, no clustering will be performed
+
+        :param n_clusters: the desired number of clusters, if less than 2 triggers optimization
+        :type n_clusters: int
+        :param max_clusters: the maximum number of clusters to consider
+        :type max_clusters: int, optional
+        :return: the cluster labels
+        :rtype: np.ndarray
+        """
+        if len(self.reaction_trees) < 3:
+            return []
+        content = kwargs.pop("content", "both")
+        labels = ClusteringHelper.cluster(
+            self.distance_matrix(content=content),
+            n_clusters,
+            max_clusters=max_clusters,
+            **kwargs
+        )
+        self._make_clusters(labels)
+        return labels
+
     def combined_reaction_trees(self, recreate=False):
         """
         Return an object that combines all the reaction tree into a single reaction tree graph
@@ -477,9 +536,9 @@ class RouteCollection:
         else:
             list_ = self.reaction_trees
 
-        for idx, item in enumerate(list_):
-            scores = {repr(scorer): scorer(item) for scorer in scorers}
-            self.all_scores[idx].update(scores)
+        for scorer in scorers:
+            for idx, score in enumerate(scorer(list_)):
+                self.all_scores[idx][repr(scorer)] = score
         self._update_route_dict(self.all_scores, "all_score")
 
     def dict_with_scores(self):
@@ -495,6 +554,32 @@ class RouteCollection:
             dicts.append(dict(dict_))
             dicts[-1]["scores"] = dict(scores)
         return dicts
+
+    def distance_matrix(self, content="both", recreate=False):
+        """
+        Compute the distance matrix between each pair of reaction trees
+
+        :param content: determine what part of the tree to include in the calculation
+        :type content: TreeContent or str, optional
+        :param recreate: if False, use a cached one if available
+        :type recreate: bool, optional
+        :return: the square distance matrix
+        :rtype: numpy.ndarray
+        """
+        if self._distance_matrix.get(content) is not None and not recreate:
+            return self._distance_matrix[content]
+        distances = np.zeros([len(self), len(self)])
+        distance_wrappers = [
+            ReactionTreeWrapper(rt, content) for rt in self.reaction_trees
+        ]
+        for i, iwrapper in enumerate(distance_wrappers):
+            # fmt: off
+            for j, jwrapper in enumerate(distance_wrappers[i + 1:], i + 1):
+                distances[i, j] = iwrapper.distance_to(jwrapper)
+                distances[j, i] = distances[i, j]
+            # fmt: on
+        self._distance_matrix[content] = distances
+        return distances
 
     def make_dicts(self):
         """ Convert all reaction trees to dictionaries
@@ -553,6 +638,28 @@ class RouteCollection:
         for idx, score in enumerate(self.scores):
             self.all_scores[idx][repr(scorer)] = score
         self._update_route_dict(self.all_scores, "all_score")
+
+    def _make_clusters(self, clusters):
+        n_clusters = max(clusters) + 1
+        self.clusters = []
+        for cluster in range(n_clusters):
+            selection = clusters == cluster
+            kwargs = {
+                "reaction_trees": self._select_subset(self.reaction_trees, selection),
+                "nodes": self._select_subset(self.nodes, selection),
+                "scores": self._select_subset(self.scores, selection),
+            }
+            if self._images:
+                kwargs["images"] = self._select_subset(self.images, selection)
+            if self._dicts:
+                kwargs["dicts"] = self._select_subset(self.dicts, selection)
+            if self._jsons:
+                kwargs["jsons"] = self._select_subset(self.jsons, selection)
+
+            self.clusters.append(RouteCollection(**kwargs))
+
+    def _select_subset(self, arr, selection):
+        return [item for sel, item in zip(selection, arr) if sel]
 
     def _unpack_kwarg(self, key, **kwargs):
         if key not in kwargs:

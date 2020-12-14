@@ -26,19 +26,39 @@ By adding these lines to the configuration file, the Mongo database will be used
 If no options are provided to the ``mongodb_stock`` key, the host, database and collection are taken to be `localhost`, 
 `stock_db`, and `molecules`, respectively. 
 
+Stop criteria
+-------------
+
+The stock can be used to stop the tree search based on three criteria: a) minimum price, b) maximum amount and c) count of different elements in the molecule.
+Note that the stock query class need to support querying for price and amount, if the stop criteria should work properly.
+
+The stop criteria can be specified in the configuration file 
+
+.. code-block:: yaml
+
+    stock:
+        stop_criteria:
+            price: 10
+            counts:
+                C: 10
+
+
+In the Jupyter GUI you can set the limit on the element occurences, but currently not the price and amount limits. 
+
 Custom stock
 ------------
 
-Secondly, support for any type of lookup is provided. You just need to write a python class that implements the ``__contains__`` 
-and ``__len__`` methods. The first method is used for lookup and should take a ``Molecule`` object as only argument.
-The second is used for providing the number of molecule and does not need to be implemented if it is not possible to compute.
+Support for any type of lookup is provided. You just need to write a python class that implements the ``__contains__`` 
+and subclasses the ``aizynthfinder.context.stock.StockQueryMixin``. The ``__contains__`` method is used for lookup and should take a ``Molecule`` object as only argument.
+The ``StockQueryMixin`` mixin class provide a default interface for some methods that perhaps isn't possible to implement in all query classes.
 
 This is an example:
 
 .. code-block::
 
   from rdkit.Chem import Lipinski
-  class CriteriaStock:
+  from aizynthfinder.context.stock import StockQueryMixin
+  class CriteriaStock(StockQueryMixin):
       def __contains__(self, mol):
           return Lipinski.HeavyAtomCount(mol.rd_mol) < 10
 

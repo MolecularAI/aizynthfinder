@@ -81,11 +81,34 @@ class AiZynthApp:
         display(self._output["smiles"])
 
         self._input["stocks"] = [
-            Checkbox(value=True, description=key, layout={"justify": "left"})
+            Checkbox(
+                value=True,
+                description=key,
+                style={"description_width": "initial"},
+                layout={"justify": "left"},
+            )
             for key in self.finder.stock.items
         ]
+
+        list_ = [Label("Limit atom occurrences")]
+        self._input["stocks_atom_count_on"] = []
+        self._input["stocks_atom_count"] = []
+        current_criteria = self.finder.stock.stop_criteria.get("counts", {})
+        for atom in ["C", "O", "N"]:
+            chk_box = Checkbox(
+                value=atom in current_criteria,
+                description=atom,
+                layout={"justify": "left", "width": "80px"},
+                style={"description_width": "initial"},
+            )
+            self._input["stocks_atom_count_on"].append(chk_box)
+            inpt = BoundedIntText(
+                value=current_criteria.get(atom, 0), min=0, layout={"width": "80px"},
+            )
+            self._input["stocks_atom_count"].append(inpt)
+            list_.append(HBox([chk_box, inpt]))
         box_stocks = VBox(
-            [Label("Stocks")] + self._input["stocks"],
+            [Label("Stocks")] + self._input["stocks"] + list_,
             layout={"border": "1px solid silver"},
         )
 
@@ -267,6 +290,13 @@ class AiZynthApp:
                 cb.description for cb in self._input["stocks"] if cb.value
             ]
             self.finder.stock.select(selected_stocks)
+            atom_count_limits = {}
+            for cb_input, value_input in zip(
+                self._input["stocks_atom_count_on"], self._input["stocks_atom_count"]
+            ):
+                if cb_input.value:
+                    atom_count_limits[cb_input.description] = value_input.value
+            self.finder.stock.set_stop_criteria({"counts": atom_count_limits})
             self.finder.expansion_policy.select(self._input["policy"].value)
             if self._input["filter"].value == "None":
                 self.finder.filter_policy.deselect()

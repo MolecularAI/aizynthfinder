@@ -21,7 +21,7 @@ To install aizynthfinder, follow these steps:
 
 ```
 conda install -c rdkit "rdkit=>2019.09.1" -y
-conda install -c anaconda tensorflow>=2.1.0 -y
+conda install -c anaconda "tensorflow>=2.1.0" -y
 conda install graphviz -y
 ```
 

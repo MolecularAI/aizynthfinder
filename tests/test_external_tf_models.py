@@ -2,19 +2,14 @@ import pytest
 import numpy as np
 import tensorflow as tf
 
+import aizynthfinder.utils.models as models
 from aizynthfinder.utils.models import ExternalModelViaREST, ExternalModelViaGRPC
 
 
 @pytest.fixture()
 def setup_rest_mock(mocker):
-    mocked_host = mocker.patch(
-        "aizynthfinder.utils.models.TF_SERVING_HOST", mocker.PropertyMock,
-    )
-    mocked_host.return_value = "localhost"
-    mocked_port = mocker.patch(
-        "aizynthfinder.utils.models.TF_SERVING_REST_PORT", mocker.PropertyMock,
-    )
-    mocked_port.return_value = "255"
+    models.TF_SERVING_HOST = "localhost"
+    models.TF_SERVING_REST_PORT = "255"
     mocked_request = mocker.patch("aizynthfinder.utils.models.requests.request")
     mocked_request.return_value.status_code = 200
     mocked_request.return_value.headers = {"Content-Type": "application/json"}
@@ -26,19 +21,16 @@ def setup_rest_mock(mocker):
             mocked_request.return_value.json.return_value = response
         return mocked_request
 
-    return wrapper
+    yield wrapper
+
+    models.TF_SERVING_HOST = None
+    models.TF_SERVING_REST_PORT = None
 
 
 @pytest.fixture()
 def setup_grpc_mock(mocker, signature_grpc):
-    mocked_host = mocker.patch(
-        "aizynthfinder.utils.models.TF_SERVING_HOST", mocker.PropertyMock,
-    )
-    mocked_host.return_value = "localhost"
-    mocked_port = mocker.patch(
-        "aizynthfinder.utils.models.TF_SERVING_GRPC_PORT", mocker.PropertyMock,
-    )
-    mocked_port.return_value = "255"
+    models.TF_SERVING_HOST = "localhost"
+    models.TF_SERVING_GRPC_PORT = "255"
     mocker.patch("aizynthfinder.utils.models.grpc.insecure_channel")
     mocked_pred_service = mocker.patch(
         "aizynthfinder.utils.models.prediction_service_pb2_grpc.PredictionServiceStub"
@@ -55,7 +47,10 @@ def setup_grpc_mock(mocker, signature_grpc):
             return
         mocked_pred_service.return_value.Predict.return_value.outputs = response
 
-    return wrapper
+    yield wrapper
+
+    models.TF_SERVING_HOST = None
+    models.TF_SERVING_GRPC_PORT = None
 
 
 @pytest.fixture()
@@ -112,7 +107,7 @@ def test_predict_tf_rest_model(signature_rest, setup_rest_mock):
 
     out = model.predict(np.zeros([1, len(model)]))
 
-    assert out == [0.0, 1.0]
+    assert list(out) == [0.0, 1.0]
 
 
 def test_setup_tf_grpc_model(setup_grpc_mock):

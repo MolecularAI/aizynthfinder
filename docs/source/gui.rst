@@ -59,3 +59,20 @@ This is done by using the ``finder`` property of the app object. The finder hold
 
     finder = app.finder
     stats = finder.extract_statistics()
+
+
+Clustering
+-----------
+
+There is a GUI extension to perform clustering of the routes. Enter the following a new cell 
+
+.. code-block::
+
+    from aizynthfinder.interfaces.gui import ClusteringGui
+    ClusteringGui.from_app(app)
+
+
+A GUI like this will be shown, where you see the hierarchy of the routes and then can select how many
+clusters you want to create.
+
+.. image:: gui_clustering.png

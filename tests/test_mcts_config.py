@@ -77,18 +77,31 @@ def test_load_filter_policy(write_yaml, shared_datadir, mock_policy_model):
     assert config.filter_policy.items == ["test"]
 
 
+def test_load_stop_criteria(write_yaml):
+    filename = write_yaml(
+        {"stock": {"stop_criteria": {"price": 100, "counts": {"C": 10}}}}
+    )
+
+    config = Configuration.from_file(filename)
+
+    set_keys = [key for key, item in config.stock.stop_criteria.items() if item]
+    assert set_keys == ["price", "counts"]
+    assert list(config.stock.stop_criteria["counts"].keys()) == ["C"]
+    assert config.stock.stop_criteria["counts"]["C"] == 10
+
+
 def test_load_default_mongodb(write_yaml, mocker):
-    mocked_client = mocker.patch("aizynthfinder.context.stock.MongoClient")
+    mocked_client = mocker.patch("aizynthfinder.context.stock.get_mongo_client")
     filename = write_yaml({"stock": {"mongodb": {}}})
 
     config = Configuration.from_file(filename)
 
-    mocked_client.assert_called_with(None)
+    mocked_client.assert_called_with("localhost")
     assert config.stock.items == ["mongodb_stock"]
 
 
 def test_load_specific_mongodb(write_yaml, mocker):
-    mocked_client = mocker.patch("aizynthfinder.context.stock.MongoClient")
+    mocked_client = mocker.patch("aizynthfinder.context.stock.get_mongo_client")
     filename = write_yaml(
         {
             "stock": {
@@ -160,6 +173,24 @@ def test_load_external_stock_incorrect_class(write_yaml, shared_datadir):
     config = Configuration.from_file(filename)
 
     assert config.stock.items == []
+
+
+def test_load_scorer_from_context_module(write_yaml):
+    filename = write_yaml({"scorer": {"PriceSumScorer": None}})
+
+    config = Configuration.from_file(filename)
+
+    assert "sum of prices" in config.scorers.items
+
+
+def test_load_scorer_from_module_spec(write_yaml):
+    filename = write_yaml(
+        {"scorer": {"aizynthfinder.context.scoring.PriceSumScorer": None}}
+    )
+
+    config = Configuration.from_file(filename)
+
+    assert "sum of prices" in config.scorers.items
 
 
 def test_init_search_yaml(write_yaml):

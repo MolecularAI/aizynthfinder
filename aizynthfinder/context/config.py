@@ -67,6 +67,7 @@ class Configuration:
             **source.get("filter", {}).get("files", {})
         )
         config_obj.stock.load_from_config(**source.get("stock", {}))
+        config_obj.scorers.load_from_config(**source.get("scorer", {}))
 
         return config_obj
 

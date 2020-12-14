@@ -7,6 +7,7 @@ import warnings
 import logging
 import importlib
 import tempfile
+import time
 from collections import defaultdict
 
 import pandas as pd
@@ -14,6 +15,16 @@ import pandas as pd
 from aizynthfinder.utils.files import cat_hdf_files, split_file, start_processes
 from aizynthfinder.aizynthfinder import AiZynthFinder
 from aizynthfinder.utils.logging import logger, setup_logger
+
+
+def _do_clustering(finder, results, detailed_results):
+    t0 = time.perf_counter_ns()
+    results["cluster_labels"] = finder.routes.cluster(n_clusters=0)
+    if not detailed_results:
+        return
+
+    results["cluster_time"] = (time.perf_counter_ns() - t0) * 1e-9
+    results["distance_matrix"] = finder.routes.distance_matrix().tolist()
 
 
 def _get_arguments():
@@ -44,6 +55,12 @@ def _get_arguments():
         type=int,
         help="if given, the input is split over a number of processes",
     )
+    parser.add_argument(
+        "--cluster",
+        action="store_true",
+        default=False,
+        help="if provided, perform automatic clustering",
+    )
     return parser.parse_args()
 
 
@@ -60,7 +77,7 @@ def _select_stocks(finder, args):
     finder.stock.select(stocks or finder.stock.items)
 
 
-def _process_single_smiles(smiles, finder, output_name):
+def _process_single_smiles(smiles, finder, output_name, do_clustering):
     output_name = output_name or "trees.json"
     finder.target_smiles = smiles
     finder.prepare_tree()
@@ -75,13 +92,15 @@ def _process_single_smiles(smiles, finder, output_name):
     logger().info(f"Scores for best routes: {scores}")
 
     stats = finder.extract_statistics()
+    if do_clustering:
+        _do_clustering(finder, stats, detailed_results=False)
     stats_str = "\n".join(
         f"{key.replace('_', ' ')}: {value}" for key, value in stats.items()
     )
     logger().info(stats_str)
 
 
-def _process_multi_smiles(filename, finder, output_name):
+def _process_multi_smiles(filename, finder, output_name, do_clustering):
     output_name = output_name or "output.hdf5"
     with open(filename, "r") as fileobj:
         smiles = [line.strip() for line in fileobj.readlines()]
@@ -95,6 +114,8 @@ def _process_multi_smiles(filename, finder, output_name):
         stats = finder.extract_statistics()
 
         logger().info(f"Done with {smi} in {search_time:.3} s")
+        if do_clustering:
+            _do_clustering(finder, stats, detailed_results=True)
         for key, value in stats.items():
             results[key].append(value)
         results["top_scores"].append(
@@ -125,6 +146,8 @@ def _multiprocess_smiles(args):
         if args.stocks:
             cmd_args.append("--stocks")
             cmd_args.extend(args.stocks)
+        if args.cluster:
+            cmd_args.append("--cluster")
         return cmd_args
 
     if not os.path.exists(args.smiles):
@@ -165,9 +188,9 @@ def main():
         pass
 
     if multi_smiles:
-        _process_multi_smiles(args.smiles, finder, args.output)
+        _process_multi_smiles(args.smiles, finder, args.output, args.cluster)
     else:
-        _process_single_smiles(args.smiles, finder, args.output)
+        _process_single_smiles(args.smiles, finder, args.output, args.cluster)
 
 
 if __name__ == "__main__":
