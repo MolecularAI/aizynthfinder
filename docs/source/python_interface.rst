@@ -27,7 +27,7 @@ by writing your own python interface. This is not recommended for most users.
 .. code-block:: python
 
     finder.stock.select("zinc")
-    finder.policy.select("full_uspto")
+    finder.expansion_policy.select("uspto")
 
 `zinc` and `full_uspto` where the keys given to the stock and the policy in the configuration file.
 
