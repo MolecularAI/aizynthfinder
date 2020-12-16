@@ -28,9 +28,10 @@ by writing your own python interface. This is not recommended for most users.
 
     finder.stock.select("zinc")
     finder.expansion_policy.select("uspto")
+    finder.filter_policy.select("uspto")
 
-`zinc` and `full_uspto` where the keys given to the stock and the policy in the configuration file.
-
+`zinc` and `uspto` where the keys given to the stock and the policy in the configuration file.
+The first policy set is the expansion policy and the second is the filter policy. The filter policy is optional.
 
 4. Set the target SMILES and perform the tree search
 
