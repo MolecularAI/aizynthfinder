@@ -1,5 +1,11 @@
 # CHANGELOG
 
+## Version 2.2.1 - 2020-12-18
+
+### Bugfixes
+
+- Include templates for producing routes in package
+
 ## Version 2.2.0 - 2020-12-14 (2020-11-23)
 
 ### Features

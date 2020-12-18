@@ -30,7 +30,7 @@ if you have GPU and CUDA libraries enabled on your machine, you can install the 
 * Secondly, install the ``aizynthfinder`` package
 
 ```
-python -m pip install https://github.com/MolecularAI/aizynthfinder/archive/v2.2.0.tar.gz
+python -m pip install https://github.com/MolecularAI/aizynthfinder/archive/v2.2.1.tar.gz
 ```
 
 if you want to install the latest version

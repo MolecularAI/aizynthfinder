@@ -5,14 +5,14 @@ with open("requirements.txt", "r") as fileobj:
 
 setup(
     name="aizynthfinder",
-    version="2.2.0",
+    version="2.2.1",
     description="Retrosynthetic route finding using neural network guided Monte-Carlo tree search.",
     author="Molecular AI group",
     author_email="samuel.genheden@astrazeneca.com",
     license="MIT",
     packages=find_packages(exclude=("tests",)),
     install_requires=requirements,
-    package_data={"aizynthfinder": ["data/*.yml","data/templates/*"]},
+    package_data={"aizynthfinder": ["data/*.yml", "data/templates/*"]},
     entry_points={
         "console_scripts": [
             "aizynthapp = aizynthfinder.interfaces.aizynthapp:main",
