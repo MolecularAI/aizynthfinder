@@ -12,7 +12,7 @@ setup(
     license="MIT",
     packages=find_packages(exclude=("tests",)),
     install_requires=requirements,
-    package_data={"aizynthfinder": ["data/*.yml"]},
+    package_data={"aizynthfinder": ["data/*.yml","data/templates/*"]},
     entry_points={
         "console_scripts": [
             "aizynthapp = aizynthfinder.interfaces.aizynthapp:main",
