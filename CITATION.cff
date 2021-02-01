@@ -1,0 +1,46 @@
+# YAML 1.2
+---
+abstract: "We present the open-source AiZynthFinder software that can be readily used in retrosynthetic planning. The algorithm is based on a Monte Carlo tree search that recursively breaks down a molecule to purchasable precursors. The tree search is guided by an artificial neural network policy that suggests possible precursors by utilizing a library of known reaction templates. The software is fast and can typically find a solution in less than 10 s and perform a complete search in less than 1 min. Moreover, the development of the code was guided by a range of software engineering principles such as automatic testing, system design and continuous integration leading to robust software with high maintainability. Finally, the software is well documented to make it suitable for beginners. The software is available at http://www.github.com/MolecularAI/aizynthfinder."
+authors:
+  -
+    family-names: Genheden
+    given-names: Samuel
+  -
+    family-names: Thakkar
+    given-names: Amol
+  -
+    family-names: "Chadimová"
+    given-names: Veronika
+  -
+    family-names: Reymond
+    given-names: "Jean-Louis"
+  -
+    family-names: Engkvist
+    given-names: Ola
+  -
+    family-names: Bjerrum
+    given-names: Esben
+    orcid: "https://orcid.org/0000-0003-1614-7376"
+cff-version: "1.1.0"
+date-released: 2020-12-08
+doi: "https://doi.org/10.1186/s13321-020-00472-1"
+identifiers:
+  -
+    type: doi
+    value: "10.1186/s13321-020-00472-1"
+keywords:
+  - retrosynthesis
+  - casp
+  - retrosynthesis
+  - cheminformatics
+  - "neural-networks"
+  - "monte-carlo-tree-search"
+  - "chemical-reactions"
+  - astrazeneca
+  - "reaction-informatics"
+license: MIT
+message: "If you use this software, please cite it using these metadata."
+repository-code: "https://github.com/MolecularAI/aizynthfinder"
+title: AiZynthFinder
+version: "2.2.1"
+...
