@@ -25,8 +25,6 @@ conda install -c anaconda "tensorflow>=2.1.0" -y
 conda install graphviz -y
 ```
 
-if you have GPU and CUDA libraries enabled on your machine, you can install the ``tensorflow-gpu`` package instead.
-
 * Secondly, install the ``aizynthfinder`` package
 
 ```
