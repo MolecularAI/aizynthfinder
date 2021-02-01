@@ -1,6 +1,7 @@
-# aizynthfinder
+# AiZynthFinder [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/MolecularAI/aizynthfinder/blob/master/contrib/notebook.ipynb)
 
-aizynthfinder is a tool for retrosynthetic planning. The algorithm is based on a Monte Carlo tree search that recursively breaks down a molecule to purchasable precursors. The tree search is guided by a policy that suggests possible precursors by utilizing a neural network trained on a library of known reaction templates.  
+
+AiZynthFinder is a tool for retrosynthetic planning. The algorithm is based on a Monte Carlo tree search that recursively breaks down a molecule to purchasable precursors. The tree search is guided by a policy that suggests possible precursors by utilizing a neural network trained on a library of known reaction templates.  
 
 ## Prerequisites
 
@@ -43,7 +44,7 @@ python -m pip install -e .
 
 if you are a developer, using the repository.
 
-Note on the graphviz installation: this package does not depend on any third-party python interfaces to graphviz but instead calls the `neato` and `dot` executables directly. If these executable are not in the `$PATH` environmental variable, the generation of route images will not work. If unable to install it properly with the default conda chanel, try using `-c anaconda`. 
+Note on the graphviz installation: this package does not depend on any third-party python interfaces to graphviz but instead calls the `neato` and `dot` executables directly. If these executable are not in the `$PATH` environmental variable, the generation of route images will not work. If unable to install it properly with the default conda chanel, try using `-c anaconda`.
 
 ## Usage
 
@@ -69,12 +70,12 @@ Such files can be downloaded from [figshare](https://figshare.com/articles/AiZyn
 download_public_data my_folder
 ```
 
-where ``my_folder`` is the folder that you want download to. 
+where ``my_folder`` is the folder that you want download to.
 This will create a ``config.yml`` file that you can use with either ``aizynthcli`` or ``aizynthapp``.
 
 ### Testing
 
-Tests uses the ``pytest`` package. 
+Tests uses the ``pytest`` package.
 
 To use, first install the dependencies
 
