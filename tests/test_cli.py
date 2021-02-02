@@ -324,7 +324,7 @@ def test_download_public_data(tmpdir, mocker, add_cli_arguments):
     download_main()
 
     filenames = glob.glob(str(tmpdir / "*.hdf5"))
-    assert len(filenames) == 3
+    assert len(filenames) == 4
     for filename in filenames:
         with open(filename, "r") as fileobj:
             assert fileobj.read() == "abcdef"
