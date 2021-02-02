@@ -1,0 +1,10 @@
+name: aizynthfinder
+channels:
+  - conda-forge
+  - defaults
+dependencies:
+  - python>=3.6,<3.7
+  - poetry>=1.1.4,<2.0
+  - graphviz>=2.38,<3.0
+  - rdkit=2019.09.1 # https://github.com/MolecularAI/aizynthfinder/issues/19
+  - scipy>=1.0 # https://github.com/python-poetry/poetry/issues/1160

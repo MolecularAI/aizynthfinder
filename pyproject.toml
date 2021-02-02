@@ -1,0 +1,76 @@
+[tool.poetry]
+name = "aizynthfinder"
+version = "2.2.1"
+description = "Retrosynthetic route finding using neural network guided Monte-Carlo tree search"
+authors = ["Molecular AI group <samuel.genheden@astrazeneca.com>"]
+license = "MIT"
+include = ["aizynthfinder/data/*.yml", "aizynthfinder/data/templates/*"]
+readme = "README.md"
+homepage = "https://doi.org/10.1186/s13321-020-00472-1"
+repository = "https://github.com/MolecularAI/aizynthfinder"
+documentation = "https://molecularai.github.io/aizynthfinder"
+
+[tool.pytest.ini_options]
+mccabe-complexity = 9
+pep8maxlinelength = 120
+pep8ignore = "doc/source/*.py ALL"
+
+[tool.poetry.dependencies]
+python = "^3.6"
+ipywidgets = "^7.5.1"
+networkx = "^2.4"
+pandas = "^0.25.3"
+rdchiral = "^1.0.0"
+jinja2 = "^2.11.0"
+tables = "^3.6.1"
+jupyter = "^1.0.0"
+jupytext = "^1.3.3"
+tqdm = "^4.42.1"
+pymongo = "^3.10.1"
+pillow = "^7.0.0"
+more-itertools = "^8.2.0"
+scipy = "^1.0"
+scikit-learn = "^0.24.0"
+requests = "^2.23.0"
+deprecated = "^1.2.10"
+grpcio = "^1.24.0"
+tensorflow-serving-api = "^2.1.0"
+apted = "^1.0.3"
+matplotlib = "^3.0.0"
+tensorflow = "^2.1.0"
+graphviz = "^0.16"
+
+[tool.poetry.dev-dependencies]
+pytest = "^5.3.4"
+pytest-cov = "^2.8.1"
+pytest-datadir = "^1.3.1"
+pytest-mock = "^2.0.0"
+pytest-pep8 = "^1.0.6"
+pytest-mccabe = "^1.0.0"
+poethepoet = "^0.9.0"
+sphinx = "^3.0.0"
+black = "^19.10b0"
+
+[tool.poetry.scripts]
+aizynthapp = "aizynthfinder.interfaces.aizynthapp:main"
+aizynthcli = "aizynthfinder.interfaces.aizynthcli:main"
+smiles2stock = "aizynthfinder.tools.make_stock:main"
+cat_aizynth_output = "aizynthfinder.tools.cat_output:main"
+preprocess_rollout = "aizynthfinder.training.preprocess_expansion:main"
+preprocess_expansion = "aizynthfinder.training.preprocess_expansion:main"
+preprocess_filter = "aizynthfinder.training.preprocess_filter:main"
+preprocess_recommender = "aizynthfinder.training.preprocess_recommender:main"
+make_false_products = "aizynthfinder.training.make_false_products:main"
+aizynth_training = "aizynthfinder.training.training:main"
+download_public_data = "aizynthfinder.tools.download_public_data:main"
+
+[build-system]
+requires = ["poetry>=0.12"]
+build-backend = "poetry.masonry.api"
+
+[tool.poe.tasks]
+test = "pytest"
+document = ["document-help", "document-api", "document-build"]
+document-build = "sphinx-build -M html ./docs ./docs/build"
+document-api = "sphinx-apidoc -o ./docs ./aizynthfinder"
+document-help = { shell = "aizynthcli -h > ./docs/cli_help.txt" }
