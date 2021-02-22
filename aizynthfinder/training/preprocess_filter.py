@@ -14,7 +14,7 @@ from aizynthfinder.training.utils import (
 )
 
 
-def _get_config():
+def _get_config() -> Config:
     parser = argparse.ArgumentParser(
         "Tool to pre-process a template library to be used to train a in-scope filter network policy"
     )
@@ -24,9 +24,8 @@ def _get_config():
     return Config(args.config)
 
 
-def main():
-    """ Entry-point for the preprocess_filter tool
-    """
+def main() -> None:
+    """Entry-point for the preprocess_filter tool"""
     config = _get_config()
 
     true_dataset = pd.read_csv(
@@ -49,7 +48,7 @@ def main():
     labels = dataset["true_product"].to_numpy()
     split_and_save_data(labels, "labels", config)
 
-    print("Labels created and splitted, generating Inputs...", flush=True)
+    print("Labels created and split, generating Inputs...", flush=True)
     products = dataset["products"].to_numpy()
     reactants = dataset["reactants"].to_numpy()
     inputs = np.apply_along_axis(
@@ -64,7 +63,7 @@ def main():
     inputs = sparse.lil_matrix(inputs.T).tocsr()
     split_and_save_data(inputs, "inputs", config)
 
-    print("Inputs created and splitted, splitting Full Dataset...", flush=True)
+    print("Inputs created and split, splitting Full Dataset...", flush=True)
     split_and_save_data(dataset, "library", config)
 
 

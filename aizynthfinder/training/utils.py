@@ -1,8 +1,10 @@
 """ Module containing various classes and routines used in training tools
 """
+from __future__ import annotations
 import os
 import hashlib
 from collections.abc import Mapping
+from typing import TYPE_CHECKING
 
 import yaml
 import numpy as np
@@ -13,6 +15,16 @@ from sklearn.model_selection import train_test_split
 
 from aizynthfinder.utils.paths import data_path
 from aizynthfinder.chem import Molecule, MoleculeException
+
+if TYPE_CHECKING:
+    from aizynthfinder.utils.type_utils import (
+        StrDict,
+        Any,
+        List,
+        Union,
+        Tuple,
+        Sequence,
+    )
 
 
 class Config:
@@ -30,10 +42,9 @@ class Config:
         config["batch_size"] = 100
 
     :param config_filename: the path to a yaml file with settings
-    :type config_filename: str, optional
     """
 
-    def __init__(self, config_filename=None):
+    def __init__(self, config_filename: str = None) -> None:
         filename = os.path.join(data_path(), "default_training.yml")
         with open(filename, "r") as fileobj:
             default_config = yaml.load(fileobj.read(), Loader=yaml.SafeLoader)
@@ -47,13 +58,13 @@ class Config:
             user_config = yaml.load(fileobj.read(), Loader=yaml.SafeLoader)
         self._update_dict(default_config, user_config)
 
-    def __getitem__(self, item):
+    def __getitem__(self, item: str) -> Any:
         return self._config[item]
 
-    def __setitem__(self, item, value):
+    def __setitem__(self, item: str, value: Any) -> None:
         self._config[item] = value
 
-    def filename(self, label):
+    def filename(self, label: str) -> str:
         """
         Return the absolute path to a file specified partly
         by settings.
@@ -66,9 +77,7 @@ class Config:
         directly from the ``label`` argument.
 
         :param label: the file postfix
-        :type label: str
         :return: the filepath
-        :rtype: str
         """
         return os.path.join(
             self["output_path"],
@@ -76,7 +85,7 @@ class Config:
         )
 
     @staticmethod
-    def _update_dict(original, other):
+    def _update_dict(original: StrDict, other: StrDict) -> StrDict:
         # Used to complement the update method of the built-in dict type
         # it works for recursive dicts (to 1 level)
         for key, val in original.items():
@@ -92,18 +101,16 @@ class Config:
         return original
 
 
-def create_reactants_molecules(reactants_str):
+def create_reactants_molecules(reactants_str: str) -> List[Molecule]:
     """
     Create Molecule objects from a SMILE string of reactants.
 
     Only molecules with atom mapping is kept.
 
     :param reactants_str: the SMILES string of the reactants
-    :type reactants_str: str
     :return: the Molecule objects
-    :rtype: list of Molecule
     """
-    mols = mols = []
+    mols = []
     for smiles in reactants_str.split("."):
         try:
             mol = Molecule(smiles=smiles, sanitize=True)
@@ -115,13 +122,11 @@ def create_reactants_molecules(reactants_str):
     return mols
 
 
-def is_sanitizable(args):
+def is_sanitizable(args: Tuple[str]) -> bool:
     """
     Check whether a SMILES is sanitizable
     :param args: the SMILES in the first element
-    :type args: tuple
     :return: whether the SMILES is sanitizable
-    :rtype: bool
     """
     smiles = args[0]
     try:
@@ -132,28 +137,23 @@ def is_sanitizable(args):
         return True
 
 
-def reverse_template(retro_template):
+def reverse_template(retro_template: str) -> str:
     """
-    Reverse the reaction template to swith product and reactants
+    Reverse the reaction template to switch product and reactants
 
     :param retro_template: the reaction template
-    :type retro_template: str
     :return: the reverse template
-    :rtype: str
     """
     return ">>".join(retro_template.split(">>")[::-1])
 
 
-def reaction_hash(reactants_smiles, product):
+def reaction_hash(reactants_smiles: str, product: Molecule) -> str:
     """
     Create a reaction hash
 
     :param reactants_smiles: the SMILES string of the reactants
-    :type reactants_smiles: str
     :param product: the product molecule
-    :type product: Molecule
     :return: the hash
-    :rtype: str
     """
     reactant_inchi = Molecule(smiles=reactants_smiles).inchi
     product_inchi = product.inchi
@@ -161,7 +161,11 @@ def reaction_hash(reactants_smiles, product):
     return hashlib.sha224(concat_inchi.encode("utf8")).hexdigest()
 
 
-def split_and_save_data(data, data_label, config):
+def split_and_save_data(
+    data: Union[pd.DataFrame, np.ndarray, sparse.csr_matrix],
+    data_label: str,
+    config: Config,
+) -> None:
     """
     Split input data into training, testing and validation sets,
     and then saves it to disc.
@@ -170,11 +174,8 @@ def split_and_save_data(data, data_label, config):
     or a sparse matrix.
 
     :param data: the data to split
-    :type data: pandas.DataFrame or np.ndarray or scipy.sparse object
     :param data_label: the label of the data, if its input or labels
-    :type data_label: str
     :param config: the settings
-    :type config: Config
     """
     train_size = config["split_size"]["training"]
     testing_frac = config["split_size"]["testing"]
@@ -199,35 +200,32 @@ def split_and_save_data(data, data_label, config):
             sparse.save_npz(filename, arr, compressed=True)
 
 
-def smiles_to_fingerprint(args, config):
+def smiles_to_fingerprint(args: Sequence[str], config: Config) -> np.ndarray:
     """
     Convert a SMILES to a fingerprint vector
 
     :param args: the SMILES in the first element
-    :type args: tuple
     :param config: the settings
-    :type config: Config
     :return: the fingerprint
-    :rtype: numpy.ndarray
     """
     smiles = args[0]
     return (
         Molecule(smiles=smiles)
-        .fingerprint(config["fingerprint_radius"], config["fingerprint_len"],)
+        .fingerprint(
+            config["fingerprint_radius"],
+            config["fingerprint_len"],
+        )
         .astype(np.int8)
     )
 
 
-def reactants_to_fingerprint(args, config):
+def reactants_to_fingerprint(args: Sequence[str], config: Config) -> np.ndarray:
     """
     Convert a SMILES string of reactants to a fingerprint
 
     :param args: the SMILES in the first element
-    :type args: tuple
     :param config: the settings
-    :type config: Config
     :return: the fingerprint
-    :rtype: numpy.ndarray
     """
     reactants_smiles = args[0]
     fingerprints = []
@@ -246,16 +244,13 @@ def reactants_to_fingerprint(args, config):
     return sum(fingerprints)
 
 
-def reaction_to_fingerprints(args, config):
+def reaction_to_fingerprints(args: Sequence[str], config: Config) -> np.ndarray:
     """
     Convert a reaction SMILEs string  a fingerprint
 
     :param args: the product SMILES in the first element, and reactants SMILES in the second
-    :type args: tuple
     :param config: the settings
-    :type config: Config
     :return: the fingerprint
-    :rtype: numpy.ndarray
     """
     product_smiles, reactants_smiles = args
     product_fp = smiles_to_fingerprint([product_smiles], config)

@@ -20,8 +20,8 @@ FILES_TO_DOWNLOAD = {
     },
     "filter_policy": {
         "filename": "uspto_filter_model.hdf5",
-        "url": "https://ndownloader.figshare.com/files/25584743"
-    }
+        "url": "https://ndownloader.figshare.com/files/25584743",
+    },
 }
 
 YAML_TEMPLATE = """policy:
@@ -38,7 +38,7 @@ stock:
 """
 
 
-def _download_file(url, filename):
+def _download_file(url: str, filename: str) -> None:
     with requests.get(url, stream=True) as response:
         response.raise_for_status()
         total_size = int(response.headers.get("content-length", 0))
@@ -52,10 +52,12 @@ def _download_file(url, filename):
         pbar.close()
 
 
-def main():
+def main() -> None:
     parser = argparse.ArgumentParser("download_public_data")
     parser.add_argument(
-        "path", default=".", help="the path download the files",
+        "path",
+        default=".",
+        help="the path download the files",
     )
     path = parser.parse_args().path
 

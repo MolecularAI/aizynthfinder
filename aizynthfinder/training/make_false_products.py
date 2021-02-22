@@ -1,7 +1,9 @@
 """ Module routines for creating negative data for the training for filter policies
 """
+from __future__ import annotations
 import random
 import argparse
+from typing import TYPE_CHECKING
 
 import pandas as pd
 import tqdm
@@ -17,22 +19,31 @@ from aizynthfinder.training.utils import (
 )
 from aizynthfinder.utils.models import CUSTOM_OBJECTS, load_keras_model
 
+if TYPE_CHECKING:
+    from aizynthfinder.utils.type_utils import (
+        Iterable,
+        Optional,
+        Tuple,
+        Any,
+        Callable,
+        List,
+    )
+
+    _DfGenerator = Iterable[Optional[pd.DataFrame]]
+
 
 class _ReactionException(Exception):
     pass
 
 
-def random_application(library, config, _):
+def random_application(library: pd.DataFrame, config: Config, _) -> _DfGenerator:
     """
     Apply a random template to each row of reactants in the library
     to make new, false reactions.
 
     :param library: the reaction library
-    :type library: pandas.DataFrame
     :param config: the configuration
-    :type config: Config
     :yield: a new DataFrame with a false reaction for each row if a match could be found, otherwise None
-    :rtype: pandas.DataFrame
     """
     random.seed(100)  # To have reproducible results
 
@@ -44,17 +55,14 @@ def random_application(library, config, _):
     yield from _sample_library(library, config, random_sampler)
 
 
-def recommender_application(library, config, _):
+def recommender_application(library: pd.DataFrame, config: Config, _) -> _DfGenerator:
     """
     Apply a template recommended by a neural network
     to each row of reactants in the library in order to make new, false reactions.
 
     :param library: the reaction library
-    :type library: pandas.DataFrame
     :param config: the configuration
-    :type config: Config
     :yield: a new DataFrame with a false reaction for each row if a match could be found, otherwise None
-    :rtype: pandas.DataFrame
     """
 
     model = load_keras_model(
@@ -73,19 +81,17 @@ def recommender_application(library, config, _):
     yield from _sample_library(library, config, prediction_sampler)
 
 
-def strict_application(library, config, errors):
+def strict_application(
+    library: pd.DataFrame, config: Config, errors: list
+) -> _DfGenerator:
     """
     Apply the recorded template to each row of reactants in the library
     to make new, false reactions.
 
     :param library: the reaction library
-    :type library: pandas.DataFrame
     :param config: the configuration
-    :type config: Config
     :param errors: a list to fill with strings of produced errors
-    :type errors: list
     :yield: a new DataFrame with a false reaction for each row if a match could be found, otherwise None
-    :rtype: pandas.DataFrame
     """
     for _, row in library.iterrows():
         try:
@@ -96,7 +102,9 @@ def strict_application(library, config, errors):
             yield new_df
 
 
-def _apply_forward_reaction(template_row, config):
+def _apply_forward_reaction(
+    template_row: pd.Series, config: Config
+) -> Optional[pd.DataFrame]:
     smarts_fwd = reverse_template(template_row.retro_template)
     mols = create_reactants_molecules(template_row.reactants)
 
@@ -137,8 +145,8 @@ def _apply_forward_reaction(template_row, config):
     )
 
 
-def _get_config():
-    parser = argparse.ArgumentParser("Tool to generate artifical negative reactions")
+def _get_config() -> Tuple[Config, str]:
+    parser = argparse.ArgumentParser("Tool to generate artificial negative reactions")
     parser.add_argument("config", help="the filename to a configuration file")
     parser.add_argument(
         "method",
@@ -150,14 +158,18 @@ def _get_config():
     return Config(args.config), args.method
 
 
-def _new_dataframe(original, config, nrows=1, **kwargs):
+def _new_dataframe(
+    original: pd.Series, config: Config, nrows: int = 1, **kwargs: Any
+) -> pd.DataFrame:
     dict_ = {"index": 0}
     for column in config["library_headers"][1:]:
         dict_[column] = kwargs.get(column, [original[column]] * nrows)
     return pd.DataFrame(dict_)
 
 
-def _sample_library(library, config, sampler_func):
+def _sample_library(
+    library: pd.DataFrame, config: Config, sampler_func: Callable
+) -> _DfGenerator:
     for _, row in library.iterrows():
         mols = create_reactants_molecules(row.reactants)
         try:
@@ -197,9 +209,8 @@ def _sample_library(library, config, sampler_func):
         )
 
 
-def main():
-    """ Entry-point for the make_false_products tool
-    """
+def main() -> None:
+    """Entry-point for the make_false_products tool"""
     methods = {
         "strict": strict_application,
         "random": random_application,
@@ -209,12 +220,15 @@ def main():
     config, selected_method = _get_config()
     filename = config.filename("library")
     library = pd.read_csv(
-        filename, index_col=False, header=None, names=config["library_headers"],
+        filename,
+        index_col=False,
+        header=None,
+        names=config["library_headers"],
     )
     false_lib = pd.DataFrame({column: [] for column in config["library_headers"]})
 
     progress_bar = tqdm.tqdm(total=len(library))
-    errors = []
+    errors: List[str] = []
     for new_df in methods[selected_method](library, config, errors):
         if new_df is not None:
             false_lib = false_lib.append(new_df, sort=False)
@@ -222,7 +236,10 @@ def main():
     progress_bar.close()
 
     false_lib.to_csv(
-        config.filename("false_library"), mode="w", header=False, index=False,
+        config.filename("false_library"),
+        mode="w",
+        header=False,
+        index=False,
     )
     with open(config.filename("_errors.txt"), "w") as fileobj:
         fileobj.write("\n".join(errors))

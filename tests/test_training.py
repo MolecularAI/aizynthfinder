@@ -74,7 +74,7 @@ def test_update_single_setting(default_config, write_yaml):
     config = Config(filename)
 
     assert config["fingerprint_len"] == 10
-    assert config["template_occurance"] == default_config["template_occurance"]
+    assert config["template_occurrence"] == default_config["template_occurrence"]
 
 
 def test_update_nested_setting(default_config, write_yaml):
@@ -84,7 +84,7 @@ def test_update_nested_setting(default_config, write_yaml):
 
     config = Config(filename)
 
-    assert config["template_occurance"] == default_config["template_occurance"]
+    assert config["template_occurrence"] == default_config["template_occurrence"]
     assert config["split_size"]["training"] == 0.8
     assert config["split_size"]["testing"] == 0.1
     assert config["split_size"]["validation"] == 0.1
@@ -211,10 +211,10 @@ def test_smiles_to_fingerprint(default_config):
 
 def test_is_sanitizable():
 
-    flag = is_sanitizable(["O"])
+    flag = is_sanitizable(("O"))
     assert flag
 
-    flag = is_sanitizable(["c1ccccc1(C)(C)"])
+    flag = is_sanitizable(("c1ccccc1(C)(C)"))
     assert not flag
 
 
@@ -308,7 +308,10 @@ def library_data(shared_datadir, default_config):
     default_config["negative_data"]["random_trials"] = 10
     filename = str(shared_datadir / "make_false_template_library.csv")
     library = pd.read_csv(
-        filename, index_col=False, header=None, names=default_config["library_headers"],
+        filename,
+        index_col=False,
+        header=None,
+        names=default_config["library_headers"],
     )
     return library, default_config
 

@@ -1,15 +1,26 @@
 """ Module containing a class that represents a node in the search tree.
 """
+from __future__ import annotations
+from typing import TYPE_CHECKING
+
 import numpy as np
 
 from aizynthfinder.chem import RetroReaction, TreeMolecule
 from aizynthfinder.mcts.state import State
 from aizynthfinder.utils.logging import logger
 
+if TYPE_CHECKING:
+    from aizynthfinder.utils.type_utils import StrDict, List, Optional
+    from aizynthfinder.utils.serialization import (
+        MoleculeDeserializer,
+        MoleculeSerializer,
+    )
+    from aizynthfinder.context.config import Configuration
+    from aizynthfinder.mcts.mcts import SearchTree
+
 
 class NodeUnexpectedBehaviourException(Exception):
-    """ Exception that is raised if the tree search is behaving unexpectedly.
-    """
+    """Exception that is raised if the tree search is behaving unexpectedly."""
 
 
 class Node:
@@ -29,43 +40,38 @@ class Node:
     and "visitations".
 
     :ivar is_expanded: if the node has had children added to it
-    :vartype is_expanded: bool
-    :ivar parent: the parent node
     :ivar is_expandable: if the node is expandable
-    :vartype is_expandable: bool
-    :vartype parent: Node
+    :ivar parent: the parent node
     :ivar state: the internal state of the node
-    :vartype state: State
+    :ivar tree: the tree owning this node
 
     :param state: the state of the node
-    :type state: State
     :param owner: the tree that owns this node
-    :type owner: SearchTree
     :param config: settings of the tree search algorithm
-    :type config: Configuration
     :param parent: the parent node, defaults to None
-    :type parent: Node, optional
     """
 
-    def __init__(self, state, owner, config, parent=None):
+    def __init__(
+        self, state: State, owner: SearchTree, config: Configuration, parent=None
+    ):
         self.state = state
         self._config = config
         self._expansion_policy = config.expansion_policy
         self._filter_policy = config.filter_policy
         self.tree = owner
-        self.is_expanded = False
-        self.is_expandable = not self.state.is_terminal
+        self.is_expanded: bool = False
+        self.is_expandable: bool = not self.state.is_terminal
         self.parent = parent
 
-        self._children_values = []
-        self._children_priors = []
-        self._children_visitations = []
-        self._children_actions = []
-        self._children = []
+        self._children_values: List[float] = []
+        self._children_priors: List[float] = []
+        self._children_visitations: List[int] = []
+        self._children_actions: List[RetroReaction] = []
+        self._children: List[Optional[Node]] = []
 
         self._logger = logger()
 
-    def __getitem__(self, node):
+    def __getitem__(self, node: "Node") -> StrDict:
         idx = self._children.index(node)
         return {
             "action": self._children_actions[idx],
@@ -75,40 +81,39 @@ class Node:
         }
 
     @classmethod
-    def create_root(cls, smiles, tree, config):
+    def create_root(
+        cls, smiles: str, tree: SearchTree, config: Configuration
+    ) -> "Node":
         """
         Create a root node for a tree using a SMILES.
 
         :param smiles: the SMILES representation of the root state
-        :type smiles: str
         :param tree: the search tree
-        :type tree: SearchTree
         :param config: settings of the tree search algorithm
-        :type config: Configuration
         :return: the created node
-        :rtype: Node
         """
         mol = TreeMolecule(parent=None, transform=0, smiles=smiles)
         state = State(mols=[mol], config=config)
         return Node(state=state, owner=tree, config=config)
 
     @classmethod
-    def from_dict(cls, dict_, tree, config, molecules, parent=None):
+    def from_dict(
+        cls,
+        dict_: StrDict,
+        tree: SearchTree,
+        config: Configuration,
+        molecules: MoleculeDeserializer,
+        parent: "Node" = None,
+    ) -> "Node":
         """
         Create a new node from a dictionary, i.e. deserialization
 
         :param dict_: the serialized node
-        :type dict_: dict
         :param tree: the search tree
-        :type tree: SearchTree
         :param config: settings of the tree search algorithm
-        :type config: Configuration
         :param molecules: the deserialized molecules
-        :type molecules: MoleculeDeserializer
         :param parent: the parent node
-        :type parent: Node
         :return: a deserialized node
-        :rtype: Node
         """
         state = State.from_dict(dict_["state"], config, molecules)
         node = Node(state=state, owner=tree, config=config, parent=parent)
@@ -117,15 +122,18 @@ class Node:
         node._children_values = dict_["children_values"]
         node._children_priors = dict_["children_priors"]
         node._children_visitations = dict_["children_visitations"]
-        node._children_actions = [
-            RetroReaction(
-                molecules[action["mol"]],
-                action["smarts"],
-                action["index"],
-                action.get("metadata", {}),
+        node._children_actions = []
+        for action in dict_["children_actions"]:
+            mol = molecules.get_tree_molecules([action["mol"]])[0]
+            node._children_actions.append(
+                RetroReaction(
+                    mol,
+                    action["smarts"],
+                    action["index"],
+                    action.get("metadata", {}),
+                )
             )
-            for action in dict_["children_actions"]
-        ]
+
         node._children = [
             Node.from_dict(child, tree, config, molecules, parent=node)
             if child
@@ -134,29 +142,26 @@ class Node:
         ]
         return node
 
-    def backpropagate(self, child, value_estimate):
+    def backpropagate(self, child: "Node", value_estimate: float) -> None:
         """
         Update the number of visitations of a particular child and its value.
 
         :param child: the child node
-        :type child: Node
         :param value_estimate: the value to add to the child value
-        :type value_estimate: float
         """
         idx = self._children.index(child)
         self._children_visitations[idx] += 1
         self._children_values[idx] += value_estimate
 
-    def children(self):
+    def children(self) -> List["Node"]:
         """
         Returns all of the instantiated children
 
         :return: the children
-        :rtype: list of Node
         """
         return [child for child in self._children if child]
 
-    def children_view(self):
+    def children_view(self) -> StrDict:
         """
         Creates a view of the children attributes. Each of the
         list returned is a new list, although the actual children
@@ -166,7 +171,6 @@ class Node:
         "priors", "visitations" and "objects".
 
         :return: the view
-        :rtype: dictionary of list
         """
         return {
             "actions": list(self._children_actions),
@@ -176,7 +180,7 @@ class Node:
             "objects": list(self._children),
         }
 
-    def expand(self):
+    def expand(self) -> None:
         """
         Expand the node.
 
@@ -208,16 +212,15 @@ class Node:
         else:
             self._children_values = [self._config.default_prior] * nactions
 
-    def is_terminal(self):
+    def is_terminal(self) -> bool:
         """
         Node is terminal if its unexpandable, or the internal state is terminal (solved)
 
         :return: the terminal attribute of the node
-        :rtype: bool
         """
         return not self.is_expandable or self.state.is_terminal
 
-    def promising_child(self):
+    def promising_child(self) -> Optional["Node"]:
         """
         Return the child with the currently highest Q+U
 
@@ -227,7 +230,6 @@ class Node:
         return None.
 
         :return: the child
-        :rtype: Node
         """
 
         scores = self._children_q() + self._children_u()
@@ -247,14 +249,12 @@ class Node:
 
         return child
 
-    def serialize(self, molecule_store):
+    def serialize(self, molecule_store: MoleculeSerializer) -> StrDict:
         """
         Serialize the node object to a dictionary
 
         :param molecule_store: the serialized molecules
-        :type molecule_store: MolecularSerializer
         :return: the serialized node
-        :rtype: dict
         """
         return {
             "state": self.state.serialize(molecule_store),
@@ -278,7 +278,7 @@ class Node:
             "is_expandable": self.is_expandable,
         }
 
-    def _check_child_reaction(self, reaction):
+    def _check_child_reaction(self, reaction: RetroReaction) -> bool:
         if not reaction.reactants:
             self._logger.debug(
                 f"Reaction {reaction.smarts} on {reaction.mol.smiles} did not produce any reactants"
@@ -287,7 +287,7 @@ class Node:
 
         # fmt: off
         reactants0 = reaction.reactants[0]
-        if (len(reaction.reactants) == 1 and len(reactants0) == 1 and reaction.mol == reactants0[0]):
+        if len(reaction.reactants) == 1 and len(reactants0) == 1 and reaction.mol == reactants0[0]:
             return False
 
         check_cycling = self._config.prune_cycles_in_search and reaction.mol.parent
@@ -301,15 +301,17 @@ class Node:
 
         return True
 
-    def _children_q(self):
+    def _children_q(self) -> np.ndarray:
         return np.array(self._children_values) / np.array(self._children_visitations)
 
-    def _children_u(self):
+    def _children_u(self) -> np.ndarray:
         total_visits = np.log(np.sum(self._children_visitations))
         child_visits = np.array(self._children_visitations)
         return self._config.C * np.sqrt(2 * total_visits / child_visits)
 
-    def _create_children_nodes(self, states, child_idx):
+    def _create_children_nodes(
+        self, states: List[State], child_idx: int
+    ) -> List[Optional["Node"]]:
         new_nodes = []
         first_child_idx = child_idx
         for state_index, state in enumerate(states):
@@ -326,7 +328,7 @@ class Node:
                 new_nodes.append(self._children[child_idx])
         return new_nodes
 
-    def _expand_children_lists(self, old_index, action_index):
+    def _expand_children_lists(self, old_index: int, action_index: int) -> int:
         new_action = self._children_actions[old_index].copy(index=action_index)
         self._children_actions.append(new_action)
         self._children_priors.append(self._children_priors[old_index])
@@ -335,13 +337,14 @@ class Node:
         self._children.append(None)
         return len(self._children) - 1
 
-    def _filter_child_reaction(self, reaction):
+    def _filter_child_reaction(self, reaction: RetroReaction) -> bool:
         if not self._filter_policy.selection:
             return False
-        feasible, prob = self._filter_policy.is_feasible(reaction, True)
+        feasible, prob = self._filter_policy.feasibility(reaction)
         if not feasible:
             self._logger.debug(
-                f"Reaction {reaction.reaction_smiles()} from template {reaction.smarts } was filtered out with prob {prob}"
+                f"Reaction {reaction.reaction_smiles()} from template {reaction.smarts } "
+                f"was filtered out with prob {prob}"
             )
             return True
 
@@ -350,7 +353,7 @@ class Node:
         )
         return False
 
-    def _select_child(self, child_idx):
+    def _select_child(self, child_idx: int) -> Optional["Node"]:
         """
         Selecting a child node implies instantiating the children nodes
 

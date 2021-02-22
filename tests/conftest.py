@@ -17,10 +17,13 @@ from aizynthfinder.analysis import TreeAnalysis
 
 def pytest_addoption(parser):
     parser.addoption(
-        "--finder_config", help="the configuration file for the aizynthfinder",
+        "--finder_config",
+        help="the configuration file for the aizynthfinder",
     )
     parser.addoption(
-        "--stocks", nargs="+", help="the stocks to use in the aizynthfinder",
+        "--stocks",
+        nargs="+",
+        help="the stocks to use in the aizynthfinder",
     )
     parser.addoption("--policy", help="the policy to use in the aizynthfinder")
     parser.addoption(
@@ -179,7 +182,7 @@ def setup_analysis(default_config, shared_datadir, tmpdir, mock_stock):
     nodes = list(tree.graph())
 
     def wrapper(scorer=None):
-        return (TreeAnalysis(tree, scorer=scorer), nodes)
+        return TreeAnalysis(tree, scorer=scorer), nodes
 
     return wrapper
 

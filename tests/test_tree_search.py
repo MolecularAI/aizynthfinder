@@ -158,7 +158,10 @@ def test_two_expansions(mock_get_actions, mock_create_root, mock_stock):
     child2_smi = ["N#Cc1cccc(N)c1F", "O=C(Cl)c1ccc(F)cc1"]
     child1_mol, *_ = mock_get_actions(root_mol, tuple([root_smi]), [child1_smi], [0.3])
     child2_mol, *_ = mock_get_actions(
-        child1_mol[1], tuple(child1_smi), [child2_smi], [0.3],
+        child1_mol[1],
+        tuple(child1_smi),
+        [child2_smi],
+        [0.3],
     )
     mock_stock(finder.config, child1_mol[0], child1_mol[2], *child2_mol)
     finder.target_mol = root_mol
@@ -190,13 +193,22 @@ def test_two_expansions_two_children(mock_get_actions, mock_create_root, mock_st
     child2_smi = ["CN1CCC(Cl)CC1", "N#Cc1cccc(NC(=O)c2ccc(F)cc2)c1F"]
     grandchild_smi = ["N#Cc1cccc(N)c1F", "O=C(Cl)c1ccc(F)cc1"]
     child1_mol, child2_mol = mock_get_actions(
-        root_mol, tuple([root_smi]), [child1_smi, child2_smi], [0.3, 0.1],
+        root_mol,
+        tuple([root_smi]),
+        [child1_smi, child2_smi],
+        [0.3, 0.1],
     )
     grandchild1_mol = mock_get_actions(
-        child1_mol[1], tuple(child1_smi), [grandchild_smi], [0.3],
+        child1_mol[1],
+        tuple(child1_smi),
+        [grandchild_smi],
+        [0.3],
     )
     grandchild2_mol = mock_get_actions(
-        child2_mol[1], tuple(child2_smi), [grandchild_smi], [0.3],
+        child2_mol[1],
+        tuple(child2_smi),
+        [grandchild_smi],
+        [0.3],
     )
     mock_stock(finder.config, child1_mol[0], child1_mol[2], *grandchild1_mol[0])
     finder.target_mol = root_mol
@@ -235,11 +247,17 @@ def test_three_expansions(
     child3_smi = ["O=C(Cl)c1ccccc1"]
     child1_mol, *_ = mock_get_actions(root_mol, tuple([root_smi]), [child1_smi], [0.3])
     child2_mol, *_ = mock_get_actions(
-        child1_mol[1], tuple(child1_smi), [child2_smi], [0.3],
+        child1_mol[1],
+        tuple(child1_smi),
+        [child2_smi],
+        [0.3],
     )
     smiles_state2 = [child1_smi[0], child1_smi[2]] + child2_smi
     child3_mol, *_ = mock_get_actions(
-        child2_mol[1], tuple(smiles_state2), [child3_smi], [0.3],
+        child2_mol[1],
+        tuple(smiles_state2),
+        [child3_smi],
+        [0.3],
     )
     mock_stock(finder.config, child1_mol[0], child1_mol[2], child2_mol[0], *child3_mol)
     finder.target_mol = root_mol
@@ -280,11 +298,17 @@ def test_three_expansions_not_solved(
     child3_smi = ["O=C(Cl)c1ccccc1"]
     child1_mol, *_ = mock_get_actions(root_mol, tuple([root_smi]), [child1_smi], [0.3])
     child2_mol, *_ = mock_get_actions(
-        child1_mol[1], tuple(child1_smi), [child2_smi], [0.3],
+        child1_mol[1],
+        tuple(child1_smi),
+        [child2_smi],
+        [0.3],
     )
     smiles_state2 = [child1_smi[0], child1_smi[2]] + child2_smi
     child3_mol, *_ = mock_get_actions(
-        child2_mol[1], tuple(smiles_state2), [child3_smi], [0.3],
+        child2_mol[1],
+        tuple(smiles_state2),
+        [child3_smi],
+        [0.3],
     )
     mock_stock(finder.config, child1_mol[0], child1_mol[2], child2_mol[0])
     finder.target_mol = root_mol
@@ -327,7 +351,10 @@ def test_two_expansions_no_expandable_root(
     child1_smi = ["CN1CCC(Cl)CC1", "N#Cc1cccc(NC(=O)c2ccc(F)cc2)c1F", "O"]
     child1_mol, *_ = mock_get_actions(root_mol, tuple([root_smi]), [child1_smi], [0.3])
     mock_get_actions(
-        child1_mol[1], tuple(child1_smi), [None], [0.3],
+        child1_mol[1],
+        tuple(child1_smi),
+        [None],
+        [0.3],
     )  # Will try to expand child1
     mock_stock(finder.config, child1_mol[0], child1_mol[2])
     finder.target_mol = root_mol
@@ -369,13 +396,22 @@ def test_two_expansions_no_reactants_first_child(
     child2_smi = ["CN1CCC(Cl)CC1", "N#Cc1cccc(NC(=O)c2ccc(F)cc2)c1F"]
     grandchild1_smi = ["N#Cc1cccc(N)c1F", "O=C(Cl)c1ccc(F)cc1"]
     child1_mol, child2_mol = mock_get_actions(
-        root_mol, tuple([root_smi]), [child1_smi, child2_smi], [0.3, 0.1],
+        root_mol,
+        tuple([root_smi]),
+        [child1_smi, child2_smi],
+        [0.3, 0.1],
     )
     mock_get_actions(
-        child1_mol[1], tuple(child1_smi), [None], [0.3],
+        child1_mol[1],
+        tuple(child1_smi),
+        [None],
+        [0.3],
     )  # Will try to expand child1
     grandchild1_mol, *_ = mock_get_actions(
-        child2_mol[1], tuple(child2_smi), [grandchild1_smi], [0.3],
+        child2_mol[1],
+        tuple(child2_smi),
+        [grandchild1_smi],
+        [0.3],
     )
     mock_stock(finder.config, child1_mol[0], child1_mol[2], *grandchild1_mol)
     finder.target_mol = root_mol
@@ -422,17 +458,29 @@ def test_three_expansions_no_reactants_first_child(
     grandchild1_smi = ["N#Cc1cccc(N)c1F", "O=C(Cl)c1ccc(F)cc1"]
     grandchild2_smi = ["O=C(Cl)c1ccccc1"]
     child1_mol, child2_mol = mock_get_actions(
-        root_mol, tuple([root_smi]), [child1_smi, child2_smi], [0.3, 0.1],
+        root_mol,
+        tuple([root_smi]),
+        [child1_smi, child2_smi],
+        [0.3, 0.1],
     )
     mock_get_actions(
-        child1_mol[1], tuple(child1_smi), [None], [0.3],
+        child1_mol[1],
+        tuple(child1_smi),
+        [None],
+        [0.3],
     )  # Will try to expand child1
     grandchild1_mol, *_ = mock_get_actions(
-        child2_mol[1], tuple(child2_smi), [grandchild1_smi], [0.3],
+        child2_mol[1],
+        tuple(child2_smi),
+        [grandchild1_smi],
+        [0.3],
     )
     smiles_state2 = [child2_smi[0]] + grandchild1_smi
     grandchild2_mol, *_ = mock_get_actions(
-        grandchild1_mol[1], tuple(smiles_state2), [grandchild2_smi], [0.3],
+        grandchild1_mol[1],
+        tuple(smiles_state2),
+        [grandchild2_smi],
+        [0.3],
     )
     mock_stock(
         finder.config,
@@ -485,17 +533,29 @@ def test_three_expansions_no_reactants_second_level(
     grandchild1_smi = ["N#Cc1cccc(N)c1F", "O=C(Cl)c1ccc(F)cc1"]
     grandchild2_smi = ["N#Cc1cccc(N)c1", "O=C(Cl)c1ccc(F)c(F)c1"]
     child1_mol, child2_mol = mock_get_actions(
-        root_mol, tuple([root_smi]), [child1_smi, child2_smi], [0.3, 0.1],
+        root_mol,
+        tuple([root_smi]),
+        [child1_smi, child2_smi],
+        [0.3, 0.1],
     )
     grandchild1_mol, *_ = mock_get_actions(
-        child1_mol[1], tuple(child1_smi), [grandchild1_smi], [0.3],
+        child1_mol[1],
+        tuple(child1_smi),
+        [grandchild1_smi],
+        [0.3],
     )
     smiles_state1 = [child1_smi[0], child1_smi[2]] + grandchild1_smi
     mock_get_actions(
-        grandchild1_mol[1], tuple(smiles_state1), [None], [0.3],
+        grandchild1_mol[1],
+        tuple(smiles_state1),
+        [None],
+        [0.3],
     )  # Will try to expand grandchild 1
     grandchild2_mol, *_ = mock_get_actions(
-        child2_mol[1], tuple(child2_smi), [grandchild2_smi], [0.3],
+        child2_mol[1],
+        tuple(child2_smi),
+        [grandchild2_smi],
+        [0.3],
     )
     mock_stock(
         finder.config,
@@ -545,13 +605,22 @@ def test_two_expansions_no_reactants_second_child(
     child2_smi = ["CN1CCC(Cl)CC1", "N#Cc1cccc(NC(=O)c2ccc(F)cc2)c1F"]
     grandchild1_smi = ["N#Cc1cccc(N)c1F", "O=C(Cl)c1ccc(F)cc1"]
     child1_mol, child2_mol = mock_get_actions(
-        root_mol, tuple([root_smi]), [child1_smi, child2_smi], [0.3, 0.1],
+        root_mol,
+        tuple([root_smi]),
+        [child1_smi, child2_smi],
+        [0.3, 0.1],
     )
     grandchild1_mol, *_ = mock_get_actions(
-        child1_mol[1], tuple(child1_smi), [grandchild1_smi], [0.3],
+        child1_mol[1],
+        tuple(child1_smi),
+        [grandchild1_smi],
+        [0.3],
     )
     mock_get_actions(
-        child2_mol[1], tuple(child2_smi), [None], [0.3],
+        child2_mol[1],
+        tuple(child2_smi),
+        [None],
+        [0.3],
     )  # Will try to expand child2
     mock_stock(finder.config, child1_mol[0], child1_mol[2], *grandchild1_mol)
     finder.target_mol = root_mol
@@ -585,7 +654,10 @@ def test_two_expansions_cyclic(mock_get_actions, mock_create_root, mock_stock):
     child2_smi = ["COc1cc2cc(-c3ccc(OC(C)=O)c(OC(C)=O)c3)[n+](C)c(C)c2cc1OC"]
     child1_mol, *_ = mock_get_actions(root_mol, tuple([root_smi]), [child1_smi], [0.3])
     child2_mol, *_ = mock_get_actions(
-        child1_mol[0], tuple(child1_smi), [child2_smi], [0.3],
+        child1_mol[0],
+        tuple(child1_smi),
+        [child2_smi],
+        [0.3],
     )
     mock_stock(finder.config)
     finder.target_mol = root_mol
@@ -618,7 +690,10 @@ def test_two_expansions_prune_cyclic(mock_get_actions, mock_create_root, mock_st
     child2_smi = ["COc1cc2cc(-c3ccc(OC(C)=O)c(OC(C)=O)c3)[n+](C)c(C)c2cc1OC"]
     child1_mol, *_ = mock_get_actions(root_mol, tuple([root_smi]), [child1_smi], [0.3])
     child2_mol, *_ = mock_get_actions(
-        child1_mol[0], tuple(child1_smi), [child2_smi], [0.3],
+        child1_mol[0],
+        tuple(child1_smi),
+        [child2_smi],
+        [0.3],
     )
     mock_stock(finder.config)
     finder.target_mol = root_mol

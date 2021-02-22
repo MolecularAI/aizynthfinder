@@ -1,44 +1,44 @@
 """Module containing routines to work with files and processes."""
+from __future__ import annotations
 import tempfile
 import subprocess
 import time
 import warnings
+from typing import TYPE_CHECKING
 
 import more_itertools
 import pandas as pd
 
 from aizynthfinder.utils.logging import logger
 
+if TYPE_CHECKING:
+    from aizynthfinder.utils.type_utils import List, Sequence, Any, Callable
 
-def cat_hdf_files(input_files, output_name):
+
+def cat_hdf_files(input_files: List[str], output_name: str) -> None:
     """
     Concatenate hdf5 files with the key "table"
 
     :param input_files: the paths to the files to concatenate
-    :type input_files: list of str
     :param output_name: the name of the concatenated file
-    :type output_name: str
     """
     data = pd.read_hdf(input_files[0], key="table")
     for filename in input_files[1:]:
         new_data = pd.read_hdf(filename, key="table")
         data = data.append(new_data)
 
-    with warnings.catch_warnings():  # This wil supress a PerformanceWarning
+    with warnings.catch_warnings():  # This wil suppress a PerformanceWarning
         warnings.simplefilter("ignore")
         data.to_hdf(output_name, key="table")
 
 
-def split_file(filename, nparts):
+def split_file(filename: str, nparts: int) -> List[str]:
     """
     Split the content of a text file into a given number of temporary files
 
     :param filename: the path to the file to split
-    :type filename: str
     :param nparts: the number of parts to create
-    :type nparts: int
     :return: list of filenames of the parts
-    :rtype: list of str
     """
     with open(filename, "r") as fileobj:
         lines = fileobj.read().splitlines()
@@ -51,7 +51,9 @@ def split_file(filename, nparts):
     return filenames
 
 
-def start_processes(inputs, log_prefix, cmd_callback, poll_freq=5):
+def start_processes(
+    inputs: Sequence[Any], log_prefix: str, cmd_callback: Callable, poll_freq: int = 5
+) -> None:
     """
     Start a number of background processes and wait for them
     to complete.
@@ -62,14 +64,10 @@ def start_processes(inputs, log_prefix, cmd_callback, poll_freq=5):
     function that takes the index of the process and an item of the input
     as arguments.
 
-    :param inputs: an iterable of input to the processes
-    :type inputs: iterable
+    :param inputs: a sequence of input to the processes
     :param log_prefix: the prefix to the log file of each processes
-    :type log_prefix: str
     :param cmd_callback: function that creates the process commands
-    :type cmd_callback: function
     :param poll_freq: the polling frequency for checking if processes are completed
-    :type poll_freq: int, optional
     """
     processes = []
     output_fileobjs = []

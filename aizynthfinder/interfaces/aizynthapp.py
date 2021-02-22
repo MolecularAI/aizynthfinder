@@ -6,6 +6,7 @@ import subprocess
 import os
 import argparse
 import logging
+from typing import TYPE_CHECKING
 
 import ipywidgets as widgets
 import jupytext
@@ -29,6 +30,9 @@ from IPython.display import display, HTML
 from aizynthfinder.aizynthfinder import AiZynthFinder
 from aizynthfinder.utils.logging import setup_logger
 
+if TYPE_CHECKING:
+    from aizynthfinder.utils.type_utils import StrDict
+
 
 class AiZynthApp:
     """
@@ -44,34 +48,31 @@ class AiZynthApp:
         app = AiZynthApp(configfile)
 
     :ivar finder: the finder instance
-    :vartype finder: AiZynthFinder
 
     :param configfile: the path to yaml file with configuration
-    :type configfile: str
-    :param setup: if True will create and display the GUI on instatiation, defaults to True
-    :type setup: bool, optional
+    :param setup: if True will create and display the GUI on instantiation, defaults to True
     """
 
-    def __init__(self, configfile, setup=True):
+    def __init__(self, configfile: str, setup: bool = True) -> None:
         setup_logger(logging.INFO)
         self.finder = AiZynthFinder(configfile=configfile)
-        self._input = dict()
-        self._output = dict()
-        self._buttons = dict()
+        self._input: StrDict = dict()
+        self._output: StrDict = dict()
+        self._buttons: StrDict = dict()
         if setup:
             self.setup()
 
-    def setup(self):
+    def setup(self) -> None:
         """
         Create the widgets and display the GUI.
-        This is typically done on instatiation, but this method
+        This is typically done on instantiation, but this method
         if for more advanced uses.
         """
         self._create_input_widgets()
         self._create_search_widgets()
         self._create_route_widgets()
 
-    def _create_input_widgets(self):
+    def _create_input_widgets(self) -> None:
         self._input["smiles"] = Text(description="SMILES", continuous_update=False)
         self._input["smiles"].observe(self._show_mol, names="value")
         display(self._input["smiles"])
@@ -103,7 +104,9 @@ class AiZynthApp:
             )
             self._input["stocks_atom_count_on"].append(chk_box)
             inpt = BoundedIntText(
-                value=current_criteria.get(atom, 0), min=0, layout={"width": "80px"},
+                value=current_criteria.get(atom, 0),
+                min=0,
+                layout={"width": "80px"},
             )
             self._input["stocks_atom_count"].append(inpt)
             list_.append(HBox([chk_box, inpt]))
@@ -196,7 +199,7 @@ class AiZynthApp:
         tab.set_title(1, "Advanced")
         display(tab)
 
-    def _create_route_widgets(self):
+    def _create_route_widgets(self) -> None:
         self._input["scorer"] = widgets.Dropdown(
             options=self.finder.scorers.names(),
             description="Reorder by:",
@@ -205,7 +208,10 @@ class AiZynthApp:
         self._input["scorer"].observe(self._on_change_scorer)
         self._buttons["show_routes"] = Button(description="Show Reactions")
         self._buttons["show_routes"].on_click(self._on_display_button_clicked)
-        self._input["route"] = Dropdown(options=[], description="Routes: ",)
+        self._input["route"] = Dropdown(
+            options=[],
+            description="Routes: ",
+        )
         self._input["route"].observe(self._on_change_route_option)
         display(
             HBox(
@@ -222,7 +228,7 @@ class AiZynthApp:
         )
         display(self._output["routes"])
 
-    def _create_search_widgets(self):
+    def _create_search_widgets(self) -> None:
         self._buttons["execute"] = Button(description="Run Search")
         self._buttons["execute"].on_click(self._on_exec_button_clicked)
 
@@ -240,7 +246,7 @@ class AiZynthApp:
         )
         display(self._output["tree_search"])
 
-    def _make_slider_input(self, label, description, min_val, max_val):
+    def _make_slider_input(self, label, description, min_val, max_val) -> HBox:
         label_widget = Label(description)
         slider = widgets.IntSlider(
             continuous_update=True, min=min_val, max=max_val, readout=False
@@ -249,41 +255,41 @@ class AiZynthApp:
         widgets.link((self._input[label], "value"), (slider, "value"))
         return HBox([label_widget, slider, self._input[label]])
 
-    def _on_change_route_option(self, change):
+    def _on_change_route_option(self, change) -> None:
         if change["name"] != "index":
             return
         self._show_route(self._input["route"].index)
 
-    def _on_change_scorer(self, change):
+    def _on_change_scorer(self, change) -> None:
         if self.finder.routes is None or change["name"] != "index":
             return
         scorer = self.finder.scorers[self._input["scorer"].value]
         self.finder.routes.rescore(scorer)
         self._show_route(self._input["route"].index)
 
-    def _on_exec_button_clicked(self, _):
+    def _on_exec_button_clicked(self, _) -> None:
         self._toggle_button(False)
         self._prepare_search()
         self._tree_search()
         self._toggle_button(True)
 
-    def _on_extend_button_clicked(self, _):
+    def _on_extend_button_clicked(self, _) -> None:
         self._toggle_button(False)
         self._tree_search()
         self._toggle_button(True)
 
-    def _on_display_button_clicked(self, _):
+    def _on_display_button_clicked(self, _) -> None:
         self._toggle_button(False)
         self.finder.build_routes()
         self.finder.routes.make_images()
         self.finder.routes.compute_scores(*self.finder.scorers.objects())
         self._input["route"].options = [
-            f"Option {i}" for i, _ in enumerate(self.finder.routes, 1)
+            f"Option {i}" for i, _ in enumerate(self.finder.routes, 1)  # type: ignore
         ]
         self._show_route(0)
         self._toggle_button(True)
 
-    def _prepare_search(self):
+    def _prepare_search(self) -> None:
         self._output["tree_search"].clear_output()
         with self._output["tree_search"]:
             selected_stocks = [
@@ -323,14 +329,18 @@ class AiZynthApp:
             self.finder.target_smiles = smiles
             self.finder.prepare_tree()
 
-    def _show_mol(self, change):
+    def _show_mol(self, change) -> None:
         self._output["smiles"].clear_output()
         with self._output["smiles"]:
             mol = Chem.MolFromSmiles(change["new"])
             display(mol)
 
-    def _show_route(self, index):
-        if index is None or index >= len(self.finder.routes):
+    def _show_route(self, index) -> None:
+        if (
+            index is None
+            or self.finder.routes is None
+            or index >= len(self.finder.routes)
+        ):
             return
 
         route = self.finder.routes[index]
@@ -350,17 +360,17 @@ class AiZynthApp:
             display(HTML("<H2>Steps"))
             display(self.finder.routes[index]["image"])
 
-    def _toggle_button(self, on):
+    def _toggle_button(self, on) -> None:
         for button in self._buttons.values():
             button.disabled = not on
 
-    def _tree_search(self):
+    def _tree_search(self) -> None:
         with self._output["tree_search"]:
             self.finder.tree_search(show_progress=True)
             print("Tree search completed.")
 
 
-def _get_arguments():
+def _get_arguments() -> argparse.Namespace:
     parser = argparse.ArgumentParser("aizynthapp")
     parser.add_argument(
         "--config", required=True, help="the filename of a configuration file"
@@ -369,9 +379,8 @@ def _get_arguments():
     return parser.parse_args()
 
 
-def main():
-    """ Entry point for the aizynthapp command
-    """
+def main() -> None:
+    """Entry point for the aizynthapp command"""
     args = _get_arguments()
 
     commands = "\n".join(

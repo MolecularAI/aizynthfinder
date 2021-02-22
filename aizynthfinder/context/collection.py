@@ -1,8 +1,14 @@
 """ Module containing a class that is the base class for all collection classes (stock, policies, scorers)
 """
+from __future__ import annotations
 import abc
+from typing import TYPE_CHECKING
 
 from aizynthfinder.utils.logging import logger
+from aizynthfinder.utils.type_utils import StrDict
+
+if TYPE_CHECKING:
+    from aizynthfinder.utils.type_utils import Any, List, Union
 
 
 class ContextCollection(abc.ABC):
@@ -29,53 +35,50 @@ class ContextCollection(abc.ABC):
     _collection_name = "collection"
 
     def __init__(self):
-        self._items = {}
-        self._selection = []
+        self._items: StrDict = {}
+        self._selection: List[str] = []
         self._logger = logger()
 
-    def __delitem__(self, key):
+    def __delitem__(self, key: str) -> None:
         if key not in self._items:
             raise KeyError(
                 f"{self._collection_name.capitalize()} with name {key} not loaded."
             )
         del self._items[key]
 
-    def __getitem__(self, key):
+    def __getitem__(self, key: str) -> Any:
         if key not in self._items:
             raise KeyError(
                 f"{self._collection_name.capitalize()} with name {key} not loaded."
             )
         return self._items[key]
 
-    def __len__(self):
+    def __len__(self) -> int:
         return len(self._items)
 
     @property
-    def items(self):
-        """The available item keys
-        """
+    def items(self) -> List[str]:
+        """The available item keys"""
         return list(self._items.keys())
 
     @property
-    def selection(self):
-        """The keys of the selected item(s)
-        """
+    def selection(self) -> Union[List[str], str, None]:
+        """The keys of the selected item(s)"""
         if self._single_selection:
             return self._selection[0] if self._selection else None
         return self._selection
 
     @selection.setter
-    def selection(self, value):
+    def selection(self, value: str) -> None:
         self.select(value)
 
-    def deselect(self, key=None):
+    def deselect(self, key: str = None) -> None:
         """
         Deselect one or all items
 
         If no key is passed, all items will be deselected.
 
         :param key: the key of the item to deselect, defaults to None
-        :type key: str, optional
         :raises KeyError: if the key is not among the selected ones
         """
         if not key:
@@ -87,29 +90,25 @@ class ContextCollection(abc.ABC):
         self._selection.remove(key)
 
     @abc.abstractmethod
-    def load(self):
-        """ Load an item. Needs to be implemented by a sub-class
-        """
+    def load(self, *_: Any) -> None:
+        """Load an item. Needs to be implemented by a sub-class"""
         pass
 
     @abc.abstractmethod
-    def load_from_config(self, **config):
-        """ Load items from a configuration. Needs to be implemented by a sub-class
-        """
+    def load_from_config(self, **config: Any) -> None:
+        """Load items from a configuration. Needs to be implemented by a sub-class"""
         pass
 
-    def select(self, value, append=False):
+    def select(self, value: Union[str, List[str]], append: bool = False) -> None:
         """
         Select one or more items.
 
-        If this is a single selection collection, only a single value is accpted.
+        If this is a single selection collection, only a single value is accepted.
         If this is a multiple selection collection it will overwrite the selection completely,
         unless ``append`` is True and a single key is given.
 
         :param value: the key or keys of the item(s) to select
-        :type value: str or list
         :param append: if True will append single keys to existing selection
-        :type append: bool, optional
         :raises ValueError: if this a single collection and value is multiple keys
         :raises KeyError: if at least one of the keys are not corresponding to a loaded item
         """
@@ -133,14 +132,12 @@ class ContextCollection(abc.ABC):
 
         self._logger.info(f"Selected as {self._collection_name}: {', '.join(keys)}")
 
-    def select_all(self):
-        """ Select all loaded items
-        """
+    def select_all(self) -> None:
+        """Select all loaded items"""
         if self.items:
             self.select(self.items)
 
-    def select_first(self):
-        """ Select the first loaded item
-        """
+    def select_first(self) -> None:
+        """Select the first loaded item"""
         if self.items:
             self.select(self.items[0])

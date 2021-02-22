@@ -27,7 +27,7 @@ batch_size: 256
 epochs: 100
 fingerprint_radius: 2
 fingerprint_len: 2048
-template_occurance: 3
+template_occurrence: 3
 remove_unsanitizable_products: False
 negative_data:
   random_trials: 1000

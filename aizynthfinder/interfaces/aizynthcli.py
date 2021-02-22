@@ -1,5 +1,6 @@
 """ Module containing classes and routines for the CLI
 """
+from __future__ import annotations
 import argparse
 import json
 import os
@@ -9,6 +10,7 @@ import importlib
 import tempfile
 import time
 from collections import defaultdict
+from typing import TYPE_CHECKING
 
 import pandas as pd
 
@@ -16,8 +18,13 @@ from aizynthfinder.utils.files import cat_hdf_files, split_file, start_processes
 from aizynthfinder.aizynthfinder import AiZynthFinder
 from aizynthfinder.utils.logging import logger, setup_logger
 
+if TYPE_CHECKING:
+    from aizynthfinder.utils.type_utils import StrDict
 
-def _do_clustering(finder, results, detailed_results):
+
+def _do_clustering(
+    finder: AiZynthFinder, results: StrDict, detailed_results: bool
+) -> None:
     t0 = time.perf_counter_ns()
     results["cluster_labels"] = finder.routes.cluster(n_clusters=0)
     if not detailed_results:
@@ -27,7 +34,7 @@ def _do_clustering(finder, results, detailed_results):
     results["distance_matrix"] = finder.routes.distance_matrix().tolist()
 
 
-def _get_arguments():
+def _get_arguments() -> argparse.Namespace:
     parser = argparse.ArgumentParser("aizynthcli")
     parser.add_argument(
         "--smiles",
@@ -64,7 +71,7 @@ def _get_arguments():
     return parser.parse_args()
 
 
-def _select_stocks(finder, args):
+def _select_stocks(finder: AiZynthFinder, args: argparse.Namespace) -> None:
     stocks = list(args.stocks)
     try:
         module = importlib.import_module("custom_stock")
@@ -72,12 +79,14 @@ def _select_stocks(finder, args):
         pass
     else:
         if hasattr(module, "stock"):
-            finder.stock.load(module.stock, "custom_stock")
+            finder.stock.load(module.stock, "custom_stock")  # type: ignore
             stocks.append("custom_stock")
     finder.stock.select(stocks or finder.stock.items)
 
 
-def _process_single_smiles(smiles, finder, output_name, do_clustering):
+def _process_single_smiles(
+    smiles: str, finder: AiZynthFinder, output_name: str, do_clustering: bool
+) -> None:
     output_name = output_name or "trees.json"
     finder.target_smiles = smiles
     finder.prepare_tree()
@@ -100,7 +109,9 @@ def _process_single_smiles(smiles, finder, output_name, do_clustering):
     logger().info(stats_str)
 
 
-def _process_multi_smiles(filename, finder, output_name, do_clustering):
+def _process_multi_smiles(
+    filename: str, finder: AiZynthFinder, output_name: str, do_clustering: bool
+) -> None:
     output_name = output_name or "output.hdf5"
     with open(filename, "r") as fileobj:
         smiles = [line.strip() for line in fileobj.readlines()]
@@ -124,13 +135,13 @@ def _process_multi_smiles(filename, finder, output_name, do_clustering):
         results["trees"].append(finder.routes.dicts)
 
     data = pd.DataFrame.from_dict(results)
-    with warnings.catch_warnings():  # This wil supress a PerformanceWarning
+    with warnings.catch_warnings():  # This wil suppress a PerformanceWarning
         warnings.simplefilter("ignore")
         data.to_hdf(output_name, key="table", mode="w")
     logger().info(f"Output saved to {output_name}")
 
 
-def _multiprocess_smiles(args):
+def _multiprocess_smiles(args: argparse.Namespace) -> None:
     def create_cmd(index, filename):
         cmd_args = [
             "aizynthcli",
@@ -167,9 +178,8 @@ def _multiprocess_smiles(args):
     cat_hdf_files(hdf_files, args.output or "output.hdf5")
 
 
-def main():
-    """ Entry point for the aizynthcli command
-    """
+def main() -> None:
+    """Entry point for the aizynthcli command"""
     args = _get_arguments()
     if args.nproc:
         return _multiprocess_smiles(args)

@@ -2,25 +2,39 @@
 Helper routines and class for the `aizynthfinder.analysis` module.
 To avoid clutter in that module, larger utility algorithms are placed herein.
 """
+from __future__ import annotations
 import abc
 from collections import defaultdict
+from typing import TYPE_CHECKING
 
 import networkx as nx
 
 from aizynthfinder.chem import (
     Molecule,
     UniqueMolecule,
+    RetroReaction,
     FixedRetroReaction,
     hash_reactions,
 )
 from aizynthfinder.utils.image import make_visjs_page
 
+if TYPE_CHECKING:
+    from aizynthfinder.utils.type_utils import (
+        Any,
+        Union,
+        Sequence,
+        Tuple,
+        StrDict,
+        FrameColors,
+    )
+    from aizynthfinder.mcts.node import Node
+    from aizynthfinder.analysis import ReactionTree
+
 
 class _ReactionTreeLoader(abc.ABC):
-    """ Base class for classes that creates a reaction tree object
-    """
+    """Base class for classes that creates a reaction tree object"""
 
-    def __init__(self, *args, **kwargs):
+    def __init__(self, *args: Any, **kwargs: Any) -> None:
         # To avoid circular imports
         from aizynthfinder.analysis import ReactionTree  # noqa
 
@@ -32,34 +46,36 @@ class _ReactionTreeLoader(abc.ABC):
         )
         _RepeatingPatternIdentifier.find(self.tree)
 
-    def _add_node(self, node, depth=0, transform=0, in_stock=False, hide=False):
+    def _add_node(
+        self,
+        node: Union[UniqueMolecule, FixedRetroReaction],
+        depth: int = 0,
+        transform: int = 0,
+        in_stock: bool = False,
+        hide: bool = False,
+    ) -> None:
         attributes = {
             "hide": hide,
             "depth": depth,
         }
         if isinstance(node, Molecule):
             attributes.update({"transform": transform, "in_stock": in_stock})
+            if not self.tree.root:
+                self.tree.root = node
         self.tree.graph.add_node(node, **attributes)
-        if not self.tree.root:
-            self.tree.root = node
 
     @abc.abstractmethod
-    def _load(self, *args, **kwargs):
+    def _load(self, *args: Any, **kwargs: Any) -> None:
         pass
 
 
 class ReactionTreeFromDict(_ReactionTreeLoader):
-    """
-    Creates a reaction tree object from a dictionary
+    """Creates a reaction tree object from a dictionary"""
 
-    :param tree_dict: the dictionary representation
-    :type tree_dict: dict
-    """
-
-    def _load(self, tree_dict):
+    def _load(self, tree_dict: StrDict) -> None:  # type: ignore
         self._parse_tree_dict(tree_dict)
 
-    def _parse_tree_dict(self, tree_dict, ncalls=0):
+    def _parse_tree_dict(self, tree_dict: StrDict, ncalls: int = 0) -> UniqueMolecule:
         product_node = UniqueMolecule(smiles=tree_dict["smiles"])
         self._add_node(
             product_node,
@@ -89,7 +105,7 @@ class ReactionTreeFromDict(_ReactionTreeLoader):
             reactant_node = self._parse_tree_dict(reactant_tree, ncalls + 1)
             self.tree.graph.add_edge(reaction_node, reactant_node)
             reactant_nodes.append(reactant_node)
-        reaction_node.reactants = reactant_nodes
+        reaction_node.reactants = (tuple(reactant_nodes),)
 
         return product_node
 
@@ -97,26 +113,22 @@ class ReactionTreeFromDict(_ReactionTreeLoader):
 class ReactionTreeFromMcts(_ReactionTreeLoader):
     """
     Creates a reaction tree object from MCTS nodes and reaction objects
-
-    :param actions: the reactions forming the route
-    :type actions: list of RetroReaction
-    :param nodes: the MCTS nodes forming the route
-    :type nodes: list of Node
     """
 
-    def _load(self, actions, nodes):
+    def _load(self, actions: Sequence[RetroReaction], nodes: Sequence[Node]) -> None:  # type: ignore
         self._unique_mols = {}
 
         root_mol = nodes[0].state.mols[0]
         self._unique_mols[id(root_mol)] = root_mol.make_unique()
         self._add_node(
-            self._unique_mols[id(root_mol)], in_stock=nodes[0].state.is_solved,
+            self._unique_mols[id(root_mol)],
+            in_stock=nodes[0].state.is_solved,
         )
 
         for child, action in zip(nodes[1:], actions):
             self._add_bipartite(child, action)
 
-    def _add_bipartite(self, child, action):
+    def _add_bipartite(self, child: Node, action: RetroReaction) -> None:
 
         reaction_obj = FixedRetroReaction(
             self._unique_mol(action.mol), smiles=action.smiles, metadata=action.metadata
@@ -134,9 +146,9 @@ class ReactionTreeFromMcts(_ReactionTreeLoader):
                 )
                 self.tree.graph.add_edge(reaction_obj, self._unique_mol(mol))
                 reactant_nodes.append(self._unique_mol(mol))
-        reaction_obj.reactants = reactant_nodes
+        reaction_obj.reactants = (tuple(reactant_nodes),)
 
-    def _unique_mol(self, molecule):
+    def _unique_mol(self, molecule: Molecule) -> UniqueMolecule:
         id_ = id(molecule)
         if id_ not in self._unique_mols:
             self._unique_mols[id_] = molecule.make_unique()
@@ -155,12 +167,11 @@ class _RepeatingPatternIdentifier:
     """
 
     @staticmethod
-    def find(reaction_tree):
+    def find(reaction_tree: ReactionTree) -> None:
         """
         Find the repeating patterns and mark the nodes
 
         :param reaction_tree: the reaction tree to process
-        :type reaction_tree: ReactionTree
         """
         for node in reaction_tree.reactions():
             # We are only interesting of starting at the very first reaction
@@ -188,17 +199,18 @@ class _RepeatingPatternIdentifier:
                     break
 
     @staticmethod
-    def _hide_reaction(reaction_tree, reaction_node):
+    def _hide_reaction(reaction_tree: ReactionTree, reaction_node: FixedRetroReaction):
         reaction_tree.graph.nodes[reaction_node]["hide"] = True
         for reactants in reaction_node.reactants[0]:
             reaction_tree.graph.nodes[reactants]["hide"] = True
 
     @staticmethod
-    def _list_reactions(reaction_tree, reaction_node):
-        """ List all reaction nodes from the given one to the last
-        """
+    def _list_reactions(
+        reaction_tree: ReactionTree, reaction_node: FixedRetroReaction
+    ) -> Sequence[FixedRetroReaction]:
+        """List all reaction nodes from the given one to the last"""
         reactions = [reaction_node]
-        curr_rxn = reaction_node
+        #  curr_rxn = reaction_node
         product = reaction_node.mol
         while product is not reaction_tree.root:
             curr_rxn = next(reaction_tree.graph.predecessors(product))
@@ -216,25 +228,24 @@ class CombinedReactionTrees:
     on the reaction smiles.
 
     :params reactions_trees: the list of reaction trees to combine
-    :type reaction_trees: list of ReactionTree
     """
 
-    def __init__(self, reaction_trees):
+    def __init__(self, reaction_trees: Sequence[ReactionTree]) -> None:
         self.graph = nx.DiGraph()
         first_rt = reaction_trees[0]
         # This is to avoid circular imports
         self._reaction_tree_class = first_rt.__class__
         self.root = first_rt.root
+
         self.graph.add_node(self.root, in_stock=first_rt.in_stock(self.root))
         rt_node_spec = [(rt.root, rt.graph) for rt in reaction_trees]
         self._add_reaction_trees_to_node(self.root, rt_node_spec)
 
-    def to_dict(self):
+    def to_dict(self) -> StrDict:
         """
         Returns the graph as a dictionary in a pre-defined format.
 
         :return: the combined reaction trees
-        :rtype: dict
         """
         rt = self._reaction_tree_class()
         rt.root = self.root
@@ -242,18 +253,19 @@ class CombinedReactionTrees:
         return rt.to_dict()
 
     def to_visjs_page(
-        self, filename, in_stock_colors={True: "green", False: "orange"},
-    ):
+        self,
+        filename: str,
+        in_stock_colors: FrameColors = None,
+    ) -> None:
         """
         Create a visualization of the combined reaction tree using the vis.js network library.
 
         The HTML page and all the images will be put into a tar-ball.
 
         :param filename: the name of the tarball
-        :type filename: str
         :param in_stock_colors: the colors around molecules, defaults to {True: "green", False: "orange"}
-        :type in_stock_colors: dict, optional
         """
+        in_stock_colors = in_stock_colors or {True: "green", False: "orange"}
         molecules = [node for node in self.graph if isinstance(node, Molecule)]
         reactions = [node for node in self.graph if not isinstance(node, Molecule)]
         frame_colors = [
@@ -262,7 +274,11 @@ class CombinedReactionTrees:
         ]
         make_visjs_page(filename, molecules, reactions, self.graph.edges, frame_colors)
 
-    def _add_reaction_trees_to_node(self, base_node, rt_node_spec):
+    def _add_reaction_trees_to_node(
+        self,
+        base_node: UniqueMolecule,
+        rt_node_spec: Sequence[Tuple[UniqueMolecule, nx.DiGraph]],
+    ) -> None:
 
         reaction_groups = defaultdict(list)
         # Group the reactions from the nodes at this level based on the reaction smiles
@@ -287,7 +303,9 @@ class CombinedReactionTrees:
                 )
 
     @staticmethod
-    def _find_other_children(child, group):
+    def _find_other_children(
+        child: UniqueMolecule, group: Sequence[Tuple[nx.DiGraph, FixedRetroReaction]]
+    ) -> Sequence[Tuple[UniqueMolecule, nx.DiGraph]]:
         children_spec = []
         for other_graph, other_reaction in group:
             found = False

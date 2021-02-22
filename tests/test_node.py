@@ -95,7 +95,7 @@ def test_promising_child_with_filter(
     default_config.filter_policy.load("dummy", "test")
     default_config.filter_policy.select("test")
     mocked_is_feasible = mocker.patch(
-        "aizynthfinder.context.policy.FilterPolicy.is_feasible"
+        "aizynthfinder.context.policy.FilterPolicy.feasibility"
     )
     mocked_is_feasible.return_value = True, 0.5
     root.expand()
@@ -117,7 +117,7 @@ def test_promising_child_with_filter_reject(
     default_config.filter_policy.load("dummy", "test")
     default_config.filter_policy.select("test")
     mocked_is_feasible = mocker.patch(
-        "aizynthfinder.context.policy.FilterPolicy.is_feasible"
+        "aizynthfinder.context.policy.FilterPolicy.feasibility"
     )
     mocked_is_feasible.return_value = False, 0.0
     root.expand()

@@ -1,8 +1,14 @@
 """ Module containing a class to help out with clustering
 """
+from __future__ import annotations
+from typing import TYPE_CHECKING
+
 import numpy as np
 from sklearn.cluster import AgglomerativeClustering
 from sklearn.metrics import silhouette_score
+
+if TYPE_CHECKING:
+    from aizynthfinder.utils.type_utils import Any, Sequence
 
 
 class ClusteringHelper:
@@ -14,16 +20,18 @@ class ClusteringHelper:
     algorithm implemented in Scikit-learn.
     """
 
-    def __init__(self, distances):
+    def __init__(self, distances: np.ndarray) -> None:
         self._distances = distances
         self._model = None
-        self.optimization_scores = []
+        self.optimization_scores: Sequence[float] = []
 
     @property
-    def labels(self):
-        return self._model.labels_ if self._model else None
+    def labels(self) -> np.ndarray:
+        if not self._model:
+            raise ValueError("Labels are not defined yet. Run clustering first")
+        return self._model.labels_
 
-    def fixed_clustering(self, n_clusters, **kwargs):
+    def fixed_clustering(self, n_clusters: int, **kwargs: Any) -> np.ndarray:
         """
         Make a fixed number of clusters.
 
@@ -31,9 +39,7 @@ class ClusteringHelper:
         can be passed in as key-word arguments
 
         :param n_clusters: the desired number of clusters
-        :type n_clusters: int
         :return: the cluster index for each observation
-        :rtype: numpy.ndarray
         """
         if "linkage" not in kwargs:
             kwargs["linkage"] = "single"
@@ -44,7 +50,7 @@ class ClusteringHelper:
         self._model = model
         return model.labels_
 
-    def linkage_matrix(self, **kwargs):
+    def linkage_matrix(self, **kwargs: Any) -> np.ndarray:
         """
         Compute the linkage matrix.
 
@@ -52,7 +58,6 @@ class ClusteringHelper:
         can be passed in as key-word arguments
 
         :return: the linkage matrix
-        :rtype: numpy.ndarray
         """
         if "linkage" not in kwargs:
             kwargs["linkage"] = "single"
@@ -67,7 +72,7 @@ class ClusteringHelper:
         matrix = np.column_stack([model.children_, model.distances_, counts])
         return matrix.astype(float)
 
-    def optimize(self, max_clusters=5, **kwargs):
+    def optimize(self, max_clusters: int = 5, **kwargs: Any) -> np.ndarray:
         """
         Optimize the number of cluster based  Silhouette metric.
 
@@ -75,9 +80,7 @@ class ClusteringHelper:
         can be passed in as key-word arguments
 
         :param max_clusters: the maximum number of clusters to consider
-        :type max_clusters: int, optional
         :return: the cluster index for each observation
-        :rtype: numpy.ndarray
         """
 
         max_score = None
@@ -91,19 +94,18 @@ class ClusteringHelper:
                 max_score = score
                 best_size = n_clusters
 
+        if best_size is None:
+            best_size = max_clusters
         return self.fixed_clustering(best_size, **kwargs)
 
     @staticmethod
-    def cluster(distances, n_clusters, **kwargs):
+    def cluster(distances: np.ndarray, n_clusters: int, **kwargs: Any) -> np.ndarray:
         """
         Cluster items based on a pre-computed distance matrix using a hierarchical clustering.
 
         :param distances: the distance matrix
-        :type distances: numpy.ndarray
         :param n_clusters: the desired number of clusters
-        :type n_clusters: int
         :return: the cluster index for each observation
-        :rtype: numpy.ndarray
         """
         helper = ClusteringHelper(distances)
 

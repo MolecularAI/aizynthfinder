@@ -10,9 +10,8 @@ from aizynthfinder.training.keras_models import (
 )
 
 
-def main():
-    """ Entry-point for the aizynth_training tool
-    """
+def main() -> None:
+    """Entry-point for the aizynth_training tool"""
     parser = argparse.ArgumentParser("Tool to train a network policy")
     parser.add_argument("config", help="the filename to a configuration file")
     parser.add_argument(

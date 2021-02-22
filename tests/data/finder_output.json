@@ -17,7 +17,7 @@
 							"template_hash": "edbf0be6af4347c7912e07e17eaca01320754051d4552771ed0794d7",
 							"classification": "N-acylation to amide",
 							"library_occurence": 20,
-							"policy_probability": 0.5510739088058472,
+							"policy_probability": 0.5511,
 							"policy_name": "dummy",
 							"template_code": 2
 						},

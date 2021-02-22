@@ -1,9 +1,21 @@
 """ Module contain a class that encapsulate the state of search tree node.
 """
+from __future__ import annotations
 import os
+from typing import TYPE_CHECKING
 
 import numpy as np
 from rdkit.Chem import Draw
+
+from aizynthfinder.chem import TreeMolecule
+
+if TYPE_CHECKING:
+    from aizynthfinder.utils.type_utils import StrDict, Any, List, Optional, Sequence
+    from aizynthfinder.utils.serialization import (
+        MoleculeDeserializer,
+        MoleculeSerializer,
+    )
+    from aizynthfinder.context.config import Configuration
 
 os.environ["PYTHONHASHSEED"] = "42"
 
@@ -19,49 +31,41 @@ class State:
     The class is hashable and comparable by the inchi keys of all the molecules.
 
     :ivar mols: the list of molecules
-    :vartype mols: list of TreeMolecule
     :ivar stock: the configured stock
-    :vartype stock: Stock
-    :ivar policy: the configured policy
-    :vartype policy: Policy
     :ivar in_stock_list: for each molecule if they are in stock
-    :vartype in_stock_list: list of bool
     :ivar is_solved: is true if all molecules are in stock:
-    :vartype is_solved: bool
     :ivar max_transforms: the maximum of the transforms of the molecule
-    :vartype max_transforms: int
     :ivar is_terminal: is true if the all molecules are in stock or if the maximum transforms has been reached
-    :vartype is_terminal: bool
 
     :param mols: the molecules of the state
-    :type mols: list of TreeMolecule
     :param config: settings of the tree search algorithm
-    :type config: Configuration
     """
 
-    def __init__(self, mols, config):
+    def __init__(self, mols: Sequence[TreeMolecule], config: Configuration) -> None:
         self.mols = mols
         self.stock = config.stock
         self.in_stock_list = [mol in self.stock for mol in self.mols]
-        self._stock_availability = None
+        self._stock_availability: Optional[List[str]] = None
         self.is_solved = all(self.in_stock_list)
         self.max_transforms = max(mol.transform for mol in self.mols)
         self.is_terminal = (
             self.max_transforms > config.max_transforms
         ) or self.is_solved
-        self._score = None
+        self._score: Optional[float] = None
 
         inchis = [mol.inchi_key for mol in self.mols]
         inchis.sort()
         self._hash = hash(tuple(inchis))
 
-    def __hash__(self):
+    def __hash__(self) -> int:
         return self._hash
 
-    def __eq__(self, other):
+    def __eq__(self, other: object) -> bool:
+        if not isinstance(other, State):
+            return False
         return self.__hash__() == other.__hash__()
 
-    def __str__(self):
+    def __str__(self) -> str:
         """A string representation of the state (for print(state))"""
         string = "%s\n%s\n%s\n%s\nScore: %0.3F Solved: %s" % (
             str([mol.smiles for mol in self.mols]),
@@ -74,7 +78,9 @@ class State:
         return string
 
     @classmethod
-    def from_dict(cls, dict_, config, molecules):
+    def from_dict(
+        cls, dict_: StrDict, config: Configuration, molecules: MoleculeDeserializer
+    ) -> "State":
         """
         Create a new state from a dictionary, i.e. deserialization
 
@@ -87,10 +93,11 @@ class State:
         :return: a deserialized state
         :rtype: State
         """
-        return State([molecules[id_] for id_ in dict_["mols"]], config)
+        mols = molecules.get_tree_molecules(dict_["mols"])
+        return State(mols, config)
 
     @property
-    def score(self):
+    def score(self) -> float:
         """
         Returns the score of the state
 
@@ -102,7 +109,7 @@ class State:
         return self._score
 
     @property
-    def stock_availability(self):
+    def stock_availability(self) -> List[str]:
         """
         Returns a list of availabilities for all molecules
 
@@ -115,7 +122,7 @@ class State:
             ]
         return self._stock_availability
 
-    def serialize(self, molecule_store):
+    def serialize(self, molecule_store: MoleculeSerializer) -> StrDict:
         """
         Serialize the state object to a dictionary
 
@@ -126,7 +133,7 @@ class State:
         """
         return {"mols": [molecule_store[mol] for mol in self.mols]}
 
-    def to_image(self, ncolumns=6):
+    def to_image(self, ncolumns: int = 6) -> Any:
         """
         Constructs an image representation of the state
 
@@ -141,7 +148,7 @@ class State:
         mols = [mol.rd_mol for mol in self.mols]
         return Draw.MolsToGridImage(mols, molsPerRow=ncolumns, legends=legends)
 
-    def _calc_score(self):
+    def _calc_score(self) -> float:
         # How many is in stock (number between 0 and 1)
         num_in_stock = np.sum(self.in_stock_list)
         # This fraction in stock, makes the algorithm artificially add stock compounds by cyclic addition/removal
@@ -157,7 +164,9 @@ class State:
         return score4
 
     @staticmethod
-    def _squash_function(r, slope, yoffset, xoffset):
+    def _squash_function(
+        r: float, slope: float, yoffset: float, xoffset: float
+    ) -> float:
         """Squash function loosely adapted from a sigmoid function with parameters
         to modify and offset the shape
 

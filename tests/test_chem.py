@@ -4,6 +4,7 @@ from rdkit import Chem
 from aizynthfinder.chem import (
     MoleculeException,
     Molecule,
+    UniqueMolecule,
     TreeMolecule,
     Reaction,
     RetroReaction,
@@ -106,6 +107,10 @@ def test_retro_reaction(simple_actions):
     products1 = reactions[0].apply()
     assert products1[0][0].smiles == "CCCCOc1ccc(CC(=O)Cl)cc1"
     assert products1[0][1].smiles == "CNO"
+    assert (
+        reactions[0].reaction_smiles()
+        == "CCCCOc1ccc(CC(=O)N(C)O)cc1>>CCCCOc1ccc(CC(=O)Cl)cc1.CNO"
+    )
 
     products2 = reactions[2].apply()
     assert products2 == ()
@@ -133,6 +138,7 @@ def test_fwd_reaction():
     assert len(products) == 1
     assert len(products[0]) == 1
     assert products[0][0].smiles == "CNC(C)=O"
+    assert reaction.reaction_smiles() == "CC(=O)O.CN>>CNC(C)=O"
 
 
 def test_retro_reaction_fingerprint(simple_actions):
@@ -175,44 +181,17 @@ def test_make_reaction_from_smiles():
 
 def test_create_fixed_reaction():
     smiles = "[C:1](=[O:2])([cH3:3])[N:4][cH3:5]>>Cl[C:1](=[O:2])[cH3:3].[N:4][cH3:5]"
-    mol = TreeMolecule(parent=None, smiles="N#Cc1cccc(NC(=O)c2ccc(F)cc2)c1F")
+    mol = UniqueMolecule(smiles="N#Cc1cccc(NC(=O)c2ccc(F)cc2)c1F")
 
     rxn = FixedRetroReaction(mol, smiles=smiles)
 
     assert rxn.smiles == smiles
 
-    with pytest.raises(ValueError):
-        rxn.rd_reaction
-
-    with pytest.raises(NotImplementedError):
-        rxn.apply()
-
-
-def test_set_reactants_single():
-    mol = TreeMolecule(parent=None, smiles="N#Cc1cccc(NC(=O)c2ccc(F)cc2)c1F")
-    reactant1 = TreeMolecule(parent=mol, smiles="N#Cc1cccc(N)c1F")
-    rxn = FixedRetroReaction(mol)
-
-    rxn.reactants = reactant1
-
-    assert rxn.reactants == ((reactant1),)
-
-
-def test_set_reactants_list():
-    mol = TreeMolecule(parent=None, smiles="N#Cc1cccc(NC(=O)c2ccc(F)cc2)c1F")
-    reactant1 = TreeMolecule(parent=mol, smiles="N#Cc1cccc(N)c1F")
-    reactant2 = TreeMolecule(parent=mol, smiles="O=C(Cl)c1ccc(F)cc1")
-    rxn = FixedRetroReaction(mol)
-
-    rxn.reactants = (reactant1, reactant2)
-
-    assert rxn.reactants == ((reactant1, reactant2),)
-
 
 def test_set_reactants_list_of_list():
-    mol = TreeMolecule(parent=None, smiles="N#Cc1cccc(NC(=O)c2ccc(F)cc2)c1F")
-    reactant1 = TreeMolecule(parent=mol, smiles="N#Cc1cccc(N)c1F")
-    reactant2 = TreeMolecule(parent=mol, smiles="O=C(Cl)c1ccc(F)cc1")
+    mol = UniqueMolecule(smiles="N#Cc1cccc(NC(=O)c2ccc(F)cc2)c1F")
+    reactant1 = UniqueMolecule(smiles="N#Cc1cccc(N)c1F")
+    reactant2 = UniqueMolecule(smiles="O=C(Cl)c1ccc(F)cc1")
     rxn = FixedRetroReaction(mol)
 
     rxn.reactants = ((reactant1, reactant2),)

@@ -493,3 +493,18 @@ def test_clustering_collection(load_reaction_tree):
     assert len(collection.clusters) == 2
     assert collection.clusters[0].reaction_trees == collection.reaction_trees[1:3]
     assert collection.clusters[1].reaction_trees == [collection.reaction_trees[0]]
+
+
+def test_clustering_collection_timeout(load_reaction_tree):
+    collection = RouteCollection(
+        reaction_trees=[
+            ReactionTree.from_dict(
+                load_reaction_tree("routes_for_clustering.json", idx)
+            )
+            for idx in range(3)
+        ]
+    )
+    cluster_labels = collection.cluster(n_clusters=1, timeout=0)
+
+    assert len(cluster_labels) == 0
+    assert collection.clusters is None

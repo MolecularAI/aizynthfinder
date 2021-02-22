@@ -14,7 +14,7 @@ from aizynthfinder.training.utils import (
 )
 
 
-def _get_config():
+def _get_config() -> Config:
     parser = argparse.ArgumentParser(
         "Tool to pre-process a template library to be used to train a recommender network"
     )
@@ -24,7 +24,7 @@ def _get_config():
     return Config(args.config)
 
 
-def _save_unique_templates(dataset, config):
+def _save_unique_templates(dataset: pd.DataFrame, config: Config) -> None:
     dataset = dataset[["retro_template", "template_code"]]
     dataset = dataset.drop_duplicates(subset="template_code", keep="first")
     dataset.set_index("template_code", inplace=True)
@@ -32,14 +32,16 @@ def _save_unique_templates(dataset, config):
     dataset.to_hdf(config.filename("unique_templates"), "table")
 
 
-def main():
-    """ Entry-point for the preprocess_recommender tool
-    """
+def main() -> None:
+    """Entry-point for the preprocess_recommender tool"""
     config = _get_config()
 
     filename = config.filename("library")
     dataset = pd.read_csv(
-        filename, index_col=False, header=None, names=config["library_headers"],
+        filename,
+        index_col=False,
+        header=None,
+        names=config["library_headers"],
     )
 
     print("Dataset loaded, generating Labels...", flush=True)
@@ -47,16 +49,16 @@ def main():
     labels = lb.fit_transform(dataset["template_hash"])
     split_and_save_data(labels, "labels", config)
 
-    print("Labels created and splitted, generating Inputs...", flush=True)
+    print("Labels created and split, generating Inputs...", flush=True)
     reactants = dataset["reactants"].to_numpy()
     inputs = np.apply_along_axis(reactants_to_fingerprint, 0, [reactants], config)
     inputs = sparse.lil_matrix(inputs.T).tocsr()
     split_and_save_data(inputs, "inputs", config)
 
-    print("Inputs created and splitted, splitting Full Dataset...", flush=True)
+    print("Inputs created and split, splitting Full Dataset...", flush=True)
     split_and_save_data(dataset, "library", config)
 
-    print("Full Dataset splitted, creating unique template set", flush=True)
+    print("Full Dataset split, creating unique template set", flush=True)
     _save_unique_templates(dataset, config)
 
 

@@ -12,22 +12,22 @@ from aizynthfinder.context.scoring import (
     ScorerCollection,
     ScorerException,
 )
-from aizynthfinder.chem import Molecule
+from aizynthfinder.chem import Molecule, UniqueMolecule
 from aizynthfinder.mcts.mcts import SearchTree
 from aizynthfinder.analysis import ReactionTree
 
 
-def test_state_scorer_node(generate_root):
+def test_state_scorer_node(generate_root, default_config):
     root = generate_root("CCCCOc1ccc(CC(=O)N(C)O)cc1")
-    scorer = StateScorer()
+    scorer = StateScorer(default_config)
 
     assert repr(scorer) == "state score"
     assert round(scorer(root), 4) == 0.0491
 
 
-def test_state_scorer_nodes(generate_root):
+def test_state_scorer_nodes(generate_root, default_config):
     root = generate_root("CCCCOc1ccc(CC(=O)N(C)O)cc1")
-    scorer = StateScorer()
+    scorer = StateScorer(default_config)
 
     scores = scorer([root, root])
 
@@ -65,9 +65,9 @@ def test_sort(shared_datadir, default_config, mock_stock):
         shared_datadir / "tree_without_repetition.json", default_config
     )
     nodes = list(search_tree.graph())
-    scorer = StateScorer()
+    scorer = StateScorer(default_config)
 
-    sorted_nodes, scores = scorer.sort(nodes)
+    sorted_nodes, scores, _ = scorer.sort(nodes)
 
     assert [np.round(score, 4) for score in scores] == [0.9976, 0.0491]
     assert sorted_nodes == [nodes[1], nodes[0]]
@@ -146,7 +146,7 @@ def test_scoring_branched_mcts_tree(shared_datadir, default_config):
     )
     nodes = list(search_tree.graph())
 
-    assert pytest.approx(StateScorer()(nodes[-1]), abs=1e-6) == 0.00012363
+    assert pytest.approx(StateScorer(default_config)(nodes[-1]), abs=1e-6) == 0.00012363
     assert NumberOfReactionsScorer()(nodes[-1]) == 14
     assert NumberOfPrecursorsScorer(default_config)(nodes[-1]) == 8
     assert NumberOfPrecursorsInStockScorer(default_config)(nodes[-1]) == 0
@@ -172,7 +172,7 @@ def test_scoring_branch_mcts_tree_in_stock(shared_datadir, default_config, mock_
     )
     nodes = list(search_tree.graph())
 
-    assert pytest.approx(StateScorer()(nodes[-1]), abs=1e-3) == 0.950
+    assert pytest.approx(StateScorer(default_config)(nodes[-1]), abs=1e-3) == 0.950
     assert NumberOfReactionsScorer()(nodes[-1]) == 14
     assert NumberOfPrecursorsScorer(default_config)(nodes[-1]) == 8
     assert NumberOfPrecursorsInStockScorer(default_config)(nodes[-1]) == 8
@@ -183,7 +183,7 @@ def test_scoring_branch_mcts_tree_in_stock(shared_datadir, default_config, mock_
 
 def test_scorers_tree_one_node_route(default_config):
     tree = ReactionTree()
-    tree.root = Molecule(smiles="CCCCOc1ccc(CC(=O)N(C)O)cc1")
+    tree.root = UniqueMolecule(smiles="CCCCOc1ccc(CC(=O)N(C)O)cc1")
     tree.graph.add_node(tree.root)
 
     assert pytest.approx(StateScorer(default_config)(tree), abs=1e-3) == 0.0497
@@ -257,7 +257,7 @@ def test_add_scorer_to_collection(default_config):
     collection = ScorerCollection(default_config)
     del collection["state score"]
 
-    collection.load(StateScorer())
+    collection.load(StateScorer(default_config))
 
     assert "state score" in collection.names()
 

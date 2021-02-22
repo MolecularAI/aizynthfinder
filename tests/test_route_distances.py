@@ -47,7 +47,8 @@ def test_get_children_random():
 
 
 @pytest.mark.parametrize(
-    "route_index", [1, 2],
+    "route_index",
+    [1, 2],
 )
 def test_create_wrapper(load_reaction_tree, route_index):
     tree = ReactionTree.from_dict(

@@ -1,5 +1,8 @@
 """ Module containing classes that interfaces neural network policies
 """
+from __future__ import annotations
+from typing import TYPE_CHECKING
+
 import numpy as np
 import pandas as pd
 
@@ -7,13 +10,19 @@ from aizynthfinder.chem import RetroReaction
 from aizynthfinder.utils.models import load_model
 from aizynthfinder.context.collection import ContextCollection
 
+if TYPE_CHECKING:
+    from aizynthfinder.utils.type_utils import Union, Any, Sequence, List, Tuple
+    from aizynthfinder.context.config import Configuration
+    from aizynthfinder.chem import TreeMolecule
+
 
 class PolicyException(Exception):
-    """ An exception raised by the Policy classes
-    """
+    """An exception raised by the Policy classes"""
 
 
-def _make_fingerprint(obj, model):
+def _make_fingerprint(
+    obj: Union[TreeMolecule, RetroReaction], model: Any
+) -> np.ndarray:
     fingerprint = obj.fingerprint(radius=2, nbits=len(model))
     return fingerprint.reshape([1, len(model)])
 
@@ -25,28 +34,33 @@ class ExpansionPolicy(ContextCollection):
     This policy provides actions (templates) that can be applied to a molecule
 
     :param config: the configuration of the tree search
-    :type config: Configuration
     """
 
     _collection_name = "expansion policy"
 
-    def __init__(self, config):
+    def __init__(self, config: Configuration) -> None:
         super().__init__()
         self._config = config
         self._stock = config.stock
 
-    def __call__(self, molecules):
+    def __call__(
+        self, molecules: Sequence[TreeMolecule]
+    ) -> Tuple[Sequence[RetroReaction], Sequence[float]]:
         return self.get_actions(molecules)
 
-    def get_actions(self, molecules):
+    def get_actions(
+        self, molecules: Sequence[TreeMolecule]
+    ) -> Tuple[List[RetroReaction], List[float]]:
         """
         Get all the probable actions of a set of molecules, using the selected policies and given cutoffs
 
         :param molecules: the molecules to consider
-        :type molecules: list of Molecule
         :return: the actions and the priors of those actions
-        :rtype: tuple (list of RetroReaction, numpy.ndarray)
+        :raises: PolicyException: if the policy isn't selected
         """
+        if not self.selection:
+            raise PolicyException("No expansion policy selected")
+
         possible_actions = []
         priors = []
 
@@ -67,7 +81,7 @@ class ExpansionPolicy(ContextCollection):
                 for idx, (move_index, move) in enumerate(possible_moves.iterrows()):
                     metadata = dict(move)
                     del metadata[self._config.template_column]
-                    metadata["policy_probability"] = float(probs[idx])
+                    metadata["policy_probability"] = float(probs[idx].round(4))
                     metadata["policy_name"] = policy_key
                     metadata["template_code"] = move_index
                     possible_actions.append(
@@ -77,7 +91,7 @@ class ExpansionPolicy(ContextCollection):
                     )
         return possible_actions, priors
 
-    def load(self, source, templatefile, key):
+    def load(self, source: Union[str, Any], templatefile: str, key: str) -> None:  # type: ignore
         """
         Load a policy and associated templates under the given key
 
@@ -88,28 +102,25 @@ class ExpansionPolicy(ContextCollection):
         implements the `__len__` and `predict` methods.
 
         :param source: the source of the policy model
-        :type source: str or object
         :param templatefile: the path to a HDF5 file with the templates
-        :type templatefile: str
         :param key: the key or label
-        :type key: str
         :raises PolicyException: if the length of the model output vector is not same as the number of templates
         """
         self._logger.info(f"Loading expansion policy model from {source} to {key}")
         model = load_model(source, key, self._config.use_remote_models)
 
         self._logger.info(f"Loading templates from {templatefile} to {key}")
-        templates = pd.read_hdf(templatefile, "table")
+        templates: pd.DataFrame = pd.read_hdf(templatefile, "table")
 
-        if hasattr(model, "output_size") and len(templates) != model.output_size:
+        if hasattr(model, "output_size") and len(templates) != model.output_size:  # type: ignore
             raise PolicyException(
-                f"The number of templates ({len(templates)}) does not agree with the "
+                f"The number of templates ({len(templates)}) does not agree with the "  # type: ignore
                 f"output dimensions of the model ({model.output_size})"
             )
 
         self._items[key] = {"model": model, "templates": templates}
 
-    def load_from_config(self, **config):
+    def load_from_config(self, **config: Any) -> None:
         """
         Load one or more expansion policy from a configuration
 
@@ -119,20 +130,19 @@ class ExpansionPolicy(ContextCollection):
             - path_to_templates
 
         :param config: the configuration
-        :type config: key value pairs
         """
         for key, policy_spec in config.items():
             modelfile, templatefile = policy_spec
             self.load(modelfile, templatefile, key)
 
-    def _cutoff_predictions(self, predictions):
+    def _cutoff_predictions(self, predictions: np.ndarray) -> np.ndarray:
         """
         Get the top transformations, by selecting those that have:
             * cumulative probability less than a threshold (cutoff_cumulative)
             * or at most N (cutoff_number)
         """
         sortidx = np.argsort(predictions)[::-1]
-        cumsum = np.cumsum(predictions[sortidx])
+        cumsum: np.ndarray = np.cumsum(predictions[sortidx])
         if any(cumsum >= self._config.cutoff_cumulative):
             maxidx = np.argmin(cumsum < self._config.cutoff_cumulative)
         else:
@@ -140,7 +150,8 @@ class ExpansionPolicy(ContextCollection):
         maxidx = min(maxidx, self._config.cutoff_number) or 1
         return sortidx[:maxidx]
 
-    def _predict(self, mol, model):
+    @staticmethod
+    def _predict(mol: TreeMolecule, model: Any) -> np.ndarray:
         fp_arr = _make_fingerprint(mol, model)
         return np.array(model.predict(fp_arr)).flatten()
 
@@ -152,44 +163,50 @@ class FilterPolicy(ContextCollection):
     This policy provides a query on a reaction to determine whether it is feasible
 
     :param config: the configuration of the tree search
-    :type config: Configuration
     """
 
     _single_selection = True
     _collection_name = "filter policy"
 
-    def __init__(self, config):
+    def __init__(self, config: Configuration) -> None:
         super().__init__()
         self._config = config
 
-    def __call__(self, reaction, return_prob=False):
-        return self.is_feasible(reaction, return_prob)
+    def __call__(self, reaction: RetroReaction) -> bool:
+        return self.is_feasible(reaction)
 
-    def is_feasible(self, reaction, return_prob=False):
+    def feasibility(self, reaction: RetroReaction) -> Tuple[bool, float]:
         """
         Computes if a given reaction is feasible by given
         the reaction fingerprint to a network model
 
         :param reaction: the reaction to query
-        :type reaction: RetroReaction
-        :param return_prob: if True, returns both the feasibility and the probability
-        :type return_prob: bool, optional
         :return: if the reaction is feasible
-        :rtype: bool
+        :raises: PolicyException: if the policy isn't selected
         """
         if not self._selection:
             raise PolicyException("No filter policy selected!")
 
         if not reaction.reactants:
-            return False
+            return False, 0.0
+
         prob = self._predict(reaction)
         feasible = prob >= self._config.filter_cutoff
-        if return_prob:
-            return feasible, prob
-        else:
-            return feasible
+        return feasible, prob
 
-    def load(self, source, key):
+    def is_feasible(self, reaction: RetroReaction) -> bool:
+        """
+        Computes if a given reaction is feasible by given
+        the reaction fingerprint to a network model
+
+        :param reaction: the reaction to query
+        :return: if the reaction is feasible
+        :raises: PolicyException: if the policy isn't selected
+        """
+        feasible, _ = self.feasibility(reaction)
+        return feasible
+
+    def load(self, source: Union[str, Any], key: str) -> None:  # type: ignore
         """
         Load a policy under the given key
 
@@ -200,17 +217,14 @@ class FilterPolicy(ContextCollection):
         implements the `__len__` and `predict` methods.
 
         :param source: the source of the policy model
-        :type source: str or object
-
         :param key: the key or label
-        :type key: str
         """
         self._logger.info(f"Loading filter policy model from {source} to {key}")
         self._items[key] = {
             "model": load_model(source, key, self._config.use_remote_models)
         }
 
-    def load_from_config(self, **config):
+    def load_from_config(self, **config: Any) -> None:
         """
         Load one or more filter policy from a configuration
 
@@ -218,17 +232,22 @@ class FilterPolicy(ContextCollection):
             key: path_to_model
 
         :param config: the configuration
-        :type config: key value pairs
         """
         for key, filename in config.items():
             self.load(filename, key)
 
-    def _reaction_to_fingerprint(self, reaction, model):
+    def _predict(self, reaction: RetroReaction) -> float:
+        if not isinstance(self.selection, str):
+            raise PolicyException("No policy selected.")
+
+        model = self[self.selection]["model"]
+        prod_fp, rxn_fp = self._reaction_to_fingerprint(reaction, model)
+        return model.predict([prod_fp, rxn_fp])[0][0]
+
+    @staticmethod
+    def _reaction_to_fingerprint(
+        reaction: RetroReaction, model: Any
+    ) -> Tuple[np.ndarray, np.ndarray]:
         rxn_fp = _make_fingerprint(reaction, model)
         prod_fp = _make_fingerprint(reaction.mol, model)
         return prod_fp, rxn_fp
-
-    def _predict(self, mol):
-        model = self[self.selection]["model"]
-        prod_fp, rxn_fp = self._reaction_to_fingerprint(mol, model)
-        return model.predict([prod_fp, rxn_fp])[0][0]

@@ -1,6 +1,9 @@
 """ Module containing a class for encapsulating the settings of the tree search
 """
+from __future__ import annotations
 import os
+from dataclasses import dataclass
+from typing import TYPE_CHECKING
 
 import yaml
 
@@ -10,7 +13,11 @@ from aizynthfinder.context.policy import ExpansionPolicy, FilterPolicy
 from aizynthfinder.context.stock import Stock
 from aizynthfinder.context.scoring import ScorerCollection
 
+if TYPE_CHECKING:
+    from aizynthfinder.utils.type_utils import StrDict, Any
 
+
+@dataclass
 class Configuration:
     """
     Encapsulating the settings of the tree search, including the policy,
@@ -29,8 +36,27 @@ class Configuration:
     file located in the `data` folder of the package.
     """
 
-    def __init__(self):
-        self._properties = {}
+    C: float = 1.4
+    cutoff_cumulative: float = 0.995
+    cutoff_number: int = 50
+    max_transforms: int = 6
+    default_prior: float = 0.5
+    use_prior: bool = True
+    iteration_limit: int = 100
+    return_first: bool = False
+    time_limit: int = 120
+    filter_cutoff: float = 0.05
+    exclude_target_from_stock: bool = True
+    template_column: str = "retro_template"
+    prune_cycles_in_search: bool = True
+    use_remote_models: bool = False
+    stock: Stock = None  # type: ignore
+    expansion_policy: ExpansionPolicy = None  # type: ignore
+    filter_policy: FilterPolicy = None  # type: ignore
+    scorers: ScorerCollection = None  # type: ignore
+
+    def __post_init__(self) -> None:
+        self._properties: StrDict = {}
         filename = os.path.join(data_path(), "config.yml")
         with open(filename, "r") as fileobj:
             _config = yaml.load(fileobj.read(), Loader=yaml.SafeLoader)
@@ -42,20 +68,20 @@ class Configuration:
         self.scorers = ScorerCollection(self)
         self._logger = logger()
 
-    def __eq__(self, other):
+    def __eq__(self, other: Any) -> bool:
+        if not isinstance(other, Configuration):
+            return False
         return self._properties == other._properties
 
     @classmethod
-    def from_dict(cls, source):
+    def from_dict(cls, source: StrDict) -> "Configuration":
         """
         Loads a configuration from a dictionary structure.
         The parameters not set in the dictionary are taken from the default values.
         The policies and stocks specified are directly loaded.
 
         :param source: the dictionary source
-        :type source: dict
         :return: a Configuration object with settings from the source
-        :rtype: Configuration
         """
         config_obj = Configuration()
         config_obj._update_from_config(source)
@@ -72,22 +98,20 @@ class Configuration:
         return config_obj
 
     @classmethod
-    def from_file(cls, filename):
+    def from_file(cls, filename: str) -> "Configuration":
         """
         Loads a configuration from a yaml file.
         The parameters not set in the yaml file are taken from the default values.
         The policies and stocks specified in the yaml file are directly loaded.
 
         :param filename: the path to a yaml file
-        :type filename: str
         :return: a Configuration object with settings from the yaml file
-        :rtype: Configuration
         """
         with open(filename, "r") as fileobj:
             _config = yaml.load(fileobj.read(), Loader=yaml.SafeLoader)
         return Configuration.from_dict(_config)
 
-    def update(self, **settings):
+    def update(self, **settings: Any) -> None:
         """
         Update the configuration using dictionary of parameters
 
@@ -99,7 +123,7 @@ class Configuration:
             setattr(self, setting, value)
             self._logger.info(f"Setting {setting.replace('_', ' ')} to {value}")
 
-    def _update_from_config(self, config):
+    def _update_from_config(self, config: StrDict) -> None:
         self._properties.update(config.get("finder", {}).get("properties", {}))
         self._properties.update(config.get("policy", {}).get("properties", {}))
         self._properties.update(config.get("filter", {}).get("properties", {}))

@@ -1,9 +1,11 @@
 """ Module containing classes that interfaces different stocks and query classes
 """
+from __future__ import annotations
 import os
 import copy
 import importlib
 from collections import defaultdict
+from typing import TYPE_CHECKING
 
 import pandas as pd
 
@@ -11,10 +13,15 @@ from aizynthfinder.chem import Molecule
 from aizynthfinder.context.collection import ContextCollection
 from aizynthfinder.utils.mongo import get_mongo_client
 
+if TYPE_CHECKING:
+    from pymongo.database import Database as MongoDatabase
+    from pymongo.collection import Collection as MongoCollection
+
+    from aizynthfinder.utils.type_utils import StrDict, Set, Union, Any, Optional, List
+
 
 class StockException(Exception):
-    """ An exception raised by the Stock classes
-    """
+    """An exception raised by the Stock classes"""
 
 
 class StockQueryMixin:
@@ -24,58 +31,52 @@ class StockQueryMixin:
     query class.
     """
 
-    def __len__(self):
+    def __len__(self) -> int:
         return 0
 
-    def amount(self, mol):
+    def __contains__(self, mol: Molecule) -> bool:
+        return False
+
+    def amount(self, mol: Molecule) -> float:
         """
         Returns the maximum amount of the molecule in stock
 
         :param mol: the query molecule
-        :type mol: Molecule
         :raises StockException: if the amount cannot be computed
         :return: the amount
-        :rtype: float
         """
         raise StockException("Cannot compute amount")
 
-    def availability_string(self, mol):
+    def availability_string(self, mol: Molecule) -> str:
         """
         Returns the sources of the molecule
 
         :param mol: the query molecule
-        :type mol: Molecule
         :raises StockException: if the string cannot be computed
         :return: a comma-separated list of sources
-        :rtype: str
         """
         raise StockException("Cannot provide availability")
 
-    def cached_search(self, mol):
+    def cached_search(self, mol: Molecule) -> bool:
         """
         Finds the entries of the molecule in the stock and cache them
         if necessary.
 
         :param mol: the query molecule
-        :type mol: Molecule
         :return: if the molecule is in stock
-        :rtype: bool
         """
         return mol in self
 
-    def clear_cache(self):
-        """ Clear the internal search cache if available
-        """
+    def clear_cache(self) -> None:
+        """Clear the internal search cache if available"""
         pass
 
-    def price(self, mol):
+    def price(self, mol: Molecule) -> float:
         """
         Returns the minimum price of the molecule in stock
 
         :param mol: the query molecule
-        :type mol: Molecule
         :raises StockException: if the price cannot be computed
-        :return: the price
         :rtype: float
         """
         raise StockException("Cannot compute price")
@@ -94,30 +95,29 @@ class InMemoryInchiKeyQuery(StockQueryMixin):
     The HDF5 file must have a dataset called "table".
 
     :parameter filename: the path to the file with inchi-keys
-    :type filename: str
     """
 
-    def __init__(self, filename):
+    def __init__(self, filename: str) -> None:
         ext = os.path.splitext(filename)[1]
         if ext in [".h5", ".hdf5"]:
-            stock = pd.read_hdf(filename, key="table")
-            inchis = stock.inchi_key.values
+            stock = pd.read_hdf(filename, key="table")  # type: ignore
+            inchis = stock.inchi_key.values  # type: ignore
         elif ext == ".csv":
             stock = pd.read_csv(filename)
             inchis = stock.inchi_key.values
         else:
             with open(filename, "r") as fileobj:
-                inchis = [line.strip() for line in fileobj]
+                inchis = fileobj.read().splitlines()
         self._stock_inchikeys = set(inchis)
 
-    def __contains__(self, mol):
+    def __contains__(self, mol: Molecule) -> bool:
         return mol.inchi_key in self._stock_inchikeys
 
-    def __len__(self):
+    def __len__(self) -> int:
         return len(self._stock_inchikeys)
 
     @property
-    def stock_inchikeys(self):
+    def stock_inchikeys(self) -> Set[str]:
         return self._stock_inchikeys
 
 
@@ -130,40 +130,39 @@ class MongoDbInchiKeyQuery(StockQueryMixin):
         * source: the original source of the molecule
 
     :ivar client: the Mongo client
-    :vartype client: pymongo.MongoClient
     :ivar database: the database instance
-    :vartype database: pymongo.database.Database
     :ivar molecules: the collection of documents
-    :vartype molecules: pymongo.collection.Collection
 
     :parameter host: the database host, defaults to None
-    :type host: str, optional
     :parameter database: the database name, defaults to "stock_db"
-    :type database: str, optional
     :parameter collection: the database collection, defaults to "molecules"
-    :type collection: str, optional
     """
 
-    def __init__(self, host=None, database="stock_db", collection="molecules"):
+    def __init__(
+        self,
+        host: str = None,
+        database: str = "stock_db",
+        collection: str = "molecules",
+    ) -> None:
         self.client = get_mongo_client(
             host or os.environ.get("MONGODB_HOST") or "localhost"
         )
-        self.database = self.client[database]
-        self.molecules = self.database[collection]
-        self._len = None
+        self.database: MongoDatabase = self.client[database]
+        self.molecules: MongoCollection = self.database[collection]
+        self._len: Optional[int] = None
 
-    def __contains__(self, mol):
+    def __contains__(self, mol: Molecule) -> bool:
         return self.molecules.count_documents({"inchi_key": mol.inchi_key}) > 0
 
-    def __len__(self):
+    def __len__(self) -> int:
         if self._len is None:
             self._len = self.molecules.count_documents({})
         return self._len
 
-    def __str__(self):
+    def __str__(self) -> str:
         return "'MongoDB stock'"
 
-    def availability_string(self, mol):
+    def availability_string(self, mol: Molecule) -> str:
         sources = [
             item["source"] for item in self.molecules.find({"inchi_key": mol.inchi_key})
         ]
@@ -197,14 +196,14 @@ class Stock(ContextCollection):
 
     _collection_name = "stock"
 
-    def __init__(self):
+    def __init__(self) -> None:
         super().__init__()
-        self._exclude = set()
-        self._stop_criteria = {"amount": None, "price": None, "counts": {}}
-        self._use_stop_criteria = False
+        self._exclude: Set[str] = set()
+        self._stop_criteria: StrDict = {"amount": None, "price": None, "counts": {}}
+        self._use_stop_criteria: bool = False
 
-    def __contains__(self, mol):
-        if mol.inchi_key in self._exclude:
+    def __contains__(self, mol: Molecule) -> bool:
+        if not self.selection or mol.inchi_key in self._exclude:
             return False
 
         if self._use_stop_criteria:
@@ -215,44 +214,38 @@ class Stock(ContextCollection):
                 return True
         return False
 
-    def __len__(self):
-        return sum(len(self[key]) for key in self.selection)
+    def __len__(self) -> int:
+        return sum(len(self[key]) for key in self.selection or [])
 
     @property
-    def stop_criteria(self):
-        """ Return a copy of the stop criteria used by the stock
-        """
+    def stop_criteria(self) -> dict:
+        """Return a copy of the stop criteria used by the stock"""
         return copy.deepcopy(self._stop_criteria)
 
-    def amount(self, mol):
+    def amount(self, mol: Molecule) -> float:
         """
         Calculate the maximum amount of a molecule in stock
 
         :param mol: the molecule to query
-        :type mol: Molecule
         :raises StockException: if the amount could not be computed
         :return: the maximum amount
-        :rtype: float
         """
         amounts = self._mol_property(mol, "amount")
         if not amounts:
             raise StockException("Could not obtain amount of molecule")
         return max(amounts)
 
-    def availability_string(self, mol):
+    def availability_string(self, mol: Molecule) -> str:
         """
         Return a string of what stocks a given mol is available
 
         If the molecule is not in stock it will return "Not in stock"
 
         :param mol: The molecule to query
-        :type mol: Molecule
-
         :returns: string with a list of stocks that mol was found in
-        :rtype: str
         """
         availability = []
-        for key in self.selection:
+        for key in self.selection or []:
             if mol not in self[key]:
                 continue
             try:
@@ -263,18 +256,17 @@ class Stock(ContextCollection):
             return ",".join(availability)
         return "Not in stock"
 
-    def exclude(self, mol):
+    def exclude(self, mol: Molecule) -> None:
         """
         Exclude a molecule from the stock.
         When this molecule is queried it will return False,
         regardless if the molecule is in the stock.
 
         :param mol: the molecule to exclude
-        :type mol: Molecule
         """
         self._exclude.add(mol.inchi_key)
 
-    def load(self, source, key):
+    def load(self, source: Union[str, Any], key: str) -> None:  # type: ignore
         """
         Load a stock.
 
@@ -285,9 +277,7 @@ class Stock(ContextCollection):
         implements the `__contains__` and `__len__` methods for querying.
 
         :param source: the source of the sock
-        :type source: str or object
         :param key: The key that will be used to select the stock
-        :type key: str
         """
         src_str = str(source)
         if "object at 0x" in src_str:
@@ -298,17 +288,17 @@ class Stock(ContextCollection):
             source = InMemoryInchiKeyQuery(source)
         self._items[key] = source
 
-    def load_from_config(self, **config):
+    def load_from_config(self, **config: Any) -> None:
         """
         Load stocks from a configuration
 
         The key can be "files" in case stocks are loaded from a file
         The key can be "mongodb" in case a ``MongoDbInchiKeyQuery`` object is instantiated
         The key can be "stop_criteria" in case the config is given to the `set_stop_criteria` method
-        The key can point to a custom stock class, e.g. ``mypackage.mymodule.MyStock`` in case this stock object is instantiated
+        The key can point to a custom stock class, e.g. ``mypackage.mymodule.MyStock``
+        in case this stock object is instantiated
 
         :param config: the configuration
-        :type config: key value pairs
         """
         known_keys = ["files", "mongodb", "stop_criteria"]
         if "stop_criteria" in config:
@@ -343,34 +333,29 @@ class Stock(ContextCollection):
                     f"Unable to find query class '{class_name}' in '{module_name}''"
                 )
 
-    def price(self, mol):
+    def price(self, mol: Molecule) -> float:
         """
         Calculate the minimum price of a molecule in stock
 
         :param mol: the molecule to query
-        :type mol: Molecule
         :raises StockException: if the price could not be computed
         :return: the minimum price
-        :rtype: float
         """
         prices = self._mol_property(mol, "price")
         if not prices:
             raise StockException("Could not obtain price of molecule")
         return min(prices)
 
-    def reset_exclusion_list(self):
-        """Remove all molecules in the exclusion list
-        """
+    def reset_exclusion_list(self) -> None:
+        """Remove all molecules in the exclusion list"""
         self._exclude = set()
 
-    def select(self, value, append=False):
+    def select(self, value: Union[str, List[str]], append: bool = False) -> None:
         """
         Select one or more stock queries
 
         :param value: the key of the stocks to select
-        :type value: str or list
         :param append: if True and ``value`` is a single key append it to the current selection
-        :type append: bool, optional
         """
         super().select(value, append)
         try:
@@ -378,7 +363,7 @@ class Stock(ContextCollection):
         except (TypeError, ValueError):  # In case len is not possible to compute
             pass
 
-    def set_stop_criteria(self, criteria=None):
+    def set_stop_criteria(self, criteria: dict = None) -> None:
         """
         Set criteria that stop the search
 
@@ -399,44 +384,41 @@ class Stock(ContextCollection):
             }
 
         :param criteria: the criteria settings
-        :type criteria: dict, optional
         """
         criteria = criteria or {}
-        self._stop_criteria["price"] = criteria.get("price")
-        self._stop_criteria["amount"] = criteria.get("amount")
-        self._stop_criteria["counts"] = copy.deepcopy(
-            criteria.get("size", criteria.get("counts"))
-        )
+        self._stop_criteria = {
+            "price": criteria.get("price"),
+            "amount": criteria.get("amount"),
+            "counts": copy.deepcopy(criteria.get("size", criteria.get("counts"))),
+        }
         self._use_stop_criteria = any(self._stop_criteria.values())
         reduced_criteria = {
             key: value for key, value in self._stop_criteria.items() if value
         }
         self._logger.info(f"Stop criteria for stock updated to: {reduced_criteria}")
 
-    def smiles_in_stock(self, smiles):
+    def smiles_in_stock(self, smiles: str) -> bool:
         """
         Check if the SMILES is in the currently selected stocks
 
         :param smiles: SMILES string (must be RDKit sanitizable)
-        :type smiles: str
         :returns: if the SMILES was on stock
-        :rtype: bool
         """
         return Molecule(smiles=smiles) in self
 
-    def _apply_amount_criteria(self, mol):
+    def _apply_amount_criteria(self, mol: Molecule) -> bool:
         if not self._stop_criteria["amount"]:
             return True
         try:
             amount = self.amount(mol)
         except StockException:
             return True
-        return amount >= self._stop_criteria["amount"]
+        return amount >= self._stop_criteria.get("amount", amount)
 
-    def _apply_counts_criteria(self, mol):
+    def _apply_counts_criteria(self, mol: Molecule) -> bool:
         if not self._stop_criteria["counts"]:
             return True
-        atom_counts = defaultdict(int)
+        atom_counts: dict = defaultdict(int)
         for atom in mol.rd_mol.GetAtoms():
             atom_counts[atom.GetSymbol()] += 1
         for symbol, threshold in self._stop_criteria["counts"].items():
@@ -444,26 +426,26 @@ class Stock(ContextCollection):
                 return False
         return True
 
-    def _apply_price_criteria(self, mol):
+    def _apply_price_criteria(self, mol: Molecule) -> bool:
         if not self._stop_criteria["price"]:
             return True
         try:
             price = self.price(mol)
         except StockException:
             return True
-        return price <= self._stop_criteria["price"]
+        return price <= self._stop_criteria.get("price", price)
 
-    def _apply_stop_criteria(self, mol):
+    def _apply_stop_criteria(self, mol: Molecule) -> bool:
         if not self._apply_counts_criteria(mol):
             return False
 
         passes = False
-        for key in self.selection:
+        for key in self.selection or []:
             passes = passes or self[key].cached_search(mol)
         passes = passes and self._apply_amount_criteria(mol)
         passes = passes and self._apply_price_criteria(mol)
 
-        for key in self.selection:
+        for key in self.selection or []:
             self[key].clear_cache()
         return passes
 

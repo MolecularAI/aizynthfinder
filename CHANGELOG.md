@@ -1,5 +1,25 @@
 # CHANGELOG
 
+## Version 2.4.0 - 2020-02-22 (2020-02-22)
+
+
+### Features
+
+- Simplified interfaces for some internal classes
+- Type hints have been added to the source code
+- poetry is now used for dependency management
+
+### Trivial changes
+
+- Update of black version causing some re-formatting
+- Small changes to documentation
+
+## Version 2.3.0 - 2020-02-22 (2020-01-20)
+
+### Features
+
+- Add option to timeout distance calculation of route collections
+
 ## Version 2.2.1 - 2020-12-18
 
 ### Bugfixes

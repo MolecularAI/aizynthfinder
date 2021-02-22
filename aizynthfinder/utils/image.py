@@ -1,11 +1,13 @@
 """ This module contains a collection of routines to produce pretty images
 """
+from __future__ import annotations
 import sys
 import subprocess
 import os
 import tempfile
 import atexit
 import shutil
+from typing import TYPE_CHECKING
 
 from jinja2 import Template
 from PIL import Image, ImageDraw
@@ -14,29 +16,45 @@ from rdkit import Chem
 
 from aizynthfinder.utils.paths import data_path
 
+if TYPE_CHECKING:
+    import networkx as nx
+
+    from aizynthfinder.utils.type_utils import (
+        Tuple,
+        Any,
+        Dict,
+        Union,
+        Sequence,
+        PilImage,
+        PilColor,
+    )
+    from aizynthfinder.chem import (
+        Molecule,
+        UniqueMolecule,
+        RetroReaction,
+        FixedRetroReaction,
+    )
+
 IMAGE_FOLDER = tempfile.mkdtemp()
 
 
 @atexit.register
-def _clean_up_images():
+def _clean_up_images() -> None:
     global IMAGE_FOLDER
     try:
         shutil.rmtree(IMAGE_FOLDER, ignore_errors=True)
-    except Exception:  # Don't care if we fail clean-up
+    except Exception:  # noqa Don't care if we fail clean-up
         pass
 
 
-def molecule_to_image(mol, frame_color):
+def molecule_to_image(mol: Molecule, frame_color: PilColor) -> PilImage:
     """
     Create a pretty image of a molecule,
     with a colored frame around it
 
     :param mol: the molecule
-    :type mol: Molecule
     :param frame_color: the color of the frame
-    :type frame_color: tuple of int or str
     :return: the produced image
-    :rtype: PIL image
     """
     mol = Chem.MolFromSmiles(mol.smiles)
     img = Draw.MolToImage(mol)
@@ -44,16 +62,13 @@ def molecule_to_image(mol, frame_color):
     return draw_rounded_rectangle(cropped_img, frame_color)
 
 
-def crop_image(img, margin=20):
+def crop_image(img: PilImage, margin: int = 20) -> PilImage:
     """
     Crop an image by removing white space around it
 
     :param img: the image to crop
-    :type img: PIL image
     :param margin: padding, defaults to 20
-    :type margin: int, optional
     :return: the cropped image
-    :rtype: PIL image
     """
     # First find the boundaries of the white area
     x0_lim = img.width
@@ -87,18 +102,16 @@ def crop_image(img, margin=20):
     return out
 
 
-def draw_rounded_rectangle(img, color, arc_size=20):
+def draw_rounded_rectangle(
+    img: PilImage, color: PilColor, arc_size: int = 20
+) -> PilImage:
     """
     Draw a rounded rectangle around an image
 
     :param img: the image to draw upon
-    :type img: PIL image
     :param color: the color of the rectangle
-    :type color: tuple or str
     :param arc_size: the size of the corner, defaults to 20
-    :type arc_size: int, optional
     :return: the new image
-    :rtype: PIL image
     """
     x0, y0, x1, y1 = img.getbbox()
     x1 -= 1
@@ -117,17 +130,16 @@ def draw_rounded_rectangle(img, color, arc_size=20):
     return copy
 
 
-def save_molecule_images(molecules, frame_colors):
+def save_molecule_images(
+    molecules: Sequence[Molecule], frame_colors: Sequence[PilColor]
+) -> Dict[Molecule, str]:
     """
     Create images of a list of molecules and save them to disc
     a globally managed folder.
 
     :param molecules: the molecules to save as images
-    :type molecules: list of Molecule
     :param frame_colors: the color of the frame around each image
-    :type frame_colors: list of str
     :return: the filename of the created images
-    :rtype: dict
     """
     global IMAGE_FOLDER
     spec = {}
@@ -142,22 +154,22 @@ def save_molecule_images(molecules, frame_colors):
     return spec
 
 
-def make_graphviz_image(molecules, reactions, edges, frame_colors):
+def make_graphviz_image(
+    molecules: Union[Sequence[Molecule], Sequence[UniqueMolecule]],
+    reactions: Union[Sequence[RetroReaction], Sequence[FixedRetroReaction]],
+    edges: Sequence[Tuple[Any, Any]],
+    frame_colors: Sequence[PilColor],
+) -> PilImage:
     """
     Create an image of a bipartite graph of molecules and reactions
     using the dot program of graphviz
 
     :param molecules: the molecules nodes
-    :type molecules: list of Molecules
     :param reactions: the reaction nodes
-    :type reactions: list of Reactions
     :param edges: the edges of the graph
-    :type edges: list of tuples
     :param frame_colors: the color of the frame around each image
-    :type frame_colors: list of str
     :raises FileNotFoundError: if the image could not be produced
     :return: the create image
-    :rtype: PIL.Image
     """
 
     def _create_image(use_splines):
@@ -168,24 +180,24 @@ def make_graphviz_image(molecules, reactions, edges, frame_colors):
             use_splines=use_splines,
         )
         _, input_name = tempfile.mkstemp(suffix=".dot")
-        with open(input_name, "w") as fileobj:
-            fileobj.write(txt)
+        with open(input_name, "w") as this_fileobj:
+            this_fileobj.write(txt)
 
-        _, output_img = tempfile.mkstemp(suffix=".png")
+        _, output_img2 = tempfile.mkstemp(suffix=".png")
         ext = ".bat" if sys.platform.startswith("win") else ""
-        subprocess.call([f"dot{ext}", "-T", "png", f"-o{output_img}", input_name])
-        if not os.path.exists(output_img) or os.path.getsize(output_img) == 0:
+        subprocess.call([f"dot{ext}", "-T", "png", f"-o{output_img2}", input_name])
+        if not os.path.exists(output_img2) or os.path.getsize(output_img2) == 0:
             raise FileNotFoundError(
                 "Could not produce graph with layout - check that 'dot' command is in path"
             )
-        return output_img
+        return output_img2
 
     mol_spec = save_molecule_images(molecules, frame_colors)
 
     template_filepath = os.path.join(data_path(), "templates", "reaction_tree.dot")
     with open(template_filepath, "r") as fileobj:
         template = Template(fileobj.read())
-    template.globals["id"] = id
+    template.globals["id"] = id  # type: ignore
 
     try:
         output_img = _create_image(use_splines=True)
@@ -196,8 +208,13 @@ def make_graphviz_image(molecules, reactions, edges, frame_colors):
 
 
 def make_visjs_page(
-    filename, molecules, reactions, edges, frame_colors, hierarchical=False
-):
+    filename: str,
+    molecules: Sequence[Molecule],
+    reactions: Sequence[FixedRetroReaction],
+    edges: Union[Sequence[Tuple[Any, Any]], nx.digraph.OutEdgeView],
+    frame_colors: Sequence[PilColor],
+    hierarchical: bool = False,
+) -> None:
     """
     Create HTML code of a bipartite graph of molecules and reactions
     using the vis.js network library.
@@ -205,24 +222,18 @@ def make_visjs_page(
     Package the created HTML page and all images as tar-ball.
 
     :param filename: the basename of the archive
-    :type filename: str
     :param molecules: the molecules nodes
-    :type molecules: list of Molecules
     :param reactions: the reaction nodes
-    :type reactions: list of Reactions
     :param edges: the edges of the graph
-    :type edges: list of tuples
     :param frame_colors: the color of the frame around each image
-    :type frame_colors: list of str
     :param hierarchical: if True, will produce a hierarchical layout
-    :type hierarchical: bool, optional
     """
     mol_spec = save_molecule_images(molecules, frame_colors)
 
     template_filepath = os.path.join(data_path(), "templates", "reaction_tree.thtml")
     with open(template_filepath, "r") as fileobj:
         template = Template(fileobj.read())
-    template.globals["id"] = id
+    template.globals["id"] = id  # type: ignore
 
     tmpdir = tempfile.mkdtemp()
     for image_filepath in mol_spec.values():

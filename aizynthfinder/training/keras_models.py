@@ -1,6 +1,8 @@
 """ Module containing classes and routines used in training of policies.
 """
+from __future__ import annotations
 import os
+from typing import TYPE_CHECKING
 
 import numpy as np
 from tensorflow.keras.layers import Dense, Dropout, Input, Dot
@@ -19,9 +21,13 @@ from scipy import sparse
 
 from aizynthfinder.utils.models import top10_acc, top50_acc
 
+if TYPE_CHECKING:
+    from aizynthfinder.utils.type_utils import Tuple, List, Any
+    from aizynthfinder.training.utils import Config
+
 
 class _InMemorySequence(Sequence):
-    def __init__(self, config, dataset_label):
+    def __init__(self, config: Config, dataset_label: str) -> None:
         self.batch_size = config["batch_size"]
         input_filename = config.filename(dataset_label + "_inputs")
         label_filename = config.filename(dataset_label + "_labels")
@@ -29,22 +35,23 @@ class _InMemorySequence(Sequence):
         self.label_matrix = self._load_data(label_filename)
         self.input_dim = self.input_matrix.shape[1]
 
-    def __len__(self):
+    def __len__(self) -> int:
         return int(np.ceil(self.label_matrix.shape[0] / float(self.batch_size)))
 
-    def _load_data(self, filename):
-        try:
-            return sparse.load_npz(filename)
-        except ValueError:
-            return np.load(filename)["arr_0"]
-
-    def _make_slice(self, idx):
+    def _make_slice(self, idx: int) -> slice:
         if idx < 0 or idx >= len(self):
             raise IndexError("index out of range")
 
         start = idx * self.batch_size
         end = (idx + 1) * self.batch_size
         return slice(start, end)
+
+    @staticmethod
+    def _load_data(filename: str) -> np.ndarray:
+        try:
+            return sparse.load_npz(filename)
+        except ValueError:
+            return np.load(filename)["arr_0"]
 
 
 class ExpansionModelSequence(_InMemorySequence):
@@ -53,32 +60,21 @@ class ExpansionModelSequence(_InMemorySequence):
     Batches are created dynamically by slicing the in-memory arrays
     The data will be shuffled on each epoch end
 
-    :ivar batch_size: the batch size as read from config
-    :vartype batch_size: int
-    :ivar input_matrix: the loaded input matrix
-    :vartype input_matrix: scipy.sparse object
-    :ivar label_matrix: the loaded label matrix
-    :vartype label_matrix: scipy.sparse object
-    :ivar input_dim: the input size (fingerprint size)
-    :vartype input_dim: int
     :ivar output_dim: the output size (number of templates)
-    :vartype output_dim: int
 
     :param config: the settings
-    :type config: Config
     :param dataset_label: the label of set, e.g. training, testing or validation
-    :type dataset_label: str
     """
 
-    def __init__(self, config, dataset_label):
+    def __init__(self, config: Config, dataset_label: str) -> None:
         super().__init__(config, dataset_label)
         self.output_dim = self.label_matrix.shape[1]
 
-    def __getitem__(self, idx):
-        idx = self._make_slice(idx)
-        return self.input_matrix[idx].toarray(), self.label_matrix[idx].toarray()
+    def __getitem__(self, idx: int) -> Tuple[np.ndarray, np.ndarray]:
+        idx_ = self._make_slice(idx)
+        return self.input_matrix[idx_].toarray(), self.label_matrix[idx_].toarray()
 
-    def on_epoch_end(self):
+    def on_epoch_end(self) -> None:
         self.input_matrix, self.label_matrix = shuffle(
             self.input_matrix, self.label_matrix, random_state=0
         )
@@ -90,42 +86,29 @@ class FilterModelSequence(_InMemorySequence):
     Batches are created dynamically by slicing the in-memory arrays
     The data will be shuffled on each epoch end
 
-    :ivar batch_size: the batch size as read from config
-    :vartype batch_size: int
-    :ivar input_matrix: the loaded input matrix for the products
-    :vartype input_matrix: scipy.sparse object
-    :ivar input_matrix2: the loaded input matrix for the reactions
-    :vartype input_matrix2: scipy.sparse object
-    :ivar label_matrix: the loaded label matrix
-    :vartype label_matrix: np.ndarray
-    :ivar input_dim: the input size (fingerprint size)
-    :vartype input_dim: int
-
     :param config: the settings
-    :type config: Config
     :param dataset_label: the label of set, e.g. training, testing or validation
-    :type dataset_label: str
     """
 
-    def __init__(self, config, dataset_label):
+    def __init__(self, config: Config, dataset_label: str) -> None:
         super().__init__(config, dataset_label)
         filename = config.filename(dataset_label + "_inputs2")
         self.input_matrix2 = self._load_data(filename)
 
-    def __getitem__(self, idx):
-        idx = self._make_slice(idx)
+    def __getitem__(self, idx: int) -> Tuple[List[np.ndarray], np.ndarray]:
+        idx_ = self._make_slice(idx)
         return (
-            [self.input_matrix[idx].toarray(), self.input_matrix2[idx].toarray()],
-            self.label_matrix[idx],
+            [self.input_matrix[idx_].toarray(), self.input_matrix2[idx_].toarray()],
+            self.label_matrix[idx_],
         )
 
-    def on_epoch_end(self):
+    def on_epoch_end(self) -> None:
         self.input_matrix, self.input_matrix2, self.label_matrix = shuffle(
             self.input_matrix, self.input_matrix2, self.label_matrix, random_state=0
         )
 
 
-def _setup_callbacks(config):
+def _setup_callbacks(config: Config) -> List[Any]:
     early_stopping = EarlyStopping(monitor="val_loss", patience=10)
     csv_logger = CSVLogger(config.filename("_keras_training.log"), append=True)
 
@@ -151,11 +134,20 @@ def _setup_callbacks(config):
     return [early_stopping, csv_logger, checkpoint, reduce_lr]
 
 
-def _train_keras_model(model, train_seq, valid_seq, loss, metrics, config):
+def _train_keras_model(
+    model: Model,
+    train_seq: _InMemorySequence,
+    valid_seq: _InMemorySequence,
+    loss: str,
+    metrics: List[Any],
+    config: Config,
+) -> None:
     adam = Adam(lr=0.001, beta_1=0.9, beta_2=0.999, epsilon=None, decay=0.0)
 
     model.compile(
-        optimizer=adam, loss=loss, metrics=metrics,
+        optimizer=adam,
+        loss=loss,
+        metrics=metrics,
     )
 
     model.fit_generator(
@@ -175,12 +167,11 @@ def _train_keras_model(model, train_seq, valid_seq, loss, metrics, config):
     )
 
 
-def train_expansion_keras_model(config):
+def train_expansion_keras_model(config: Config) -> None:
     """
     Train a expansion policy
 
     :param config: the settings
-    :type config: Config
     """
     train_seq = ExpansionModelSequence(config, "training")
     valid_seq = ExpansionModelSequence(config, "validation")
@@ -207,7 +198,7 @@ def train_expansion_keras_model(config):
     )
 
 
-def train_filter_keras_model(config):
+def train_filter_keras_model(config: Config) -> None:
 
     train_seq = FilterModelSequence(config, "training")
     valid_seq = FilterModelSequence(config, "validation")
@@ -232,7 +223,7 @@ def train_filter_keras_model(config):
     )
 
 
-def train_recommender_keras_model(config):
+def train_recommender_keras_model(config: Config) -> None:
 
     train_seq = ExpansionModelSequence(config, "training")
     valid_seq = ExpansionModelSequence(config, "validation")

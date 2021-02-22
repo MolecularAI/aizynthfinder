@@ -5,12 +5,14 @@ import argparse
 from aizynthfinder.utils.files import cat_hdf_files
 
 
-def main():
-    """ Entry-point for the cat_aizynth_output CLI
-    """
+def main() -> None:
+    """Entry-point for the cat_aizynth_output CLI"""
     parser = argparse.ArgumentParser("cat_aizynthcli_output")
     parser.add_argument(
-        "--files", required=True, nargs="+", help="the output filenames",
+        "--files",
+        required=True,
+        nargs="+",
+        help="the output filenames",
     )
     parser.add_argument(
         "--output",

@@ -3,11 +3,13 @@ Module containing helper classes to compute the distance between to reaction tre
 Since APTED is based on ordered trees and the reaction trees are unordered, plenty of
 heuristics are implemented to deal with this.
 """
+from __future__ import annotations
 import random
 import itertools
 import math
 from enum import Enum
 from operator import itemgetter
+from typing import TYPE_CHECKING
 
 import numpy as np
 from apted import Config as BaseAptedConfig
@@ -17,10 +19,23 @@ from scipy.spatial.distance import jaccard as jaccard_dist
 from aizynthfinder.chem import Molecule
 from aizynthfinder.utils.logging import logger
 
+if TYPE_CHECKING:
+    from aizynthfinder.utils.type_utils import (
+        List,
+        Union,
+        Iterable,
+        Tuple,
+        Dict,
+        StrDict,
+    )
+    from aizynthfinder.analysis import ReactionTree
+    from aizynthfinder.chem import Reaction
+
+    _FloatIterator = Iterable[float]
+
 
 class TreeContent(str, Enum):
-    """ Possibilities for distance calculations on reaction trees
-    """
+    """Possibilities for distance calculations on reaction trees"""
 
     MOLECULES = "molecules"
     REACTIONS = "reactions"
@@ -34,17 +49,15 @@ class AptedConfig(BaseAptedConfig):
     cost is calculated and how to obtain children nodes.
 
     :param randomize: if True, the children will be shuffled
-    :type randomize: bool, optional
     :param sort_children: if True, the children will be sorted
-    :type sort_children: bool, optional
     """
 
-    def __init__(self, randomize=False, sort_children=False):
+    def __init__(self, randomize: bool = False, sort_children: bool = False) -> None:
         super().__init__()
         self._randomize = randomize
         self._sort_children = sort_children
 
-    def rename(self, node1, node2):
+    def rename(self, node1: StrDict, node2: StrDict) -> float:
         if node1["type"] != node2["type"]:
             return 1
 
@@ -52,7 +65,7 @@ class AptedConfig(BaseAptedConfig):
         fp2 = node2["fingerprint"]
         return jaccard_dist(fp1, fp2)
 
-    def children(self, node):
+    def children(self, node: StrDict) -> List[StrDict]:
         if self._sort_children:
             return sorted(node["children"], key=itemgetter("sort_key"))
         if not self._randomize:
@@ -68,11 +81,8 @@ class ReactionTreeWrapper:
     trees.
 
     :param reaction_tree: the reaction tree to wrap
-    :type reaction_tree: ReactionTree
     :param content: the content of the route to consider in the distance calculation
-    :type content: TreeContent, optional
     :param exhaustive_limit: if the number of possible ordered trees are below this limit create them all
-    :type exhaustive_limit: int, optional
     """
 
     _index_permutations = {
@@ -80,8 +90,11 @@ class ReactionTreeWrapper:
     }
 
     def __init__(
-        self, reaction_tree, content=TreeContent.MOLECULES, exhaustive_limit=20
-    ):
+        self,
+        reaction_tree: ReactionTree,
+        content: Union[str, TreeContent] = TreeContent.MOLECULES,
+        exhaustive_limit: int = 20,
+    ) -> None:
         self._logger = logger()
         # Will convert string input automatically
         self._content = TreeContent(content)
@@ -101,9 +114,8 @@ class ReactionTreeWrapper:
             self._trees.append(self._create_tree_recursively(self._root))
 
     @property
-    def info(self):
-        """ Return a dictionary with internal information about the wrapper
-        """
+    def info(self) -> StrDict:
+        """Return a dictionary with internal information about the wrapper"""
         return {
             "content": self._content,
             "tree count": self._tree_count,
@@ -112,18 +124,18 @@ class ReactionTreeWrapper:
         }
 
     @property
-    def first_tree(self):
-        """ Return the first created ordered tree
-        """
+    def first_tree(self) -> StrDict:
+        """Return the first created ordered tree"""
         return self._trees[0]
 
     @property
-    def trees(self):
-        """ Return a list of all created ordered trees
-        """
+    def trees(self) -> List[StrDict]:
+        """Return a list of all created ordered trees"""
         return self._trees
 
-    def distance_iter(self, other, exhaustive_limit=20):
+    def distance_iter(
+        self, other: "ReactionTreeWrapper", exhaustive_limit: int = 20
+    ) -> _FloatIterator:
         """
         Iterate over all distances computed between this and another tree
 
@@ -141,11 +153,8 @@ class ReactionTreeWrapper:
         The rules are applied top-to-bottom.
 
         :param other: another tree to calculate distance to
-        :type other: ReactionTreeWrapper
         :param exhaustive_limit: used to determine what type of enumeration to do
-        :type exhaustive_limit: int, optional
         :yield: the next computed distance between self and other
-        :rtype: float
         """
         if len(self.trees) * len(other.trees) < exhaustive_limit:
             yield from self._distance_iter_exhaustive(other)
@@ -154,18 +163,17 @@ class ReactionTreeWrapper:
         else:
             yield from self._distance_iter_random(other, exhaustive_limit)
 
-    def distance_to(self, other, exhaustive_limit=20):
+    def distance_to(
+        self, other: "ReactionTreeWrapper", exhaustive_limit: int = 20
+    ) -> float:
         """
         Calculate the minimum distance from this route to another route
 
         Enumerate the distances using `distance_iter`.
 
         :param other: another tree to calculate distance to
-        :type other: ReactionTreeWrapper
         :param exhaustive_limit: used to determine what type of enumeration to do
-        :type exhaustive_limit: int, optional
-        :return: the miminum distance
-        :rtype: float
+        :return: the minimum distance
         """
         min_dist = 1e6
         min_iter = -1
@@ -178,20 +186,18 @@ class ReactionTreeWrapper:
         self._logger.debug(f"Found minimum after {min_iter} iterations")
         return min_dist
 
-    def distance_to_with_sorting(self, other):
+    def distance_to_with_sorting(self, other: "ReactionTreeWrapper") -> float:
         """
         Compute the distance to another tree, by simpling sorting the children
         of both trees. This is not guaranteed to return the minimum distance.
 
         :param other: another tree to calculate distance to
-        :type other: ReactionTreeWrapper
         :return: the distance
-        :rtype: float
         """
         config = AptedConfig(sort_children=True)
         return Apted(self.first_tree, other.first_tree, config).compute_edit_distance()
 
-    def _compute_fingerprint(self, node):
+    def _compute_fingerprint(self, node: Union[Molecule, Reaction]) -> np.ndarray:
         if isinstance(node, Molecule):
             return node.fingerprint(radius=2).astype(int)
 
@@ -202,16 +208,23 @@ class ReactionTreeWrapper:
             fp -= reactant.fingerprint(radius=2)
         return fp.astype(int)
 
-    def _create_all_trees(self):
+    def _create_all_trees(self) -> None:
+        if not self._root:
+            return
+
         self._trees = []
         # Iterate over all possible combinations of child order
         for order_list in itertools.product(*self._node_index_list):
             order_dict = {idict["node"]: idict["child_order"] for idict in order_list}
             self._trees.append(self._create_tree_recursively(self._root, order_dict))
 
-    def _create_tree_recursively(self, node, order_dict=None):
+    def _create_tree_recursively(
+        self,
+        node: Union[Molecule, Reaction],
+        order_dict: Dict[Union[Molecule, Reaction], List[int]] = None,
+    ) -> StrDict:
         fp = self._compute_fingerprint(node)
-        dict_tree = {
+        dict_tree: StrDict = {
             "type": node.__class__.__name__,
             "smiles": node.smiles,
             "fingerprint": fp,
@@ -223,7 +236,7 @@ class ReactionTreeWrapper:
             dict_tree["children"].append(child_tree)
         return dict_tree
 
-    def _distance_iter_exhaustive(self, other):
+    def _distance_iter_exhaustive(self, other: "ReactionTreeWrapper") -> _FloatIterator:
         self._logger.debug(
             f"APTED: Exhaustive search. {len(self.trees)} {len(other.trees)}"
         )
@@ -231,7 +244,9 @@ class ReactionTreeWrapper:
         for tree1, tree2 in itertools.product(self.trees, other.trees):
             yield Apted(tree1, tree2, config).compute_edit_distance()
 
-    def _distance_iter_random(self, other, ntimes):
+    def _distance_iter_random(
+        self, other: "ReactionTreeWrapper", ntimes: int
+    ) -> _FloatIterator:
         self._logger.debug(
             f"APTED: Heuristic search. {len(self.trees)} {len(other.trees)}"
         )
@@ -244,7 +259,9 @@ class ReactionTreeWrapper:
                 self.first_tree, other.first_tree, config
             ).compute_edit_distance()
 
-    def _distance_iter_semi_exhaustive(self, other):
+    def _distance_iter_semi_exhaustive(
+        self, other: "ReactionTreeWrapper"
+    ) -> _FloatIterator:
         self._logger.debug(
             f"APTED: Semi-exhaustive search. {len(self.trees)} {len(other.trees)}"
         )
@@ -261,7 +278,7 @@ class ReactionTreeWrapper:
                 tree1, second_wrapper.first_tree, config
             ).compute_edit_distance()
 
-    def _inspect_tree(self):
+    def _inspect_tree(self) -> Tuple[int, List[List[StrDict]]]:
         """
         Find the number of children for each node in the tree, which
         will be used to compute the number of possible combinations of child orders
@@ -292,15 +309,19 @@ class ReactionTreeWrapper:
                 )
         if not permutations:
             return 0, []
-        return np.prod(permutations), node_index_list
+        return int(np.prod(permutations)), node_index_list
 
-    def _iter_children(self, node, order_dict=None):
-        def _generator(node, lookup_node):
+    def _iter_children(
+        self,
+        node: Union[Molecule, Reaction],
+        order_dict: Dict[Union[Molecule, Reaction], List[int]] = None,
+    ) -> Iterable[Union[Molecule, Reaction]]:
+        def _generator(node_, lookup_node):
             if order_dict is None:
-                for child in self._graph.successors(node):
+                for child in self._graph.successors(node_):
                     yield child
             else:
-                children = list(self._graph.successors(node))
+                children = list(self._graph.successors(node_))
                 if children:
                     for child_idx in order_dict.get(lookup_node, []):
                         yield children[child_idx]
@@ -311,7 +332,9 @@ class ReactionTreeWrapper:
             for succ in self._graph.successors(node):
                 yield from _generator(succ, node)
 
-    def _make_root(self, reaction_tree):
+    def _make_root(
+        self, reaction_tree: ReactionTree
+    ) -> Union[Molecule, Reaction, None]:
         if self._content is TreeContent.REACTIONS:
             try:
                 return next(self._graph.successors(reaction_tree.root))

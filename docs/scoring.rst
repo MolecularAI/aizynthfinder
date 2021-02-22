@@ -13,6 +13,7 @@ Currently, there are a few scoring functions available
     * Average template occurence - the average occurence of the templates used in the route
     * Sum of prices - the plain sum of the price of all pre-cursors
     * Route cost score - the cost of the synthesizing the route (Badowski et al. Chem Sci. 2019, 10, 4640)
+    * Average product similarity - the average maximum similarity of each reaction product in the route to the reaction products in the template library that uses the same template
 
 
 The *State score* is the score that is guiding the tree search in the :doc:`update phase <sequences>`, and 

@@ -23,11 +23,11 @@ from aizynthfinder.analysis import RouteCollection, ReactionTree
 
 def test_create_gui_app(mocker):
     display_patch = mocker.patch("aizynthfinder.interfaces.aizynthapp.display")
-    AiZynthApp(configfile=None, setup=False)
+    AiZynthApp(configfile="", setup=False)
 
     display_patch.assert_not_called()
 
-    AiZynthApp(configfile=None)
+    AiZynthApp(configfile="")
 
     display_patch.assert_called()
 

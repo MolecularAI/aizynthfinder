@@ -1,4 +1,5 @@
 import numpy as np
+import pytest
 
 from aizynthfinder.utils.route_clustering.clustering import ClusteringHelper
 
@@ -16,7 +17,8 @@ distance_matrix = np.array(
 def test_create_clustering_helper():
     helper = ClusteringHelper(distance_matrix)
 
-    assert helper.labels is None
+    with pytest.raises(ValueError):
+        _ = helper.labels
 
 
 def test_make_two_clusters():

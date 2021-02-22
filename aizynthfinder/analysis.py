@@ -1,15 +1,20 @@
 """ Module containing classes to perform analysis of the tree search results.
 """
+from __future__ import annotations
 import json
+import time
 from collections import defaultdict
+from typing import TYPE_CHECKING
 
 import numpy as np
 import networkx as nx
 
-
 from aizynthfinder.chem import (
     Molecule,
+    UniqueMolecule,
+    FixedRetroReaction,
     hash_reactions,
+    none_molecule,
 )
 from aizynthfinder.utils.image import make_graphviz_image
 from aizynthfinder.utils.analysis_helpers import (
@@ -19,6 +24,24 @@ from aizynthfinder.utils.analysis_helpers import (
 )
 from aizynthfinder.utils.route_clustering import ReactionTreeWrapper, ClusteringHelper
 
+if TYPE_CHECKING:
+    from aizynthfinder.utils.type_utils import (
+        StrDict,
+        PilImage,
+        FrameColors,
+        Optional,
+        Union,
+        Tuple,
+        Any,
+        Iterable,
+        List,
+        Dict,
+        Sequence,
+    )
+    from aizynthfinder.context.scoring import Scorer
+    from aizynthfinder.mcts.mcts import SearchTree
+    from aizynthfinder.mcts.node import Node
+
 
 class TreeAnalysis:
     """
@@ -26,62 +49,55 @@ class TreeAnalysis:
     performed on a search tree.
 
     :ivar scorer: the object used to score the nodes
-    :type scorer: Scorer
     :ivar search_tree: the search tree
-    :vartype search_tree: SearchTree
 
+    :param search_tree: the search tree to do the analysis on
     :param scorer: the object used to score the nodes, defaults to StateScorer
-    :type scorer: Scorer, optional
-    :parameter search_tree: the search tree to do the analysis on
-    :type search_tree: SearchTree
     """
 
-    def __init__(self, search_tree, scorer=None):
+    def __init__(self, search_tree: SearchTree, scorer: Scorer = None) -> None:
         self.search_tree = search_tree
         if scorer is None:
             # Do import here to avoid circular imports
             from aizynthfinder.context.scoring import StateScorer
 
-            self.scorer = StateScorer()
+            self.scorer: Scorer = StateScorer(search_tree.config)
         else:
             self.scorer = scorer
 
-    def best_node(self):
+    def best_node(self) -> Node:
         """
         Returns the node with the highest score.
         If several nodes have the same score, it will return the first
 
         :return: the top scoring node
-        :rtype: Node
         """
         nodes = self._all_nodes()
-        sorted_nodes, _ = self.scorer.sort(nodes)
+        sorted_nodes, _, _ = self.scorer.sort(nodes)
         return sorted_nodes[0]
 
-    def sort_nodes(self, min_return=5, max_return=25):
+    def sort_nodes(
+        self, min_return: int = 5, max_return: int = 25
+    ) -> Tuple[Sequence[Node], Sequence[float]]:
         """
         Sort and select the nodes, so that the best scoring routes are returned.
         The algorithm filter away identical routes and returns at minimum the number specified.
         If multiple alternative routes have the same score as the n'th route, they will be included and returned.
 
-        :param min_return: the minium number of routes to return, defaults to 5
-        :type min_return: int, optional
+        :param min_return: the minimum number of routes to return, defaults to 5
         :param max_return: the maximum number of routes to return
-        :type max_return: int, optional
         :return: the nodes
-        :rtype: list of Node
         :return: the score
-        :rtype: list of float
         """
         nodes = self._all_nodes()
-        sorted_nodes, sorted_scores = self.scorer.sort(nodes)
+        sorted_nodes, sorted_scores, _ = self.scorer.sort(nodes)
 
         if len(nodes) <= min_return:
             return sorted_nodes, sorted_scores
 
         seen_hashes = set()
-        best_nodes = []
-        best_scores = []
+        best_nodes: List[Node] = []
+        best_scores: List[float] = []
         last_score = 1e16
         for score, node in zip(sorted_scores, sorted_nodes):
             if len(best_nodes) >= min_return and score < last_score:
@@ -101,16 +117,15 @@ class TreeAnalysis:
 
         return best_nodes, best_scores
 
-    def tree_statistics(self):
+    def tree_statistics(self) -> StrDict:
         """
-        Returns statiscs of the tree
+        Returns statistics of the tree
 
         Currently it returns the number of nodes, the maximum number of transforms,
         maximum number of children, top score, if the top score route is solved,
         the number of molecule in the top score node, and information on pre-cursors
 
         :return: the statistics
-        :rtype: dict
         """
         top_node = self.best_node()
         top_state = top_node.state
@@ -126,7 +141,7 @@ class TreeAnalysis:
             if not instock
         )
 
-        policy_used_counts = defaultdict(lambda: 0)
+        policy_used_counts: StrDict = defaultdict(lambda: 0)
         for node in nodes:
             for child in node.children():
                 policy_used = node[child]["action"].metadata.get("policy_name")
@@ -151,7 +166,7 @@ class TreeAnalysis:
             "policy_used_counts": dict(policy_used_counts),
         }
 
-    def _all_nodes(self):
+    def _all_nodes(self) -> Sequence[Node]:
         # This is to keep backwards compatibility, this should be investigate further
         if repr(self.scorer) == "state score":
             return list(self.search_tree.graph())
@@ -163,24 +178,22 @@ class ReactionTree:
     Encapsulation of a bipartite reaction tree of a single route.
     The nodes consists of either FixedRetroReaction or UniqueMolecule objects.
 
-    :ivar has_repeating_patterns: if the graph has repetetive elements
-    :vartype has_repeating_patterns: bool
+    :ivar has_repeating_patterns: if the graph has repetitive elements
     :ivar graph: the bipartite graph
-    :vartype graph: networkx.DiGraph
     :ivar is_solved: if all of the leaf nodes are in stock
-    :vartype is_solved: bool
     :ivar root: the root of the tree
-    :vartype root: UniqueMolecule
     """
 
-    def __init__(self):
+    def __init__(self) -> None:
         self.graph = nx.DiGraph()
-        self.root = None
-        self.has_repeating_patterns = False
-        self.is_solved = False
+        self.root = none_molecule()
+        self.has_repeating_patterns: bool = False
+        self.is_solved: bool = False
 
     @classmethod
-    def from_analysis(cls, analysis, from_node=None):
+    def from_analysis(
+        cls, analysis: TreeAnalysis, from_node: Node = None
+    ) -> "ReactionTree":
         """
         Create a reaction from a tree analysis.
 
@@ -188,11 +201,8 @@ class ReactionTree:
         argument is given. If it is not given, the top scoring node is used.
 
         :param analysis: the analysis to base the reaction tree on
-        :type analysis: TreeAnalysis
         :param from_node: the end node of the route, defaults to None
-        :type from_node: Node, optional
         :returns: the reaction tree
-        :rtype: ReactionTree
         """
         if not from_node:
             from_node = analysis.best_node()
@@ -201,7 +211,7 @@ class ReactionTree:
         return ReactionTreeFromMcts(actions=actions, nodes=nodes).tree
 
     @classmethod
-    def from_dict(cls, tree_dict):
+    def from_dict(cls, tree_dict: StrDict) -> "ReactionTree":
         """
         Create a new ReactionTree by parsing a dictionary.
 
@@ -214,24 +224,20 @@ class ReactionTree:
         The returned object should be sufficient to e.g. generate an image of the route.
 
         :param tree_dict: the dictionary representation
-        :type tree_dict: dict
         :returns: the reaction tree
-        :rtype: ReactionTree
         """
         return ReactionTreeFromDict(tree_dict).tree
 
-    def depth(self, node):
+    def depth(self, node: Union[UniqueMolecule, FixedRetroReaction]) -> int:
         """
         Return the depth of a node in the route
 
         :param node: the query node
-        :type node: UniqueMolecule or Reaction
         :return: the depth
-        :rtype: float
         """
         return self.graph.nodes[node].get("depth", -1)
 
-    def distance_to(self, other, content="both"):
+    def distance_to(self, other: "ReactionTree", content: str = "both") -> float:
         """
         Calculate the distance to another reaction tree
 
@@ -239,88 +245,81 @@ class ReactionTree:
         insert and deleted nodes, and the Jaccard distance for substituting nodes
 
         :param other: the reaction tree to compare to
-        :type other: ReactionTree
         :param content: determine what part of the tree to include in the calculation
-        :type content: TreeContent or str, optional
         :return: the distance between the routes
-        :rtype: float
         """
         self_wrapper = ReactionTreeWrapper(self, content)
         other_wrapper = ReactionTreeWrapper(other, content)
         return self_wrapper.distance_to(other_wrapper)
 
-    def in_stock(self, node):
+    def in_stock(self, node: Union[UniqueMolecule, FixedRetroReaction]) -> bool:
         """
         Return if a node in the route is in stock
 
         Note that is a property set on creation and as such is not updated.
 
         :param node: the query node
-        :type node: UniqueMolecule
         :return: if the molecule is in stock
-        :rtype: bool
         """
         return self.graph.nodes[node].get("in_stock", False)
 
-    def leafs(self):
+    def leafs(self) -> Iterable[UniqueMolecule]:
         """
         Generates the molecules nodes of the reaction tree that has no predecessors,
         i.e. molecules that has not been broken down
 
         :yield: the next leaf molecule in the tree
-        :rtype: UniqueMolecule
         """
         for node in self.graph:
-            if isinstance(node, Molecule) and not self.graph[node]:
+            if isinstance(node, UniqueMolecule) and not self.graph[node]:
                 yield node
 
-    def molecules(self):
+    def molecules(self) -> Iterable[UniqueMolecule]:
         """
         Generates the molecule nodes of the reaction tree
 
         :yield: the next molecule in the tree
-        :rtype: UniqueMolecule
         """
         for node in self.graph:
-            if isinstance(node, Molecule):
+            if isinstance(node, UniqueMolecule):
                 yield node
 
-    def reactions(self):
+    def reactions(self) -> Iterable[FixedRetroReaction]:
         """
         Generates the reaction nodes of the reaction tree
 
         :yield: the next reaction in the tree
-        :rtype: Reaction
         """
         for node in self.graph:
             if not isinstance(node, Molecule):
                 yield node
 
-    def to_dict(self):
+    def to_dict(self) -> StrDict:
         """
         Returns the reaction tree as a dictionary in a pre-defined format.
 
         :return: the reaction tree
-        :rtype: dict
         """
         return self._build_dict(self.root)
 
-    def to_image(self, in_stock_colors={True: "green", False: "orange"}, show_all=True):
+    def to_image(
+        self,
+        in_stock_colors: FrameColors = None,
+        show_all: bool = True,
+    ) -> PilImage:
         """
         Return a pictoral representation of the route
 
         :raises ValueError: if image could not be produced
         :param in_stock_colors: the colors around molecules, defaults to {True: "green", False: "orange"}
-        :type in_stock_colors: dict, optional
         :param show_all: if True, also show nodes that are marked as hidden
-        :type show_all: bool, optional
         :return: the image of the route
-        :rtype: PIL.Image
         """
 
-        def show(node):
-            return not self.graph.nodes[node].get("hide", False)
+        def show(node_):
+            return not self.graph.nodes[node_].get("hide", False)
 
+        in_stock_colors = in_stock_colors or {True: "green", False: "orange"}
         molecules = []
         frame_colors = []
         for node in self.molecules():
@@ -341,28 +340,33 @@ class ReactionTree:
         except FileNotFoundError as err:
             raise ValueError(str(err))
 
-    def to_json(self):
+    def to_json(self) -> str:
         """
         Returns the reaction tree as a JSON string in a pre-defined format.
 
         :return: the reaction tree
-        :rtype: str
         """
         return json.dumps(self.to_dict(), sort_keys=False, indent=2)
 
-    def _build_dict(self, node, dict_=None):
+    def _build_dict(
+        self, node: Union[UniqueMolecule, FixedRetroReaction], dict_: StrDict = None
+    ) -> StrDict:
         if dict_ is None:
             dict_ = {}
 
         dict_["type"] = "mol" if isinstance(node, Molecule) else "reaction"
         dict_["hide"] = self.graph.nodes[node].get("hide", False)
         dict_["smiles"] = node.smiles
-        if isinstance(node, Molecule):
+        if isinstance(node, UniqueMolecule):
             dict_["is_chemical"] = True
             dict_["in_stock"] = self.in_stock(node)
-        else:
+        elif isinstance(node, FixedRetroReaction):
             dict_["is_reaction"] = True
             dict_["metadata"] = dict(node.metadata)
+        else:
+            raise ValueError(
+                f"This is an invalid reaction tree. Unknown node type {type(node)}"
+            )
 
         dict_["children"] = []
 
@@ -393,55 +397,42 @@ class RouteCollection:
         route0 = collection[0]
 
     :ivar all_scores: all the computed scores for the routes
-    :vartype all_scores: list of dict
     :ivar nodes: the top-ranked nodes
-    :vartype nodes: list of Node
     :ivar scores: initial scores of top-ranked nodes
-    :vartype scores: list of float
     :ivar reaction_trees: the reaction trees created from the top-ranked nodes
-    :vartype reaction_trees: list of Reaction Tree
     :ivar clusters: the created clusters from the collection
-    :vartype clusters: list of RouteCollection
 
     :param reaction_trees: the trees to base the collection on
-    :type reaction_trees: list of ReactionTree
     """
 
-    def __init__(self, reaction_trees, **kwargs):
-        self._routes = [{} for _ in range(len(reaction_trees))]
+    def __init__(self, reaction_trees: Sequence[ReactionTree], **kwargs) -> None:
+        self._routes: Sequence[StrDict] = [{} for _ in range(len(reaction_trees))]
         self.reaction_trees = reaction_trees
         self._update_route_dict(reaction_trees, "reaction_tree")
 
-        self.nodes = self._unpack_kwarg("nodes", **kwargs)
-        if not self.nodes:
-            self.nodes = [None] * len(self.reaction_trees)
+        self.nodes = self._unpack_kwarg_with_default("nodes", None, **kwargs)
+        self.scores = self._unpack_kwarg_with_default("scores", np.nan, **kwargs)
+        self.all_scores = self._unpack_kwarg_with_default("all_scores", dict, **kwargs)
 
-        self.scores = self._unpack_kwarg("scores", **kwargs)
-        if not self.scores:
-            self.scores = [np.nan] * len(self.reaction_trees)
-
-        self.all_scores = self._unpack_kwarg("all_scores", **kwargs)
-        if not self.all_scores:
-            self.all_scores = [dict() for _ in range(len(self.reaction_trees))]
-
-        self._dicts = self._unpack_kwarg("dicts", **kwargs)
-        self._images = self._unpack_kwarg("images", **kwargs)
-        self._jsons = self._unpack_kwarg("jsons", **kwargs)
-        self._clusters = self._unpack_kwarg("clusters", **kwargs)
-        self._distance_matrix = {}
-        self._combined_reaction_trees = None
+        self._dicts: Optional[Sequence[StrDict]] = self._unpack_kwarg("dicts", **kwargs)
+        self._images: Optional[Sequence[PilImage]] = self._unpack_kwarg(
+            "images", **kwargs
+        )
+        self._jsons: Optional[Sequence[str]] = self._unpack_kwarg("jsons", **kwargs)
+        self.clusters: Optional[Sequence[RouteCollection]] = self._unpack_kwarg(
+            "clusters", **kwargs
+        )
+        self._distance_matrix: Dict[str, np.ndarray] = {}
+        self._combined_reaction_trees: Optional[CombinedReactionTrees] = None
 
     @classmethod
-    def from_analysis(cls, analysis, min_nodes):
+    def from_analysis(cls, analysis: TreeAnalysis, min_nodes: int) -> "RouteCollection":
         """
         Create a collection from a tree analysis.
 
         :param analysis: the tree analysis to use
-        :type analysis: TreeAnalysis
         :param min_nodes: the minimum number of top-ranked nodes to consider
-        :type min_nodes: int
         :return: the created collection
-        :rtype: RouteCollection
         """
         nodes, scores = analysis.sort_nodes(min_return=min_nodes)
         reaction_trees = [ReactionTree.from_analysis(analysis, node) for node in nodes]
@@ -453,39 +444,38 @@ class RouteCollection:
             all_scores=all_scores,
         )
 
-    def __getitem__(self, index):
+    def __getitem__(self, index: int) -> StrDict:
         if index < 0 or index >= len(self):
             raise IndexError("Index out of range")
         return self._routes[index]
 
-    def __len__(self):
-        return len(self.nodes)
+    def __len__(self) -> int:
+        return len(self.reaction_trees)
 
     @property
-    def dicts(self):
-        """ Returns a list of dictionary representation of the routes
-        """
+    def dicts(self) -> Sequence[StrDict]:
+        """Returns a list of dictionary representation of the routes"""
         if self._dicts is None:
-            self.make_dicts()
+            self._dicts = self.make_dicts()
         return self._dicts
 
     @property
-    def images(self):
-        """ Returns a list of pictoral representation of the routes
-        """
+    def images(self) -> Sequence[PilImage]:
+        """Returns a list of pictoral representation of the routes"""
         if self._images is None:
-            self.make_images()
+            self._images = self.make_images()
         return self._images
 
     @property
-    def jsons(self):
-        """ Returns a list of JSON string representation of the routes
-        """
+    def jsons(self) -> Sequence[str]:
+        """Returns a list of JSON string representation of the routes"""
         if self._jsons is None:
-            self.make_jsons()
+            self._jsons = self.make_jsons()
         return self._jsons
 
-    def cluster(self, n_clusters, max_clusters=5, **kwargs):
+    def cluster(
+        self, n_clusters: int, max_clusters: int = 5, timeout: int = None, **kwargs: Any
+    ) -> np.ndarray:
         """
         Cluster the route collection into a number of clusters.
 
@@ -495,38 +485,39 @@ class RouteCollection:
         If the number of reaction trees are less than 3, no clustering will be performed
 
         :param n_clusters: the desired number of clusters, if less than 2 triggers optimization
-        :type n_clusters: int
         :param max_clusters: the maximum number of clusters to consider
-        :type max_clusters: int, optional
+        :param timeout: if given, return no clusters if distance calculation is taking longer time
         :return: the cluster labels
-        :rtype: np.ndarray
         """
         if len(self.reaction_trees) < 3:
-            return []
+            return np.asarray([])
         content = kwargs.pop("content", "both")
+        try:
+            distances = self.distance_matrix(content=content, timeout=timeout)
+        except ValueError:
+            return np.asarray([])
+
         labels = ClusteringHelper.cluster(
-            self.distance_matrix(content=content),
+            distances,
             n_clusters,
             max_clusters=max_clusters,
-            **kwargs
+            **kwargs,
         )
         self._make_clusters(labels)
         return labels
 
-    def combined_reaction_trees(self, recreate=False):
+    def combined_reaction_trees(self, recreate: bool = False) -> CombinedReactionTrees:
         """
         Return an object that combines all the reaction tree into a single reaction tree graph
 
         :param recreate: if False will return a cached object if available, defaults to False
-        :type recreate: bool, optional
         :return: the combined trees
-        :rtype: CombinedReactionTrees
         """
         if not self._combined_reaction_trees or recreate:
             self._combined_reaction_trees = CombinedReactionTrees(self.reaction_trees)
         return self._combined_reaction_trees
 
-    def compute_scores(self, *scorers):
+    def compute_scores(self, *scorers: Scorer) -> None:
         """
         Compute new scores for all routes in this collection.
         They can then be accessed with the ``all_scores`` attribute.
@@ -537,17 +528,16 @@ class RouteCollection:
             list_ = self.reaction_trees
 
         for scorer in scorers:
-            for idx, score in enumerate(scorer(list_)):
+            for idx, score in enumerate(scorer(list_)):  # type: ignore
                 self.all_scores[idx][repr(scorer)] = score
         self._update_route_dict(self.all_scores, "all_score")
 
-    def dict_with_scores(self):
+    def dict_with_scores(self) -> Sequence[StrDict]:
         """
         Return the routes as dictionaries with all scores added
         to the root (target) node.
 
         :return: the routes as dictionaries
-        :rtype: list of dict
         """
         dicts = []
         for dict_, scores in zip(self.dicts, self.all_scores):
@@ -555,16 +545,19 @@ class RouteCollection:
             dicts[-1]["scores"] = dict(scores)
         return dicts
 
-    def distance_matrix(self, content="both", recreate=False):
+    def distance_matrix(
+        self,
+        content: str = "both",
+        recreate: bool = False,
+        timeout: int = None,
+    ) -> np.ndarray:
         """
         Compute the distance matrix between each pair of reaction trees
 
         :param content: determine what part of the tree to include in the calculation
-        :type content: TreeContent or str, optional
         :param recreate: if False, use a cached one if available
-        :type recreate: bool, optional
+        :param timeout: if given, raises an exception if timeout is taking longer time
         :return: the square distance matrix
-        :rtype: numpy.ndarray
         """
         if self._distance_matrix.get(content) is not None and not recreate:
             return self._distance_matrix[content]
@@ -572,24 +565,27 @@ class RouteCollection:
         distance_wrappers = [
             ReactionTreeWrapper(rt, content) for rt in self.reaction_trees
         ]
+        time0 = time.perf_counter()
         for i, iwrapper in enumerate(distance_wrappers):
             # fmt: off
             for j, jwrapper in enumerate(distance_wrappers[i + 1:], i + 1):
                 distances[i, j] = iwrapper.distance_to(jwrapper)
                 distances[j, i] = distances[i, j]
             # fmt: on
+            time_past = time.perf_counter() - time0
+            if timeout is not None and time_past > timeout:
+                raise ValueError(f"Unable to compute distance matrix in {timeout} s")
         self._distance_matrix[content] = distances
         return distances
 
-    def make_dicts(self):
-        """ Convert all reaction trees to dictionaries
-        """
+    def make_dicts(self) -> Sequence[StrDict]:
+        """Convert all reaction trees to dictionaries"""
         self._dicts = [tree.to_dict() for tree in self.reaction_trees]
         self._update_route_dict(self._dicts, "dict")
+        return self._dicts
 
-    def make_images(self):
-        """ Convert all reaction trees to images
-        """
+    def make_images(self) -> Sequence[Optional[PilImage]]:
+        """Convert all reaction trees to images"""
 
         self._images = []
         for tree in self.reaction_trees:
@@ -600,14 +596,15 @@ class RouteCollection:
             else:
                 self._images.append(img)
         self._update_route_dict(self._images, "image")
+        return self._images
 
-    def make_jsons(self):
-        """ Convert all reaction trees to JSON strings
-        """
+    def make_jsons(self) -> Sequence[str]:
+        """Convert all reaction trees to JSON strings"""
         self._jsons = [tree.to_json() for tree in self.reaction_trees]
         self._update_route_dict(self._jsons, "json")
+        return self._jsons
 
-    def rescore(self, scorer):
+    def rescore(self, scorer: Scorer) -> None:
         """
         Rescore the routes in the collection, and thereby re-order them.
 
@@ -615,17 +612,12 @@ class RouteCollection:
         attribute with another entry.
 
         :param scorer: the scorer to use
-        :type scorer: Scorer
         """
         if self.nodes[0]:
-            self.nodes, self.scores, sortidx = scorer.sort(
-                self.nodes, return_sort_indices=True
-            )
+            self.nodes, self.scores, sortidx = scorer.sort(self.nodes)
             self.reaction_trees = [self.reaction_trees[idx] for idx in sortidx]
         else:
-            self.reaction_trees, self.scores, sortidx = scorer.sort(
-                self.reaction_trees, return_sort_indices=True
-            )
+            self.reaction_trees, self.scores, sortidx = scorer.sort(self.reaction_trees)
         self._routes = [self._routes[idx] for idx in sortidx]
         self.all_scores = [self.all_scores[idx] for idx in sortidx]
         if self._dicts:
@@ -639,7 +631,7 @@ class RouteCollection:
             self.all_scores[idx][repr(scorer)] = score
         self._update_route_dict(self.all_scores, "all_score")
 
-    def _make_clusters(self, clusters):
+    def _make_clusters(self, clusters: np.ndarray) -> None:
         n_clusters = max(clusters) + 1
         self.clusters = []
         for cluster in range(n_clusters):
@@ -658,16 +650,28 @@ class RouteCollection:
 
             self.clusters.append(RouteCollection(**kwargs))
 
-    def _select_subset(self, arr, selection):
-        return [item for sel, item in zip(selection, arr) if sel]
-
-    def _unpack_kwarg(self, key, **kwargs):
+    def _unpack_kwarg(self, key: str, **kwargs: Any) -> Optional[Sequence[Any]]:
         if key not in kwargs:
             return None
         arr = kwargs[key]
         self._update_route_dict(arr, key[:-1])
         return arr
 
-    def _update_route_dict(self, arr, key):
+    def _unpack_kwarg_with_default(
+        self, key: str, default: Any, **kwargs: Any
+    ) -> Sequence[Any]:
+        arr = self._unpack_kwarg(key, **kwargs)
+        if arr is not None:
+            return arr
+        return [
+            default() if callable(default) else default
+            for _ in range(len(self.reaction_trees))
+        ]
+
+    def _update_route_dict(self, arr: Sequence[Any], key: str) -> None:
         for i, value in enumerate(arr):
             self._routes[i][key] = value
+
+    @staticmethod
+    def _select_subset(arr: Sequence[Any], selection: Sequence[bool]) -> Sequence[Any]:
+        return [item for sel, item in zip(selection, arr) if sel]

@@ -1,6 +1,8 @@
 """ Module containing a class that is the main interface the retrosynthesis tool.
 """
+from __future__ import annotations
 import time
+from typing import TYPE_CHECKING
 
 from deprecated import deprecated
 from tqdm import tqdm
@@ -12,38 +14,34 @@ from aizynthfinder.mcts.mcts import SearchTree
 from aizynthfinder.analysis import TreeAnalysis, RouteCollection
 from aizynthfinder.chem import Molecule
 
+if TYPE_CHECKING:
+    from aizynthfinder.utils.type_utils import StrDict, Optional
+
 
 class AiZynthFinder:
     """
     Public API to the aizynthfinder tool
 
-    If intantiated with the path to a yaml file or dictionary of settings
+    If instantiated with the path to a yaml file or dictionary of settings
     the stocks and policy networks are loaded directly.
     Otherwise, the user is responsible for loading them prior to
     executing the tree search.
 
     :ivar config: the configuration of the search
-    :vartype config: Configuration
-    :ivar policy: the policy model
-    :vartype policy: Policy
+    :ivar expansion_policy: the expansion policy model
+    :ivar filter_policy: the filter policy model
     :ivar stock: the stock
-    :vartype stock: Stock
+    :ivar scorers: the loaded scores
     :ivar tree: the search tree
-    :vartype tree: SearchTree
     :ivar analysis: the tree analysis
-    :vartype analysis: TreeAnalysis
     :ivar routes: the top-ranked routes
-    :vartype routes: RouteCollection
-    :ivar search_stats: statistics of the latest search: time, number of iterations and if it returned first solution
-    :vartype search_stats: dict
+    :ivar search_stats: statistics of the latest search
 
     :param configfile: the path to yaml file with configuration (has priority over configdict), defaults to None
-    :type configfile: str, optional
     :param configdict: the config as a dictionary source, defaults to None
-    :type configdict: dict, optional
     """
 
-    def __init__(self, configfile=None, configdict=None):
+    def __init__(self, configfile: str = None, configdict: StrDict = None) -> None:
         self._logger = logger()
 
         if configfile:
@@ -57,42 +55,34 @@ class AiZynthFinder:
         self.filter_policy = self.config.filter_policy
         self.stock = self.config.stock
         self.scorers = self.config.scorers
-        self.tree = None
-        self._target_mol = None
-        self.search_stats = {}
-        self.routes = None
-        self.analysis = None
+        self.tree: Optional[SearchTree] = None
+        self._target_mol: Optional[Molecule] = None
+        self.search_stats: StrDict = dict()
+        self.routes = RouteCollection([])
+        self.analysis: Optional[TreeAnalysis] = None
 
     @property
-    def target_smiles(self):
-        """
-        The SMILES representation of the molecule to predict routes on.
-
-        :return: the SMILES
-        :rvalue: str
-        """
+    def target_smiles(self) -> str:
+        """The SMILES representation of the molecule to predict routes on."""
+        if not self._target_mol:
+            return ""
         return self._target_mol.smiles
 
     @target_smiles.setter
-    def target_smiles(self, smiles):
+    def target_smiles(self, smiles: str) -> None:
         self.target_mol = Molecule(smiles=smiles)
 
     @property
-    def target_mol(self):
-        """
-        The molecule to predict routes on
-
-        :return: the molecule
-        :rvalue: Molecule
-        """
+    def target_mol(self) -> Optional[Molecule]:
+        """The molecule to predict routes on"""
         return self._target_mol
 
     @target_mol.setter
-    def target_mol(self, mol):
+    def target_mol(self, mol: Molecule) -> None:
         self.tree = None
         self._target_mol = mol
 
-    def build_routes(self, min_nodes=5, scorer="state score"):
+    def build_routes(self, min_nodes: int = 5, scorer: str = "state score") -> None:
         """
         Build reaction routes
 
@@ -100,25 +90,32 @@ class AiZynthFinder:
         to extract results from the tree search.
 
         :param min_nodes: the minimum number of top-ranked nodes to consider, defaults to 5
-        :type min_nodes: int, optional
-        :param scorer: the object used to score the nodes
-        :type scorer: str, optional
+        :param scorer: a reference to the object used to score the nodes
+        :raises ValueError: if the search tree not initialized
         """
+        if not self.tree:
+            raise ValueError("Search tree not initialized")
+
         self.analysis = TreeAnalysis(self.tree, scorer=self.scorers[scorer])
         self.routes = RouteCollection.from_analysis(self.analysis, min_nodes)
 
-    def extract_statistics(self):
-        """ Extracts tree statistics as a dictionary
-        """
+    def extract_statistics(self) -> StrDict:
+        """Extracts tree statistics as a dictionary"""
         if not self.analysis:
             return {}
         stats = {"target": self.target_smiles, "search_time": self.search_stats["time"]}
         stats.update(self.analysis.tree_statistics())
         return stats
 
-    def prepare_tree(self):
-        """ Setup the tree for searching
+    def prepare_tree(self) -> None:
         """
+        Setup the tree for searching
+
+        :raises ValueError: if the target molecule was not set
+        """
+        if not self.target_mol:
+            raise ValueError("No target molecule set")
+
         self.stock.reset_exclusion_list()
         if self.config.exclude_target_from_stock and self.target_mol in self.stock:
             self.stock.exclude(self.target_mol)
@@ -127,17 +124,15 @@ class AiZynthFinder:
         self._logger.debug("Defining tree root: %s" % self.target_smiles)
         self.tree = SearchTree(root_smiles=self.target_smiles, config=self.config)
         self.analysis = None
-        self.routes = None
+        self.routes = RouteCollection([])
 
     @deprecated(version="2.1.0", reason="Not supported anymore")
-    def run_from_json(self, params):
+    def run_from_json(self, params: StrDict) -> StrDict:
         """
         Run a search tree by reading settings from a JSON
 
         :param params: the parameters of the tree search
-        :type params: dict
         :return: dictionary with all settings and top scored routes
-        :rtype: dict
         """
         self.stock.select(params["stocks"])
         self.expansion_policy.select(params.get("policy", params.get("policies", "")))
@@ -171,17 +166,18 @@ class AiZynthFinder:
             "trees": self.routes.dict_with_scores(),
         }
 
-    def tree_search(self, show_progress=False):
+    def tree_search(self, show_progress: bool = False) -> float:
         """
         Perform the actual tree search
 
         :param show_progress: if True, shows a progress bar
-        :type show_progress: bool
         :return: the time past in seconds
-        :rtype: float
         """
         if not self.tree:
             self.prepare_tree()
+        assert (
+            self.tree is not None
+        )  # This is for type checking, prepare_tree is creating it.
         self.search_stats = {"returned_first": False, "iterations": 0}
 
         time0 = time.time()
@@ -218,15 +214,17 @@ class AiZynthFinder:
         self.search_stats["time"] = time_past
         return time_past
 
-    def _get_settings(self):
-        """Get the current settings as a dictionary
-        """
+    def _get_settings(self) -> StrDict:
+        """Get the current settings as a dictionary"""
         # To be backward-compatible
-        if len(self.expansion_policy.selection) == 1:
+        if (
+            self.expansion_policy.selection
+            and len(self.expansion_policy.selection) == 1
+        ):
             policy_value = self.expansion_policy.selection[0]
             policy_key = "policy"
         else:
-            policy_value = self.expansion_policy.selection
+            policy_value = self.expansion_policy.selection  # type: ignore
             policy_key = "policies"
 
         dict_ = {

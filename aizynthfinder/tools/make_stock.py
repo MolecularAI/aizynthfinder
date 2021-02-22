@@ -1,18 +1,28 @@
 """ Module containing classes and routines for making stock input to the tree search.
 """
+from __future__ import annotations
 import argparse
 import importlib
+from typing import TYPE_CHECKING
 
 import pandas as pd
 
 from aizynthfinder.chem import Molecule, MoleculeException
 from aizynthfinder.context.stock import MongoDbInchiKeyQuery
 
+if TYPE_CHECKING:
+    from aizynthfinder.utils.type_utils import List, Iterable
 
-def _get_arguments():
+    _StrIterator = Iterable[str]
+
+
+def _get_arguments() -> argparse.Namespace:
     parser = argparse.ArgumentParser("smiles2stock")
     parser.add_argument(
-        "--files", required=True, nargs="+", help="the files containing smiles",
+        "--files",
+        required=True,
+        nargs="+",
+        help="the files containing smiles",
     )
     parser.add_argument(
         "--source",
@@ -36,7 +46,7 @@ def _get_arguments():
     return parser.parse_args()
 
 
-def _convert_smiles(smiles_list):
+def _convert_smiles(smiles_list: _StrIterator) -> _StrIterator:
     for smiles in smiles_list:
         try:
             yield Molecule(smiles=smiles, sanitize=True).inchi_key
@@ -47,7 +57,7 @@ def _convert_smiles(smiles_list):
             )
 
 
-def extract_plain_smiles(files):
+def extract_plain_smiles(files: List[str]) -> _StrIterator:
     """
     Extract SMILES from plain text files, one SMILES on each line.
     The SMILES are yielded to save memory.
@@ -59,7 +69,7 @@ def extract_plain_smiles(files):
                 yield line.strip()
 
 
-def extract_smiles_from_module(files):
+def extract_smiles_from_module(files: List[str]) -> _StrIterator:
     """
     Extract SMILES by loading a custom module, containing
     the function ``extract_smiles``.
@@ -72,16 +82,16 @@ def extract_smiles_from_module(files):
     module_name = files.pop(0)
     module = importlib.import_module(module_name)
     if not files:
-        for smiles in module.extract_smiles():
+        for smiles in module.extract_smiles():  # type: ignore
             yield smiles
     else:
         for filename in files:
             print(f"Processing {filename}", flush=True)
-            for smiles in module.extract_smiles(filename):
+            for smiles in module.extract_smiles(filename):  # type: ignore
                 yield smiles
 
 
-def make_hdf5_stock(inchi_keys, filename):
+def make_hdf5_stock(inchi_keys: _StrIterator, filename: str) -> None:
     """
     Put all the inchi keys from the given iterable in a pandas
     dataframe and save it as an HDF5 file. Only unique inchi keys
@@ -93,7 +103,9 @@ def make_hdf5_stock(inchi_keys, filename):
     print(f"Created HDF5 stock with {len(data)} unique compounds")
 
 
-def make_mongo_stock(inchi_keys, source_tag, host=None):
+def make_mongo_stock(
+    inchi_keys: _StrIterator, source_tag: str, host: str = None
+) -> None:
     """
     Put all the inchi keys from the given iterable in Mongo database as
     a molecules collection. Only unique inchi keys are stored.
@@ -108,9 +120,8 @@ def make_mongo_stock(inchi_keys, source_tag, host=None):
     print(f"Created MongoDB stock with {len(inchi_keys)} unique compounds")
 
 
-def main():
-    """ Entry-point for the smiles2stock tool
-    """
+def main() -> None:
+    """Entry-point for the smiles2stock tool"""
     args = _get_arguments()
     if args.source == "plain":
         smiles_gen = (smiles for smiles in extract_plain_smiles(args.files))

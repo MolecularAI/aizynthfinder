@@ -7,6 +7,15 @@ import pytest
 from aizynthfinder.aizynthfinder import AiZynthFinder
 
 
+def _remove_and_yield_meta_data(dict_):
+    if "metadata" in dict_:
+        yield dict_["metadata"]
+        del dict_["metadata"]
+    if "children" in dict_:
+        for child in dict_["children"]:
+            yield from _remove_and_yield_meta_data(child)
+
+
 @pytest.fixture(scope="module")
 def read_options(request):
     policy_model = os.environ.get("TEST_POLICY_MODEL")
@@ -69,12 +78,19 @@ def test_full_flow(finder_output, setup_finder, smiles):
         assert actual == expected
 
     for actual, expected in zip(finder.routes.dicts, expected_output["trees"]):
+        metalist_actual = [metadata for metadata in _remove_and_yield_meta_data(actual)]
+        metalist_expected = [
+            metadata for metadata in _remove_and_yield_meta_data(expected)
+        ]
+        for meta_actual, meta_expected in zip(metalist_actual, metalist_expected):
+            assert meta_actual == pytest.approx(meta_expected)
         assert actual == expected
 
 
 @pytest.mark.integration
 @pytest.mark.parametrize(
-    "include_scores", [False, True],
+    "include_scores",
+    [False, True],
 )
 def test_run_from_json(finder_output, setup_finder, include_scores):
 
@@ -108,4 +124,10 @@ def test_run_from_json(finder_output, setup_finder, include_scores):
     assert result["request"] == params
 
     for actual, expected in zip(result["trees"], expected_output["trees"]):
+        metalist_actual = [metadata for metadata in _remove_and_yield_meta_data(actual)]
+        metalist_expected = [
+            metadata for metadata in _remove_and_yield_meta_data(expected)
+        ]
+        for meta_actual, meta_expected in zip(metalist_actual, metalist_expected):
+            assert meta_actual == pytest.approx(meta_expected)
         assert actual == expected
