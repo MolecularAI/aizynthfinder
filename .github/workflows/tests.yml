@@ -18,3 +18,12 @@ jobs:
         conda env create -f env-dev.yml
         conda run --name aizynth-dev poetry install
         conda run --name aizynth-dev inv full-tests
+    - name: Upload coverage to Codecov
+      uses: codecov/codecov-action@v1
+      with:
+        token: ${{ secrets.CODECOV_TOKEN }}
+        files: ./coverage.xml
+        directory: ./coverage/
+        name: codecov-aizynth
+        fail_ci_if_error: false
+        verbose: true
