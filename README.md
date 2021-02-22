@@ -42,14 +42,12 @@ the `aizynthfinder` package is now installed in editable mode.
 
 If the above simple instructions does not work, here are the more detailed instructions. You might have to modify conda channels or similar if the dependencies fails to install on your OS.
 
-* First, install these conda packages
+First, install these conda packages
 
     conda install -c conda-forge "rdkit=>2019.09.1" -y
     conda install graphviz -y
 
-* Secondly, install the ``aizynthfinder`` package
-
-
+Secondly, install the ``aizynthfinder`` package
     python -m pip install https://github.com/MolecularAI/aizynthfinder/archive/v2.4.0.tar.gz
 
 
