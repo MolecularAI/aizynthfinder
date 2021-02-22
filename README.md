@@ -48,6 +48,7 @@ First, install these conda packages
     conda install graphviz -y
 
 Secondly, install the ``aizynthfinder`` package
+
     python -m pip install https://github.com/MolecularAI/aizynthfinder/archive/v2.4.0.tar.gz
 
 
