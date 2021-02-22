@@ -26,6 +26,10 @@ And if you want to update the environment
 
     conda env update -n aizynth-env -f https://raw.githubusercontent.com/MolecularAI/aizynthfinder/master/env-users.yml
     
+The package is now installed in a new conda environment, that you need to activate each time you want to use it
+
+    conda activate aizynth-env
+
 ### For developers
 
 First clone the repository using Git.
