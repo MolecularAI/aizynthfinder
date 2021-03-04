@@ -173,6 +173,52 @@ def test_preprocess_expansion(write_yaml, shared_datadir, add_cli_arguments):
         assert column in data.columns
 
 
+def test_preprocess_expansion_no_class(write_yaml, shared_datadir, add_cli_arguments):
+    config_path = write_yaml(
+        {
+            "library_headers": [
+                "index",
+                "ID",
+                "reaction_hash",
+                "reactants",
+                "products",
+                "retro_template",
+                "template_hash",
+            ],
+            "metadata_headers": ["template_hash"],
+            "file_prefix": str(shared_datadir / "dummy_noclass"),
+            "split_size": {"training": 0.6, "testing": 0.2, "validation": 0.2},
+        }
+    )
+    add_cli_arguments(config_path)
+
+    expansion_main()
+
+    with open(shared_datadir / "dummy_noclass_template_library.csv", "r") as fileobj:
+        lines = fileobj.read().splitlines()
+    assert len(lines) == 10
+
+    with open(shared_datadir / "dummy_noclass_training.csv", "r") as fileobj:
+        lines = fileobj.read().splitlines()
+    assert len(lines) == 6
+
+    with open(shared_datadir / "dummy_noclass_testing.csv", "r") as fileobj:
+        lines = fileobj.read().splitlines()
+    assert len(lines) == 2
+
+    with open(shared_datadir / "dummy_noclass_validation.csv", "r") as fileobj:
+        lines = fileobj.read().splitlines()
+    assert len(lines) == 2
+
+    data = pd.read_hdf(shared_datadir / "dummy_noclass_unique_templates.hdf5", "table")
+    config = Config(config_path)
+    assert len(data) == 2
+    assert "retro_template" in data.columns
+    assert "library_occurence" in data.columns
+    for column in config["metadata_headers"]:
+        assert column in data.columns
+
+
 def test_preprocess_expansion_bad_product(
     write_yaml, shared_datadir, add_cli_arguments
 ):

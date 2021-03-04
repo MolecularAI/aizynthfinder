@@ -69,7 +69,8 @@ def _get_config() -> Config:
 def _save_unique_templates(dataset: pd.DataFrame, config: Config) -> None:
     template_group = dataset.groupby("template_hash", sort=False).size()
     dataset = dataset[["retro_template", "template_code"] + config["metadata_headers"]]
-    dataset["classification"].fillna("-", inplace=True)
+    if "classification" in dataset.columns:
+        dataset["classification"].fillna("-", inplace=True)
     dataset = dataset.drop_duplicates(subset="template_code", keep="first")
     dataset["library_occurence"] = template_group.values
     dataset.set_index("template_code", inplace=True)
@@ -80,6 +81,8 @@ def _save_unique_templates(dataset: pd.DataFrame, config: Config) -> None:
 def main() -> None:
     """Entry-point for the preprocess_expansion tool"""
     config = _get_config()
+    if "template_code" != config["library_headers"][-1]:
+        config["library_headers"].append("template_code")
 
     filename = config.filename("library")
     if not os.path.exists(filename):
