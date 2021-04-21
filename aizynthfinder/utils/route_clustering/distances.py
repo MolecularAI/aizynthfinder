@@ -156,7 +156,7 @@ class ReactionTreeWrapper:
         :param exhaustive_limit: used to determine what type of enumeration to do
         :yield: the next computed distance between self and other
         """
-        if len(self.trees) * len(other.trees) < exhaustive_limit:
+        if self._tree_count * other.info["tree count"] < exhaustive_limit:
             yield from self._distance_iter_exhaustive(other)
         elif self._enumeration or other.info["enumeration"]:
             yield from self._distance_iter_semi_exhaustive(other)

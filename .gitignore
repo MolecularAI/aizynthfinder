@@ -70,9 +70,9 @@ instance/
 
 # Sphinx documentation
 docs/build/
-docs/source/aizynth*
-docs/source/modules.rst
-docs/source/cli_help.txt
+docs/aizynth*
+docs/modules.rst
+docs/cli_help.txt
 
 # PyBuilder
 target/
