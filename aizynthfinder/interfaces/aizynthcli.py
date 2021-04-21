@@ -14,8 +14,8 @@ from typing import TYPE_CHECKING
 
 import pandas as pd
 
-from aizynthfinder.utils.files import cat_hdf_files, split_file, start_processes
 from aizynthfinder.aizynthfinder import AiZynthFinder
+from aizynthfinder.utils.files import cat_hdf_files, split_file, start_processes
 from aizynthfinder.utils.logging import logger, setup_logger
 
 if TYPE_CHECKING:

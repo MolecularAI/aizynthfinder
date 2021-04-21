@@ -1,27 +1,24 @@
 """ Module containing routines to setup proper logging
 """
+# pylint: disable=ungrouped-imports, wrong-import-order, wrong-import-position
 import logging.config
 import os
-import sys
 
 import yaml
-import tensorflow  # noqa
+
+# See Github issue 30 why sklearn is imported here
+import sklearn  # noqa
 from rdkit import RDLogger
 
 from aizynthfinder.utils.paths import data_path
 
-
-# This suppress the printing of the Keras backend
-stderr = sys.stderr
-sys.stderr = open(os.devnull, "w")
-import tensorflow.keras  # noqa
-
-sys.stderr = stderr
-
 # Suppress tensforflow logging
+os.environ["TF_CPP_MIN_LOG_LEVEL"] = "2"
+
+import tensorflow  # noqa
+
 tf_logger = tensorflow.get_logger()
 tf_logger.setLevel(logging.WARNING)
-os.environ["TF_CPP_MIN_LOG_LEVEL"] = "2"
 
 # Suppress RDKit errors due to incomplete template (e.g. aromatic non-ring atoms)
 rd_logger = RDLogger.logger()
