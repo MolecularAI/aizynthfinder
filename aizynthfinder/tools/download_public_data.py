@@ -1,5 +1,8 @@
+""" Module with script to download public data
+"""
 import argparse
 import os
+import sys
 
 import requests
 import tqdm
@@ -53,6 +56,7 @@ def _download_file(url: str, filename: str) -> None:
 
 
 def main() -> None:
+    """Entry-point for CLI"""
     parser = argparse.ArgumentParser("download_public_data")
     parser.add_argument(
         "path",
@@ -66,7 +70,7 @@ def main() -> None:
             _download_file(filespec["url"], os.path.join(path, filespec["filename"]))
     except requests.HTTPError as err:
         print(f"Download failed with message {str(err)}")
-        exit(1)
+        sys.exit(1)
 
     with open(os.path.join(path, "config.yml"), "w") as fileobj:
         path = os.path.abspath(path)

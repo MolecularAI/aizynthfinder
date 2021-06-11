@@ -12,13 +12,15 @@ from aizynthfinder.utils.paths import data_path
 from aizynthfinder.context.policy import ExpansionPolicy, FilterPolicy
 from aizynthfinder.context.stock import Stock
 from aizynthfinder.context.scoring import ScorerCollection
+from aizynthfinder.context.cost import MoleculeCost
+
 
 if TYPE_CHECKING:
     from aizynthfinder.utils.type_utils import StrDict, Any
 
 
 @dataclass
-class Configuration:
+class Configuration:  # pylint: disable=R0902
     """
     Encapsulating the settings of the tree search, including the policy,
     the stock, the loaded scorers and various parameters.
@@ -36,7 +38,7 @@ class Configuration:
     file located in the `data` folder of the package.
     """
 
-    C: float = 1.4
+    C: float = 1.4  # pylint: disable=invalid-name
     cutoff_cumulative: float = 0.995
     cutoff_number: int = 50
     max_transforms: int = 6
@@ -50,10 +52,12 @@ class Configuration:
     template_column: str = "retro_template"
     prune_cycles_in_search: bool = True
     use_remote_models: bool = False
+    search_algorithm: str = "mcts"
     stock: Stock = None  # type: ignore
     expansion_policy: ExpansionPolicy = None  # type: ignore
     filter_policy: FilterPolicy = None  # type: ignore
     scorers: ScorerCollection = None  # type: ignore
+    molecule_cost: MoleculeCost = None # type: ignore
 
     def __post_init__(self) -> None:
         self._properties: StrDict = {}
@@ -66,6 +70,7 @@ class Configuration:
         self.expansion_policy = ExpansionPolicy(self)
         self.filter_policy = FilterPolicy(self)
         self.scorers = ScorerCollection(self)
+        self.molecule_cost = MoleculeCost()
         self._logger = logger()
 
     def __eq__(self, other: Any) -> bool:
@@ -83,6 +88,7 @@ class Configuration:
         :param source: the dictionary source
         :return: a Configuration object with settings from the source
         """
+        # pylint: disable=protected-access
         config_obj = Configuration()
         config_obj._update_from_config(source)
 
@@ -94,6 +100,7 @@ class Configuration:
         )
         config_obj.stock.load_from_config(**source.get("stock", {}))
         config_obj.scorers.load_from_config(**source.get("scorer", {}))
+        config_obj.molecule_cost.load_from_config(**source.get("molecule_cost", {}))
 
         return config_obj
 

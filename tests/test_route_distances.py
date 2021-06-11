@@ -5,7 +5,7 @@ from aizynthfinder.utils.route_clustering.distances import (
     ReactionTreeWrapper,
     TreeContent,
 )
-from aizynthfinder.analysis import ReactionTree
+from aizynthfinder.reactiontree import ReactionTree
 from aizynthfinder.chem import Molecule
 
 

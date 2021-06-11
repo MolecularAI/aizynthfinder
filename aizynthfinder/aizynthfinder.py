@@ -2,6 +2,7 @@
 """
 from __future__ import annotations
 import time
+import importlib
 from typing import TYPE_CHECKING
 
 from deprecated import deprecated
@@ -10,12 +11,13 @@ from tqdm import tqdm
 # This must be imported first to setup logging for rdkit, tensorflow etc
 from aizynthfinder.utils.logging import logger
 from aizynthfinder.context.config import Configuration
-from aizynthfinder.mcts.mcts import SearchTree
+from aizynthfinder.mcts.mcts import SearchTree as MctsSearchTree
 from aizynthfinder.analysis import TreeAnalysis, RouteCollection
 from aizynthfinder.chem import Molecule
+from aizynthfinder.utils.trees import AndOrSearchTreeBase
 
 if TYPE_CHECKING:
-    from aizynthfinder.utils.type_utils import StrDict, Optional
+    from aizynthfinder.utils.type_utils import StrDict, Optional, Union
 
 
 class AiZynthFinder:
@@ -55,7 +57,7 @@ class AiZynthFinder:
         self.filter_policy = self.config.filter_policy
         self.stock = self.config.stock
         self.scorers = self.config.scorers
-        self.tree: Optional[SearchTree] = None
+        self.tree: Optional[Union[MctsSearchTree, AndOrSearchTreeBase]] = None
         self._target_mol: Optional[Molecule] = None
         self.search_stats: StrDict = dict()
         self.routes = RouteCollection([])
@@ -103,7 +105,14 @@ class AiZynthFinder:
         """Extracts tree statistics as a dictionary"""
         if not self.analysis:
             return {}
-        stats = {"target": self.target_smiles, "search_time": self.search_stats["time"]}
+        stats = {
+            "target": self.target_smiles,
+            "search_time": self.search_stats["time"],
+            "first_solution_time": self.search_stats.get("first_solution_time", 0),
+            "first_solution_iteration": self.search_stats.get(
+                "first_solution_iteration", 0
+            ),
+        }
         stats.update(self.analysis.tree_statistics())
         return stats
 
@@ -121,8 +130,7 @@ class AiZynthFinder:
             self.stock.exclude(self.target_mol)
             self._logger.debug("Excluding the target compound from the stock")
 
-        self._logger.debug("Defining tree root: %s" % self.target_smiles)
-        self.tree = SearchTree(root_smiles=self.target_smiles, config=self.config)
+        self._setup_search_tree()
         self.analysis = None
         self.routes = RouteCollection([])
 
@@ -186,22 +194,23 @@ class AiZynthFinder:
         time_past = time.time() - time0
 
         if show_progress:
-            pbar = tqdm(total=self.config.iteration_limit)
+            pbar = tqdm(total=self.config.iteration_limit, leave=False)
 
         while time_past < self.config.time_limit and i <= self.config.iteration_limit:
             if show_progress:
                 pbar.update(1)
             self.search_stats["iterations"] += 1
 
-            leaf = self.tree.select_leaf()
-            leaf.expand()
-            while not leaf.is_terminal():
-                child = leaf.promising_child()
-                if child:
-                    child.expand()
-                    leaf = child
-            self.tree.backpropagate(leaf, leaf.state.score)
-            if self.config.return_first and leaf.state.is_solved:
+            try:
+                is_solved = self.tree.one_iteration()
+            except StopIteration:
+                break
+
+            if is_solved and "first_solution_time" not in self.search_stats:
+                self.search_stats["first_solution_time"] = time.time() - time0
+                self.search_stats["first_solution_iteration"] = i
+
+            if self.config.return_first and is_solved:
                 self._logger.debug("Found first solved route")
                 self.search_stats["returned_first"] = True
                 break
@@ -210,6 +219,7 @@ class AiZynthFinder:
 
         if show_progress:
             pbar.close()
+        time_past = time.time() - time0
         self._logger.debug("Search completed")
         self.search_stats["time"] = time_past
         return time_past
@@ -244,3 +254,23 @@ class AiZynthFinder:
         if self.filter_policy.selection:
             dict_["filter"] = self.filter_policy.selection
         return dict_
+
+    def _setup_search_tree(self):
+        self._logger.debug("Defining tree root: %s" % self.target_smiles)
+        if self.config.search_algorithm.lower() == "mcts":
+            self.tree = MctsSearchTree(
+                root_smiles=self.target_smiles, config=self.config
+            )
+        else:
+            module_name, cls_name = self.config.search_algorithm.rsplit(".", maxsplit=1)
+            try:
+                module_obj = importlib.import_module(module_name)
+            except ImportError:
+                raise ValueError(f"Could not import module {module_name}")
+
+            if not hasattr(module_obj, cls_name):
+                raise ValueError(f"Could not identify class {cls_name} in module")
+
+            self.tree: AndOrSearchTreeBase = getattr(module_obj, cls_name)(
+                root_smiles=self.target_smiles, config=self.config
+            )

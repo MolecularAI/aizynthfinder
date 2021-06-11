@@ -11,7 +11,7 @@ from aizynthfinder.chem import (
     FixedRetroReaction,
     hash_reactions,
 )
-from aizynthfinder.analysis import ReactionTree
+from aizynthfinder.reactiontree import ReactionTree
 
 
 def test_no_input():

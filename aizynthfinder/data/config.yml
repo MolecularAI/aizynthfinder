@@ -13,3 +13,4 @@ properties:
   template_column: retro_template
   prune_cycles_in_search: True
   use_remote_models: False
+  search_algorithm: mcts

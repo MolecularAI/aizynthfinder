@@ -45,8 +45,8 @@ def main() -> None:
     )
 
     print("Dataset loaded, generating Labels...", flush=True)
-    lb = LabelBinarizer(neg_label=0, pos_label=1, sparse_output=True)
-    labels = lb.fit_transform(dataset["template_hash"])
+    labelbin = LabelBinarizer(neg_label=0, pos_label=1, sparse_output=True)
+    labels = labelbin.fit_transform(dataset["template_hash"])
     split_and_save_data(labels, "labels", config)
 
     print("Labels created and split, generating Inputs...", flush=True)

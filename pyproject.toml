@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "aizynthfinder"
-version = "2.4.0"
+version = "2.5.0"
 description = "Retrosynthetic route finding using neural network guided Monte-Carlo tree search"
 authors = ["Molecular AI group <samuel.genheden@astrazeneca.com>"]
 license = "MIT"
@@ -9,6 +9,13 @@ readme = "README.md"
 
 [tool.pytest.ini_options]
 mccabe-complexity = 9
+
+[tool.pylint.'MESSAGES CONTROL']
+max-line-length = 120
+max-args = 6
+max-attributes = 15
+min-public-methods = 0
+disable = "W1201, W1203, R0401, W0707, W0221, W0603, R0801, typecheck"
 
 [tool.poetry.dependencies]
 python = ">=3.7,<3.9"
@@ -45,6 +52,7 @@ pytest-mock = "^3.5.0"
 pytest-mccabe = "^2.0.0"
 sphinx = "^3.0.0"
 mypy = "^0.800"
+pylint = "^2.7.0"
 
 [tool.poetry.scripts]
 aizynthapp = "aizynthfinder.interfaces.aizynthapp:main"

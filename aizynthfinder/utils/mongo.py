@@ -1,7 +1,8 @@
 """ Module containing routines to obtain a MongoClient instance
 """
-from pymongo import MongoClient
 from urllib.parse import urlencode
+
+from pymongo import MongoClient
 
 from aizynthfinder.utils.logging import logger
 

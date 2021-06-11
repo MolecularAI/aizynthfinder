@@ -81,7 +81,7 @@ def _save_unique_templates(dataset: pd.DataFrame, config: Config) -> None:
 def main() -> None:
     """Entry-point for the preprocess_expansion tool"""
     config = _get_config()
-    if "template_code" != config["library_headers"][-1]:
+    if config["library_headers"][-1] != "template_code":
         config["library_headers"].append("template_code")
 
     filename = config.filename("library")
@@ -96,8 +96,8 @@ def main() -> None:
         )
 
     print("Dataset filtered/loaded, generating labels...", flush=True)
-    lb = LabelBinarizer(neg_label=0, pos_label=1, sparse_output=True)
-    labels = lb.fit_transform(dataset["template_hash"])
+    labelb = LabelBinarizer(neg_label=0, pos_label=1, sparse_output=True)
+    labels = labelb.fit_transform(dataset["template_hash"])
     split_and_save_data(labels, "labels", config)
 
     print("Labels created and split, generating inputs...", flush=True)

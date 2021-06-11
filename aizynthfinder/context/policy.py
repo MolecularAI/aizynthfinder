@@ -48,6 +48,7 @@ class ExpansionPolicy(ContextCollection):
     ) -> Tuple[Sequence[RetroReaction], Sequence[float]]:
         return self.get_actions(molecules)
 
+    # pylint: disable=R0914
     def get_actions(
         self, molecules: Sequence[TreeMolecule]
     ) -> Tuple[List[RetroReaction], List[float]]:
@@ -82,6 +83,7 @@ class ExpansionPolicy(ContextCollection):
                     metadata = dict(move)
                     del metadata[self._config.template_column]
                     metadata["policy_probability"] = float(probs[idx].round(4))
+                    metadata["policy_probability_rank"] = idx
                     metadata["policy_name"] = policy_key
                     metadata["template_code"] = move_index
                     possible_actions.append(

@@ -28,7 +28,7 @@ if TYPE_CHECKING:
         Dict,
         StrDict,
     )
-    from aizynthfinder.analysis import ReactionTree
+    from aizynthfinder.reactiontree import ReactionTree
     from aizynthfinder.chem import Reaction
 
     _FloatIterator = Iterable[float]
@@ -156,7 +156,7 @@ class ReactionTreeWrapper:
         :param exhaustive_limit: used to determine what type of enumeration to do
         :yield: the next computed distance between self and other
         """
-        if self._tree_count * other.info["tree count"] < exhaustive_limit:
+        if len(self.trees) * len(other.trees) < exhaustive_limit:
             yield from self._distance_iter_exhaustive(other)
         elif self._enumeration or other.info["enumeration"]:
             yield from self._distance_iter_semi_exhaustive(other)
@@ -203,10 +203,10 @@ class ReactionTreeWrapper:
 
         # Difference fingerprint for reactions
         product = next(self._graph.predecessors(node))
-        fp = product.fingerprint(radius=2).copy()
+        fp_ = product.fingerprint(radius=2).copy()
         for reactant in self._graph.successors(node):
-            fp -= reactant.fingerprint(radius=2)
-        return fp.astype(int)
+            fp_ -= reactant.fingerprint(radius=2)
+        return fp_.astype(int)
 
     def _create_all_trees(self) -> None:
         if not self._root:
@@ -223,12 +223,12 @@ class ReactionTreeWrapper:
         node: Union[Molecule, Reaction],
         order_dict: Dict[Union[Molecule, Reaction], List[int]] = None,
     ) -> StrDict:
-        fp = self._compute_fingerprint(node)
+        fp_ = self._compute_fingerprint(node)
         dict_tree: StrDict = {
             "type": node.__class__.__name__,
             "smiles": node.smiles,
-            "fingerprint": fp,
-            "sort_key": "".join(f"{digit}" for digit in fp),
+            "fingerprint": fp_,
+            "sort_key": "".join(f"{digit}" for digit in fp_),
             "children": [],
         }
         for child in self._iter_children(node, order_dict):

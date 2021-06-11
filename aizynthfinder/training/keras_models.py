@@ -26,7 +26,7 @@ if TYPE_CHECKING:
     from aizynthfinder.training.utils import Config
 
 
-class _InMemorySequence(Sequence):
+class _InMemorySequence(Sequence):  # pylint: disable=W0223
     def __init__(self, config: Config, dataset_label: str) -> None:
         self.batch_size = config["batch_size"]
         input_filename = config.filename(dataset_label + "_inputs")
@@ -199,7 +199,7 @@ def train_expansion_keras_model(config: Config) -> None:
 
 
 def train_filter_keras_model(config: Config) -> None:
-
+    """Train a Filter model"""
     train_seq = FilterModelSequence(config, "training")
     valid_seq = FilterModelSequence(config, "validation")
 
@@ -224,7 +224,7 @@ def train_filter_keras_model(config: Config) -> None:
 
 
 def train_recommender_keras_model(config: Config) -> None:
-
+    """Train a recommender model to be used in filter development"""
     train_seq = ExpansionModelSequence(config, "training")
     valid_seq = ExpansionModelSequence(config, "validation")
 

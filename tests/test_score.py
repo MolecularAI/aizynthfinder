@@ -14,7 +14,7 @@ from aizynthfinder.context.scoring import (
 )
 from aizynthfinder.chem import Molecule, UniqueMolecule
 from aizynthfinder.mcts.mcts import SearchTree
-from aizynthfinder.analysis import ReactionTree
+from aizynthfinder.reactiontree import ReactionTree
 
 
 def test_state_scorer_node(generate_root, default_config):

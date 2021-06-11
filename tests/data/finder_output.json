@@ -18,6 +18,7 @@
 							"classification": "N-acylation to amide",
 							"library_occurence": 20,
 							"policy_probability": 0.5511,
+							"policy_probability_rank": 0,
 							"policy_name": "dummy",
 							"template_code": 2
 						},

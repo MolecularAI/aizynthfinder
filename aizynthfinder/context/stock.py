@@ -17,6 +17,7 @@ if TYPE_CHECKING:
     from pymongo.database import Database as MongoDatabase
     from pymongo.collection import Collection as MongoCollection
 
+    # pylint: disable=ungrouped-imports
     from aizynthfinder.utils.type_utils import StrDict, Set, Union, Any, Optional, List
 
 
@@ -24,6 +25,7 @@ class StockException(Exception):
     """An exception raised by the Stock classes"""
 
 
+# pylint: disable=no-self-use
 class StockQueryMixin:
     """
     Mixin class for all query classes, providing a default interface
@@ -69,7 +71,6 @@ class StockQueryMixin:
 
     def clear_cache(self) -> None:
         """Clear the internal search cache if available"""
-        pass
 
     def price(self, mol: Molecule) -> float:
         """
@@ -118,6 +119,7 @@ class InMemoryInchiKeyQuery(StockQueryMixin):
 
     @property
     def stock_inchikeys(self) -> Set[str]:
+        """Return the InChiKeys in this stock"""
         return self._stock_inchikeys
 
 

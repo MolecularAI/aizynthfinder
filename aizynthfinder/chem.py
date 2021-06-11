@@ -21,6 +21,7 @@ if TYPE_CHECKING:
         RdMol,
         RdReaction,
         StrDict,
+        Iterable
     )
 
 
@@ -181,6 +182,7 @@ class Molecule:
 
         try:
             AllChem.SanitizeMol(self.rd_mol)
+        # pylint: disable=bare-except
         except:  # noqa, there could be many reasons why the molecule cannot be sanitized
             if raise_exception:
                 raise MoleculeException(f"Unable to sanitize molecule ({self.smiles})")
@@ -388,6 +390,13 @@ class Reaction(_ExpandableReactionInterfaceMixin):
         return self._products
 
     def apply(self) -> Tuple[Tuple[Molecule, ...], ...]:
+        """
+        Apply a reactions smarts to list of reactant and return the products
+
+        Will try to sanitize the reactants, and if that fails it will not return that molecule
+
+        :return: the products of the reaction
+        """
         num_rectantant_templates = self.rd_reaction.GetNumReactantTemplates()
         reactants = tuple(mol.rd_mol for mol in self.mols[:num_rectantant_templates])
         products_list = self.rd_reaction.RunReactants(reactants)
@@ -450,15 +459,14 @@ class RetroReaction(_ExpandableReactionInterfaceMixin):
         :param smarts: the SMARTS of the reaction
         :return: the constructed reaction object
         """
+        # pylint: disable=protected-access
         mol_smiles, reactants_smiles = smiles.split(">>")
         mol = TreeMolecule(parent=None, smiles=mol_smiles)
         reaction = RetroReaction(mol, smarts=smarts)
         reaction._reactants = (
             tuple(
-                [
-                    TreeMolecule(parent=mol, smiles=smiles)
-                    for smiles in reactants_smiles.split(".")
-                ]
+                TreeMolecule(parent=mol, smiles=smiles)
+                for smiles in reactants_smiles.split(".")
             ),
         )
         return reaction
@@ -520,6 +528,7 @@ class RetroReaction(_ExpandableReactionInterfaceMixin):
         :param index: new index, defaults to None
         :return: the copy
         """
+        # pylint: disable=protected-access
         index = index if index is not None else self.index
         new_reaction = RetroReaction(self.mol, self.smarts, index, self.metadata)
         new_reaction._reactants = tuple(mol_list for mol_list in self._reactants or [])
@@ -577,7 +586,7 @@ class FixedRetroReaction(_ReactionInterfaceMixin):
 
 
 def hash_reactions(
-    reactions: Union[List[Reaction], List[RetroReaction], List[FixedRetroReaction]],
+    reactions: Union[Iterable[Reaction], Iterable[RetroReaction], Iterable[FixedRetroReaction]],
     sort: bool = True,
 ) -> str:
     """

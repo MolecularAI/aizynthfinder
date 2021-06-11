@@ -18,3 +18,11 @@ def full_tests(context):
 @task
 def run_mypy(context):
     context.run("mypy --ignore-missing-imports --show-error-codes aizynthfinder")
+
+
+@task
+def run_linting(context):
+    print("Running mypy...")
+    context.run("mypy --ignore-missing-imports --show-error-codes aizynthfinder")
+    print("Running pylint...")
+    context.run("pylint aizynthfinder")

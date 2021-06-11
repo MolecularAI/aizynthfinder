@@ -165,13 +165,13 @@ class State:
 
     @staticmethod
     def _squash_function(
-        r: float, slope: float, yoffset: float, xoffset: float
+        val: float, slope: float, yoffset: float, xoffset: float
     ) -> float:
         """Squash function loosely adapted from a sigmoid function with parameters
         to modify and offset the shape
 
-        :param r: the sign of the function, if the function goes from 1 to 0 or from 0 to 1
+        :param val: the sign of the function, if the function goes from 1 to 0 or from 0 to 1
         :param slope: the slope of the midpoint
         :param xoffset: the offset of the midpoint along the x-axis
         :param yoffset: the offset of the curve along the y-axis"""
-        return 1 / (1 + np.exp(slope * -(r - xoffset))) - yoffset
+        return 1 / (1 + np.exp(slope * -(val - xoffset))) - yoffset

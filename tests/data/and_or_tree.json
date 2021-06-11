@@ -1,0 +1,136 @@
+{
+  "tree": {
+    "mol": 140605332219984,
+    "children": [
+      {
+        "reaction": {
+          "mol": 140605332219984,
+          "smarts": "([c:8]-[NH;D2;+0:7]-[c;H0;D3;+0:1]1:[c:2]:[c:3]:[#7;a:4]:[c:5]:[c:6]:1)>>(Cl-[c;H0;D3;+0:1]1:[c:2]:[c:3]:[#7;a:4]:[c:5]:[c:6]:1).([NH2;D1;+0:7]-[c:8])",
+          "index": 0,
+          "metadata": {}
+        },
+        "children": [
+          {
+            "mol": 140605332201936,
+            "children": []
+          },
+          {
+            "mol": 140605332205072,
+            "children": []
+          }
+        ]
+      },
+      {
+        "reaction": {
+          "mol": 140605332219984,
+          "smarts": "([S;D1;H0:3]=[C;H0;D3;+0:4](-[NH;D2;+0:1]-[c:2])-[NH;D2;+0:5]-[c:6])>>([NH2;D1;+0:1]-[c:2]).([S;D1;H0:3]=[C;H0;D2;+0:4]=[N;H0;D2;+0:5]-[c:6])",
+          "index": 1,
+          "metadata": {}
+        },
+        "children": [
+          {
+            "mol": 140598039857296,
+            "children": [
+              {
+                "reaction": {
+                  "mol": 140598039857296,
+                  "smarts": "([c:8]-[NH;D2;+0:7]-[c;H0;D3;+0:1]1:[c:2]:[c:3]:[#7;a:4]:[c:5]:[c:6]:1)>>(Cl-[c;H0;D3;+0:1]1:[c:2]:[c:3]:[#7;a:4]:[c:5]:[c:6]:1).([NH2;D1;+0:7]-[c:8])",
+                  "index": 0,
+                  "metadata": {}
+                },
+                "children": [
+                  {
+                    "mol": 140598039857616,
+                    "children": []
+                  },
+                  {
+                    "mol": 140605332368528,
+                    "children": []
+                  }
+                ]
+              },
+              {
+                "reaction": {
+                  "mol": 140598039857296,
+                  "smarts": "([c:2]:[c;H0;D3;+0:1](:[c:3])-[NH;D2;+0:4]-[c:5])>>(Br-[c;H0;D3;+0:1](:[c:2]):[c:3]).([NH2;D1;+0:4]-[c:5])",
+                  "index": 1,
+                  "metadata": {}
+                },
+                "children": [
+                  {
+                    "mol": 140605332368656,
+                    "children": []
+                  },
+                  {
+                    "mol": 140602867801296,
+                    "children": []
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "mol": 140605332204496,
+            "children": []
+          }
+        ]
+      }
+    ]
+  },
+  "molecules": {
+    "140605332219984": {
+      "smiles": "Cc1ccc2nc3ccccc3c(Nc3ccc(NC(=S)Nc4ccccc4)cc3)c2c1",
+      "class": "TreeMolecule",
+      "parent": null,
+      "transform": 0
+    },
+    "140605332201936": {
+      "smiles": "Cc1ccc2nc3ccccc3c(Cl)c2c1",
+      "class": "TreeMolecule",
+      "parent": 140605332219984,
+      "transform": 1
+    },
+    "140605332205072": {
+      "smiles": "Nc1ccc(NC(=S)Nc2ccccc2)cc1",
+      "class": "TreeMolecule",
+      "parent": 140605332219984,
+      "transform": 1
+    },
+    "140598039857296": {
+      "smiles": "Cc1ccc2nc3ccccc3c(Nc3ccc(N=C=S)cc3)c2c1",
+      "class": "TreeMolecule",
+      "parent": 140605332219984,
+      "transform": 1
+    },
+    "140598039857616": {
+      "smiles": "Cc1ccc2nc3ccccc3c(Cl)c2c1",
+      "class": "TreeMolecule",
+      "parent": 140598039857296,
+      "transform": 2
+    },
+    "140605332368528": {
+      "smiles": "Nc1ccc(N=C=S)cc1",
+      "class": "TreeMolecule",
+      "parent": 140598039857296,
+      "transform": 2
+    },
+    "140605332368656": {
+      "smiles": "Cc1ccc2nc3ccccc3c(Br)c2c1",
+      "class": "TreeMolecule",
+      "parent": 140598039857296,
+      "transform": 2
+    },
+    "140602867801296": {
+      "smiles": "Nc1ccc(N=C=S)cc1",
+      "class": "TreeMolecule",
+      "parent": 140598039857296,
+      "transform": 2
+    },
+    "140605332204496": {
+      "smiles": "Nc1ccccc1",
+      "class": "TreeMolecule",
+      "parent": 140605332219984,
+      "transform": 1
+    }
+  }
+}

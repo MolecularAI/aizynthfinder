@@ -1,3 +1,6 @@
+""" Module containing all types and type imports
+"""
+# pylint: disable=unused-import
 from typing import (
     Any,
     Callable,  # noqa
@@ -12,8 +15,8 @@ from typing import (
     Union,
 )
 
-from rdkit import Chem
 from PIL.Image import Image
+from rdkit import Chem
 from rdkit.DataStructs.cDataStructs import ExplicitBitVect
 
 StrDict = Dict[str, Any]

@@ -115,6 +115,7 @@ class Node:
         :param parent: the parent node
         :return: a deserialized node
         """
+        # pylint: disable=protected-access
         state = State.from_dict(dict_["state"], config, molecules)
         node = Node(state=state, owner=tree, config=config, parent=parent)
         node.is_expanded = dict_["is_expanded"]

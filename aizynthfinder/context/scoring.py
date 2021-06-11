@@ -2,13 +2,12 @@
 """
 from __future__ import annotations
 import abc
-import importlib
 from collections import defaultdict
 from collections.abc import Sequence as SequenceAbc
 from typing import TYPE_CHECKING
 
 from aizynthfinder.mcts.node import Node
-from aizynthfinder.analysis import ReactionTree
+from aizynthfinder.reactiontree import ReactionTree
 from aizynthfinder.mcts.state import State
 from aizynthfinder.chem import TreeMolecule
 from aizynthfinder.context.collection import ContextCollection
@@ -16,7 +15,6 @@ from aizynthfinder.context.stock import StockException
 
 if TYPE_CHECKING:
     from aizynthfinder.utils.type_utils import (
-        Optional,
         Union,
         List,
         Tuple,
@@ -66,7 +64,7 @@ class Scorer(abc.ABC):
     def __call__(self, item: _ScorerItemType) -> Union[float, Sequence[float]]:
         if isinstance(item, SequenceAbc):
             return self._score_many(item)
-        if isinstance(item, Node) or isinstance(item, ReactionTree):
+        if isinstance(item, (Node, ReactionTree)):
             return self._score_just_one(item)  # type: ignore
         raise ScorerException(
             f"Unable to score item from class {item.__class__.__name__}"
@@ -98,7 +96,7 @@ class Scorer(abc.ABC):
     def _score_many(self, items: _Scoreables) -> Sequence[float]:
         if isinstance(items[0], Node):
             return self._score_nodes(items)
-        elif isinstance(items[0], ReactionTree):
+        if isinstance(items[0], ReactionTree):
             return self._score_reaction_trees(items)
         raise ScorerException(
             f"Unable to score item from class {items[0].__class__.__name__}"
@@ -221,6 +219,8 @@ class AverageTemplateOccurenceScorer(Scorer):
 
 
 class PriceSumScorer(Scorer):
+    """Scorer that sums the prices of all pre-cursors"""
+
     def __init__(
         self,
         config: Configuration,
@@ -297,10 +297,10 @@ class RouteCostScorer(PriceSumScorer):
             return leaf_costs[node.state.mols[0]]
 
         scores = {id(mol): leaf_costs[mol] for mol in nodes[-1].state.mols}
-        for node, reaction in zip(nodes[::-1][1:], reactions[::-1]):
+        for pnode, reaction in zip(nodes[::-1][1:], reactions[::-1]):
             updated_scores = {
                 id(mol): scores[id(mol)]
-                for mol in node.state.mols
+                for mol in pnode.state.mols
                 if mol != reaction.mol
             }
             child_sum = sum(
@@ -390,26 +390,11 @@ class ScorerCollection(ContextCollection):
         :raises ScorerException: if module or class could not be found
         """
         for name_spec, scorer_config in scorers_config.items():
-            if "." not in name_spec:
-                name = name_spec
-                module_name = self.__module__
-            else:
-                module_name, name = name_spec.rsplit(".", maxsplit=1)
-
-            try:
-                loaded_module = importlib.import_module(module_name)
-            except ImportError:
-                raise ScorerException(f"Unable to load module: {module_name}")
-
-            if not hasattr(loaded_module, name):
-                raise ScorerException(
-                    f"Module ({module_name}) does not have a class called {name}"
-                )
-
             config_str = (
                 f" from configuration '{scorer_config}'" if scorer_config else ""
             )
-            obj = getattr(loaded_module, name)(self._config, **(scorer_config or {}))
+            cls = self._load_dynamic_cls(name_spec, self.__module__, ScorerException)
+            obj = cls(self._config, **(scorer_config or {}))
             self._logger.info(f"Loaded scorer: '{repr(obj)}'{config_str}")
             self._items[repr(obj)] = obj
 

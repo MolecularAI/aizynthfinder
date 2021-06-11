@@ -93,6 +93,29 @@ class SearchTree:
             add_node(child)
         return self._graph
 
+    def one_iteration(self) -> bool:
+        """
+        Perform one iteration of
+            1. Selection
+            2. Expansion
+            3. Rollout
+            4. Backpropagation
+
+        :return: if a solution was found
+        """
+        leaf = self.select_leaf()
+        leaf.expand()
+        rollout_child = None
+        while not leaf.is_terminal():
+            child = leaf.promising_child()
+            if not rollout_child:
+                rollout_child = child
+            if child:
+                child.expand()
+                leaf = child
+        self.backpropagate(leaf, leaf.state.score)
+        return leaf.state.is_solved
+
     def select_leaf(self) -> Node:
         """
         Traverse the tree selecting the most promising child at

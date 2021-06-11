@@ -19,6 +19,7 @@ from aizynthfinder.utils.paths import data_path
 if TYPE_CHECKING:
     import networkx as nx
 
+    # pylint: disable=ungrouped-imports
     from aizynthfinder.utils.type_utils import (
         Tuple,
         Any,
@@ -43,6 +44,7 @@ def _clean_up_images() -> None:
     global IMAGE_FOLDER
     try:
         shutil.rmtree(IMAGE_FOLDER, ignore_errors=True)
+    # pylint: disable=broad-except
     except Exception:  # noqa Don't care if we fail clean-up
         pass
 
@@ -70,6 +72,7 @@ def crop_image(img: PilImage, margin: int = 20) -> PilImage:
     :param margin: padding, defaults to 20
     :return: the cropped image
     """
+    # pylint: disable=invalid-name
     # First find the boundaries of the white area
     x0_lim = img.width
     y0_lim = img.height
@@ -113,6 +116,7 @@ def draw_rounded_rectangle(
     :param arc_size: the size of the corner, defaults to 20
     :return: the new image
     """
+    # pylint: disable=invalid-name
     x0, y0, x1, y1 = img.getbbox()
     x1 -= 1
     y1 -= 1

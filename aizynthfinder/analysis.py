@@ -1,46 +1,78 @@
 """ Module containing classes to perform analysis of the tree search results.
 """
 from __future__ import annotations
-import json
 import time
 from collections import defaultdict
 from typing import TYPE_CHECKING
 
 import numpy as np
-import networkx as nx
+from deprecated import deprecated
 
 from aizynthfinder.chem import (
-    Molecule,
-    UniqueMolecule,
     FixedRetroReaction,
     hash_reactions,
-    none_molecule,
 )
-from aizynthfinder.utils.image import make_graphviz_image
 from aizynthfinder.utils.analysis_helpers import (
-    ReactionTreeFromDict,
-    ReactionTreeFromMcts,
     CombinedReactionTrees,
+    ReactionTreeFromMcts,
 )
+from aizynthfinder.context.scoring import (
+    StateScorer,
+)
+from aizynthfinder.reactiontree import ReactionTree
 from aizynthfinder.utils.route_clustering import ReactionTreeWrapper, ClusteringHelper
+from aizynthfinder.mcts.mcts import SearchTree as MctsSearchTree
+from aizynthfinder.mcts.node import Node as MctsNode
+from aizynthfinder.utils.trees import AndOrSearchTreeBase
 
 if TYPE_CHECKING:
     from aizynthfinder.utils.type_utils import (
         StrDict,
         PilImage,
-        FrameColors,
         Optional,
         Union,
         Tuple,
         Any,
         Iterable,
-        List,
         Dict,
         Sequence,
+        List,
     )
     from aizynthfinder.context.scoring import Scorer
-    from aizynthfinder.mcts.mcts import SearchTree
-    from aizynthfinder.mcts.node import Node
+    from aizynthfinder.chem import RetroReaction
+
+
+@deprecated(reason="use a factory method directly", version="2.5.0")
+def rt_from_analysis(
+    analysis: TreeAnalysis, from_node: MctsNode = None
+) -> "ReactionTree":
+    """
+    Create a reaction from a tree analysis.
+
+    The single route can be from a given node in the search tree if the `from_node`
+    argument is given. If it is not given, the top scoring node is used.
+
+    :param analysis: the analysis to base the reaction tree on
+    :param from_node: the end node of the route, defaults to None
+    :returns: the reaction tree
+    """
+    if not isinstance(analysis.search_tree, MctsSearchTree):
+        raise TreeAnalysisException(
+            "Cannot create reaction tree because analysis not on a MCTS tree"
+        )
+
+    if not from_node:
+        from_node = analysis.best_node()
+
+    actions, nodes = analysis.search_tree.route_to_node(from_node)
+    return ReactionTreeFromMcts(actions=actions, nodes=nodes).tree
+
+
+ReactionTree.from_analysis = rt_from_analysis  # type: ignore
+
+
+class TreeAnalysisException(Exception):
+    """Exception raised by TreeAnalysis class"""
 
 
 class TreeAnalysis:
@@ -55,30 +87,72 @@ class TreeAnalysis:
     :param scorer: the object used to score the nodes, defaults to StateScorer
     """
 
-    def __init__(self, search_tree: SearchTree, scorer: Scorer = None) -> None:
+    def __init__(
+        self,
+        search_tree: Union[MctsSearchTree, AndOrSearchTreeBase],
+        scorer: Scorer = None,
+    ) -> None:
         self.search_tree = search_tree
         if scorer is None:
-            # Do import here to avoid circular imports
-            from aizynthfinder.context.scoring import StateScorer
-
             self.scorer: Scorer = StateScorer(search_tree.config)
         else:
             self.scorer = scorer
 
-    def best_node(self) -> Node:
+    def best(self) -> Union[MctsNode, ReactionTree]:
+        """
+        Returns the route with the highest score.
+        If several routes have the same score, it will return the first
+
+        :return: the top scoring node or route
+        """
+        if isinstance(self.search_tree, MctsSearchTree):
+            return self.best_node()
+
+        sorted_routes, _, _ = self.scorer.sort(self.search_tree.routes())
+        return sorted_routes[0]
+
+    def best_node(self) -> MctsNode:
         """
         Returns the node with the highest score.
         If several nodes have the same score, it will return the first
 
         :return: the top scoring node
+        :raises TreeAnalysisException: when the search is not a MCTS tree
         """
+        if not isinstance(self.search_tree, MctsSearchTree):
+            raise TreeAnalysisException(
+                "Cannot compute best node because analysis not on a MCTS tree"
+            )
+
         nodes = self._all_nodes()
         sorted_nodes, _, _ = self.scorer.sort(nodes)
         return sorted_nodes[0]
 
+    def sort(
+        self, min_return: int = 5
+    ) -> Tuple[Union[Sequence[MctsNode], Sequence[ReactionTree]], Sequence[float]]:
+        """
+        Sort and select the nodes or routes in the search tree.
+        The algorithm filter away identical routes and returns at minimum the number specified.
+        If multiple alternative routes have the same score as the n'th route, they will be included and returned.
+
+
+        :param min_return: the minium number of routes to return, defaults to 5
+        :return: the items
+        :return: the score
+        """
+        if isinstance(self.search_tree, MctsSearchTree):
+            return self.sort_nodes(min_return)
+
+        sorted_routes, sorted_scores, _ = self.scorer.sort(self.search_tree.routes())
+        actions = [route.reactions() for route in sorted_routes]
+        return self._collect_top_items(
+            sorted_routes, sorted_scores, actions, min_return
+        )
+
     def sort_nodes(
         self, min_return: int = 5, max_return: int = 25
-    ) -> Tuple[Sequence[Node], Sequence[float]]:
+    ) -> Tuple[Sequence[MctsNode], Sequence[float]]:
         """
         Sort and select the nodes, so that the best scoring routes are returned.
         The algorithm filter away identical routes and returns at minimum the number specified.
@@ -88,34 +162,20 @@ class TreeAnalysis:
         :param max_return: the maximum number of routes to return
         :return: the nodes
         :return: the score
+        :raises TreeAnalysisException: when the search is not a MCTS tree
         """
+        if not isinstance(self.search_tree, MctsSearchTree):
+            raise TreeAnalysisException(
+                "Cannot sort nodes because analysis not on a MCTS tree"
+            )
+
         nodes = self._all_nodes()
         sorted_nodes, sorted_scores, _ = self.scorer.sort(nodes)
+        actions = [self.search_tree.route_to_node(node)[0] for node in sorted_nodes]
 
-        if len(nodes) <= min_return:
-            return sorted_nodes, sorted_scores
-
-        seen_hashes = set()
-        best_nodes: List[Node] = []
-        best_scores: List[float] = []
-        last_score = 1e16
-        for score, node in zip(sorted_scores, sorted_nodes):
-            if len(best_nodes) >= min_return and score < last_score:
-                break
-            route_actions, _ = self.search_tree.route_to_node(node)
-            route_hash = hash_reactions(route_actions)
-
-            if route_hash in seen_hashes:
-                continue
-            seen_hashes.add(route_hash)
-            best_nodes.append(node)
-            best_scores.append(score)
-            last_score = score
-
-            if max_return and len(best_nodes) == max_return:
-                break
-
-        return best_nodes, best_scores
+        return self._collect_top_items(  # type: ignore
+            sorted_nodes, sorted_scores, actions, min_return, max_return
+        )
 
     def tree_statistics(self) -> StrDict:
         """
@@ -127,6 +187,56 @@ class TreeAnalysis:
 
         :return: the statistics
         """
+        if isinstance(self.search_tree, MctsSearchTree):
+            return self._tree_statistics_mcts()
+        return self._tree_statistics_andor()
+
+    def _all_nodes(self) -> Sequence[MctsNode]:
+        assert isinstance(self.search_tree, MctsSearchTree)
+        # This is to keep backwards compatibility, this should be investigate further
+        if repr(self.scorer) == "state score":
+            return list(self.search_tree.graph())
+        return [node for node in self.search_tree.graph() if not node.children()]
+
+    def _tree_statistics_andor(self) -> StrDict:
+        assert isinstance(self.search_tree, AndOrSearchTreeBase)
+        top_route = self.best()
+        assert isinstance(top_route, ReactionTree)
+        mols_in_stock = ", ".join(
+            mol.smiles for mol in top_route.leafs() if top_route.in_stock(mol)
+        )
+        mols_not_in_stock = ", ".join(
+            mol.smiles for mol in top_route.leafs() if not top_route.in_stock(mol)
+        )
+        all_routes = self.search_tree.routes()
+        policy_used_counts = self._policy_used_statistics(
+            [reaction for route in all_routes for reaction in route.reactions()]
+        )
+
+        return {
+            "number_of_nodes": len(self.search_tree.mol_nodes),
+            "max_transforms": max(
+                node.prop["mol"].transform for node in self.search_tree.mol_nodes
+            ),
+            "max_children": max(
+                len(node.children) for node in self.search_tree.mol_nodes
+            ),
+            "number_of_routes": len(all_routes),
+            "number_of_solved_routes": sum(route.is_solved for route in all_routes),
+            "top_score": self.scorer(top_route),
+            "is_solved": top_route.is_solved,
+            "number_of_steps": len(list(top_route.reactions())),
+            "number_of_precursors": len(list(top_route.leafs())),
+            "number_of_precursors_in_stock": sum(
+                top_route.in_stock(leaf) for leaf in top_route.leafs()
+            ),
+            "precursors_in_stock": mols_in_stock,
+            "precursors_not_in_stock": mols_not_in_stock,
+            "policy_used_counts": policy_used_counts,
+        }
+
+    def _tree_statistics_mcts(self) -> StrDict:
+        assert isinstance(self.search_tree, MctsSearchTree)
         top_node = self.best_node()
         top_state = top_node.state
         nodes = list(self.search_tree.graph())
@@ -141,19 +251,16 @@ class TreeAnalysis:
             if not instock
         )
 
-        policy_used_counts: StrDict = defaultdict(lambda: 0)
-        for node in nodes:
-            for child in node.children():
-                policy_used = node[child]["action"].metadata.get("policy_name")
-                if policy_used:
-                    policy_used_counts[policy_used] += 1
+        policy_used_counts = self._policy_used_statistics(
+            [node[child]["action"] for node in nodes for child in node.children()]
+        )
 
         return {
             "number_of_nodes": len(nodes),
             "max_transforms": max(node.state.max_transforms for node in nodes),
             "max_children": max(len(node.children()) for node in nodes),
-            "number_of_leafs": sum(1 for node in nodes if not node.children()),
-            "number_of_solved_leafs": sum(
+            "number_of_routes": sum(1 for node in nodes if not node.children()),
+            "number_of_solved_routes": sum(
                 1 for node in nodes if not node.children() and node.state.is_solved
             ),
             "top_score": self.scorer(top_node),
@@ -163,220 +270,53 @@ class TreeAnalysis:
             "number_of_precursors_in_stock": sum(top_state.in_stock_list),
             "precursors_in_stock": mols_in_stock,
             "precursors_not_in_stock": mols_not_in_stock,
-            "policy_used_counts": dict(policy_used_counts),
+            "policy_used_counts": policy_used_counts,
         }
 
-    def _all_nodes(self) -> Sequence[Node]:
-        # This is to keep backwards compatibility, this should be investigate further
-        if repr(self.scorer) == "state score":
-            return list(self.search_tree.graph())
-        return [node for node in self.search_tree.graph() if not node.children()]
+    @staticmethod
+    def _collect_top_items(
+        items: Union[Sequence[MctsNode], Sequence[ReactionTree]],
+        scores: Sequence[float],
+        reactions: Sequence[
+            Union[Iterable[RetroReaction], Iterable[FixedRetroReaction]]
+        ],
+        min_return: int,
+        max_return: int = None,
+    ) -> Tuple[Union[Sequence[MctsNode], Sequence[ReactionTree]], Sequence[float]]:
+        if len(items) <= min_return:
+            return items, scores
 
+        seen_hashes = set()
+        best_items: List[Any] = []
+        best_scores = []
+        last_score = 1e16
+        for score, item, actions in zip(scores, items, reactions):
+            if len(best_items) >= min_return and score < last_score:
+                break
+            route_hash = hash_reactions(actions)
 
-class ReactionTree:
-    """
-    Encapsulation of a bipartite reaction tree of a single route.
-    The nodes consists of either FixedRetroReaction or UniqueMolecule objects.
-
-    :ivar has_repeating_patterns: if the graph has repetitive elements
-    :ivar graph: the bipartite graph
-    :ivar is_solved: if all of the leaf nodes are in stock
-    :ivar root: the root of the tree
-    """
-
-    def __init__(self) -> None:
-        self.graph = nx.DiGraph()
-        self.root = none_molecule()
-        self.has_repeating_patterns: bool = False
-        self.is_solved: bool = False
-
-    @classmethod
-    def from_analysis(
-        cls, analysis: TreeAnalysis, from_node: Node = None
-    ) -> "ReactionTree":
-        """
-        Create a reaction from a tree analysis.
-
-        The single route can be from a given node in the search tree if the `from_node`
-        argument is given. If it is not given, the top scoring node is used.
-
-        :param analysis: the analysis to base the reaction tree on
-        :param from_node: the end node of the route, defaults to None
-        :returns: the reaction tree
-        """
-        if not from_node:
-            from_node = analysis.best_node()
-
-        actions, nodes = analysis.search_tree.route_to_node(from_node)
-        return ReactionTreeFromMcts(actions=actions, nodes=nodes).tree
-
-    @classmethod
-    def from_dict(cls, tree_dict: StrDict) -> "ReactionTree":
-        """
-        Create a new ReactionTree by parsing a dictionary.
-
-        This is supposed to be the opposite of ``to_dict``,
-        but because that format loses information, the returned
-        object is not a full copy:
-        * The stock will only contain the list of molecules marked as ``in_stock`` in the dictionary.
-        * The reaction nodes will be of type `FixedRetroReaction`
-
-        The returned object should be sufficient to e.g. generate an image of the route.
-
-        :param tree_dict: the dictionary representation
-        :returns: the reaction tree
-        """
-        return ReactionTreeFromDict(tree_dict).tree
-
-    def depth(self, node: Union[UniqueMolecule, FixedRetroReaction]) -> int:
-        """
-        Return the depth of a node in the route
-
-        :param node: the query node
-        :return: the depth
-        """
-        return self.graph.nodes[node].get("depth", -1)
-
-    def distance_to(self, other: "ReactionTree", content: str = "both") -> float:
-        """
-        Calculate the distance to another reaction tree
-
-        This is a tree edit distance, with unit cost to
-        insert and deleted nodes, and the Jaccard distance for substituting nodes
-
-        :param other: the reaction tree to compare to
-        :param content: determine what part of the tree to include in the calculation
-        :return: the distance between the routes
-        """
-        self_wrapper = ReactionTreeWrapper(self, content)
-        other_wrapper = ReactionTreeWrapper(other, content)
-        return self_wrapper.distance_to(other_wrapper)
-
-    def in_stock(self, node: Union[UniqueMolecule, FixedRetroReaction]) -> bool:
-        """
-        Return if a node in the route is in stock
-
-        Note that is a property set on creation and as such is not updated.
-
-        :param node: the query node
-        :return: if the molecule is in stock
-        """
-        return self.graph.nodes[node].get("in_stock", False)
-
-    def leafs(self) -> Iterable[UniqueMolecule]:
-        """
-        Generates the molecules nodes of the reaction tree that has no predecessors,
-        i.e. molecules that has not been broken down
-
-        :yield: the next leaf molecule in the tree
-        """
-        for node in self.graph:
-            if isinstance(node, UniqueMolecule) and not self.graph[node]:
-                yield node
-
-    def molecules(self) -> Iterable[UniqueMolecule]:
-        """
-        Generates the molecule nodes of the reaction tree
-
-        :yield: the next molecule in the tree
-        """
-        for node in self.graph:
-            if isinstance(node, UniqueMolecule):
-                yield node
-
-    def reactions(self) -> Iterable[FixedRetroReaction]:
-        """
-        Generates the reaction nodes of the reaction tree
-
-        :yield: the next reaction in the tree
-        """
-        for node in self.graph:
-            if not isinstance(node, Molecule):
-                yield node
-
-    def to_dict(self) -> StrDict:
-        """
-        Returns the reaction tree as a dictionary in a pre-defined format.
-
-        :return: the reaction tree
-        """
-        return self._build_dict(self.root)
-
-    def to_image(
-        self,
-        in_stock_colors: FrameColors = None,
-        show_all: bool = True,
-    ) -> PilImage:
-        """
-        Return a pictoral representation of the route
-
-        :raises ValueError: if image could not be produced
-        :param in_stock_colors: the colors around molecules, defaults to {True: "green", False: "orange"}
-        :param show_all: if True, also show nodes that are marked as hidden
-        :return: the image of the route
-        """
-
-        def show(node_):
-            return not self.graph.nodes[node_].get("hide", False)
-
-        in_stock_colors = in_stock_colors or {True: "green", False: "orange"}
-        molecules = []
-        frame_colors = []
-        for node in self.molecules():
-            if not show_all and not show(node):
+            if route_hash in seen_hashes:
                 continue
-            molecules.append(node)
-            frame_colors.append(in_stock_colors[self.in_stock(node)])
+            seen_hashes.add(route_hash)
+            best_items.append(item)
+            best_scores.append(score)
+            last_score = score
 
-        reactions = [node for node in self.reactions() if show_all or show(node)]
-        edges = [
-            (node1, node2)
-            for node1, node2 in self.graph.edges()
-            if show_all or (show(node1) and show(node2))
-        ]
+            if max_return and len(best_items) == max_return:
+                break
 
-        try:
-            return make_graphviz_image(molecules, reactions, edges, frame_colors)
-        except FileNotFoundError as err:
-            raise ValueError(str(err))
+        return best_items, best_scores
 
-    def to_json(self) -> str:
-        """
-        Returns the reaction tree as a JSON string in a pre-defined format.
-
-        :return: the reaction tree
-        """
-        return json.dumps(self.to_dict(), sort_keys=False, indent=2)
-
-    def _build_dict(
-        self, node: Union[UniqueMolecule, FixedRetroReaction], dict_: StrDict = None
+    @staticmethod
+    def _policy_used_statistics(
+        reactions: Iterable[Union[RetroReaction, FixedRetroReaction]]
     ) -> StrDict:
-        if dict_ is None:
-            dict_ = {}
-
-        dict_["type"] = "mol" if isinstance(node, Molecule) else "reaction"
-        dict_["hide"] = self.graph.nodes[node].get("hide", False)
-        dict_["smiles"] = node.smiles
-        if isinstance(node, UniqueMolecule):
-            dict_["is_chemical"] = True
-            dict_["in_stock"] = self.in_stock(node)
-        elif isinstance(node, FixedRetroReaction):
-            dict_["is_reaction"] = True
-            dict_["metadata"] = dict(node.metadata)
-        else:
-            raise ValueError(
-                f"This is an invalid reaction tree. Unknown node type {type(node)}"
-            )
-
-        dict_["children"] = []
-
-        for child in self.graph.successors(node):
-            child_dict = self._build_dict(child)
-            dict_["children"].append(child_dict)
-
-        if not dict_["children"]:
-            del dict_["children"]
-        return dict_
+        policy_used_counts: StrDict = defaultdict(lambda: 0)
+        for reaction in reactions:
+            policy_used = reaction.metadata.get("policy_name")
+            if policy_used:
+                policy_used_counts[policy_used] += 1
+        return dict(policy_used_counts)
 
 
 class RouteCollection:
@@ -434,15 +374,22 @@ class RouteCollection:
         :param min_nodes: the minimum number of top-ranked nodes to consider
         :return: the created collection
         """
-        nodes, scores = analysis.sort_nodes(min_return=min_nodes)
-        reaction_trees = [ReactionTree.from_analysis(analysis, node) for node in nodes]
+        items, scores = analysis.sort(min_return=min_nodes)
         all_scores = [{repr(analysis.scorer): score} for score in scores]
-        return cls(
-            reaction_trees=reaction_trees,
-            nodes=nodes,
-            scores=scores,
-            all_scores=all_scores,
-        )
+        kwargs = {"scores": scores, "all_scores": all_scores}
+        if isinstance(analysis.search_tree, MctsSearchTree):
+            kwargs["nodes"] = items
+            reaction_trees = [
+                ReactionTreeFromMcts(
+                    *analysis.search_tree.route_to_node(from_node)
+                ).tree
+                for from_node in items
+                if isinstance(from_node, MctsNode)
+            ]
+        else:
+            reaction_trees = items  # type: ignore
+
+        return cls(reaction_trees, **kwargs)
 
     def __getitem__(self, index: int) -> StrDict:
         if index < 0 or index >= len(self):

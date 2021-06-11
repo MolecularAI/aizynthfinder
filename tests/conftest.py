@@ -13,6 +13,12 @@ from aizynthfinder.mcts.node import Node
 from aizynthfinder.chem import Molecule, TreeMolecule, RetroReaction
 from aizynthfinder.mcts.mcts import SearchTree
 from aizynthfinder.analysis import TreeAnalysis
+from aizynthfinder.utils.trees import (
+    AndOrSearchTreeBase,
+    TreeNodeMixin,
+    SplitAndOrTree,
+)
+from aizynthfinder.utils.serialization import MoleculeDeserializer
 
 
 def pytest_addoption(parser):
@@ -108,6 +114,80 @@ def load_reaction_tree(shared_datadir):
             return trees
         else:
             return trees[index]
+
+    return wrapper
+
+
+@pytest.fixture
+def mocked_reaction(mocker):
+    """
+    Fixture for creating a mocked Reaction object
+    Will return a function that should be called with the parent of the reaction
+    and the TreeMolecule objects that should be returned when calling ``apply``.
+    """
+
+    def wrapper(parent, return_value):
+        class MockedReaction(mocker.MagicMock):
+            @property
+            def index(self):
+                return 0
+
+            @property
+            def mol(self):
+                return parent
+
+            @property
+            def reactants(self):
+                return [return_value] if return_value else []
+
+            def apply(self, *_):
+                return self.reactants
+
+        return MockedReaction()
+
+    return wrapper
+
+
+@pytest.fixture
+def mock_get_actions(mocker, mocked_reaction):
+    """
+    Fixture for mocking the call to the ``get_actions`` method of the Policy class,
+    used to return reactions and probabilities of these actions.
+
+    Will return a function that should be called will:
+        - the parent TreeMolecule object
+        - the SMILES of the State object of the Node that will be calling ``get_actions``
+        - a list of the the SMILES of the molecules that will be returned by the Reaction class
+        - a list of probabilities for each action that should be returned by ``get_actions``
+
+    the function will create the TreeMolecule objects that should be returned by the Reaction classes,
+    and it will return them to the caller.
+    """
+    actions = {}
+
+    def get_action(mols):
+        key = tuple(mol.smiles for mol in mols)
+        return actions[key]
+
+    mocked_get_actions = mocker.patch(
+        "aizynthfinder.context.policy.ExpansionPolicy.get_actions"
+    )
+    mocked_get_actions.side_effect = get_action
+
+    def wrapper(parent, key_smiles, child_smiles_list, probs):
+        rxn_objs = []
+        mol_objs_list = []
+        for child_smiles in child_smiles_list:
+            if not child_smiles:
+                rxn_objs.append(mocked_reaction(parent, None))
+                continue
+            mol_objs = [
+                TreeMolecule(parent=parent, smiles=smiles) for smiles in child_smiles
+            ]
+            mol_objs_list.append(mol_objs)
+            rxn_objs.append(mocked_reaction(parent, mol_objs))
+        actions[key_smiles] = rxn_objs, probs
+        return mol_objs_list
 
     return wrapper
 
@@ -327,5 +407,73 @@ def write_yaml(tmpdir):
         with open(filename, "w") as fileobj:
             yaml.dump(dict_, fileobj)
         return filename
+
+    return wrapper
+
+
+@pytest.fixture
+def setup_analysis_andor_tree(default_config, shared_datadir, mock_stock):
+    mock_stock(
+        default_config,
+        "Nc1ccc(NC(=S)Nc2ccccc2)cc1",
+        "Cc1ccc2nc3ccccc3c(Cl)c2c1",
+        "Nc1ccccc1",
+        "Nc1ccc(N=C=S)cc1",
+        "Cc1ccc2nc3ccccc3c(Br)c2c1",
+        "Nc1ccc(Br)cc1",
+    )
+
+    class BasicAndOrTree(AndOrSearchTreeBase):
+        def __init__(self, filename, config):
+            super().__init__(config)
+            self._mol_nodes = []
+            with open(filename, "r") as fileobj:
+                dict_ = json.load(fileobj)
+            mol_deser = MoleculeDeserializer(dict_["molecules"])
+            self.root = AndOrNode(dict_["tree"], config, mol_deser, self)
+
+        @property
+        def mol_nodes(self):
+            return self._mol_nodes
+
+        def one_iteration(self):
+            return False
+
+        def routes(self):
+            return SplitAndOrTree(self.root, self.config.stock).routes
+
+    class AndOrNode(TreeNodeMixin):
+        def __init__(self, dict_, config, molecules, tree):
+            self.tree = tree
+            self.config = config
+            self._children = [
+                AndOrNode(child, config, molecules, tree) for child in dict_["children"]
+            ]
+            if "reaction" in dict_:
+                self._obj = RetroReaction(
+                    molecules[dict_["reaction"]["mol"]],
+                    dict_["reaction"]["smarts"],
+                    dict_["reaction"]["index"],
+                    dict_["reaction"].get("metadata", {}),
+                )
+                self._solved = all(child.prop["solved"] for child in self._children)
+            else:
+                self.tree._mol_nodes.append(self)
+                self._obj = molecules[dict_["mol"]]
+                self._solved = self._obj in self.config.stock
+
+        @property
+        def prop(self):
+            obj_key = "reaction" if isinstance(self._obj, RetroReaction) else "mol"
+            return {obj_key: self._obj, "solved": self._solved}
+
+        @property
+        def children(self):
+            return self._children
+
+    tree = BasicAndOrTree(str(shared_datadir / "and_or_tree.json"), default_config)
+
+    def wrapper(scorer=None):
+        return TreeAnalysis(tree, scorer=scorer)
 
     return wrapper

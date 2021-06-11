@@ -6,20 +6,27 @@ import numpy as np
 import pytest
 
 from aizynthfinder.chem import Molecule
-from aizynthfinder.analysis import TreeAnalysis, ReactionTree, RouteCollection
-from aizynthfinder.mcts.mcts import SearchTree
+from aizynthfinder.analysis import TreeAnalysis, RouteCollection, ReactionTree
+from aizynthfinder.mcts.mcts import SearchTree as MctsSearchTree
 from aizynthfinder.context.scoring import StateScorer, NumberOfReactionsScorer
+from aizynthfinder.utils.analysis_helpers import ReactionTreeFromMcts
+
+
+def make_reaction_tree(analysis):
+    from_node = analysis.best_node()
+    actions, nodes = analysis.search_tree.route_to_node(from_node)
+    return ReactionTreeFromMcts(actions=actions, nodes=nodes).tree
 
 
 def test_sort_nodes(setup_analysis):
     analysis, nodes = setup_analysis()
 
-    best_nodes, best_scores = analysis.sort_nodes()
+    best_nodes, best_scores = analysis.sort()
 
     assert len(best_nodes) == 7
     assert np.round(best_scores[0], 4) == 0.9940
 
-    best_nodes, best_scores = analysis.sort_nodes(min_return=0)
+    best_nodes, best_scores = analysis.sort(min_return=0)
 
     assert len(best_nodes) == 0
 
@@ -27,16 +34,31 @@ def test_sort_nodes(setup_analysis):
 def test_sort_nodes_scorer(setup_analysis):
     analysis, _ = setup_analysis(scorer=NumberOfReactionsScorer())
 
-    best_nodes, best_scores = analysis.sort_nodes()
+    best_nodes, best_scores = analysis.sort()
 
     assert len(best_nodes) == 10
     assert best_scores[0] == 2
 
 
+def test_sort_routes(setup_analysis_andor_tree):
+    analysis = setup_analysis_andor_tree(scorer=NumberOfReactionsScorer())
+
+    best_routes, best_scores = analysis.sort()
+
+    assert len(best_routes) == 3
+    assert best_scores[0] == 1
+
+
 def test_best_node(setup_analysis):
     analysis, nodes = setup_analysis(scorer=NumberOfReactionsScorer())
 
-    assert analysis.best_node() is nodes[51]
+    assert analysis.best() is nodes[51]
+
+
+def test_best_route(setup_analysis_andor_tree):
+    analysis = setup_analysis_andor_tree(scorer=NumberOfReactionsScorer())
+
+    assert len(list(analysis.best().reactions())) == 1
 
 
 def test_tree_statistics(setup_analysis):
@@ -47,8 +69,8 @@ def test_tree_statistics(setup_analysis):
     assert stats["number_of_nodes"] == 61
     assert stats["max_transforms"] == 7
     assert stats["max_children"] == 10
-    assert stats["number_of_leafs"] == 10
-    assert stats["number_of_solved_leafs"] == 1
+    assert stats["number_of_routes"] == 10
+    assert stats["number_of_solved_routes"] == 1
     assert stats["top_score"] == 2
     assert stats["is_solved"]
     assert stats["number_of_steps"] == 2
@@ -60,10 +82,30 @@ def test_tree_statistics(setup_analysis):
     assert stats["policy_used_counts"] == {}
 
 
+def test_tree_statistics_andor_tree(setup_analysis_andor_tree):
+    analysis = setup_analysis_andor_tree(scorer=NumberOfReactionsScorer())
+
+    stats = analysis.tree_statistics()
+    assert stats["number_of_nodes"] == 9
+    assert stats["max_transforms"] == 2
+    assert stats["max_children"] == 2
+    assert stats["number_of_routes"] == 3
+    assert stats["number_of_solved_routes"] == 3
+    assert stats["top_score"] == 1
+    assert stats["is_solved"]
+    assert stats["number_of_steps"] == 1
+    assert stats["number_of_precursors"] == 2
+    assert stats["number_of_precursors_in_stock"] == 2
+    mol_str = "Cc1ccc2nc3ccccc3c(Cl)c2c1, Nc1ccc(NC(=S)Nc2ccccc2)cc1"
+    assert stats["precursors_in_stock"] == mol_str
+    assert stats["precursors_not_in_stock"] == ""
+    assert stats["policy_used_counts"] == {}
+
+
 def test_route_to_reactiontree(setup_analysis):
     analysis, _ = setup_analysis()
 
-    reaction_tree = ReactionTree.from_analysis(analysis)
+    reaction_tree = make_reaction_tree(analysis)
 
     mol_nodes = list(reaction_tree.molecules())
     assert len(mol_nodes) == 6
@@ -85,7 +127,7 @@ def test_reactiontree_to_json(setup_analysis, load_reaction_tree):
     expected = load_reaction_tree("sample_reaction.json")
     analysis, _ = setup_analysis()
 
-    resp = ReactionTree.from_analysis(analysis).to_json()
+    resp = make_reaction_tree(analysis).to_json()
     assert json.loads(resp) == expected
 
 
@@ -100,7 +142,7 @@ def test_reactiontree_from_dict(load_reaction_tree):
 
 
 def test_reactiontree_to_image(load_reaction_tree, mocker):
-    patched_make_image = mocker.patch("aizynthfinder.analysis.make_graphviz_image")
+    patched_make_image = mocker.patch("aizynthfinder.reactiontree.make_graphviz_image")
 
     tree = load_reaction_tree("sample_reaction.json")
     rt = ReactionTree.from_dict(tree)
@@ -113,7 +155,7 @@ def test_reactiontree_to_image(load_reaction_tree, mocker):
 
 
 def test_reactiontree_to_image_hiding(load_reaction_tree, mocker):
-    patched_make_image = mocker.patch("aizynthfinder.analysis.make_graphviz_image")
+    patched_make_image = mocker.patch("aizynthfinder.reactiontree.make_graphviz_image")
 
     tree = load_reaction_tree("sample_reaction_with_hidden.json", 1)
     rt = ReactionTree.from_dict(tree)
@@ -161,12 +203,12 @@ def test_find_repetetive_patterns_created_tree(
     mock_stock(default_config, Molecule(smiles="CC"), Molecule(smiles="C"))
 
     # Try one with 2 repetetive units
-    search_tree = SearchTree.from_json(
+    search_tree = MctsSearchTree.from_json(
         shared_datadir / "tree_with_repetition.json", default_config
     )
     analysis = TreeAnalysis(search_tree)
 
-    rt = ReactionTree.from_analysis(analysis)
+    rt = make_reaction_tree(analysis)
 
     assert rt.has_repeating_patterns
     hidden_nodes = [
@@ -175,12 +217,12 @@ def test_find_repetetive_patterns_created_tree(
     assert len(hidden_nodes) == 5
 
     # Try one with 3 repetetive units
-    search_tree = SearchTree.from_json(
+    search_tree = MctsSearchTree.from_json(
         shared_datadir / "tree_with_3_repetitions.json", default_config
     )
     analysis = TreeAnalysis(search_tree)
 
-    rt = ReactionTree.from_analysis(analysis)
+    rt = make_reaction_tree(analysis)
 
     assert rt.has_repeating_patterns
     hidden_nodes = [
@@ -195,12 +237,12 @@ def test_find_repetetive_patterns_created_tree_no_patterns(
     mock_stock(default_config, Molecule(smiles="CC"), Molecule(smiles="CCCO"))
 
     # Try with a short tree (3 nodes, 1 reaction)
-    search_tree = SearchTree.from_json(
+    search_tree = MctsSearchTree.from_json(
         shared_datadir / "tree_without_repetition.json", default_config
     )
     analysis = TreeAnalysis(search_tree)
 
-    rt = ReactionTree.from_analysis(analysis)
+    rt = make_reaction_tree(analysis)
 
     assert not rt.has_repeating_patterns
     hidden_nodes = [
@@ -209,23 +251,23 @@ def test_find_repetetive_patterns_created_tree_no_patterns(
     assert len(hidden_nodes) == 0
 
     # Try with something longer
-    search_tree = SearchTree.from_json(
+    search_tree = MctsSearchTree.from_json(
         shared_datadir / "tree_without_repetition_longer.json", default_config
     )
     analysis = TreeAnalysis(search_tree)
 
-    rt = ReactionTree.from_analysis(analysis)
+    rt = make_reaction_tree(analysis)
 
     assert not rt.has_repeating_patterns
 
 
 def test_route_node_depth_from_analysis(default_config, mock_stock, shared_datadir):
     mock_stock(default_config, Molecule(smiles="CC"), Molecule(smiles="CCCO"))
-    search_tree = SearchTree.from_json(
+    search_tree = MctsSearchTree.from_json(
         shared_datadir / "tree_without_repetition.json", default_config
     )
     analysis = TreeAnalysis(search_tree)
-    rt = ReactionTree.from_analysis(analysis)
+    rt = make_reaction_tree(analysis)
 
     mols = list(rt.molecules())
 
@@ -301,14 +343,23 @@ def test_create_route_collection_full(setup_analysis, mocker):
     assert "json" not in routes[0]
     assert "image" not in routes[0]
 
-    mocker.patch("aizynthfinder.analysis.ReactionTree.to_dict")
-    mocker.patch("aizynthfinder.analysis.json.dumps")
+    mocker.patch("aizynthfinder.reactiontree.ReactionTree.to_dict")
+    mocker.patch("aizynthfinder.reactiontree.json.dumps")
     mocker.patch("aizynthfinder.utils.image.make_graphviz_image")
 
     # Just see that the code does not crash, does not verify content
     assert len(routes.images) == 7
     assert len(routes.dicts) == 7
     assert len(routes.jsons) == 7
+
+
+def test_create_route_collection_andor_tree(setup_analysis_andor_tree):
+    analysis = setup_analysis_andor_tree()
+
+    routes = RouteCollection.from_analysis(analysis, 5)
+
+    assert len(routes) == 3
+    assert routes.nodes == [None, None, None]
 
 
 def test_compute_new_score(setup_analysis):
@@ -418,7 +469,7 @@ def test_create_combine_tree_dict_from_tree(
         "Cc1ccc2nc3ccccc3c(N)c2c1",
         "Nc1ccc(Br)cc1",
     )
-    search_tree = SearchTree.from_json(
+    search_tree = MctsSearchTree.from_json(
         shared_datadir / "tree_for_clustering.json", default_config
     )
     analysis = TreeAnalysis(search_tree)

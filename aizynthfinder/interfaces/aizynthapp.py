@@ -54,6 +54,7 @@ class AiZynthApp:
     """
 
     def __init__(self, configfile: str, setup: bool = True) -> None:
+        # pylint: disable=used-before-assignment
         setup_logger(logging.INFO)
         self.finder = AiZynthFinder(configfile=configfile)
         self._input: StrDict = dict()
@@ -240,7 +241,7 @@ class AiZynthApp:
             layout={
                 "border": "1px solid silver",
                 "width": "99%",
-                "height": "300px",
+                "height": "320px",
                 "overflow": "auto",
             }
         )
@@ -360,14 +361,14 @@ class AiZynthApp:
             display(HTML("<H2>Steps"))
             display(self.finder.routes[index]["image"])
 
-    def _toggle_button(self, on) -> None:
+    def _toggle_button(self, on_) -> None:
         for button in self._buttons.values():
-            button.disabled = not on
+            button.disabled = not on_
 
     def _tree_search(self) -> None:
         with self._output["tree_search"]:
             self.finder.tree_search(show_progress=True)
-            print("Tree search completed.")
+            display(HTML("<b>Tree search completed!</b>"))
 
 
 def _get_arguments() -> argparse.Namespace:

@@ -2,6 +2,7 @@
 """
 from __future__ import annotations
 import abc
+import importlib
 from typing import TYPE_CHECKING
 
 from aizynthfinder.utils.logging import logger
@@ -92,12 +93,10 @@ class ContextCollection(abc.ABC):
     @abc.abstractmethod
     def load(self, *_: Any) -> None:
         """Load an item. Needs to be implemented by a sub-class"""
-        pass
 
     @abc.abstractmethod
     def load_from_config(self, **config: Any) -> None:
         """Load items from a configuration. Needs to be implemented by a sub-class"""
-        pass
 
     def select(self, value: Union[str, List[str]], append: bool = False) -> None:
         """
@@ -141,3 +140,29 @@ class ContextCollection(abc.ABC):
         """Select the first loaded item"""
         if self.items:
             self.select(self.items[0])
+
+    def select_last(self) -> None:
+        """Select the last loaded item"""
+        if self.items:
+            self.select(self.items[-1])
+
+    @staticmethod
+    def _load_dynamic_cls(name_spec: str, default_module: Any, exception_cls: Any) -> Any:
+        """ Load an object from a dynamic specification """
+        if "." not in name_spec:
+            name = name_spec
+            module_name = default_module
+        else:
+            module_name, name = name_spec.rsplit(".", maxsplit=1)
+
+        try:
+            loaded_module = importlib.import_module(module_name)
+        except ImportError:
+            raise exception_cls(f"Unable to load module: {module_name}")
+
+        if not hasattr(loaded_module, name):
+            raise exception_cls(
+                f"Module ({module_name}) does not have a class called {name}"
+            )
+
+        return getattr(loaded_module, name)

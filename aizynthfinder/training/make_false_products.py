@@ -8,7 +8,7 @@ from typing import TYPE_CHECKING
 import pandas as pd
 import tqdm
 
-import aizynthfinder.utils.logging  # noqa
+import aizynthfinder.utils.logging  # pylint: disable=unused-import
 from aizynthfinder.chem import Molecule, Reaction, MoleculeException
 from aizynthfinder.training.utils import (
     Config,
@@ -195,6 +195,7 @@ def _sample_library(
             yield None
             continue
 
+        # pylint: disable=undefined-loop-variable
         yield _new_dataframe(
             row,
             config,

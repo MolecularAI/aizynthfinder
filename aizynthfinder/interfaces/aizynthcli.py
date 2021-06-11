@@ -14,8 +14,8 @@ from typing import TYPE_CHECKING
 
 import pandas as pd
 
-from aizynthfinder.aizynthfinder import AiZynthFinder
 from aizynthfinder.utils.files import cat_hdf_files, split_file, start_processes
+from aizynthfinder.aizynthfinder import AiZynthFinder
 from aizynthfinder.utils.logging import logger, setup_logger
 
 if TYPE_CHECKING:
@@ -25,12 +25,12 @@ if TYPE_CHECKING:
 def _do_clustering(
     finder: AiZynthFinder, results: StrDict, detailed_results: bool
 ) -> None:
-    t0 = time.perf_counter_ns()
+    time0 = time.perf_counter_ns()
     results["cluster_labels"] = finder.routes.cluster(n_clusters=0)
     if not detailed_results:
         return
 
-    results["cluster_time"] = (time.perf_counter_ns() - t0) * 1e-9
+    results["cluster_time"] = (time.perf_counter_ns() - time0) * 1e-9
     results["distance_matrix"] = finder.routes.distance_matrix().tolist()
 
 
@@ -182,7 +182,8 @@ def main() -> None:
     """Entry point for the aizynthcli command"""
     args = _get_arguments()
     if args.nproc:
-        return _multiprocess_smiles(args)
+        _multiprocess_smiles(args)
+        return
 
     multi_smiles = os.path.exists(args.smiles)
 
