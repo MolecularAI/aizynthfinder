@@ -3,6 +3,7 @@
 from __future__ import annotations
 import time
 import importlib
+from collections import defaultdict
 from typing import TYPE_CHECKING
 
 from deprecated import deprecated
@@ -12,12 +13,22 @@ from tqdm import tqdm
 from aizynthfinder.utils.logging import logger
 from aizynthfinder.context.config import Configuration
 from aizynthfinder.mcts.mcts import SearchTree as MctsSearchTree
+from aizynthfinder.reactiontree import ReactionTreeFromExpansion
 from aizynthfinder.analysis import TreeAnalysis, RouteCollection
-from aizynthfinder.chem import Molecule
+from aizynthfinder.chem import Molecule, TreeMolecule, FixedRetroReaction
 from aizynthfinder.utils.trees import AndOrSearchTreeBase
 
 if TYPE_CHECKING:
-    from aizynthfinder.utils.type_utils import StrDict, Optional, Union
+    from aizynthfinder.utils.type_utils import (
+        StrDict,
+        Optional,
+        Union,
+        Callable,
+        List,
+        Tuple,
+        Dict,
+    )
+    from aizynthfinder.chem import RetroReaction
 
 
 class AiZynthFinder:
@@ -274,3 +285,80 @@ class AiZynthFinder:
             self.tree: AndOrSearchTreeBase = getattr(module_obj, cls_name)(
                 root_smiles=self.target_smiles, config=self.config
             )
+
+
+class AiZynthExpander:
+    """
+    Public API to the AiZynthFinder expansion and filter policies
+
+    If instantiated with the path to a yaml file or dictionary of settings
+    the stocks and policy networks are loaded directly.
+    Otherwise, the user is responsible for loading them prior to
+    executing the tree search.
+
+    :ivar config: the configuration of the search
+    :ivar expansion_policy: the expansion policy model
+    :ivar filter_policy: the filter policy model
+
+    :param configfile: the path to yaml file with configuration (has priority over configdict), defaults to None
+    :param configdict: the config as a dictionary source, defaults to None
+    """
+
+    def __init__(self, configfile: str = None, configdict: StrDict = None) -> None:
+        self._logger = logger()
+
+        if configfile:
+            self.config = Configuration.from_file(configfile)
+        elif configdict:
+            self.config = Configuration.from_dict(configdict)
+        else:
+            self.config = Configuration()
+
+        self.expansion_policy = self.config.expansion_policy
+        self.filter_policy = self.config.filter_policy
+
+    def do_expansion(
+        self,
+        smiles: str,
+        return_n: int = 5,
+        filter_func: Callable[[RetroReaction], bool] = None,
+    ) -> List[Tuple[FixedRetroReaction, ...]]:
+        """
+        Do the expansion of the given molecule returning a list of
+        reaction tuples. Each tuple in the list contains reactions
+        producing the same reactants. Hence, nested structure of the
+        return value is way to group reactions.
+
+        If filter policy is setup, the probability of the reactions are
+        added as metadata to the reaction.
+
+        The additional filter functions makes it possible to do customized
+        filtering. The callable should take as only argument a `RetroReaction`
+        object and return True if the reaction can be kept or False if it should
+        be removed.
+
+        :param smiles: the SMILES string of the target molecule
+        :param return_n: the length of the return list
+        :param filter_func: an additional filter function
+        :return: the grouped reactions
+        """
+
+        mol = TreeMolecule(parent=None, smiles=smiles)
+        actions, _ = self.expansion_policy.get_actions([mol])
+        results: Dict[Tuple[str, ...], List[FixedRetroReaction]] = defaultdict(list)
+        for action in actions:
+            reactants = action.apply()
+            if not reactants:
+                continue
+            if filter_func and not filter_func(action):
+                continue
+            if self.filter_policy.selection:
+                _, feasibility_prob = self.filter_policy.feasibility(action)
+                action.metadata["feasibility"] = float(feasibility_prob)
+            action.metadata["expansion_rank"] = len(results) + 1
+            unique_key = tuple(sorted(mol.inchi_key for mol in reactants[0]))
+            if unique_key not in results and len(results) >= return_n:
+                continue
+            rxn = next(ReactionTreeFromExpansion(action).tree.reactions())  # type: ignore
+            results[unique_key].append(rxn)
+        return [tuple(reactions) for reactions in results.values()]

@@ -412,7 +412,7 @@ def write_yaml(tmpdir):
 
 
 @pytest.fixture
-def setup_analysis_andor_tree(default_config, shared_datadir, mock_stock):
+def setup_analysis_andor_tree(default_config, shared_datadir, mock_stock):  # noqa
     mock_stock(
         default_config,
         "Nc1ccc(NC(=S)Nc2ccccc2)cc1",

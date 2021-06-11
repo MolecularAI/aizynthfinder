@@ -1,12 +1,13 @@
 """ Module containing classes to perform analysis of the tree search results.
 """
 from __future__ import annotations
-import time
 from collections import defaultdict
 from typing import TYPE_CHECKING
 
 import numpy as np
 from deprecated import deprecated
+from route_distances.clustering import ClusteringHelper
+from route_distances.route_distances import route_distances_calculator
 
 from aizynthfinder.chem import (
     FixedRetroReaction,
@@ -20,7 +21,6 @@ from aizynthfinder.context.scoring import (
     StateScorer,
 )
 from aizynthfinder.reactiontree import ReactionTree
-from aizynthfinder.utils.route_clustering import ReactionTreeWrapper, ClusteringHelper
 from aizynthfinder.mcts.mcts import SearchTree as MctsSearchTree
 from aizynthfinder.mcts.node import Node as MctsNode
 from aizynthfinder.utils.trees import AndOrSearchTreeBase
@@ -421,7 +421,11 @@ class RouteCollection:
         return self._jsons
 
     def cluster(
-        self, n_clusters: int, max_clusters: int = 5, timeout: int = None, **kwargs: Any
+        self,
+        n_clusters: int,
+        max_clusters: int = 5,
+        distances_model: str = "ted",
+        **kwargs: Any
     ) -> np.ndarray:
         """
         Cluster the route collection into a number of clusters.
@@ -429,18 +433,26 @@ class RouteCollection:
         Additional arguments to the distance or clustering algorithm
         can be passed in as key-word arguments.
 
+        When `distances_model` is "lstm", a key-word argument `model_path` needs to be given
+        when `distances_model` is "ted", two optional key-word arguments `timeout` and `content`
+        can be given.
+
         If the number of reaction trees are less than 3, no clustering will be performed
 
         :param n_clusters: the desired number of clusters, if less than 2 triggers optimization
         :param max_clusters: the maximum number of clusters to consider
-        :param timeout: if given, return no clusters if distance calculation is taking longer time
+        :param distances_model: can be ted or lstm and determines how the route distances are computed
         :return: the cluster labels
         """
         if len(self.reaction_trees) < 3:
             return np.asarray([])
-        content = kwargs.pop("content", "both")
+        dist_kwargs = {
+            "content": kwargs.pop("content", "both"),
+            "timeout": kwargs.pop("timeout", None),
+            "model_path": kwargs.pop("model_path", None),
+        }
         try:
-            distances = self.distance_matrix(content=content, timeout=timeout)
+            distances = self.distance_matrix(model=distances_model, **dist_kwargs)
         except ValueError:
             return np.asarray([])
 
@@ -493,36 +505,33 @@ class RouteCollection:
         return dicts
 
     def distance_matrix(
-        self,
-        content: str = "both",
-        recreate: bool = False,
-        timeout: int = None,
+        self, recreate: bool = False, model: str = "ted", **kwargs: Any
     ) -> np.ndarray:
         """
         Compute the distance matrix between each pair of reaction trees
 
-        :param content: determine what part of the tree to include in the calculation
+        All key-word arguments are passed along to the `route_distance_calculator`
+        function from the `route_distances` package.
+
+        When `model` is "lstm", a key-word argument `model_path` needs to be given
+        when `model` is "ted", two optional key-word arguments `timeout` and `content`
+        can be given.
+
         :param recreate: if False, use a cached one if available
-        :param timeout: if given, raises an exception if timeout is taking longer time
+        :param model: the type of model to use "ted" or "lstm"
         :return: the square distance matrix
         """
-        if self._distance_matrix.get(content) is not None and not recreate:
-            return self._distance_matrix[content]
-        distances = np.zeros([len(self), len(self)])
-        distance_wrappers = [
-            ReactionTreeWrapper(rt, content) for rt in self.reaction_trees
-        ]
-        time0 = time.perf_counter()
-        for i, iwrapper in enumerate(distance_wrappers):
-            # fmt: off
-            for j, jwrapper in enumerate(distance_wrappers[i + 1:], i + 1):
-                distances[i, j] = iwrapper.distance_to(jwrapper)
-                distances[j, i] = distances[i, j]
-            # fmt: on
-            time_past = time.perf_counter() - time0
-            if timeout is not None and time_past > timeout:
-                raise ValueError(f"Unable to compute distance matrix in {timeout} s")
-        self._distance_matrix[content] = distances
+        if model == "lstm" and not kwargs.get("model_path"):
+            raise KeyError(
+                "Need to provide 'model_path' argument when using LSTM model for computing distances"
+            )
+        content = kwargs.get("content", "both")
+        cache_key = kwargs.get("model_path") if model == "lstm" else content
+        if self._distance_matrix.get(cache_key) is not None and not recreate:
+            return self._distance_matrix[cache_key]
+        calculator = route_distances_calculator(model, **kwargs)
+        distances = calculator(self.dicts)
+        self._distance_matrix[cache_key] = distances
         return distances
 
     def make_dicts(self) -> Sequence[StrDict]:

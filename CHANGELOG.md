@@ -1,5 +1,15 @@
 # CHANGELOG
 
+## Version 2.6.0 - 2020-06-11 (2020-05-03)
+
+### Features
+
+- Add `AiZynthExpander` class as public interface to single-step reactions
+- Route distance calculations and clustering is now dependent on package `route-distances`
+- Route distance calculations with ML model is now supported
+- Reaction tree objects now has property `is_branched`
+
+
 ## Version 2.5.0 - 2020-06-11 (2020-03-30)
 
 ### Features

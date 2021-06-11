@@ -53,6 +53,42 @@ The first policy set is the expansion policy and the second is the filter policy
 
 The ``build_routes`` method needs to be called before any analysis can be done.
 
+Expansion interface
+-------------------
+
+There is an interface for the expansion policy as well. It can be used to break down a molecule into reactants.
+
+.. code-block:: python
+
+    filename = "config.yml"
+    expander = AiZynthExpander(configfile=filename)
+    expander.expansion_policy.select("uspto")
+    expander.filter_policy.select("uspto")
+    reactions = expander.do_expansion("Cc1cccc(c1N(CC(=O)Nc2ccc(cc2)c3ncon3)C(=O)C4CCS(=O)(=O)CC4)C")
+
+for this, you only need to select the policies. The filter policy is optional and using it will only add the
+feasibility of the reactions not filter it out.
+
+The result is a nested list of `FixedRetroReaction` objects. This you can manipulate to for instance get
+out all the reactants SMILES strings
+
+.. code-block:: python
+
+    reactants_smiles = []
+    for reaction_tuple in reactions:
+        reactants_smiles.append([mol.smiles for mol in reaction_tuple[0].reactants])
+
+or you can put all the metadata of all the reactions in a pandas dataframe
+
+.. code-block:: python
+
+    import pandas as pd
+    metadata = []
+    for reaction_tuple in reactions:
+        for reaction in reaction_tuple:
+            metadata.append(reaction.metadata)
+    df = pd.DataFrame(metadata)
+
 
 Further reading
 ---------------

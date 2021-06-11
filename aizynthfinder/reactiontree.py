@@ -5,6 +5,7 @@ import abc
 from typing import TYPE_CHECKING
 
 import networkx as nx
+from route_distances.route_distances import route_distances_calculator
 
 from aizynthfinder.chem import (
     Molecule,
@@ -14,7 +15,7 @@ from aizynthfinder.chem import (
     hash_reactions,
 )
 from aizynthfinder.utils.image import make_graphviz_image
-from aizynthfinder.utils.route_clustering import ReactionTreeWrapper
+
 
 if TYPE_CHECKING:
     from aizynthfinder.utils.type_utils import (
@@ -85,9 +86,9 @@ class ReactionTree:
         :param content: determine what part of the tree to include in the calculation
         :return: the distance between the routes
         """
-        self_wrapper = ReactionTreeWrapper(self, content)
-        other_wrapper = ReactionTreeWrapper(other, content)
-        return self_wrapper.distance_to(other_wrapper)
+        calculator = route_distances_calculator("ted", content=content)
+        distances = calculator([self.to_dict(), other.to_dict()])
+        return distances[0, 1]
 
     def in_stock(self, node: Union[UniqueMolecule, FixedRetroReaction]) -> bool:
         """
@@ -99,6 +100,17 @@ class ReactionTree:
         :return: if the molecule is in stock
         """
         return self.graph.nodes[node].get("in_stock", False)
+
+    def is_branched(self) -> bool:
+        """
+        Returns if the route is branched
+
+        i.e. checks if the maximum depth is not equal to the number
+        of reactions.
+        """
+        nsteps = len(list(self.reactions()))
+        max_depth = max(self.depth(leaf) for leaf in self.leafs())
+        return nsteps != max_depth // 2
 
     def leafs(self) -> Iterable[UniqueMolecule]:
         """
@@ -372,3 +384,27 @@ class ReactionTreeFromDict(ReactionTreeLoader):
         reaction_node.reactants = (tuple(reactant_nodes),)
 
         return product_node
+
+
+class ReactionTreeFromExpansion(ReactionTreeLoader):
+    """
+    Create a ReactionTree from a single reaction
+
+    This is mainly intended as a convenience function for the expander interface
+    """
+    def _load(self, reaction: RetroReaction) -> None:  # type: ignore
+        root = self._unique_mol(reaction.mol)
+        self._add_node(root)
+
+        rxn = self._unique_reaction(reaction)
+        rxn.metadata["smarts"] = reaction.smarts
+        self._add_node(rxn)
+        self.tree.graph.add_edge(root, rxn)
+
+        reactant_nodes = []
+        for reactant in reaction.reactants[0]:
+            reactant_node = self._unique_mol(reactant)
+            reactant_nodes.append(reactant_node)
+            self._add_node(reactant_node)
+            self.tree.graph.add_edge(rxn, reactant_node)
+        rxn.reactants = (tuple(reactant_nodes),)

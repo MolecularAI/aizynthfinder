@@ -327,6 +327,16 @@ def test_route_distance_other(load_reaction_tree):
     assert pytest.approx(dist, abs=1e-2) == 2.6522
 
 
+@pytest.mark.parametrize(
+    ("filename", "expected"),
+    [("routes_for_clustering.json", False), ("branched_route.json", True)],
+)
+def test_route_is_branched(load_reaction_tree, filename, expected):
+    rt = ReactionTree.from_dict(load_reaction_tree(filename))
+
+    assert rt.is_branched() == expected
+
+
 def test_create_route_collection_full(setup_analysis, mocker):
     analysis, _ = setup_analysis()
 

@@ -8,8 +8,8 @@ import numpy as np
 from ipywidgets import Output, Label, BoundedIntText, Button, HBox, Tab
 from IPython.display import display
 from scipy.cluster.hierarchy import dendrogram
+from route_distances.clustering import ClusteringHelper
 
-from aizynthfinder.utils.route_clustering import ClusteringHelper
 
 if TYPE_CHECKING:
     from aizynthfinder.analysis import RouteCollection

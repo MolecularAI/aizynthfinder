@@ -14,8 +14,8 @@ from typing import TYPE_CHECKING
 
 import pandas as pd
 
-from aizynthfinder.utils.files import cat_hdf_files, split_file, start_processes
 from aizynthfinder.aizynthfinder import AiZynthFinder
+from aizynthfinder.utils.files import cat_hdf_files, split_file, start_processes
 from aizynthfinder.utils.logging import logger, setup_logger
 
 if TYPE_CHECKING:
@@ -23,10 +23,17 @@ if TYPE_CHECKING:
 
 
 def _do_clustering(
-    finder: AiZynthFinder, results: StrDict, detailed_results: bool
+    finder: AiZynthFinder,
+    results: StrDict,
+    detailed_results: bool,
+    model_path: str = None,
 ) -> None:
     time0 = time.perf_counter_ns()
-    results["cluster_labels"] = finder.routes.cluster(n_clusters=0)
+    if model_path:
+        kwargs = {"distances_model": "lstm", "model_path": model_path}
+    else:
+        kwargs = {"distances_model": "ted"}
+    results["cluster_labels"] = finder.routes.cluster(n_clusters=0, **kwargs)
     if not detailed_results:
         return
 
@@ -68,6 +75,10 @@ def _get_arguments() -> argparse.Namespace:
         default=False,
         help="if provided, perform automatic clustering",
     )
+    parser.add_argument(
+        "--route_distance_model",
+        help="if provided, calculate route distances for clustering with this ML model",
+    )
     return parser.parse_args()
 
 
@@ -85,7 +96,11 @@ def _select_stocks(finder: AiZynthFinder, args: argparse.Namespace) -> None:
 
 
 def _process_single_smiles(
-    smiles: str, finder: AiZynthFinder, output_name: str, do_clustering: bool
+    smiles: str,
+    finder: AiZynthFinder,
+    output_name: str,
+    do_clustering: bool,
+    route_distance_model: str = None,
 ) -> None:
     output_name = output_name or "trees.json"
     finder.target_smiles = smiles
@@ -102,7 +117,9 @@ def _process_single_smiles(
 
     stats = finder.extract_statistics()
     if do_clustering:
-        _do_clustering(finder, stats, detailed_results=False)
+        _do_clustering(
+            finder, stats, detailed_results=False, model_path=route_distance_model
+        )
     stats_str = "\n".join(
         f"{key.replace('_', ' ')}: {value}" for key, value in stats.items()
     )
@@ -110,7 +127,11 @@ def _process_single_smiles(
 
 
 def _process_multi_smiles(
-    filename: str, finder: AiZynthFinder, output_name: str, do_clustering: bool
+    filename: str,
+    finder: AiZynthFinder,
+    output_name: str,
+    do_clustering: bool,
+    route_distance_model: str = None,
 ) -> None:
     output_name = output_name or "output.hdf5"
     with open(filename, "r") as fileobj:
@@ -126,7 +147,9 @@ def _process_multi_smiles(
 
         logger().info(f"Done with {smi} in {search_time:.3} s")
         if do_clustering:
-            _do_clustering(finder, stats, detailed_results=True)
+            _do_clustering(
+                finder, stats, detailed_results=True, model_path=route_distance_model
+            )
         for key, value in stats.items():
             results[key].append(value)
         results["top_scores"].append(
@@ -159,6 +182,8 @@ def _multiprocess_smiles(args: argparse.Namespace) -> None:
             cmd_args.extend(args.stocks)
         if args.cluster:
             cmd_args.append("--cluster")
+        if args.route_distance_model:
+            cmd_args.extend(["--route_distance_model", args.route_distance_model])
         return cmd_args
 
     if not os.path.exists(args.smiles):
@@ -198,10 +223,8 @@ def main() -> None:
     except KeyError:
         pass
 
-    if multi_smiles:
-        _process_multi_smiles(args.smiles, finder, args.output, args.cluster)
-    else:
-        _process_single_smiles(args.smiles, finder, args.output, args.cluster)
+    func = _process_multi_smiles if multi_smiles else _process_single_smiles
+    func(args.smiles, finder, args.output, args.cluster, args.route_distance_model)
 
 
 if __name__ == "__main__":

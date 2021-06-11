@@ -5,7 +5,6 @@ import logging.config
 import os
 
 import yaml
-
 # See Github issue 30 why sklearn is imported here
 import sklearn  # noqa
 from rdkit import RDLogger
