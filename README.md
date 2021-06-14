@@ -157,3 +157,5 @@ The software is licensed under the MIT license (see LICENSE file), and is free a
 
 1. Thakkar A, Kogej T, Reymond J-L, et al (2019) Datasets and their influence on the development of computer assisted synthesis planning tools in the pharmaceutical domain. Chem Sci. https://doi.org/10.1039/C9SC04944D
 2. Genheden S, Thakkar A, Chadimova V, et al (2020) AiZynthFinder: a fast, robust and flexible open-source software for retrosynthetic planning. J. Cheminf. https://jcheminf.biomedcentral.com/articles/10.1186/s13321-020-00472-1
+3. Genheden S, Engkvist O, Bjerrum E (2020) A Quick Policy to Filter Reactions Based on Feasibility in AI-Guided Retrosynthetic Planning. ChemRxiv. Preprint. https://doi.org/10.26434/chemrxiv.13280495.v1 
+4. Genheden S, Engkvist O, Bjerrum E (2020) Clustering of synthetic routes using tree edit distance. ChemRxiv. Preprint. https://doi.org/10.26434/chemrxiv.13372475.v1  
