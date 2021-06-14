@@ -66,6 +66,8 @@ def test_graphviz_usage(mocker, tmpdir, setup_graphviz_graph):
     files = [
         (None, str(tmpdir / "graph1.dot")),
         (None, str(tmpdir / "img2.png")),
+        (None, str(tmpdir / "graph1.dot")),
+        (None, str(tmpdir / "img2.png")),
     ]
     mkstemp_patch.side_effect = files
     molecules, reactions, edges, frame_colors = setup_graphviz_graph
@@ -80,7 +82,7 @@ def test_graphviz_usage(mocker, tmpdir, setup_graphviz_graph):
 
 def test_graphviz_usage_exception_dot(mocker, tmpdir, setup_graphviz_graph):
     exists_patch = mocker.patch("aizynthfinder.utils.image.os.path.exists")
-    exists_patch.side_effect = [False, True]
+    exists_patch.side_effect = [False, True, True, True]
     molecules, reactions, edges, frame_colors = setup_graphviz_graph
 
     img = image.make_graphviz_image(molecules, reactions, edges, frame_colors)
