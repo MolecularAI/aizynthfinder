@@ -69,6 +69,10 @@ class Node:
         self._children_actions: List[RetroReaction] = []
         self._children: List[Optional[Node]] = []
 
+        self.blacklist = set(mol.inchi_key for mol in state.expandable_mols)
+        if self.parent:
+            self.blacklist = self.blacklist.union(parent.blacklist)
+
         self._logger = logger()
 
     def __getitem__(self, node: "Node") -> StrDict:
@@ -290,14 +294,6 @@ class Node:
         reactants0 = reaction.reactants[0]
         if len(reaction.reactants) == 1 and len(reactants0) == 1 and reaction.mol == reactants0[0]:
             return False
-
-        check_cycling = self._config.prune_cycles_in_search and reaction.mol.parent
-        if check_cycling and len(reaction.reactants) == 1 and (reaction.mol.parent in reactants0):
-            self._logger.debug(
-                "Removing cycle-producing reaction on mol %s with parent %s and transformation %s"
-                % (reaction.mol.smiles, reaction.mol.parent.smiles, reaction.smarts)
-            )
-            return False
         # fmt: on
 
         return True
@@ -339,6 +335,13 @@ class Node:
         return len(self._children) - 1
 
     def _filter_child_reaction(self, reaction: RetroReaction) -> bool:
+        if self._regenerated_blacklisted(reaction):
+            self._logger.debug(
+                f"Reaction {reaction.reaction_smiles()} "
+                f"was rejected because it re-generated molecule not in stock"
+            )
+            return True
+
         if not self._filter_policy.selection:
             return False
         feasible, prob = self._filter_policy.feasibility(reaction)
@@ -352,6 +355,15 @@ class Node:
         self._logger.debug(
             f"Reaction {reaction.reaction_smiles()} from template {reaction.smarts } was kept with prob {prob}"
         )
+        return False
+
+    def _regenerated_blacklisted(self, reaction: RetroReaction) -> bool:
+        if not self._config.prune_cycles_in_search:
+            return False
+        for reactants in reaction.reactants:
+            for mol in reactants:
+                if mol.inchi_key in self.blacklist:
+                    return True
         return False
 
     def _select_child(self, child_idx: int) -> Optional["Node"]:

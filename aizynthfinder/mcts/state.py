@@ -31,6 +31,7 @@ class State:
     The class is hashable and comparable by the inchi keys of all the molecules.
 
     :ivar mols: the list of molecules
+    :ivar expandable_mols: the list of molecules not in stock
     :ivar stock: the configured stock
     :ivar in_stock_list: for each molecule if they are in stock
     :ivar is_solved: is true if all molecules are in stock:
@@ -45,6 +46,9 @@ class State:
         self.mols = mols
         self.stock = config.stock
         self.in_stock_list = [mol in self.stock for mol in self.mols]
+        self.expandable_mols = [
+            mol for mol, in_stock in zip(self.mols, self.in_stock_list) if not in_stock
+        ]
         self._stock_availability: Optional[List[str]] = None
         self.is_solved = all(self.in_stock_list)
         self.max_transforms = max(mol.transform for mol in self.mols)
