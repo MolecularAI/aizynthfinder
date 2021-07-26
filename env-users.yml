@@ -8,4 +8,4 @@ dependencies:
   - rdkit=>2019.09.1
   - pip>=20.0
   - pip:
-    - https://github.com/MolecularAI/aizynthfinder/archive/v2.4.0.tar.gz
+    - https://github.com/MolecularAI/aizynthfinder/archive/v3.0.0.tar.gz
