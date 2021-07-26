@@ -38,6 +38,13 @@
                 {
                     "type": "mol",
                     "hide": false,
+                    "smiles": "S=C=Nc1ccccc1",
+                    "is_chemical": true,
+                    "in_stock": true
+                },
+                {
+                    "type": "mol",
+                    "hide": false,
                     "smiles": "Cc1ccc2nc3ccccc3c(Nc3ccc(N)cc3)c2c1",
                     "is_chemical": true,
                     "in_stock": false,
@@ -52,14 +59,14 @@
                                 {
                                     "type": "mol",
                                     "hide": false,
-                                    "smiles": "Cc1ccc2nc3ccccc3c(Cl)c2c1",
+                                    "smiles": "Nc1ccc(N)cc1",
                                     "is_chemical": true,
                                     "in_stock": true
                                 },
                                 {
                                     "type": "mol",
                                     "hide": false,
-                                    "smiles": "Nc1ccc(N)cc1",
+                                    "smiles": "Cc1ccc2nc3ccccc3c(Cl)c2c1",
                                     "is_chemical": true,
                                     "in_stock": true
                                 }
@@ -75,27 +82,20 @@
                                 {
                                     "type": "mol",
                                     "hide": false,
-                                    "smiles": "Cc1ccc2nc3ccccc3c(N)c2c1",
+                                    "smiles": "Nc1ccc(Br)cc1",
                                     "is_chemical": true,
                                     "in_stock": true
                                 },
                                 {
                                     "type": "mol",
                                     "hide": false,
-                                    "smiles": "Nc1ccc(Br)cc1",
+                                    "smiles": "Cc1ccc2nc3ccccc3c(N)c2c1",
                                     "is_chemical": true,
                                     "in_stock": true
                                 }
                             ]
                         }
                     ]
-                },
-                {
-                    "type": "mol",
-                    "hide": false,
-                    "smiles": "S=C=Nc1ccccc1",
-                    "is_chemical": true,
-                    "in_stock": true
                 }
             ]
         }

@@ -49,7 +49,7 @@ Custom stock
 ------------
 
 Support for any type of lookup is provided. You just need to write a python class that implements the ``__contains__`` 
-and subclasses the ``aizynthfinder.context.stock.StockQueryMixin``. The ``__contains__`` method is used for lookup and should take a ``Molecule`` object as only argument.
+and subclasses the ``aizynthfinder.context.stock.queries.StockQueryMixin``. The ``__contains__`` method is used for lookup and should take a ``Molecule`` object as only argument.
 The ``StockQueryMixin`` mixin class provide a default interface for some methods that perhaps isn't possible to implement in all query classes.
 
 This is an example:
@@ -57,7 +57,7 @@ This is an example:
 .. code-block::
 
   from rdkit.Chem import Lipinski
-  from aizynthfinder.context.stock import StockQueryMixin
+  from aizynthfinder.context.stock.queries import StockQueryMixin
   class CriteriaStock(StockQueryMixin):
       def __contains__(self, mol):
           return Lipinski.HeavyAtomCount(mol.rd_mol) < 10

@@ -1,258 +1,107 @@
 {
-    "type": "mol",
-    "smiles": "COc1ccc2nc(-c3ccc(O)c4c3C3(CCN(CC(C)(C)C)CC3)CN4c3ccccc3NC(=O)Nc3csc(C(F)(F)F)n3)sc2c1",
-    "is_chemical": true,
-    "in_stock": false,
-    "children": [
+  "type": "mol",
+  "hide": false,
+  "smiles": "OOc1ccc(-c2ccc(NC3CCCC(C4C=CC=C4)C3)cc2)cc1",
+  "is_chemical": true,
+  "in_stock": false,
+  "children": [
+    {
+      "type": "reaction",
+      "hide": false,
+      "smiles": "OOc1ccc(-c2ccc(NC3CCCC(C4C=CC=C4)C3)cc2)cc1>>OOc1ccc(-c2ccccc2)cc1.NC1CCCC(C2C=CC=C2)C1",
+      "is_reaction": true,
+      "metadata": {},
+      "children": [
         {
-            "type": "reaction",
-            "smiles": "",
-            "is_reaction": true,
-            "children": [
+          "type": "mol",
+          "hide": false,
+          "smiles": "OOc1ccc(-c2ccccc2)cc1",
+          "is_chemical": true,
+          "in_stock": false,
+          "children": [
+            {
+              "type": "reaction",
+              "hide": false,
+              "smiles": "OOc1ccc(-c2ccccc2)cc1>>c1ccccc1.OOc1ccccc1",
+              "is_reaction": true,
+              "metadata": {},
+              "children": [
                 {
-                    "type": "mol",
-                    "smiles": "CC(C)(C)CN1CCC2(CC1)CN(c1ccccc1NC(=O)Nc1csc(C(F)(F)F)n1)c1c(O)ccc(Br)c12",
-                    "is_chemical": true,
-                    "in_stock": false,
-                    "children": [
-                        {
-                            "type": "reaction",
-                            "smiles": "",
-                            "is_reaction": true,
-                            "children": [
-                                {
-                                    "type": "mol",
-                                    "smiles": "CC(C)(C)CO",
-                                    "is_chemical": true,
-                                    "in_stock": true
-                                },
-                                {
-                                    "type": "mol",
-                                    "smiles": "O=C(Nc1csc(C(F)(F)F)n1)Nc1ccccc1N1CC2(CCNCC2)c2c(Br)ccc(O)c21",
-                                    "is_chemical": true,
-                                    "in_stock": false,
-                                    "children": [
-                                        {
-                                            "type": "reaction",
-                                            "smiles": "",
-                                            "is_reaction": true,
-                                            "children": [
-                                                {
-                                                    "type": "mol",
-                                                    "smiles": "CC(C)(C)OC(=O)N1CCC2(CC1)CN(c1ccccc1NC(=O)Nc1csc(C(F)(F)F)n1)c1c(O)ccc(Br)c12",
-                                                    "is_chemical": true,
-                                                    "in_stock": false,
-                                                    "children": [
-                                                        {
-                                                            "type": "reaction",
-                                                            "smiles": "",
-                                                            "is_reaction": true,
-                                                            "children": [
-                                                                {
-                                                                    "type": "mol",
-                                                                    "smiles": "CC(C)(C)OC(=O)N1CCC2(CC1)CN(c1ccccc1N)c1c(O)ccc(Br)c12",
-                                                                    "is_chemical": true,
-                                                                    "in_stock": false,
-                                                                    "children": [
-                                                                        {
-                                                                            "type": "reaction",
-                                                                            "smiles": "",
-                                                                            "is_reaction": true,
-                                                                            "children": [
-                                                                                {
-                                                                                    "type": "mol",
-                                                                                    "smiles": "CC(C)(C)OC(=O)N1CCC2(CC1)CN(c1ccccc1[N+](=O)[O-])c1c(O)ccc(Br)c12",
-                                                                                    "is_chemical": true,
-                                                                                    "in_stock": false,
-                                                                                    "children": [
-                                                                                        {
-                                                                                            "type": "reaction",
-                                                                                            "smiles": "",
-                                                                                            "is_reaction": true,
-                                                                                            "children": [
-                                                                                                {
-                                                                                                    "type": "mol",
-                                                                                                    "smiles": "CC(C)(C)OC(=O)N1CCC2(CC1)CN(c1ccccc1[N+](=O)[O-])c1c(O)cccc12",
-                                                                                                    "is_chemical": true,
-                                                                                                    "in_stock": false,
-                                                                                                    "children": [
-                                                                                                        {
-                                                                                                            "type": "reaction",
-                                                                                                            "smiles": "",
-                                                                                                            "is_reaction": true,
-                                                                                                            "children": [
-                                                                                                                {
-                                                                                                                    "type": "mol",
-                                                                                                                    "smiles": "CC(C)(C)OC(=O)N1CCC(CNc2ccccc2[N+](=O)[O-])(c2cccc(O)c2F)CC1",
-                                                                                                                    "is_chemical": true,
-                                                                                                                    "in_stock": false,
-                                                                                                                    "children": [
-                                                                                                                        {
-                                                                                                                            "type": "reaction",
-                                                                                                                            "smiles": "",
-                                                                                                                            "is_reaction": true,
-                                                                                                                            "children": [
-                                                                                                                                {
-                                                                                                                                    "type": "mol",
-                                                                                                                                    "smiles": "CC(C)(C)OC(=O)N1CCC(CN)(c2cccc(O)c2F)CC1",
-                                                                                                                                    "is_chemical": true,
-                                                                                                                                    "in_stock": false,
-                                                                                                                                    "children": [
-                                                                                                                                        {
-                                                                                                                                            "type": "reaction",
-                                                                                                                                            "smiles": "",
-                                                                                                                                            "is_reaction": true,
-                                                                                                                                            "children": [
-                                                                                                                                                {
-                                                                                                                                                    "type": "mol",
-                                                                                                                                                    "smiles": "CC(C)(C)OC(=O)N1CCC(C#N)(c2cccc(O)c2F)CC1",
-                                                                                                                                                    "is_chemical": true,
-                                                                                                                                                    "in_stock": false,
-                                                                                                                                                    "children": [
-                                                                                                                                                        {
-                                                                                                                                                            "type": "reaction",
-                                                                                                                                                            "smiles": "",
-                                                                                                                                                            "is_reaction": true,
-                                                                                                                                                            "children": [
-                                                                                                                                                                {
-                                                                                                                                                                    "type": "mol",
-                                                                                                                                                                    "smiles": "CC(C)(C)OC(=O)N(CCCl)CCCl",
-                                                                                                                                                                    "is_chemical": true,
-                                                                                                                                                                    "in_stock": true
-                                                                                                                                                                },
-                                                                                                                                                                {
-                                                                                                                                                                    "type": "mol",
-                                                                                                                                                                    "smiles": "N#CCc1cccc(O)c1F",
-                                                                                                                                                                    "is_chemical": true,
-                                                                                                                                                                    "in_stock": true
-                                                                                                                                                                }
-                                                                                                                                                            ]
-                                                                                                                                                        }
-                                                                                                                                                    ]
-                                                                                                                                                }
-                                                                                                                                            ]
-                                                                                                                                        }
-                                                                                                                                    ]
-                                                                                                                                },
-                                                                                                                                {
-                                                                                                                                    "type": "mol",
-                                                                                                                                    "smiles": "O=[N+]([O-])c1ccccc1F",
-                                                                                                                                    "is_chemical": true,
-                                                                                                                                    "in_stock": true
-                                                                                                                                }
-                                                                                                                            ]
-                                                                                                                        }
-                                                                                                                    ]
-                                                                                                                }
-                                                                                                            ]
-                                                                                                        }
-                                                                                                    ]
-                                                                                                },
-                                                                                                {
-                                                                                                    "type": "mol",
-                                                                                                    "smiles": "O=C1CCC(=O)N1Br",
-                                                                                                    "is_chemical": true,
-                                                                                                    "in_stock": true
-                                                                                                }
-                                                                                            ]
-                                                                                        }
-                                                                                    ]
-                                                                                }
-                                                                            ]
-                                                                        }
-                                                                    ]
-                                                                },
-                                                                {
-                                                                    "type": "mol",
-                                                                    "smiles": "O=C=Nc1csc(C(F)(F)F)n1",
-                                                                    "is_chemical": true,
-                                                                    "in_stock": true
-                                                                }
-                                                            ]
-                                                        }
-                                                    ]
-                                                }
-                                            ]
-                                        }
-                                    ]
-                                }
-                            ]
-                        }
-                    ]
+                  "type": "mol",
+                  "hide": false,
+                  "smiles": "c1ccccc1",
+                  "is_chemical": true,
+                  "in_stock": true
                 },
                 {
-                    "type": "mol",
-                    "smiles": "CCCC[Sn](CCCC)(CCCC)c1nc2ccc(OC)cc2s1",
-                    "is_chemical": true,
-                    "in_stock": false,
-                    "children": [
+                  "type": "mol",
+                  "hide": false,
+                  "smiles": "OOc1ccccc1",
+                  "is_chemical": true,
+                  "in_stock": false,
+                  "children": [
+                    {
+                      "type": "reaction",
+                      "hide": false,
+                      "smiles": "OOc1ccccc1>>O.Oc1ccccc1",
+                      "is_reaction": true,
+                      "metadata": {},
+                      "children": [
                         {
-                            "type": "reaction",
-                            "smiles": "",
-                            "is_reaction": true,
-                            "children": [
-                                {
-                                    "type": "mol",
-                                    "smiles": "CCCC[Sn](Cl)(CCCC)CCCC",
-                                    "is_chemical": true,
-                                    "in_stock": false,
-                                    "children": [
-                                        {
-                                            "type": "reaction",
-                                            "smiles": "",
-                                            "is_reaction": true,
-                                            "children": [
-                                                {
-                                                    "type": "mol",
-                                                    "smiles": "CCCC[Sn](Cl)(CCC)CCCC",
-                                                    "is_chemical": true,
-                                                    "in_stock": false,
-                                                    "children": [
-                                                        {
-                                                            "type": "reaction",
-                                                            "smiles": "",
-                                                            "is_reaction": true,
-                                                            "children": [
-                                                                {
-                                                                    "type": "mol",
-                                                                    "smiles": "CCCC[Sn](Cl)(CCC)CCC",
-                                                                    "is_chemical": true,
-                                                                    "in_stock": false,
-                                                                    "children": [
-                                                                        {
-                                                                            "type": "reaction",
-                                                                            "smiles": "",
-                                                                            "is_reaction": true,
-                                                                            "children": [
-                                                                                {
-                                                                                    "type": "mol",
-                                                                                    "smiles": "CCC[Sn](Cl)(CCC)CCC",
-                                                                                    "is_chemical": true,
-                                                                                    "in_stock": true
-                                                                                }
-                                                                            ]
-                                                                        }
-                                                                    ]
-                                                                }
-                                                            ]
-                                                        }
-                                                    ]
-                                                }
-                                            ]
-                                        }
-                                    ]
-                                },
-                                {
-                                    "type": "mol",
-                                    "smiles": "COc1ccc2ncsc2c1",
-                                    "is_chemical": true,
-                                    "in_stock": true
-                                }
-                            ]
+                          "type": "mol",
+                          "hide": false,
+                          "smiles": "O",
+                          "is_chemical": true,
+                          "in_stock": false
+                        },
+                        {
+                          "type": "mol",
+                          "hide": false,
+                          "smiles": "Oc1ccccc1",
+                          "is_chemical": true,
+                          "in_stock": true
                         }
-                    ]
+                      ]
+                    }
+                  ]
                 }
-            ]
+              ]
+            }
+          ]
+        },
+        {
+          "type": "mol",
+          "hide": false,
+          "smiles": "NC1CCCC(C2C=CC=C2)C1",
+          "is_chemical": true,
+          "in_stock": false,
+          "children": [
+            {
+              "type": "reaction",
+              "hide": false,
+              "smiles": "NC1CCCC(C2C=CC=C2)C1>>NC1CCCCC1.C1=CCC=C1",
+              "is_reaction": true,
+              "metadata": {},
+              "children": [
+                {
+                  "type": "mol",
+                  "hide": false,
+                  "smiles": "NC1CCCCC1",
+                  "is_chemical": true,
+                  "in_stock": true
+                },
+                {
+                  "type": "mol",
+                  "hide": false,
+                  "smiles": "C1=CCC=C1",
+                  "is_chemical": true,
+                  "in_stock": true
+                }
+              ]
+            }
+          ]
         }
-    ]
+      ]
+    }
+  ]
 }

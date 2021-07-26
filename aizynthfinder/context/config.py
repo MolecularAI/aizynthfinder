@@ -1,14 +1,12 @@
 """ Module containing a class for encapsulating the settings of the tree search
 """
 from __future__ import annotations
-import os
 from dataclasses import dataclass
 from typing import TYPE_CHECKING
 
 import yaml
 
 from aizynthfinder.utils.logging import logger
-from aizynthfinder.utils.paths import data_path
 from aizynthfinder.context.policy import ExpansionPolicy, FilterPolicy
 from aizynthfinder.context.stock import Stock
 from aizynthfinder.context.scoring import ScorerCollection
@@ -16,7 +14,7 @@ from aizynthfinder.context.cost import MoleculeCost
 
 
 if TYPE_CHECKING:
-    from aizynthfinder.utils.type_utils import StrDict, Any
+    from aizynthfinder.utils.type_utils import StrDict, Any, Dict, Union
 
 
 @dataclass
@@ -32,15 +30,12 @@ class Configuration:  # pylint: disable=R0902
 
         config.max_transforms  # The maximum of transform
         config.iteration_limit  # The maximum number of iterations
-
-
-    On instantiation it will read default parameters from a config.yml
-    file located in the `data` folder of the package.
     """
 
     C: float = 1.4  # pylint: disable=invalid-name
     cutoff_cumulative: float = 0.995
     cutoff_number: int = 50
+    additive_expansion: bool = False
     max_transforms: int = 6
     default_prior: float = 0.5
     use_prior: bool = True
@@ -57,15 +52,10 @@ class Configuration:  # pylint: disable=R0902
     expansion_policy: ExpansionPolicy = None  # type: ignore
     filter_policy: FilterPolicy = None  # type: ignore
     scorers: ScorerCollection = None  # type: ignore
-    molecule_cost: MoleculeCost = None # type: ignore
+    molecule_cost: MoleculeCost = None  # type: ignore
 
     def __post_init__(self) -> None:
         self._properties: StrDict = {}
-        filename = os.path.join(data_path(), "config.yml")
-        with open(filename, "r") as fileobj:
-            _config = yaml.load(fileobj.read(), Loader=yaml.SafeLoader)
-        self._update_from_config(_config)
-
         self.stock = Stock()
         self.expansion_policy = ExpansionPolicy(self)
         self.filter_policy = FilterPolicy(self)
@@ -76,7 +66,7 @@ class Configuration:  # pylint: disable=R0902
     def __eq__(self, other: Any) -> bool:
         if not isinstance(other, Configuration):
             return False
-        return self._properties == other._properties
+        return self.properties == other.properties
 
     @classmethod
     def from_dict(cls, source: StrDict) -> "Configuration":
@@ -90,17 +80,14 @@ class Configuration:  # pylint: disable=R0902
         """
         # pylint: disable=protected-access
         config_obj = Configuration()
-        config_obj._update_from_config(source)
+        src_copy = dict(source)  # Make a copy so we can pop items
+        config_obj._update_from_config(src_copy)
 
-        config_obj.expansion_policy.load_from_config(
-            **source.get("policy", {}).get("files", {})
-        )
-        config_obj.filter_policy.load_from_config(
-            **source.get("filter", {}).get("files", {})
-        )
-        config_obj.stock.load_from_config(**source.get("stock", {}))
-        config_obj.scorers.load_from_config(**source.get("scorer", {}))
-        config_obj.molecule_cost.load_from_config(**source.get("molecule_cost", {}))
+        config_obj.expansion_policy.load_from_config(**src_copy.get("policy", {}))
+        config_obj.filter_policy.load_from_config(**src_copy.get("filter", {}))
+        config_obj.stock.load_from_config(**src_copy.get("stock", {}))
+        config_obj.scorers.load_from_config(**src_copy.get("scorer", {}))
+        config_obj.molecule_cost.load_from_config(**src_copy.get("molecule_cost", {}))
 
         return config_obj
 
@@ -118,21 +105,40 @@ class Configuration:  # pylint: disable=R0902
             _config = yaml.load(fileobj.read(), Loader=yaml.SafeLoader)
         return Configuration.from_dict(_config)
 
-    def update(self, **settings: Any) -> None:
+    @property
+    def properties(self) -> Dict[str, Union[int, float, str, bool]]:
+        """ Return the basic properties of the config as a dictionary
+        """
+        dict_ = {}
+        for item in dir(self):
+            if item == "properties" or item.startswith("_"):
+                continue
+            attr = getattr(self, item)
+            if isinstance(attr, (int, float, str, bool)):
+                dict_[item] = attr
+        return dict_
+
+    @properties.setter
+    def properties(self, dict_: Dict[str, Union[int, float, str, bool]]) -> None:
         """
         Update the configuration using dictionary of parameters
 
         If a value is None that setting is ignored.
+
+        :param dict_: the dictionary of properties
         """
-        for setting, value in settings.items():
+        for setting, value in dict_.items():
             if value is None:
                 continue
+            if not hasattr(self, setting):
+                raise AttributeError(f"Could not find attribute to set: {setting}")
             setattr(self, setting, value)
             self._logger.info(f"Setting {setting.replace('_', ' ')} to {value}")
 
     def _update_from_config(self, config: StrDict) -> None:
-        self._properties.update(config.get("finder", {}).get("properties", {}))
-        self._properties.update(config.get("policy", {}).get("properties", {}))
-        self._properties.update(config.get("filter", {}).get("properties", {}))
-        self._properties.update(config.get("properties", {}))
-        self.__dict__.update(self._properties)
+        #  The first 3 places for properties are kept for historical reasons, but they are not recommended usage
+        dict_ = config.get("finder", {}).pop("properties", {})
+        dict_.update(config.get("policy", {}).pop("properties", {}))
+        dict_.update(config.get("filter", {}).pop("properties", {}))
+        dict_.update(config.pop("properties", {}))
+        self.properties = dict_

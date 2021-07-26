@@ -1,11 +1,10 @@
-from aizynthfinder.chem import TreeMolecule
 from aizynthfinder.aizynthfinder import AiZynthExpander
 
 
-def test_expander_defaults(mock_expansion_policy):
+def test_expander_defaults(get_one_step_expansion, setup_policies):
     expander = AiZynthExpander()
+    setup_policies(get_one_step_expansion, config=expander.config)
     smi = "CCCCOc1ccc(CC(=O)N(C)O)cc1"
-    mock_expansion_policy(TreeMolecule(parent=None, smiles=smi))
 
     reactions = expander.do_expansion(smi)
 
@@ -22,10 +21,10 @@ def test_expander_defaults(mock_expansion_policy):
     assert smi1 != smi2
 
 
-def test_expander_top1(mock_expansion_policy):
+def test_expander_top1(get_one_step_expansion, setup_policies):
     expander = AiZynthExpander()
+    setup_policies(get_one_step_expansion, config=expander.config)
     smi = "CCCCOc1ccc(CC(=O)N(C)O)cc1"
-    mock_expansion_policy(TreeMolecule(parent=None, smiles=smi))
 
     reactions = expander.do_expansion(smi, return_n=1)
 
@@ -34,13 +33,13 @@ def test_expander_top1(mock_expansion_policy):
     assert smiles_list == ["CCCCOc1ccc(CC(=O)Cl)cc1", "CNO"]
 
 
-def test_expander_filter(mock_expansion_policy):
+def test_expander_filter(get_one_step_expansion, setup_policies):
     def filter_func(reaction):
         return "CNO" not in [mol.smiles for mol in reaction.reactants[0]]
 
     expander = AiZynthExpander()
+    setup_policies(get_one_step_expansion, config=expander.config)
     smi = "CCCCOc1ccc(CC(=O)N(C)O)cc1"
-    mock_expansion_policy(TreeMolecule(parent=None, smiles=smi))
 
     reactions = expander.do_expansion(smi, filter_func=filter_func)
 
@@ -49,15 +48,16 @@ def test_expander_filter(mock_expansion_policy):
     assert smiles_list == ["CCCCBr", "CN(O)C(=O)Cc1ccc(O)cc1"]
 
 
-def test_expander_filter_policy(mock_expansion_policy, mock_policy_model):
+def test_expander_filter_policy(get_one_step_expansion, setup_policies):
     expander = AiZynthExpander()
+    _, filter_strategy = setup_policies(get_one_step_expansion, config=expander.config)
+    filter_strategy.lookup[
+        "CCCCOc1ccc(CC(=O)N(C)O)cc1>>CCCCOc1ccc(CC(=O)Cl)cc1.CNO"
+    ] = 0.5
     smi = "CCCCOc1ccc(CC(=O)N(C)O)cc1"
-    mock_expansion_policy(TreeMolecule(parent=None, smiles=smi))
-    expander.filter_policy.load("dummy.hdf5", "policy1")
-    expander.filter_policy.select("policy1")
 
     reactions = expander.do_expansion(smi)
 
     assert len(reactions) == 2
-    assert reactions[0][0].metadata["feasibility"] == 0.2
-    assert reactions[1][0].metadata["feasibility"] == 0.2
+    assert reactions[0][0].metadata["feasibility"] == 0.5
+    assert reactions[1][0].metadata["feasibility"] == 0.0

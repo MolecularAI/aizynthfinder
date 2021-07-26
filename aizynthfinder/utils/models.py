@@ -19,6 +19,7 @@ from tensorflow.keras.metrics import top_k_categorical_accuracy
 from tensorflow.keras.models import load_model as load_keras_model
 
 from aizynthfinder.utils.logging import logger
+from aizynthfinder.utils.exceptions import ExternalModelAPIError
 
 if TYPE_CHECKING:
     from aizynthfinder.utils.type_utils import Any, Union, Callable, List
@@ -103,12 +104,6 @@ class LocalKerasModel:
         :return: the vector of the output layer
         """
         return self.model.predict(input_)
-
-
-class ExternalModelAPIError(Exception):
-    """
-    Custom error type to signal failure in External model.
-    """
 
 
 def _log_and_reraise_exceptions(method: Callable) -> Callable:

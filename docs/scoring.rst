@@ -1,8 +1,8 @@
 Scoring
 =======
 
-aizynthfinder is capable of scoring reaction routes, both in the form of ``Node`` objects when a search tree is available,
-and in the form of ``ReactionTrees`` if post-processing is required.
+aizynthfinder is capable of scoring reaction routes, both in the form of ``MctsNode`` objects when a search tree is available,
+and in the form of ``ReactionTree`` objects if post-processing is required.
 
 Currently, there are a few scoring functions available
 
@@ -10,7 +10,7 @@ Currently, there are a few scoring functions available
     * Number of reactions - the number of steps in the route
     * Number of pre-cursors - the number of pre-cursors in the route
     * Number of pre-cursors in stock - the number of the pre-cursors that are purchaseable
-    * Average template occurence - the average occurence of the templates used in the route
+    * Average template occurrence - the average occurrence of the templates used in the route
     * Sum of prices - the plain sum of the price of all pre-cursors
     * Route cost score - the cost of the synthesizing the route (Badowski et al. Chem Sci. 2019, 10, 4640)
 
@@ -20,21 +20,21 @@ this is not configurable.
 
 In the Jupyter notebook :doc:`GUI <gui>` one can choose to score the routes with any of the loaded the scorers. 
 
-The three above scoring functions are loaded automatically when an ``aizynthfinder`` object is created.
+The first four scoring functions are loaded automatically when an ``aizynthfinder`` object is created.
 
 
 Add new scoring functions
 -------------------------
 
 
-Additional scoring functions can be implemented by inheriting from the class ``Scorer`` in the ``aizynthfinder.context.scoring`` module.
+Additional scoring functions can be implemented by inheriting from the class ``Scorer`` in the ``aizynthfinder.context.scoring.scorers`` module.
 The scoring class needs to implement the ``_score_node``, ``_score_reaction_tree`` and the ``__repr__`` methods.
 
 This is an example of that.
 
 .. code-block:: python
 
-    from aizynthfinder.context.scoring import Scorer
+    from aizynthfinder.context.scoring.scorers import Scorer
 
     class DeltaNumberOfTransformsScorer(Scorer):
 

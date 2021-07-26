@@ -33,7 +33,7 @@ def _do_clustering(
         kwargs = {"distances_model": "lstm", "model_path": model_path}
     else:
         kwargs = {"distances_model": "ted"}
-    results["cluster_labels"] = finder.routes.cluster(n_clusters=0, **kwargs)
+    results["cluster_labels"] = finder.routes.cluster(n_clusters=0, **kwargs)  # type: ignore
     if not detailed_results:
         return
 
@@ -51,7 +51,15 @@ def _get_arguments() -> argparse.Namespace:
     parser.add_argument(
         "--config", required=True, help="the filename of a configuration file"
     )
-    parser.add_argument("--policy", default="", help="the name of the policy to use")
+    parser.add_argument(
+        "--policy",
+        nargs="+",
+        default=[],
+        help="the name of the expansion policy to use",
+    )
+    parser.add_argument(
+        "--filter", nargs="+", default=[], help="the name of the filter to use"
+    )
     parser.add_argument(
         "--stocks", nargs="+", default=[], help="the name of the stocks to use"
     )
@@ -145,7 +153,8 @@ def _process_multi_smiles(
         finder.build_routes()
         stats = finder.extract_statistics()
 
-        logger().info(f"Done with {smi} in {search_time:.3} s")
+        solved_str = "is solved" if stats["is_solved"] else "is not solved"
+        logger().info(f"Done with {smi} in {search_time:.3} s and {solved_str}")
         if do_clustering:
             _do_clustering(
                 finder, stats, detailed_results=True, model_path=route_distance_model
@@ -176,7 +185,9 @@ def _multiprocess_smiles(args: argparse.Namespace) -> None:
             hdf_files[index - 1],
         ]
         if args.policy:
-            cmd_args.extend(["--policy", args.policy])
+            cmd_args.extend(["--policy"] + args.policy)
+        if args.filter:
+            cmd_args.extend(["--filter"] + args.filter)
         if args.stocks:
             cmd_args.append("--stocks")
             cmd_args.extend(args.stocks)
@@ -218,10 +229,7 @@ def main() -> None:
     finder = AiZynthFinder(configfile=args.config)
     _select_stocks(finder, args)
     finder.expansion_policy.select(args.policy or finder.expansion_policy.items[0])
-    try:
-        finder.filter_policy.select(args.policy)
-    except KeyError:
-        pass
+    finder.filter_policy.select(args.filter)
 
     func = _process_multi_smiles if multi_smiles else _process_single_smiles
     func(args.smiles, finder, args.output, args.cluster, args.route_distance_model)

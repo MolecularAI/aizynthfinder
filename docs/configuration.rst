@@ -93,6 +93,8 @@ iteration_limit           100            The maximum number of iterations for th
 time_limit                120            The maximum number of seconds to complete the tree search
 exclude_target_from_stock True           If the target is in stock it will be broken down if this property is True
 template_column           retro_template the column in the template file that contains the templates
-filter_cutoff             0.05           the cut-off for the filter policy
-prune_cycles_in_search    True           prevents the MCTS from creating cycles by recreating the parent of a molecule when it is expanded
+filter_cutoff             0.05           the cut-off for the quick-filter policy
+prune_cycles_in_search    True           prevents the MCTS from creating cycles by recreating previously seen molecules when it is expanded
+additive_expansion        False          If true, reactions from all selected expansion policies will be appended, otherwise only the first non-empty expansion will be used
+search_algorithm          mcts           The search algorithm. Can be set to `package.module.ClassName` to use a custom search method
 ========================= ============== ===========

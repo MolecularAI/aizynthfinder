@@ -1,10 +1,11 @@
 """ Module containing routines to setup proper logging
 """
-# pylint: disable=ungrouped-imports, wrong-import-order, wrong-import-position
+# pylint: disable=ungrouped-imports, wrong-import-order, wrong-import-position, unused-import
 import logging.config
 import os
 
 import yaml
+
 # See Github issue 30 why sklearn is imported here
 import sklearn  # noqa
 from rdkit import RDLogger

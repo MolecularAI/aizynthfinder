@@ -111,7 +111,7 @@ def test_config_filename(default_config):
     assert filename.endswith("something")
 
 
-def test_split_and_save_data_frame(mocker, tmpdir, default_config):
+def test_split_and_save_data_frame(tmpdir, default_config):
     default_config["output_path"] = str(tmpdir)
     default_config["file_prefix"] = "dummy"
     filename_train = str(
@@ -141,7 +141,7 @@ def test_split_and_save_data_frame(mocker, tmpdir, default_config):
     assert len(data_read) == 5
 
 
-def test_split_and_save_data_ndarray(mocker, tmpdir, default_config):
+def test_split_and_save_data_ndarray(tmpdir, default_config):
     default_config["output_path"] = str(tmpdir)
     default_config["file_prefix"] = "dummy"
     filename_train = str(
@@ -171,7 +171,7 @@ def test_split_and_save_data_ndarray(mocker, tmpdir, default_config):
     assert len(data_read) == 5
 
 
-def test_split_and_save_data_sparse(default_config, mocker, tmpdir):
+def test_split_and_save_data_sparse(default_config, tmpdir):
     default_config["output_path"] = str(tmpdir)
     default_config["file_prefix"] = "dummy"
     filename_train = str(

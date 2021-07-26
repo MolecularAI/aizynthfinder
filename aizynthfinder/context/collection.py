@@ -2,13 +2,12 @@
 """
 from __future__ import annotations
 import abc
-import importlib
 from typing import TYPE_CHECKING
 
 from aizynthfinder.utils.logging import logger
-from aizynthfinder.utils.type_utils import StrDict
 
 if TYPE_CHECKING:
+    from aizynthfinder.utils.type_utils import StrDict
     from aizynthfinder.utils.type_utils import Any, List, Union
 
 
@@ -145,24 +144,3 @@ class ContextCollection(abc.ABC):
         """Select the last loaded item"""
         if self.items:
             self.select(self.items[-1])
-
-    @staticmethod
-    def _load_dynamic_cls(name_spec: str, default_module: Any, exception_cls: Any) -> Any:
-        """ Load an object from a dynamic specification """
-        if "." not in name_spec:
-            name = name_spec
-            module_name = default_module
-        else:
-            module_name, name = name_spec.rsplit(".", maxsplit=1)
-
-        try:
-            loaded_module = importlib.import_module(module_name)
-        except ImportError:
-            raise exception_cls(f"Unable to load module: {module_name}")
-
-        if not hasattr(loaded_module, name):
-            raise exception_cls(
-                f"Module ({module_name}) does not have a class called {name}"
-            )
-
-        return getattr(loaded_module, name)

@@ -1,21 +1,14 @@
-import json
 import os
 from tarfile import TarFile
 
 import numpy as np
 import pytest
 
-from aizynthfinder.chem import Molecule
-from aizynthfinder.analysis import TreeAnalysis, RouteCollection, ReactionTree
-from aizynthfinder.mcts.mcts import SearchTree as MctsSearchTree
+from aizynthfinder.analysis import TreeAnalysis, RouteCollection
+from aizynthfinder.analysis.utils import RouteSelectionArguments
+from aizynthfinder.reactiontree import ReactionTree
+from aizynthfinder.search.mcts import MctsSearchTree
 from aizynthfinder.context.scoring import StateScorer, NumberOfReactionsScorer
-from aizynthfinder.utils.analysis_helpers import ReactionTreeFromMcts
-
-
-def make_reaction_tree(analysis):
-    from_node = analysis.best_node()
-    actions, nodes = analysis.search_tree.route_to_node(from_node)
-    return ReactionTreeFromMcts(actions=actions, nodes=nodes).tree
 
 
 def test_sort_nodes(setup_analysis):
@@ -26,9 +19,26 @@ def test_sort_nodes(setup_analysis):
     assert len(best_nodes) == 7
     assert np.round(best_scores[0], 4) == 0.9940
 
-    best_nodes, best_scores = analysis.sort(min_return=0)
+    best_nodes, best_scores = analysis.sort(RouteSelectionArguments(nmin=0))
 
     assert len(best_nodes) == 0
+
+
+def test_sort_nodes_nmax(setup_analysis):
+    analysis, nodes = setup_analysis()
+
+    best_nodes, best_scores = analysis.sort(RouteSelectionArguments(nmax=5))
+
+    assert len(best_nodes) == 5
+
+
+def test_sort_nodes_return_all(setup_analysis):
+    analysis, nodes = setup_analysis()
+
+    best_nodes, best_scores = analysis.sort(RouteSelectionArguments(return_all=True))
+
+    assert len(best_nodes) == 1
+    assert np.round(best_scores[0], 4) == 0.9940
 
 
 def test_sort_nodes_scorer(setup_analysis):
@@ -102,245 +112,10 @@ def test_tree_statistics_andor_tree(setup_analysis_andor_tree):
     assert stats["policy_used_counts"] == {}
 
 
-def test_route_to_reactiontree(setup_analysis):
-    analysis, _ = setup_analysis()
-
-    reaction_tree = make_reaction_tree(analysis)
-
-    mol_nodes = list(reaction_tree.molecules())
-    assert len(mol_nodes) == 6
-
-    reaction_nodes = list(reaction_tree.reactions())
-    assert len(reaction_nodes) == 2
-
-    leaf_nodes = list(reaction_tree.leafs())
-    assert len(leaf_nodes) == 4
-    assert set(node.smiles for node in leaf_nodes) == {
-        "N#Cc1cccc(N)c1F",
-        "O=C(Cl)c1ccc(F)cc1",
-        "CN1CCC(Cl)CC1",
-        "O",
-    }
-
-
-def test_reactiontree_to_json(setup_analysis, load_reaction_tree):
-    expected = load_reaction_tree("sample_reaction.json")
-    analysis, _ = setup_analysis()
-
-    resp = make_reaction_tree(analysis).to_json()
-    assert json.loads(resp) == expected
-
-
-def test_reactiontree_from_dict(load_reaction_tree):
-    expected = load_reaction_tree("sample_reaction.json")
-
-    rt = ReactionTree.from_dict(expected)
-
-    # Simply check that the to_dict() and from_dict() gives/produces the same dict
-    resp = rt.to_dict()
-    assert resp == expected
-
-
-def test_reactiontree_to_image(load_reaction_tree, mocker):
-    patched_make_image = mocker.patch("aizynthfinder.reactiontree.make_graphviz_image")
-
-    tree = load_reaction_tree("sample_reaction.json")
-    rt = ReactionTree.from_dict(tree)
-
-    rt.to_image()
-
-    patched_make_image.assert_called_once()
-    assert len(patched_make_image.call_args[0][0]) == len(list(rt.molecules()))
-    assert len(patched_make_image.call_args[0][1]) == len(list(rt.reactions()))
-
-
-def test_reactiontree_to_image_hiding(load_reaction_tree, mocker):
-    patched_make_image = mocker.patch("aizynthfinder.reactiontree.make_graphviz_image")
-
-    tree = load_reaction_tree("sample_reaction_with_hidden.json", 1)
-    rt = ReactionTree.from_dict(tree)
-    assert rt.has_repeating_patterns
-
-    rt.to_image(show_all=True)
-
-    patched_make_image.assert_called_once()
-    assert len(patched_make_image.call_args[0][0]) == len(list(rt.molecules()))
-    assert len(patched_make_image.call_args[0][1]) == len(list(rt.reactions()))
-
-    patched_make_image.reset_mock()
-
-    rt.to_image(show_all=False)
-
-    assert len(patched_make_image.call_args[0][0]) == len(list(rt.molecules())) - 3
-    assert len(patched_make_image.call_args[0][1]) == len(list(rt.reactions())) - 2
-
-
-def test_find_repetetive_patterns(load_reaction_tree):
-    tree_with_repetetive_patterns = load_reaction_tree(
-        "sample_reaction_with_hidden.json", 1
-    )
-
-    rt = ReactionTree.from_dict(tree_with_repetetive_patterns)
-
-    assert rt.has_repeating_patterns
-    assert len([node for node in rt.graph if rt.graph.nodes[node]["hide"]]) == 5
-
-
-def test_find_repetetive_patterns_no_patterns(load_reaction_tree):
-    tree_with_no_repetetive_patterns = load_reaction_tree(
-        "sample_reaction_with_hidden.json", 0
-    )
-
-    rt = ReactionTree.from_dict(tree_with_no_repetetive_patterns)
-
-    assert not rt.has_repeating_patterns
-    assert len([node for node in rt.graph if rt.graph.nodes[node]["hide"]]) == 0
-
-
-def test_find_repetetive_patterns_created_tree(
-    default_config, mock_stock, shared_datadir
-):
-    mock_stock(default_config, Molecule(smiles="CC"), Molecule(smiles="C"))
-
-    # Try one with 2 repetetive units
-    search_tree = MctsSearchTree.from_json(
-        shared_datadir / "tree_with_repetition.json", default_config
-    )
-    analysis = TreeAnalysis(search_tree)
-
-    rt = make_reaction_tree(analysis)
-
-    assert rt.has_repeating_patterns
-    hidden_nodes = [
-        node for node in rt.graph if rt.graph.nodes[node].get("hide", False)
-    ]
-    assert len(hidden_nodes) == 5
-
-    # Try one with 3 repetetive units
-    search_tree = MctsSearchTree.from_json(
-        shared_datadir / "tree_with_3_repetitions.json", default_config
-    )
-    analysis = TreeAnalysis(search_tree)
-
-    rt = make_reaction_tree(analysis)
-
-    assert rt.has_repeating_patterns
-    hidden_nodes = [
-        node for node in rt.graph if rt.graph.nodes[node].get("hide", False)
-    ]
-    assert len(hidden_nodes) == 10
-
-
-def test_find_repetetive_patterns_created_tree_no_patterns(
-    default_config, mock_stock, shared_datadir
-):
-    mock_stock(default_config, Molecule(smiles="CC"), Molecule(smiles="CCCO"))
-
-    # Try with a short tree (3 nodes, 1 reaction)
-    search_tree = MctsSearchTree.from_json(
-        shared_datadir / "tree_without_repetition.json", default_config
-    )
-    analysis = TreeAnalysis(search_tree)
-
-    rt = make_reaction_tree(analysis)
-
-    assert not rt.has_repeating_patterns
-    hidden_nodes = [
-        node for node in rt.graph if rt.graph.nodes[node].get("hide", False)
-    ]
-    assert len(hidden_nodes) == 0
-
-    # Try with something longer
-    search_tree = MctsSearchTree.from_json(
-        shared_datadir / "tree_without_repetition_longer.json", default_config
-    )
-    analysis = TreeAnalysis(search_tree)
-
-    rt = make_reaction_tree(analysis)
-
-    assert not rt.has_repeating_patterns
-
-
-def test_route_node_depth_from_analysis(default_config, mock_stock, shared_datadir):
-    mock_stock(default_config, Molecule(smiles="CC"), Molecule(smiles="CCCO"))
-    search_tree = MctsSearchTree.from_json(
-        shared_datadir / "tree_without_repetition.json", default_config
-    )
-    analysis = TreeAnalysis(search_tree)
-    rt = make_reaction_tree(analysis)
-
-    mols = list(rt.molecules())
-
-    assert rt.depth(mols[0]) == 0
-    assert rt.depth(mols[1]) == 2
-    assert rt.depth(mols[2]) == 2
-
-    rxns = list(rt.reactions())
-    assert rt.depth(rxns[0]) == 1
-
-    for mol in rt.molecules():
-        assert rt.depth(mol) == 2 * rt.graph.nodes[mol]["transform"]
-
-
-def test_route_node_depth_from_json(load_reaction_tree):
-    dict_ = load_reaction_tree("sample_reaction_with_hidden.json", 0)
-    rt = ReactionTree.from_dict(dict_)
-
-    mols = list(rt.molecules())
-
-    assert rt.depth(mols[0]) == 0
-    assert rt.depth(mols[1]) == 2
-    assert rt.depth(mols[2]) == 4
-    assert rt.depth(mols[3]) == 6
-    assert rt.depth(mols[4]) == 6
-    assert rt.depth(mols[5]) == 8
-    assert rt.depth(mols[6]) == 8
-    assert rt.depth(mols[7]) == 10
-    assert rt.depth(mols[8]) == 12
-    assert rt.depth(mols[9]) == 12
-    assert rt.depth(mols[10]) == 2
-
-    rxns = list(rt.reactions())
-
-    assert rt.depth(rxns[0]) == 1
-    assert rt.depth(rxns[1]) == 3
-
-    for mol in rt.molecules():
-        assert rt.depth(mol) == 2 * rt.graph.nodes[mol]["transform"]
-
-
-def test_route_distance_self(load_reaction_tree):
-    dict_ = load_reaction_tree("sample_reaction_with_hidden.json", 0)
-    rt = ReactionTree.from_dict(dict_)
-
-    assert rt.distance_to(rt) == 0.0
-
-
-def test_route_distance_other(load_reaction_tree):
-    dict_ = load_reaction_tree("routes_for_clustering.json", 0)
-    rt1 = ReactionTree.from_dict(dict_)
-    dict_ = load_reaction_tree("routes_for_clustering.json", 1)
-    rt2 = ReactionTree.from_dict(dict_)
-
-    dist = rt1.distance_to(rt2, content="molecules")
-
-    assert pytest.approx(dist, abs=1e-2) == 2.6522
-
-
-@pytest.mark.parametrize(
-    ("filename", "expected"),
-    [("routes_for_clustering.json", False), ("branched_route.json", True)],
-)
-def test_route_is_branched(load_reaction_tree, filename, expected):
-    rt = ReactionTree.from_dict(load_reaction_tree(filename))
-
-    assert rt.is_branched() == expected
-
-
 def test_create_route_collection_full(setup_analysis, mocker):
     analysis, _ = setup_analysis()
 
-    routes = RouteCollection.from_analysis(analysis, 5)
+    routes = RouteCollection.from_analysis(analysis)
 
     assert len(routes) == 7
     # Check a few of the routes
@@ -366,7 +141,7 @@ def test_create_route_collection_full(setup_analysis, mocker):
 def test_create_route_collection_andor_tree(setup_analysis_andor_tree):
     analysis = setup_analysis_andor_tree()
 
-    routes = RouteCollection.from_analysis(analysis, 5)
+    routes = RouteCollection.from_analysis(analysis)
 
     assert len(routes) == 3
     assert routes.nodes == [None, None, None]
@@ -374,7 +149,7 @@ def test_create_route_collection_andor_tree(setup_analysis_andor_tree):
 
 def test_compute_new_score(setup_analysis):
     analysis, _ = setup_analysis()
-    routes = RouteCollection.from_analysis(analysis, 5)
+    routes = RouteCollection.from_analysis(analysis)
 
     routes.compute_scores(NumberOfReactionsScorer())
 
@@ -389,7 +164,7 @@ def test_compute_new_score(setup_analysis):
 
 def test_rescore_collection(setup_analysis):
     analysis, _ = setup_analysis()
-    routes = RouteCollection.from_analysis(analysis, 5)
+    routes = RouteCollection.from_analysis(analysis)
 
     routes.rescore(NumberOfReactionsScorer())
 
@@ -404,7 +179,7 @@ def test_rescore_collection(setup_analysis):
 
 def test_dict_with_scores(setup_analysis):
     analysis, _ = setup_analysis()
-    routes = RouteCollection.from_analysis(analysis, 5)
+    routes = RouteCollection.from_analysis(analysis)
 
     dicts = routes.dict_with_scores()
 
@@ -413,11 +188,8 @@ def test_dict_with_scores(setup_analysis):
     assert np.round(dicts[0]["scores"]["state score"], 3) == 0.994
 
 
-def test_compute_new_score_for_trees(default_config, mock_stock, load_reaction_tree):
-    mock_stock(
-        default_config, "N#Cc1cccc(N)c1F", "O=C(Cl)c1ccc(F)cc1", "CN1CCC(Cl)CC1", "O"
-    )
-    rt = ReactionTree.from_dict(load_reaction_tree("sample_reaction.json"))
+def test_compute_new_score_for_trees(default_config, setup_linear_reaction_tree):
+    rt = setup_linear_reaction_tree()
     routes = RouteCollection(reaction_trees=[rt])
 
     assert routes.nodes[0] is None
@@ -431,11 +203,8 @@ def test_compute_new_score_for_trees(default_config, mock_stock, load_reaction_t
     assert routes.all_scores[0]["number of reactions"] == 2
 
 
-def test_rescore_collection_for_trees(default_config, mock_stock, load_reaction_tree):
-    mock_stock(
-        default_config, "N#Cc1cccc(N)c1F", "O=C(Cl)c1ccc(F)cc1", "CN1CCC(Cl)CC1", "O"
-    )
-    rt = ReactionTree.from_dict(load_reaction_tree("sample_reaction.json"))
+def test_rescore_collection_for_trees(default_config, setup_linear_reaction_tree):
+    rt = setup_linear_reaction_tree()
     routes = RouteCollection(reaction_trees=[rt])
     routes.compute_scores(StateScorer(default_config))
 
@@ -462,15 +231,15 @@ def test_create_combine_tree_dict_from_json(load_reaction_tree):
     assert combined_dict["children"][0]["is_reaction"]
     assert len(combined_dict["children"][0]["children"]) == 2
     assert len(combined_dict["children"][1]["children"]) == 2
-    assert len(combined_dict["children"][1]["children"][0]["children"]) == 2
-    assert combined_dict["children"][1]["children"][0]["children"][0]["is_reaction"]
+    assert len(combined_dict["children"][1]["children"][1]["children"]) == 2
+    assert combined_dict["children"][1]["children"][1]["children"][0]["is_reaction"]
     assert combined_dict == expected
 
 
 def test_create_combine_tree_dict_from_tree(
-    mock_stock, default_config, load_reaction_tree, shared_datadir
+    setup_stock, default_config, load_reaction_tree, shared_datadir
 ):
-    mock_stock(
+    setup_stock(
         default_config,
         "Nc1ccc(NC(=S)Nc2ccccc2)cc1",
         "Cc1ccc2nc3ccccc3c(Cl)c2c1",
@@ -483,7 +252,9 @@ def test_create_combine_tree_dict_from_tree(
         shared_datadir / "tree_for_clustering.json", default_config
     )
     analysis = TreeAnalysis(search_tree)
-    collection = RouteCollection.from_analysis(analysis, 3)
+    collection = RouteCollection.from_analysis(
+        analysis, RouteSelectionArguments(nmin=3)
+    )
     expected = load_reaction_tree("combined_example_tree.json")
 
     combined_dict = collection.combined_reaction_trees().to_dict()
@@ -492,8 +263,8 @@ def test_create_combine_tree_dict_from_tree(
     assert combined_dict["children"][0]["is_reaction"]
     assert len(combined_dict["children"][0]["children"]) == 2
     assert len(combined_dict["children"][1]["children"]) == 2
-    assert len(combined_dict["children"][1]["children"][0]["children"]) == 2
-    assert combined_dict["children"][1]["children"][0]["children"][0]["is_reaction"]
+    assert len(combined_dict["children"][1]["children"][1]["children"]) == 2
+    assert combined_dict["children"][1]["children"][1]["children"][0]["is_reaction"]
     assert combined_dict == expected
 
 

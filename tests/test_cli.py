@@ -18,7 +18,8 @@ from aizynthfinder.training.make_false_products import main as make_false_main
 from aizynthfinder.tools.download_public_data import main as download_main
 from aizynthfinder.training.utils import Config
 from aizynthfinder.chem import MoleculeException
-from aizynthfinder.analysis import RouteCollection, ReactionTree
+from aizynthfinder.analysis import RouteCollection
+from aizynthfinder.reactiontree import ReactionTree
 
 
 def test_create_gui_app(mocker):
@@ -92,14 +93,25 @@ def test_cli_single_smiles(mocker, add_cli_arguments, tmpdir, capsys):
     assert "b: 2" in output.out
 
 
-def test_cli_multiple_smiles(mocker, add_cli_arguments, tmpdir, shared_datadir, capsys):
+def test_cli_multiple_smiles(
+    mocker,
+    add_cli_arguments,
+    tmpdir,
+    shared_datadir,
+    capsys,
+    create_dummy_smiles_source,
+):
     finder_patch = mocker.patch("aizynthfinder.interfaces.aizynthcli.AiZynthFinder")
-    finder_patch.return_value.extract_statistics.return_value = {"a": 1, "b": 2}
+    finder_patch.return_value.extract_statistics.return_value = {
+        "a": 1,
+        "b": 2,
+        "is_solved": True,
+    }
     finder_patch.return_value.tree_search.return_value = 1.5
     pd_patch = mocker.patch(
         "aizynthfinder.interfaces.aizynthcli.pd.DataFrame.from_dict"
     )
-    smiles_input = str(shared_datadir / "smiles_plain.txt")
+    smiles_input = create_dummy_smiles_source("txt")
     output_name = str(tmpdir / "data.hdf5")
     add_cli_arguments(
         f"--smiles {smiles_input} --config config_local.yml --output {output_name}"
@@ -114,21 +126,23 @@ def test_cli_multiple_smiles(mocker, add_cli_arguments, tmpdir, shared_datadir, 
     assert f"Output saved to {output_name}" in output.out
 
 
-def test_make_stock_from_plain_file(shared_datadir, tmpdir, add_cli_arguments, stock):
+def test_make_stock_from_plain_file(
+    create_dummy_smiles_source, tmpdir, add_cli_arguments, default_config
+):
     output_name = str(tmpdir / "temp.hdf5")
-    filename = str(shared_datadir / "smiles_plain.txt")
+    filename = create_dummy_smiles_source("txt")
     add_cli_arguments(f"--files {filename} --output {output_name}")
 
     make_stock_main()
 
-    stock.load(filename, "stock1")
-    stock.select(["stock1"])
-    assert len(stock) == 3
+    default_config.stock.load(filename, "stock1")
+    default_config.stock.select(["stock1"])
+    assert len(default_config.stock) == 3
 
 
-def test_cat_main(shared_datadir, tmpdir, add_cli_arguments):
+def test_cat_main(tmpdir, add_cli_arguments, create_dummy_stock1, create_dummy_stock2):
     filename = str(tmpdir / "output.hdf")
-    inputs = [str(shared_datadir / "stock1.h5"), str(shared_datadir / "stock2.h5")]
+    inputs = [create_dummy_stock1("hdf5"), create_dummy_stock2]
     add_cli_arguments(f"--files {inputs[0]} {inputs[1]} --output {filename}")
 
     cat_main()
@@ -168,7 +182,7 @@ def test_preprocess_expansion(write_yaml, shared_datadir, add_cli_arguments):
     config = Config(config_path)
     assert len(data) == 2
     assert "retro_template" in data.columns
-    assert "library_occurence" in data.columns
+    assert "library_occurrence" in data.columns
     for column in config["metadata_headers"]:
         assert column in data.columns
 
@@ -214,7 +228,7 @@ def test_preprocess_expansion_no_class(write_yaml, shared_datadir, add_cli_argum
     config = Config(config_path)
     assert len(data) == 2
     assert "retro_template" in data.columns
-    assert "library_occurence" in data.columns
+    assert "library_occurrence" in data.columns
     for column in config["metadata_headers"]:
         assert column in data.columns
 

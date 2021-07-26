@@ -33,11 +33,11 @@ The batch-mode script is called ``aizynthcli`` and can be executed like:
 
 .. code-block:: bash
 
-    aizynthcli --config config_local.yml --policy full_uspto --stock ACD Addendum --smiles smiles.txt
+    aizynthcli --config config_local.yml --policy full_uspto --stock ACD eMolecules --smiles smiles.txt
 
 
 where `config_local.yml` contains configurations such as paths to policy models and stocks (see :doc:`here <configuration>`),
-`full_uspto` is the chosen policy model, `ACD` and `Addendum` are the chosen stocks and `smiles.txt` is a simple text 
+`full_uspto` is the chosen policy model, `ACD` and `eMolecules` are the chosen stocks and `smiles.txt` is a simple text
 file with SMILES (one on each row). If the ``--policy`` or ``--stock`` arguments are omitted, the first policy and all stocks
 in the configuration file are auto-selected.
 

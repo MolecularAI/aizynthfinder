@@ -72,7 +72,7 @@ def _save_unique_templates(dataset: pd.DataFrame, config: Config) -> None:
     if "classification" in dataset.columns:
         dataset["classification"].fillna("-", inplace=True)
     dataset = dataset.drop_duplicates(subset="template_code", keep="first")
-    dataset["library_occurence"] = template_group.values
+    dataset["library_occurrence"] = template_group.values
     dataset.set_index("template_code", inplace=True)
     dataset = dataset.sort_index()
     dataset.to_hdf(config.filename("unique_templates"), "table")

@@ -1,5 +1,6 @@
 """ Module containing the implementation of a reaction tree or route and factory classes to make such trees """
 from __future__ import annotations
+import operator
 import json
 import abc
 from typing import TYPE_CHECKING
@@ -12,7 +13,6 @@ from aizynthfinder.chem import (
     UniqueMolecule,
     FixedRetroReaction,
     none_molecule,
-    hash_reactions,
 )
 from aizynthfinder.utils.image import make_graphviz_image
 
@@ -26,7 +26,6 @@ if TYPE_CHECKING:
         Iterable,
         Any,
         Dict,
-        Sequence,
     )
     from aizynthfinder.chem import RetroReaction
 
@@ -36,7 +35,9 @@ class ReactionTree:
     Encapsulation of a bipartite reaction tree of a single route.
     The nodes consists of either FixedRetroReaction or UniqueMolecule objects.
 
-    :ivar has_repeating_patterns: if the graph has repetitive elements
+    The reaction tree is initialized at instantiation and is not supposed to
+    be updated.
+
     :ivar graph: the bipartite graph
     :ivar is_solved: if all of the leaf nodes are in stock
     :ivar root: the root of the tree
@@ -45,7 +46,6 @@ class ReactionTree:
     def __init__(self) -> None:
         self.graph = nx.DiGraph()
         self.root = none_molecule()
-        self.has_repeating_patterns: bool = False
         self.is_solved: bool = False
 
     @classmethod
@@ -55,9 +55,8 @@ class ReactionTree:
 
         This is supposed to be the opposite of ``to_dict``,
         but because that format loses information, the returned
-        object is not a full copy:
-        * The stock will only contain the list of molecules marked as ``in_stock`` in the dictionary.
-        * The reaction nodes will be of type `FixedRetroReaction`
+        object is not a full copy as the stock will only contain
+        the list of molecules marked as ``in_stock`` in the dictionary.
 
         The returned object should be sufficient to e.g. generate an image of the route.
 
@@ -157,7 +156,7 @@ class ReactionTree:
         show_all: bool = True,
     ) -> PilImage:
         """
-        Return a pictoral representation of the route
+        Return a pictorial representation of the route
 
         :raises ValueError: if image could not be produced
         :param in_stock_colors: the colors around molecules, defaults to {True: "green", False: "orange"}
@@ -171,7 +170,14 @@ class ReactionTree:
         in_stock_colors = in_stock_colors or {True: "green", False: "orange"}
         molecules = []
         frame_colors = []
-        for node in self.molecules():
+        mols = sorted(
+            self.molecules(),
+            key=lambda mol: (
+                self.depth(mol),
+                mol.weight,
+            ),
+        )
+        for node in mols:
             if not show_all and not show(node):
                 continue
             molecules.append(node)
@@ -219,7 +225,10 @@ class ReactionTree:
 
         dict_["children"] = []
 
-        for child in self.graph.successors(node):
+        children = list(self.graph.successors(node))
+        if isinstance(node, FixedRetroReaction):
+            children.sort(key=operator.attrgetter("weight"))
+        for child in children:
             child_dict = self._build_dict(child)
             dict_["children"].append(child_dict)
 
@@ -228,72 +237,13 @@ class ReactionTree:
         return dict_
 
 
-class _RepeatingPatternIdentifier:
-    """
-    Encapsulation of algorithm to identify repeating patterns of reactions and mark them as hidden.
-
-    A unit of the repetition is the hash of two consecutive reactions,
-    where the first unit should be the first two reactions of the route.
-
-    This is for hiding repeating patterns of e.g. protection followed by deprotection,
-    which is a common behaviour for the tree search when it fails to solve a route.
-    """
-
-    @staticmethod
-    def find(reaction_tree: ReactionTree) -> None:
-        """
-        Find the repeating patterns and mark the nodes
-
-        :param reaction_tree: the reaction tree to process
-        """
-        for node in reaction_tree.reactions():
-            # We are only interesting of starting at the very first reaction
-            if any(reaction_tree.graph[mol] for mol in node.reactants[0]):
-                continue
-            actions = _RepeatingPatternIdentifier._list_reactions(reaction_tree, node)
-            if len(actions) < 5:
-                continue
-
-            hashes = [
-                hash_reactions([rxn1, rxn2], sort=False)
-                for rxn1, rxn2 in zip(actions[:-1:2], actions[1::2])
-            ]
-            for idx, (hash1, hash2) in enumerate(zip(hashes[:-1], hashes[1:])):
-                if hash1 == hash2:
-                    _RepeatingPatternIdentifier._hide_reaction(
-                        reaction_tree, actions[idx * 2]
-                    )
-                    _RepeatingPatternIdentifier._hide_reaction(
-                        reaction_tree, actions[idx * 2 + 1]
-                    )
-                    reaction_tree.has_repeating_patterns = True
-                # The else-clause prevents removing repeating patterns in the middle of a route
-                else:
-                    break
-
-    @staticmethod
-    def _hide_reaction(reaction_tree: ReactionTree, reaction_node: FixedRetroReaction):
-        reaction_tree.graph.nodes[reaction_node]["hide"] = True
-        for reactants in reaction_node.reactants[0]:
-            reaction_tree.graph.nodes[reactants]["hide"] = True
-
-    @staticmethod
-    def _list_reactions(
-        reaction_tree: ReactionTree, reaction_node: FixedRetroReaction
-    ) -> Sequence[FixedRetroReaction]:
-        """List all reaction nodes from the given one to the last"""
-        reactions = [reaction_node]
-        #  curr_rxn = reaction_node
-        product = reaction_node.mol
-        while product is not reaction_tree.root:
-            curr_rxn = next(reaction_tree.graph.predecessors(product))
-            product = curr_rxn.mol
-            reactions.append(curr_rxn)
-        return reactions
-
-
 class ReactionTreeLoader(abc.ABC):
-    """Base class for classes that creates a reaction tree object"""
+    """
+    Base class for classes that creates a reaction tree object
+
+    This class makes sure that node attributes are set after the
+    graph is generated, and provides utility methods.
+    """
 
     def __init__(self, *args: Any, **kwargs: Any) -> None:
         self._unique_mols: Dict[int, UniqueMolecule] = {}
@@ -304,7 +254,6 @@ class ReactionTreeLoader(abc.ABC):
         self.tree.is_solved = all(
             self.tree.in_stock(node) for node in self.tree.leafs()
         )
-        _RepeatingPatternIdentifier.find(self.tree)
 
     def _add_node(
         self,
@@ -392,12 +341,14 @@ class ReactionTreeFromExpansion(ReactionTreeLoader):
 
     This is mainly intended as a convenience function for the expander interface
     """
+
     def _load(self, reaction: RetroReaction) -> None:  # type: ignore
         root = self._unique_mol(reaction.mol)
         self._add_node(root)
 
         rxn = self._unique_reaction(reaction)
-        rxn.metadata["smarts"] = reaction.smarts
+        if hasattr(reaction, "smarts"):
+            rxn.metadata["smarts"] = reaction.smarts  # type: ignore
         self._add_node(rxn)
         self.tree.graph.add_edge(root, rxn)
 

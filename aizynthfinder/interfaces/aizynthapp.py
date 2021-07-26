@@ -309,21 +309,19 @@ class AiZynthApp:
                 self.finder.filter_policy.deselect()
             else:
                 self.finder.filter_policy.select(self._input["policy"].value)
-            self.finder.config.update(
-                **{
-                    "C": self._input["C"].value,
-                    "max_transforms": self._input["max_transforms"].value,
-                    "cutoff_cumulative": self._input["cutoff_cumulative"].value,
-                    "cutoff_number": int(self._input["cutoff_number"].value),
-                    "return_first": self._input["return_first"].value,
-                    "time_limit": self._input["time_limit"].value * 60,
-                    "iteration_limit": self._input["iteration_limit"].value,
-                    "filter_cutoff": self._input["filter_cutoff"].value,
-                    "exclude_target_from_stock": self._input[
-                        "exclude_target_from_stock"
-                    ].value,
-                }
-            )
+            self.finder.config.properties = {
+                "C": self._input["C"].value,
+                "max_transforms": self._input["max_transforms"].value,
+                "cutoff_cumulative": self._input["cutoff_cumulative"].value,
+                "cutoff_number": int(self._input["cutoff_number"].value),
+                "return_first": self._input["return_first"].value,
+                "time_limit": self._input["time_limit"].value * 60,
+                "iteration_limit": self._input["iteration_limit"].value,
+                "filter_cutoff": self._input["filter_cutoff"].value,
+                "exclude_target_from_stock": self._input[
+                    "exclude_target_from_stock"
+                ].value,
+            }
 
             smiles = self._input["smiles"].value
             print("Setting target molecule with smiles: %s" % smiles)
