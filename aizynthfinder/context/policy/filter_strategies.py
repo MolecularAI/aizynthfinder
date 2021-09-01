@@ -76,6 +76,8 @@ class QuickKerasFilter(FilterStrategy):
         source = kwargs["source"]
         self._logger.info(f"Loading filter policy model from {source} to {key}")
         self.model = load_model(source, key, self._config.use_remote_models)
+        self._prod_fp_name = kwargs.get("prod_fp_name", "input_1")
+        self._rxn_fp_name = kwargs.get("rxn_fp_name", "input_2")
 
     def apply(self, reaction: RetroReaction) -> None:
         feasible, prob = self.feasibility(reaction)
@@ -99,7 +101,8 @@ class QuickKerasFilter(FilterStrategy):
 
     def _predict(self, reaction: RetroReaction) -> float:
         prod_fp, rxn_fp = self._reaction_to_fingerprint(reaction, self.model)
-        return self.model.predict([prod_fp, rxn_fp])[0][0]
+        kwargs = {self._prod_fp_name: prod_fp, self._rxn_fp_name: rxn_fp}
+        return self.model.predict(prod_fp, rxn_fp, **kwargs)[0][0]
 
     @staticmethod
     def _reaction_to_fingerprint(

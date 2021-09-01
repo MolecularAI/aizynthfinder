@@ -96,14 +96,14 @@ class LocalKerasModel:
     def __len__(self) -> int:
         return self._model_dimensions
 
-    def predict(self, input_: _ModelInput) -> np.ndarray:
+    def predict(self, *args: np.ndarray, **_: np.ndarray) -> np.ndarray:
         """
         Perform a forward pass of the neural network.
 
-        :param input_: the input vector
+        :param args: the input vectors
         :return: the vector of the output layer
         """
-        return self.model.predict(input_)
+        return self.model.predict(args)
 
 
 def _log_and_reraise_exceptions(method: Callable) -> Callable:
@@ -136,16 +136,20 @@ class ExternalModelViaREST:
             self._sig_def["inputs"][first_input_name]["tensor_shape"]["dim"][1]["size"]
         )
 
-    def predict(self, inputs: _ModelInput) -> np.ndarray:
+    def predict(self, *args: np.ndarray, **kwargs: np.ndarray) -> np.ndarray:
         """
         Get prediction from model.
 
-        :param inputs: the input vector or list of vectors
+        If the keys in `kwargs` agree with the model input names, they
+        will be used in stead of `arg`
+
+        :param args: the input vectors
+        :param kwargs: the named input vectors
         :return: the vector of the output layer
         """
         url = self._model_url + ":predict"
         res = self._handle_rest_api_request(
-            "POST", url, json=self._make_payload(inputs)
+            "POST", url, json=self._make_payload(*args, **kwargs)
         )
         return np.asarray(res["outputs"])
 
@@ -168,13 +172,14 @@ class ExternalModelViaREST:
 
         return res.json()
 
-    def _make_payload(self, inputs: _ModelInput) -> dict:
-        if isinstance(inputs, np.ndarray):
-            inputs = [inputs]
-        data = {
-            name: fp.tolist()
-            for name, fp in zip(self._sig_def["inputs"].keys(), inputs)
-        }
+    def _make_payload(self, *args: np.ndarray, **kwargs: np.ndarray) -> dict:
+        if all(key in kwargs for key in self._sig_def["inputs"].keys()):
+            data = {key: kwargs[key].tolist() for key in self._sig_def["inputs"].keys()}
+        else:
+            data = {
+                name: fp.tolist()
+                for name, fp in zip(self._sig_def["inputs"].keys(), args)
+            }
         return {"inputs": data}
 
     @staticmethod
@@ -208,14 +213,18 @@ class ExternalModelViaGRPC:
         )
 
     @_log_and_reraise_exceptions
-    def predict(self, inputs: _ModelInput) -> np.ndarray:
+    def predict(self, *args: np.ndarray, **kwargs: np.ndarray) -> np.ndarray:
         """
         Get prediction from model.
 
-        :param inputs: the input vector or list of vectors
+        If the keys in `kwargs` agree with the model input names, they
+        will be used in stead of `arg`
+
+        :param args: the input vectors
+        :param kwargs: the named input vectors
         :return: the vector of the output layer
         """
-        input_tensors = self._make_payload(inputs)
+        input_tensors = self._make_payload(*args, **kwargs)
         channel = grpc.insecure_channel(self._server)
         service = prediction_service_pb2_grpc.PredictionServiceStub(channel)
         request = predict_pb2.PredictRequest()
@@ -237,13 +246,16 @@ class ExternalModelViaGRPC:
         channel.close()
         return result["metadata"]["signature_def"]["signatureDef"]["serving_default"]
 
-    def _make_payload(self, inputs: _ModelInput) -> dict:
-        if isinstance(inputs, np.ndarray):
-            inputs = [inputs]
+    def _make_payload(self, *args: np.ndarray, **kwargs: np.ndarray) -> dict:
+        if all(key in kwargs for key in self._sig_def["inputs"].keys()):
+            inputs = kwargs
+        else:
+            inputs = dict(zip(self._sig_def["inputs"].keys(), args))
+
         tensors = {}
-        for name, fp_ in zip(self._sig_def["inputs"].keys(), inputs):
+        for name, vec in inputs.items():
             size = int(self._sig_def["inputs"][name]["tensorShape"]["dim"][1]["size"])
-            tensors[name] = tf.make_tensor_proto(fp_, dtype=np.float32, shape=(1, size))
+            tensors[name] = tf.make_tensor_proto(vec, dtype=np.float32, shape=(1, size))
         return tensors
 
     @staticmethod
