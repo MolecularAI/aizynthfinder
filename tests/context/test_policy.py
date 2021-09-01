@@ -1,10 +1,15 @@
 import pytest
 import numpy as np
 
-from aizynthfinder.chem import TreeMolecule, SmilesBasedRetroReaction
+from aizynthfinder.chem import (
+    TreeMolecule,
+    SmilesBasedRetroReaction,
+    TemplatedRetroReaction,
+)
 from aizynthfinder.context.policy import (
     TemplateBasedExpansionStrategy,
     QuickKerasFilter,
+    ReactantsCountFilter,
 )
 from aizynthfinder.utils.exceptions import RejectionException, PolicyException
 
@@ -217,3 +222,24 @@ def test_filter_rejection(default_config, mock_keras_model):
 
     filter_policy._config.filter_cutoff = 0.15
     filter_policy(reaction)
+
+
+def test_reactants_count_rejection(default_config):
+    smarts = (
+        "([C:3]-[N;H0;D2;+0:2]=[C;H0;D3;+0:1](-[c:4]1:[c:5]:[c:6]:[c:7]:[c:8]:[c:9]:1)-[c;H0;D3;+0:11](:[c:10]):[c:12])>>"
+        "(O=[C;H0;D3;+0:1](-[NH;D2;+0:2]-[C:3])-[c:4]1:[c:5]:[c:6]:[c:7]:[c:8]:[c:9]:1.[c:10]:[cH;D2;+0:11]:[c:12])"
+    )
+    mol = TreeMolecule(parent=None, smiles="c1c2c(ccc1)CCN=C2c3ccccc3")
+    rxn1 = TemplatedRetroReaction(mol=mol, smarts=smarts)
+    filter = ReactantsCountFilter("dummy", default_config)
+
+    assert len(rxn1.reactants) == 2
+
+    rxn2 = rxn1.copy(index=1)
+    if len(rxn1.reactants[0]) == 1:
+        rxn1, rxn2 = rxn2, rxn1
+
+    assert filter(rxn2) is None
+
+    with pytest.raises(RejectionException):
+        filter(rxn1)

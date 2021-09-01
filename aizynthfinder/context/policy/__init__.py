@@ -9,4 +9,5 @@ from aizynthfinder.context.policy.expansion_strategies import (
 from aizynthfinder.context.policy.filter_strategies import (
     FilterStrategy,
     QuickKerasFilter,
+    ReactantsCountFilter,
 )
