@@ -10,6 +10,8 @@ from aizynthfinder.utils.models import load_model
 from aizynthfinder.utils.logging import logger
 from aizynthfinder.context.policy.utils import _make_fingerprint
 from aizynthfinder.utils.exceptions import PolicyException, RejectionException
+from aizynthfinder.chem import TemplatedRetroReaction
+
 
 if TYPE_CHECKING:
     from aizynthfinder.utils.type_utils import Any, List, Tuple
@@ -36,7 +38,7 @@ class FilterStrategy(abc.ABC):
 
     _required_kwargs: List[str] = []
 
-    def __init__(self, key: str, config: Configuration, **kwargs: str) -> None:
+    def __init__(self, key: str, config: Configuration, **kwargs: Any) -> None:
         if any(name not in kwargs for name in self._required_kwargs):
             raise PolicyException(
                 f"A {self.__class__.__name__} class needs to be initiated "
@@ -71,7 +73,7 @@ class QuickKerasFilter(FilterStrategy):
 
     _required_kwargs: List[str] = ["source"]
 
-    def __init__(self, key: str, config: Configuration, **kwargs: str) -> None:
+    def __init__(self, key: str, config: Configuration, **kwargs: Any) -> None:
         super().__init__(key, config, **kwargs)
         source = kwargs["source"]
         self._logger.info(f"Loading filter policy model from {source} to {key}")
@@ -111,3 +113,28 @@ class QuickKerasFilter(FilterStrategy):
         rxn_fp = _make_fingerprint(reaction, model)
         prod_fp = _make_fingerprint(reaction.mol, model)
         return prod_fp, rxn_fp
+
+
+class ReactantsCountFilter(FilterStrategy):
+    """
+    Check that the number of reactants is was expected from the template
+
+    :param key: the key or label
+    :param config: the configuration of the tree search
+    """
+
+    def __init__(self, key: str, config: Configuration, **kwargs: Any) -> None:
+        super().__init__(key, config, **kwargs)
+        self._logger.info(f"Loading reactants count filter to {key}")
+
+    def apply(self, reaction: RetroReaction) -> None:
+        if not isinstance(reaction, TemplatedRetroReaction):
+            raise ValueError(
+                "Reactants count filter can only be used on templated retro reaction "
+            )
+
+        reactants = reaction.reactants[reaction.index]
+        if len(reactants) > reaction.rd_reaction.GetNumProductTemplates():
+            raise RejectionException(
+                f"{reaction} was filtered out because number of reactants disagree with the template"
+            )

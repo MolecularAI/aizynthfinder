@@ -308,6 +308,23 @@ class TemplatedRetroReaction(RetroReaction):
             f"retro reaction from template {self.smarts} on molecule {self.mol.smiles}"
         )
 
+    @property
+    def rd_reaction(self) -> RdReaction:
+        """ Return the RDKit reaction created from the SMART """
+        if self._rd_reaction is None:
+            self._rd_reaction = AllChem.ReactionFromSmarts(self.smarts)
+        return self._rd_reaction
+
+    def forward_reaction(self) -> Reaction:
+        """
+        Create the forward reaction corresponding to the SMARTS and reactants of this reaction
+
+        :return: the forward reaction
+        """
+        fwd_smarts = ">>".join(self.smarts.split(">>")[::-1])
+        mols = [Molecule(rd_mol=mol.rd_mol) for mol in self.reactants[self.index]]
+        return Reaction(mols=mols, smarts=fwd_smarts)
+
     def to_dict(self) -> StrDict:
         dict_ = super().to_dict()
         dict_["smarts"] = self.smarts
@@ -346,9 +363,7 @@ class TemplatedRetroReaction(RetroReaction):
         return self._reactants
 
     def _make_smiles(self):
-        if self._rd_reaction is None:
-            self._rd_reaction = AllChem.ReactionFromSmarts(self.smarts)
-        return AllChem.ReactionToSmiles(self._rd_reaction)
+        return AllChem.ReactionToSmiles(self.rd_reaction)
 
 
 class SmilesBasedRetroReaction(RetroReaction):

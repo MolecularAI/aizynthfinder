@@ -57,6 +57,8 @@ A more detailed configuration file is shown below
     filter:
       files:
         my_policy: /path/to/keras/model/weights.hdf5
+      ReactantsCountFilter:
+        filter_tag:
     stock:
       files:
         stock1: /path/to/stock1.hdf5
@@ -66,7 +68,9 @@ The (expansion) policy models are specified using two files
     * a checkpoint files from Keras in hdf5 format,
     * a HDF5 file containing templates. 
 
-The filter policy model is specified using a single checkpoint file from Keras in hdf5 format.
+The filter policy model is specified using a single checkpoint file from Keras in hdf5 format. Any additional
+filters can be specified using the classname, and a tag as seen above using ``ReactantsCountFilter`` with the flag
+``filter_tag``.
     
 The template file should be readable by ``pandas`` using  the ``table`` key and the ``retro_template`` column. 
 A policy can then be selected using the provided key, like ``my_policy`` in the above example. 
