@@ -19,6 +19,24 @@ def test_reset_tree():
     assert finder.tree is None
 
 
+def test_dead_end_expansion(setup_aizynthfinder):
+    """
+    Test the building of this tree:
+                root
+    root cannot be expanded
+    """
+    root_smi = "CN1CCC(C(=O)c2cccc(NC(=O)c3ccc(F)cc3)c2F)CC1"
+    lookup = {root_smi: []}
+    finder = setup_aizynthfinder(lookup, [])
+
+    finder.tree_search()
+
+    nodes = list(finder.tree.graph())
+    assert len(nodes) == 1
+    assert state_smiles(nodes[0].state) == [root_smi]
+    assert finder.search_stats["iterations"] == 100
+
+
 def test_one_expansion(setup_aizynthfinder):
     """
     Test the building of this tree:

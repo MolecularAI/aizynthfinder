@@ -14,7 +14,15 @@ from aizynthfinder.context.cost import MoleculeCost
 
 
 if TYPE_CHECKING:
-    from aizynthfinder.utils.type_utils import StrDict, Any, Dict, Union
+    from aizynthfinder.utils.type_utils import StrDict, Any, Dict, Union, Optional
+
+
+@dataclass
+class _PostprocessingConfiguration:
+    min_routes: int = 5
+    max_routes: int = 25
+    all_routes: bool = False
+    route_distance_model: Optional[str] = None
 
 
 @dataclass
@@ -36,6 +44,7 @@ class Configuration:  # pylint: disable=R0902
     cutoff_cumulative: float = 0.995
     cutoff_number: int = 50
     additive_expansion: bool = False
+    use_rdchiral: bool = True
     max_transforms: int = 6
     default_prior: float = 0.5
     use_prior: bool = True
@@ -48,6 +57,7 @@ class Configuration:  # pylint: disable=R0902
     prune_cycles_in_search: bool = True
     use_remote_models: bool = False
     search_algorithm: str = "mcts"
+    post_processing: _PostprocessingConfiguration = _PostprocessingConfiguration()
     stock: Stock = None  # type: ignore
     expansion_policy: ExpansionPolicy = None  # type: ignore
     filter_policy: FilterPolicy = None  # type: ignore
@@ -107,8 +117,7 @@ class Configuration:  # pylint: disable=R0902
 
     @property
     def properties(self) -> Dict[str, Union[int, float, str, bool]]:
-        """ Return the basic properties of the config as a dictionary
-        """
+        """Return the basic properties of the config as a dictionary"""
         dict_ = {}
         for item in dir(self):
             if item == "properties" or item.startswith("_"):
@@ -132,6 +141,10 @@ class Configuration:  # pylint: disable=R0902
                 continue
             if not hasattr(self, setting):
                 raise AttributeError(f"Could not find attribute to set: {setting}")
+            if not isinstance(value, (int, float, str, bool)):
+                raise ValueError(
+                    f"Trying to set property with invalid value {setting}={value}"
+                )
             setattr(self, setting, value)
             self._logger.info(f"Setting {setting.replace('_', ' ')} to {value}")
 
@@ -141,4 +154,7 @@ class Configuration:  # pylint: disable=R0902
         dict_.update(config.get("policy", {}).pop("properties", {}))
         dict_.update(config.get("filter", {}).pop("properties", {}))
         dict_.update(config.pop("properties", {}))
+        self.post_processing = _PostprocessingConfiguration(
+            **dict_.pop("post_processing", {})
+        )
         self.properties = dict_

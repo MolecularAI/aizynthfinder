@@ -23,6 +23,7 @@ from ipywidgets import (
     Dropdown,
     BoundedIntText,
     BoundedFloatText,
+    SelectMultiple,
 )
 from rdkit import Chem
 from IPython.display import display, HTML
@@ -116,16 +117,24 @@ class AiZynthApp:
             layout={"border": "1px solid silver"},
         )
 
-        self._input["policy"] = widgets.Dropdown(
+        init_value = (
+            [self.finder.expansion_policy.items[0]]
+            if self.finder.expansion_policy
+            else []
+        )
+        self._input["policy"] = SelectMultiple(
             options=self.finder.expansion_policy.items,
+            value=init_value,
             description="Expansion Policy:",
             style={"description_width": "initial"},
+            rows=min(len(self.finder.expansion_policy.items) + 1, 4),
         )
 
-        self._input["filter"] = widgets.Dropdown(
-            options=["None"] + self.finder.filter_policy.items,
+        self._input["filter"] = SelectMultiple(
+            options=self.finder.filter_policy.items,
             description="Filter Policy:",
             style={"description_width": "initial"},
+            rows=min(len(self.finder.filter_policy.items) + 1, 4),
         )
 
         max_time_box = self._make_slider_input("time_limit", "Time (min)", 1, 120)
@@ -153,7 +162,7 @@ class AiZynthApp:
         self._input["max_transforms"] = BoundedIntText(
             description="Max steps for substrates",
             min=1,
-            max=6,
+            max=20,
             value=self.finder.config.max_transforms,
             style={"description_width": "initial"},
         )
@@ -305,10 +314,10 @@ class AiZynthApp:
                     atom_count_limits[cb_input.description] = value_input.value
             self.finder.stock.set_stop_criteria({"counts": atom_count_limits})
             self.finder.expansion_policy.select(self._input["policy"].value)
-            if self._input["filter"].value == "None":
+            if not self._input["filter"].value:
                 self.finder.filter_policy.deselect()
             else:
-                self.finder.filter_policy.select(self._input["policy"].value)
+                self.finder.filter_policy.select(self._input["filter"].value)
             self.finder.config.properties = {
                 "C": self._input["C"].value,
                 "max_transforms": self._input["max_transforms"].value,

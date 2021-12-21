@@ -135,6 +135,7 @@ class TemplateBasedExpansionStrategy(ExpansionStrategy):
                         mol,
                         smarts=move[self._config.template_column],
                         metadata=metadata,
+                        use_rdchiral=self._config.use_rdchiral,
                     )
                 )
         return possible_actions, priors  # type: ignore
@@ -148,7 +149,7 @@ class TemplateBasedExpansionStrategy(ExpansionStrategy):
         sortidx = np.argsort(predictions)[::-1]
         cumsum: np.ndarray = np.cumsum(predictions[sortidx])
         if any(cumsum >= self._config.cutoff_cumulative):
-            maxidx = np.argmin(cumsum < self._config.cutoff_cumulative)
+            maxidx = int(np.argmin(cumsum < self._config.cutoff_cumulative))
         else:
             maxidx = len(cumsum)
         maxidx = min(maxidx, self._config.cutoff_number) or 1

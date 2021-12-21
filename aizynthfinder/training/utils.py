@@ -241,7 +241,7 @@ def reactants_to_fingerprint(args: Sequence[str], config: Config) -> np.ndarray:
                         config["fingerprint_radius"], config["fingerprint_len"]
                     )
                 )
-    return sum(fingerprints)
+    return sum(fingerprints)  # type: ignore
 
 
 def reaction_to_fingerprints(args: Sequence[str], config: Config) -> np.ndarray:

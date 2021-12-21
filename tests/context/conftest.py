@@ -1,5 +1,6 @@
 import pytest
 import numpy as np
+import pandas as pd
 
 from aizynthfinder.context.policy import TemplateBasedExpansionStrategy
 from aizynthfinder.context.stock import (
@@ -7,6 +8,17 @@ from aizynthfinder.context.stock import (
     StockQueryMixin,
     StockException,
 )
+
+
+@pytest.fixture
+def create_templates_file(tmpdir):
+    def wrapper(templates):
+        data = {"retro_template": templates}
+        filename = str(tmpdir / "dummy_templates.hdf5")
+        pd.DataFrame(data).to_hdf(filename, "table")
+        return filename
+
+    return wrapper
 
 
 @pytest.fixture
@@ -82,11 +94,14 @@ def mocked_mongo_db_query(mocker):
 
 @pytest.fixture
 def setup_template_expansion_policy(
-    default_config, create_dummy_templates, mock_keras_model
+    default_config, create_dummy_templates, mock_keras_model, create_templates_file
 ):
-    templates_filename = create_dummy_templates(3)
+    def wrapper(key="policy1", templates=None):
+        if templates is None:
+            templates_filename = create_dummy_templates(3)
+        else:
+            templates_filename = create_templates_file(templates)
 
-    def wrapper(key="policy1"):
         strategy = TemplateBasedExpansionStrategy(
             key, default_config, source="dummy.hdf5", templatefile=templates_filename
         )

@@ -21,6 +21,7 @@ if TYPE_CHECKING:
         RdReaction,
         StrDict,
         Iterable,
+        Any,
     )
     from aizynthfinder.chem.mol import UniqueMolecule
 
@@ -46,7 +47,7 @@ class _ReactionInterfaceMixin:
         reactants_fp = sum(
             mol.fingerprint(radius, nbits) for mol in self._reactants_getter()  # type: ignore
         )
-        return reactants_fp - product_fp
+        return reactants_fp - product_fp  # type: ignore
 
     def hash_list(self) -> List[str]:
         """
@@ -56,6 +57,19 @@ class _ReactionInterfaceMixin:
         """
         mols = self.reaction_smiles().replace(".", ">>").split(">>")
         return [hashlib.sha224(mol.encode("utf8")).hexdigest() for mol in mols]
+
+    def hash_key(self) -> str:
+        """
+        Return a code that can be use to identify the reaction
+
+        :return: the hash code
+        """
+        reactants = sorted([mol.inchi_key for mol in self._reactants_getter()])  # type: ignore
+        products = sorted([mol.inchi_key for mol in self._products_getter()])  # type: ignore
+        hash_ = hashlib.sha224()
+        for item in reactants + [">>"] + products:
+            hash_.update(item.encode())
+        return hash_.hexdigest()
 
     def rd_reaction_from_smiles(self) -> RdReaction:
         """
@@ -199,7 +213,7 @@ class RetroReaction(abc.ABC, _ReactionInterfaceMixin):
     _required_kwargs: List[str] = []
 
     def __init__(
-        self, mol: TreeMolecule, index: int = 0, metadata: StrDict = None, **kwargs: str
+        self, mol: TreeMolecule, index: int = 0, metadata: StrDict = None, **kwargs: Any
     ) -> None:
         if any(name not in kwargs for name in self._required_kwargs):
             raise KeyError(
@@ -297,10 +311,11 @@ class TemplatedRetroReaction(RetroReaction):
     _required_kwargs = ["smarts"]
 
     def __init__(
-        self, mol: TreeMolecule, index: int = 0, metadata: StrDict = None, **kwargs: str
+        self, mol: TreeMolecule, index: int = 0, metadata: StrDict = None, **kwargs: Any
     ):
         super().__init__(mol, index, metadata, **kwargs)
         self.smarts: str = kwargs["smarts"]
+        self._use_rdchiral: bool = kwargs.get("use_rdchiral", True)
         self._rd_reaction: Optional[RdReaction] = None
 
     def __str__(self) -> str:
@@ -331,6 +346,11 @@ class TemplatedRetroReaction(RetroReaction):
         return dict_
 
     def _apply(self) -> Tuple[Tuple[TreeMolecule, ...], ...]:
+        if self._use_rdchiral:
+            return self._apply_with_rdchiral()
+        return self._apply_with_rdkit()
+
+    def _apply_with_rdchiral(self) -> Tuple[Tuple[TreeMolecule, ...], ...]:
         """
         Apply a reactions smarts to a molecule and return the products (reactants for retro templates)
         Will try to sanitize the reactants, and if that fails it will not return that molecule
@@ -362,6 +382,30 @@ class TemplatedRetroReaction(RetroReaction):
 
         return self._reactants
 
+    def _apply_with_rdkit(self) -> Tuple[Tuple[TreeMolecule, ...], ...]:
+        rxn = AllChem.ReactionFromSmarts(self.smarts)
+        try:
+            self.mol.sanitize()
+        except MoleculeException:
+            reactants_list = []
+        else:
+            reactants_list = rxn.RunReactants([self.mol.rd_mol])
+
+        outcomes = []
+        for reactants in reactants_list:
+            try:
+                mols = tuple(
+                    TreeMolecule(parent=self.mol, rd_mol=mol, sanitize=True)
+                    for mol in reactants
+                )
+            except MoleculeException:
+                pass
+            else:
+                outcomes.append(mols)
+        self._reactants = tuple(outcomes)
+
+        return self._reactants
+
     def _make_smiles(self):
         return AllChem.ReactionToSmiles(self.rd_reaction)
 
@@ -381,7 +425,7 @@ class SmilesBasedRetroReaction(RetroReaction):
     _required_kwargs = ["reactants_str"]
 
     def __init__(
-        self, mol: TreeMolecule, index: int = 0, metadata: StrDict = None, **kwargs: str
+        self, mol: TreeMolecule, index: int = 0, metadata: StrDict = None, **kwargs: Any
     ):
         super().__init__(mol, index, metadata, **kwargs)
         self.reactants_str: str = kwargs["reactants_str"]

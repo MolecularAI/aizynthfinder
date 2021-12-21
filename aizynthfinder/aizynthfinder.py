@@ -115,7 +115,14 @@ class AiZynthFinder:
             raise ValueError("Search tree not initialized")
 
         self.analysis = TreeAnalysis(self.tree, scorer=self.scorers[scorer])
-        self.routes = RouteCollection.from_analysis(self.analysis, selection)
+        config_selection = RouteSelectionArguments(
+            nmin=self.config.post_processing.min_routes,
+            nmax=self.config.post_processing.max_routes,
+            return_all=self.config.post_processing.all_routes,
+        )
+        self.routes = RouteCollection.from_analysis(
+            self.analysis, selection or config_selection
+        )
 
     def extract_statistics(self) -> StrDict:
         """Extracts tree statistics as a dictionary"""

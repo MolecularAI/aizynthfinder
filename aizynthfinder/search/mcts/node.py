@@ -2,6 +2,7 @@
 """
 from __future__ import annotations
 from typing import TYPE_CHECKING
+import random
 
 import numpy as np
 
@@ -239,6 +240,10 @@ class MctsNode:
         else:
             self._children_values = [self._config.default_prior] * nactions
 
+        if nactions == 0:  # Reverse the expansion if it did not produce any children
+            self.is_expandable = False
+            self.is_expanded = False
+
     def is_terminal(self) -> bool:
         """
         Node is terminal if its unexpandable, or the internal state is terminal (solved)
@@ -423,5 +428,5 @@ class MctsNode:
         new_nodes = self._create_children_nodes(new_states, child_idx)
 
         if new_nodes:
-            return np.random.choice(new_nodes)
+            return random.choice(new_nodes)
         return None

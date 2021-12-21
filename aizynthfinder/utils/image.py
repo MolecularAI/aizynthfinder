@@ -186,6 +186,7 @@ def save_molecule_images(
 
     try:
         images = molecules_to_images(molecules, frame_colors)
+    # pylint: disable=broad-except
     except Exception:  # noqa
         images = [
             molecule_to_image(molecule, frame_color)
@@ -205,6 +206,7 @@ def make_graphviz_image(
     reactions: Union[Sequence[RetroReaction], Sequence[FixedRetroReaction]],
     edges: Sequence[Tuple[Any, Any]],
     frame_colors: Sequence[PilColor],
+    use_splines: bool = True,
 ) -> PilImage:
     """
     Create an image of a bipartite graph of molecules and reactions
@@ -214,6 +216,7 @@ def make_graphviz_image(
     :param reactions: the reaction nodes
     :param edges: the edges of the graph
     :param frame_colors: the color of the frame around each image
+    :param use_splines: if True tries to use splines to connect nodes in image
     :raises FileNotFoundError: if the image could not be produced
     :return: the create image
     """
@@ -244,6 +247,10 @@ def make_graphviz_image(
     with open(template_filepath, "r") as fileobj:
         template = Template(fileobj.read())
     template.globals["id"] = id  # type: ignore
+
+    if not use_splines:
+        output_img = _create_image(use_splines=False)
+        return Image.open(output_img)
 
     try:
         output_img = _create_image(use_splines=True)

@@ -157,6 +157,37 @@ def test_get_actions_two_policies(default_config, setup_template_expansion_polic
     assert priors == [0.7, 0.2]
 
 
+def test_get_actions_using_rdkit(
+    default_config, setup_template_expansion_policy, mocker
+):
+    smarts = (
+        "([#8:4]-[N;H0;D3;+0:5](-[C;D1;H3:6])-[C;H0;D3;+0:1](-[C:2])=[O;D1;H0:3])"
+        ">>(Cl-[C;H0;D3;+0:1](-[C:2])=[O;D1;H0:3]).([#8:4]-[NH;D2;+0:5]-[C;D1;H3:6])"
+    )
+    strategy, _ = setup_template_expansion_policy(templates=[smarts] * 3)
+    expansion_policy = default_config.expansion_policy
+    expansion_policy.load(strategy)
+    mols = [TreeMolecule(smiles="CCO", parent=None)]
+    expansion_policy.select("policy1")
+    mocker.patch(
+        "aizynthfinder.chem.reaction.AllChem.ReactionFromSmarts",
+        side_effect=RuntimeError("Intential error"),
+    )
+
+    actions, _ = expansion_policy.get_actions(mols)
+
+    assert actions[0] is not None
+
+    # Now switch to RDKit
+    default_config.use_rdchiral = False
+    actions, _ = expansion_policy.get_actions(mols)
+
+    # This is a kind of convulted way to check that the RDKit application route will be called
+    # the actual testing of the RDKit routine is done elsewhere
+    with pytest.raises(RuntimeError, match="Intential error"):
+        _ = actions[0].reactants
+
+
 def test_create_quick_filter_strategy_wo_kwargs():
     with pytest.raises(
         PolicyException, match=" class needs to be initiated with keyword arguments"
@@ -222,6 +253,36 @@ def test_filter_rejection(default_config, mock_keras_model):
 
     filter_policy._config.filter_cutoff = 0.15
     filter_policy(reaction)
+
+
+def test_skip_filter_rejection(default_config, mock_keras_model):
+    filter_policy = default_config.filter_policy
+    filter_policy.load_from_config(
+        **{
+            "QuickKerasFilter": {
+                "policy1": {"source": "dummy1", "exclude_from_policy": ["dummy"]}
+            },
+        }
+    )
+    mol = TreeMolecule(
+        parent=None, smiles="CN1CCC(C(=O)c2cccc(NC(=O)c3ccc(F)cc3)c2F)CC1"
+    )
+    filter_policy.select("policy1")
+    filter_policy._config.filter_cutoff = 0.9
+
+    reaction = SmilesBasedRetroReaction(
+        mol, reactants_str="CN1CCC(Cl)CC1.N#Cc1cccc(NC(=O)c2ccc(F)cc2)c1F.O"
+    )
+
+    with pytest.raises(RejectionException):
+        filter_policy(reaction)
+
+    reaction = SmilesBasedRetroReaction(
+        mol,
+        reactants_str="CN1CCC(Cl)CC1.N#Cc1cccc(NC(=O)c2ccc(F)cc2)c1F.O",
+        metadata={"policy_name": "dummy"},
+    )
+    assert filter_policy(reaction) is None
 
 
 def test_reactants_count_rejection(default_config):

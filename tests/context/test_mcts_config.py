@@ -21,7 +21,10 @@ def test_load_empty_file(default_config, write_yaml):
 def test_load_from_file(write_yaml):
     filename = write_yaml(
         {
-            "properties": {"cutoff_number": 300},
+            "properties": {
+                "cutoff_number": 300,
+                "post_processing": {"all_routes": True},
+            },
             "policy": {"properties": {"C": 1.9, "time_limit": 200}},
             "finder": {"properties": {"time_limit": 300}},
         }
@@ -32,6 +35,7 @@ def test_load_from_file(write_yaml):
     assert config.cutoff_number == 300
     assert config.C == 1.9
     assert config.time_limit == 200
+    assert config.post_processing.all_routes
 
 
 def test_load_from_dict_invalid_property(write_yaml):
@@ -53,6 +57,7 @@ def test_get_properties(default_config):
     assert props["C"] == 1.4
     assert props["time_limit"] == 120
     assert props["max_transforms"] == 6
+    assert "post_processing" not in props
 
 
 def test_update_properties(default_config):
@@ -74,6 +79,14 @@ def test_update_properties(default_config):
             "time_limit": 300,
             "max_transforms": None,
             "dummy": 2,
+        }
+
+    with pytest.raises(ValueError):
+        config.properties = {
+            "C": 2.0,
+            "time_limit": 300,
+            "max_transforms": None,
+            "post_processing": {"all_routes": True},
         }
 
 

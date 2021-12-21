@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "aizynthfinder"
-version = "3.0.0"
+version = "3.1.0"
 description = "Retrosynthetic route finding using neural network guided Monte-Carlo tree search"
 authors = ["Molecular AI group <samuel.genheden@astrazeneca.com>"]
 license = "MIT"
@@ -15,7 +15,7 @@ max-line-length = 120
 max-args = 6
 max-attributes = 15
 min-public-methods = 0
-disable = "W1201, W1203, R0401, W0707, W0221, W0603, R0801, typecheck"
+disable = "W1201, W1203, R0401, W0707, W0221, W0603, R0801, R1735, W1514, C0209, W0237, R1732, W0602, typecheck"
 
 [tool.poetry.dependencies]
 python = ">=3.7,<3.9"
@@ -40,7 +40,7 @@ tables = "^3.6.1"
 tensorflow = "^2.1.0"
 tensorflow-serving-api = "^2.1.0"
 tqdm = "^4.42.1"
-route_distances = { url = "https://github.com/MolecularAI/route-distances/archive/refs/tags/v0.2.0.tar.gz" }
+route_distances = { url = "https://github.com/MolecularAI/route-distances/archive/refs/tags/v0.2.1.tar.gz" }
 
 [tool.poetry.dev-dependencies]
 black = "^20.8b1"

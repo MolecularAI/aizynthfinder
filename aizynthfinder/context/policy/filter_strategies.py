@@ -80,8 +80,14 @@ class QuickKerasFilter(FilterStrategy):
         self.model = load_model(source, key, self._config.use_remote_models)
         self._prod_fp_name = kwargs.get("prod_fp_name", "input_1")
         self._rxn_fp_name = kwargs.get("rxn_fp_name", "input_2")
+        self._exclude_from_policy: List[str] = kwargs.get(
+            "exclude_from_policy", []
+        )
 
     def apply(self, reaction: RetroReaction) -> None:
+        if reaction.metadata.get("policy_name", "") in self._exclude_from_policy:
+            return
+
         feasible, prob = self.feasibility(reaction)
         if not feasible:
             raise RejectionException(f"{reaction} was filtered out with prob {prob}")

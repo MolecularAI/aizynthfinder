@@ -7,6 +7,7 @@ from aizynthfinder.chem import (
     FixedRetroReaction,
     SmilesBasedRetroReaction,
     hash_reactions,
+    MoleculeException,
 )
 from aizynthfinder.reactiontree import ReactionTree
 
@@ -24,6 +25,10 @@ def test_fwd_reaction():
     assert len(products[0]) == 1
     assert products[0][0].smiles == "CNC(C)=O"
     assert reaction.reaction_smiles() == "CC(=O)O.CN>>CNC(C)=O"
+    assert (
+        reaction.hash_key()
+        == "48430f9760af903f4b846a5f13f0b41ede99be0df93b0b58b581ad4b"
+    )
 
 
 def test_retro_reaction(get_action):
@@ -48,6 +53,28 @@ def test_reaction_failure_rdchiral(get_action, mocker):
 
     products = reaction.reactants
     assert not products
+
+
+def test_retro_reaction_with_rdkit(get_action):
+    reaction = get_action(applicable=True, use_rdchiral=False)
+
+    products1 = reaction.reactants
+    assert products1[0][0].smiles == "CCCCOc1ccc(CC(=O)Cl)cc1"
+    assert products1[0][1].smiles == "CNO"
+    assert (
+        reaction.reaction_smiles()
+        == "CCCCOc1ccc(CC(=O)N(C)O)cc1>>CCCCOc1ccc(CC(=O)Cl)cc1.CNO"
+    )
+
+    reaction = get_action(applicable=False)
+    assert not reaction.reactants
+
+
+def test_retro_reaction_with_rdkit_exception(get_action, mocker):
+    reaction = get_action(applicable=True, use_rdchiral=False)
+    mocker.patch("aizynthfinder.chem.Molecule.sanitize", side_effect=MoleculeException)
+
+    assert not reaction.reactants
 
 
 def test_retro_reaction_fingerprint(get_action):

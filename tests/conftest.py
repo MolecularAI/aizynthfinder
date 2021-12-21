@@ -147,7 +147,7 @@ def get_action():
     smi = "CCCCOc1ccc(CC(=O)N(C)O)cc1"
     mol = TreeMolecule(smiles=smi, parent=None)
 
-    def wrapper(applicable=True):
+    def wrapper(applicable=True, use_rdchiral=True):
         if applicable:
             smarts = (
                 "([#8:4]-[N;H0;D3;+0:5](-[C;D1;H3:6])-[C;H0;D3;+0:1](-[C:2])=[O;D1;H0:3])"
@@ -158,7 +158,9 @@ def get_action():
                 "([C:4]-[N;H0;D3;+0:5](-[C:6])-[C;H0;D3;+0:1](-[C:2])=[O;D1;H03])>>"
                 "(O-[C;H0;D3;+0:1](-[C:2])=[O;D1;H0:3]).([C:4]-[NH;D2;+0:5]-[C:6])"
             )
-        return TemplatedRetroReaction(mol, smarts=smarts, metadata={"dummy": 1})
+        return TemplatedRetroReaction(
+            mol, smarts=smarts, metadata={"dummy": 1}, use_rdchiral=use_rdchiral
+        )
 
     return wrapper
 

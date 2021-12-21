@@ -153,3 +153,31 @@ def test_route_is_branched(load_reaction_tree, filename, expected):
     rt = ReactionTree.from_dict(load_reaction_tree(filename))
 
     assert rt.is_branched() == expected
+
+
+def test_route_hash(load_reaction_tree):
+    dict_ = load_reaction_tree("branched_route.json")
+    rt = ReactionTree.from_dict(dict_)
+
+    assert rt.hash_key() == "1514c305b6dcddc0a2e4133ff77cd53893d25c4e5caaca7dc53490fe"
+
+
+def test_subtrees(load_reaction_tree):
+    dict_ = load_reaction_tree("branched_route.json")
+    rt = ReactionTree.from_dict(dict_)
+
+    subtrees = list(rt.subtrees())
+
+    assert len(subtrees) == 3
+
+    mols = list(subtrees[0].molecules())
+    assert len(mols) == 5
+    assert [subtrees[0].depth(mol) for mol in mols] == [0, 2, 2, 4, 4]
+
+    mols = list(subtrees[1].molecules())
+    assert len(mols) == 3
+    assert [subtrees[1].depth(mol) for mol in mols] == [0, 2, 2]
+
+    mols = list(subtrees[2].molecules())
+    assert len(mols) == 3
+    assert [subtrees[2].depth(mol) for mol in mols] == [0, 2, 2]

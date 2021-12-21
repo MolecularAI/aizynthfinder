@@ -3,9 +3,11 @@ from __future__ import annotations
 import operator
 import json
 import abc
+import hashlib
 from typing import TYPE_CHECKING
 
 import networkx as nx
+from networkx.algorithms.traversal.depth_first_search import dfs_tree
 from route_distances.route_distances import route_distances_calculator
 
 from aizynthfinder.chem import (
@@ -89,6 +91,14 @@ class ReactionTree:
         distances = calculator([self.to_dict(), other.to_dict()])
         return distances[0, 1]
 
+    def hash_key(self) -> str:
+        """
+        Calculates a hash code for the tree using the sha224 hash function recursively
+
+        :return: the hash key
+        """
+        return self._hash_func(self.root)
+
     def in_stock(self, node: Union[UniqueMolecule, FixedRetroReaction]) -> bool:
         """
         Return if a node in the route is in stock
@@ -141,6 +151,31 @@ class ReactionTree:
         for node in self.graph:
             if not isinstance(node, Molecule):
                 yield node
+
+    def subtrees(self) -> Iterable[ReactionTree]:
+        """
+        Generates the subtrees of this reaction tree a
+        subtree is a reaction treee starting at a molecule node that has children.
+
+        :yield: the next subtree
+        """
+
+        def create_subtree(root_node):
+            subtree = ReactionTree()
+            subtree.root = root_node
+            subtree.graph = dfs_tree(self.graph, root_node)
+            for node in subtree.graph:
+                prop = dict(self.graph.nodes[node])
+                prop["depth"] -= self.graph.nodes[root_node].get("depth", 0)
+                if "transform" in prop:
+                    prop["transform"] -= self.graph.nodes[root_node].get("transform", 0)
+                subtree.graph.nodes[node].update(prop)
+            subtree.is_solved = all(subtree.in_stock(node) for node in subtree.leafs())
+            return subtree
+
+        for node in self.molecules():
+            if node is not self.root and self.graph[node]:
+                yield create_subtree(node)
 
     def to_dict(self) -> StrDict:
         """
@@ -235,6 +270,18 @@ class ReactionTree:
         if not dict_["children"]:
             del dict_["children"]
         return dict_
+
+    def _hash_func(self, node: Union[FixedRetroReaction, UniqueMolecule]) -> str:
+        if isinstance(node, UniqueMolecule):
+            hash_ = hashlib.sha224(node.inchi_key.encode())
+        else:
+            hash_ = hashlib.sha224(node.hash_key().encode())
+        child_hashes = sorted(
+            self._hash_func(child) for child in self.graph.successors(node)
+        )
+        for child_hash in child_hashes:
+            hash_.update(child_hash.encode())
+        return hash_.hexdigest()
 
 
 class ReactionTreeLoader(abc.ABC):

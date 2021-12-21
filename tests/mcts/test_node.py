@@ -111,3 +111,18 @@ def test_backpropagate(setup_mcts_search):
     assert view_prior["visitations"][1:] == view_post["visitations"][1:]
     assert view_post["values"][0] == view_prior["values"][0] + 1.5
     assert view_prior["values"][1:] == view_post["values"][1:]
+
+
+def test_expand_dead_end(setup_policies, generate_root):
+    root_smiles = "CCCCOc1ccc(CC(=O)N(C)O)cc1"
+    expansions = {root_smiles: []}
+    setup_policies(expansions)
+    node = generate_root(root_smiles)
+
+    assert node.is_expandable
+    assert not node.is_expanded
+
+    node.expand()
+
+    assert not node.is_expandable
+    assert not node.is_expanded

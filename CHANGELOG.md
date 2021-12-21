@@ -1,6 +1,28 @@
 # CHANGELOG
 
-## Version 3.0.0  2020-07-26
+## Version 3.1.0 2021-12-21
+
+### Features
+
+- ReactantsCountFiler (Github issue 42) to filter reactions with incompatible number of reactants
+- ForwardRegenerationFiler to filter reactions where the forward reaction is incompatible
+- Possible to skip quick Keras filter for specific policies
+- Possible to select more than one policy in the GUI application
+- Reaction classes has a hash function
+- Possible to extract sub trees from ReactionTree objects
+- RDKit can be used instead of RDChiral for expansions
+
+### Bugfixes
+
+- Possible to use more than depth 6 in the GUI application
+- Fix failure in MctsNode class when expansion policy return no molecules
+
+### Trivial changes
+
+- Update type hints to be compatible with latest numpy release
+- Update route-distances dependency
+
+## Version 3.0.0  2021-07-26
 
 ### Features
 
@@ -32,7 +54,7 @@
 - Documentation updates
 - Extensive re-factoring of test cases
 
-## Version 2.6.0 - 2020-06-11 (2020-05-03)
+## Version 2.6.0 - 2021-06-11 (2021-05-03)
 
 ### Features
 
@@ -42,7 +64,7 @@
 - Reaction tree objects now has property `is_branched`
 
 
-## Version 2.5.0 - 2020-06-11 (2020-03-30)
+## Version 2.5.0 - 2021-06-11 (2021-03-30)
 
 ### Features
 
@@ -58,7 +80,7 @@
 
 - `scikit-learn` is now imported before `tensorflow`, according to Github issue 30
 
-## Version 2.4.0 - 2020-02-22 (2020-02-22)
+## Version 2.4.0 - 2021-02-22 (2021-02-22)
 
 
 ### Features
@@ -72,7 +94,7 @@
 - Update of black version causing some re-formatting
 - Small changes to documentation
 
-## Version 2.3.0 - 2020-02-22 (2020-01-20)
+## Version 2.3.0 - 2021-02-22 (2021-01-20)
 
 ### Features
 

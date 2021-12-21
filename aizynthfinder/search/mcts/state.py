@@ -165,7 +165,7 @@ class MctsState:
 
         # NB weights should sum to 1, to ensure that all
         score4 = 0.95 * fraction_in_stock + 0.05 * max_transforms_score
-        return score4
+        return float(score4)
 
     @staticmethod
     def _squash_function(
