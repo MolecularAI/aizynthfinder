@@ -40,7 +40,7 @@ tables = "^3.6.1"
 tensorflow = "^2.1.0"
 tensorflow-serving-api = "^2.1.0"
 tqdm = "^4.42.1"
-route_distances = { url = "https://github.com/MolecularAI/route-distances/archive/refs/tags/v0.2.1.tar.gz" }
+route_distances = { url = "https://github.com/MolecularAI/route-distances/archive/refs/tags/v0.2.2.tar.gz" }
 
 [tool.poetry.dev-dependencies]
 black = "^20.8b1"

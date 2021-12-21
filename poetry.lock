@@ -1966,7 +1966,7 @@ torch = ">=1.7.1,<2.0.0"
 
 [package.source]
 type = "url"
-url = "https://github.com/MolecularAI/route-distances/archive/refs/tags/v0.2.1.tar.gz"
+url = "https://github.com/MolecularAI/route-distances/archive/refs/tags/v0.2.2.tar.gz"
 [[package]]
 name = "rsa"
 version = "4.8"
@@ -2545,7 +2545,7 @@ testing = ["pytest (>=4.6)", "pytest-checkdocs (>=2.4)", "pytest-flake8", "pytes
 [metadata]
 lock-version = "1.1"
 python-versions = ">=3.7,<3.9"
-content-hash = "3c23dc32cbd7742ceaddd19897f8c6a7a9bf1ca4c2eda621dd4a5ddabe917661"
+content-hash = "5d891ea3692941091f46cffb053e4d32e99553b0f6cb8642a3de73547de537b7"
 
 [metadata.files]
 absl-py = [
