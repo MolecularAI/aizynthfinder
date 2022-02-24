@@ -4,6 +4,8 @@ import tempfile
 import subprocess
 import time
 import warnings
+import json
+import gzip
 from typing import TYPE_CHECKING
 
 import more_itertools
@@ -15,21 +17,45 @@ if TYPE_CHECKING:
     from aizynthfinder.utils.type_utils import List, Sequence, Any, Callable
 
 
-def cat_hdf_files(input_files: List[str], output_name: str) -> None:
+def cat_hdf_files(
+    input_files: List[str], output_name: str, trees_name: str = None
+) -> None:
     """
     Concatenate hdf5 files with the key "table"
 
+    if `tree_name` is given, will take out the `trees` column
+    from the tables and save it to a gzipped-json file.
+
     :param input_files: the paths to the files to concatenate
     :param output_name: the name of the concatenated file
+    :param trees_name: the name of the concatenated trees
     """
     data = pd.read_hdf(input_files[0], key="table")
+    if "trees" not in data.columns:
+        trees_name = None
+
+    if trees_name:
+        columns = list(data.columns)
+        columns.remove("trees")
+        trees = list(data["trees"].values)
+        data = data[columns]
+
     for filename in input_files[1:]:
         new_data = pd.read_hdf(filename, key="table")
+        if trees_name:
+            trees.extend(new_data["trees"].values)
+            new_data = new_data[columns]
         data = data.append(new_data)
 
     with warnings.catch_warnings():  # This wil suppress a PerformanceWarning
         warnings.simplefilter("ignore")
-        data.to_hdf(output_name, key="table")
+        data.reset_index().to_hdf(output_name, key="table")
+
+    if trees_name:
+        if not trees_name.endswith(".gz"):
+            trees_name += ".gz"
+        with gzip.open(trees_name, "wt", encoding="UTF-8") as fileobj:
+            json.dump(trees, fileobj)
 
 
 def split_file(filename: str, nparts: int) -> List[str]:

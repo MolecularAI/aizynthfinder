@@ -5,6 +5,8 @@ import os
 from typing import TYPE_CHECKING
 
 import numpy as np
+
+# pylint: disable=no-name-in-module
 from tensorflow.keras.layers import Dense, Dropout, Input, Dot
 from tensorflow.keras.models import Sequential, Model
 from tensorflow.keras.optimizers import Adam

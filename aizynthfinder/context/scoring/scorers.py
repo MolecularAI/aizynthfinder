@@ -297,7 +297,7 @@ class RouteCostScorer(PriceSumScorer):
             updated_scores = {
                 id(mol): scores[id(mol)]
                 for mol in pnode.state.mols
-                if mol != reaction.mol
+                if mol is not reaction.mol
             }
             child_sum = sum(
                 1 / self.average_yield * score

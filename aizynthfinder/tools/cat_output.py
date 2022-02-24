@@ -20,9 +20,13 @@ def main() -> None:
         default="output.hdf5",
         help="the name of the concatenate output file ",
     )
+    parser.add_argument(
+        "--trees",
+        help="if given, save all trees to this file",
+    )
     args = parser.parse_args()
 
-    cat_hdf_files(args.files, args.output)
+    cat_hdf_files(args.files, args.output, args.trees)
 
 
 if __name__ == "__main__":

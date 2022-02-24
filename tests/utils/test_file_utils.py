@@ -1,4 +1,6 @@
 import os
+import gzip
+import json
 
 import pytest
 import pandas as pd
@@ -88,3 +90,32 @@ def test_cat_hdf(create_dummy_stock1, create_dummy_stock2, tmpdir):
         "UHOVQNZJYSORNB-UHFFFAOYSA-N",
         "ISWSIDIOOBJBQZ-UHFFFAOYSA-N",
     ]
+
+
+def test_cat_hdf_no_trees(tmpdir, create_dummy_stock1, create_dummy_stock2):
+    hdf_filename = str(tmpdir / "output.hdf")
+    tree_filename = str(tmpdir / "trees.json")
+    inputs = [create_dummy_stock1("hdf5"), create_dummy_stock2]
+
+    cat_hdf_files(inputs, hdf_filename, tree_filename)
+
+    assert not os.path.exists(tree_filename)
+
+
+def test_cat_hdf_trees(tmpdir):
+    hdf_filename = str(tmpdir / "output.hdf")
+    tree_filename = str(tmpdir / "trees.json")
+    filename1 = str(tmpdir / "file1.hdf5")
+    filename2 = str(tmpdir / "file2.hdf5")
+    trees1 = [[1], [2]]
+    trees2 = [[3], [4]]
+    pd.DataFrame({"mol": ["A", "B"], "trees": trees1}).to_hdf(filename1, "table")
+    pd.DataFrame({"mol": ["A", "B"], "trees": trees2}).to_hdf(filename2, "table")
+
+    cat_hdf_files([filename1, filename2], hdf_filename, tree_filename)
+
+    assert os.path.exists(tree_filename + ".gz")
+    with gzip.open(tree_filename + ".gz", "rt", encoding="UTF-8") as fileobj:
+        trees_cat = json.load(fileobj)
+    assert trees_cat == trees1 + trees2
+    assert "trees" not in pd.read_hdf(hdf_filename, "table")

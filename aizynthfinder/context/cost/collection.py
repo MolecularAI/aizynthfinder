@@ -71,3 +71,4 @@ class MoleculeCost(ContextCollection):
             )
             self._logger.info(f"Loaded cost: '{repr(obj)}'{config_str}")
             self._items[repr(obj)] = obj
+        self.select_last()

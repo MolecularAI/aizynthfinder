@@ -1,5 +1,18 @@
 # CHANGELOG
 
+## Version 3.3.0 2022-02-24
+
+### Features
+
+- Support for Retro* tree search
+- Support for breadth-first exhaustive tree search
+- Support for depth-first proof-number tree search
+- Possible to save concatenated reaction trees to separate file
+
+### Bugfixes
+
+- RouteCostScorer fix for rare routes
+
 ## Version 3.2.0 2022-02-24
 
 ### Features

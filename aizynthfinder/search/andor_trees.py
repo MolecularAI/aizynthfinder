@@ -83,9 +83,11 @@ class SplitAndOrTree:
         else:
             self._sampling_cutoff = max_routes
         self._partition_search_tree(graph, root_node)
-        self.routes = [
+        routes_list = [
             ReactionTreeFromAndOrTrace(trace, stock).tree for trace in self._traces
         ]
+        routes_map = {route.hash_key(): route for route in routes_list}
+        self.routes = list(routes_map.values())
 
     def _partition_search_tree(self, graph: _AndOrTrace, node: TreeNodeMixin) -> None:
         # fmt: off
@@ -190,6 +192,8 @@ class ReactionTreeFromAndOrTrace(ReactionTreeLoader):
             in_stock=self._trace_root.prop["mol"] in self._stock,
         )
         for node1, node2 in andor_trace.edges():
+            if "reaction" in node2.prop and not andor_trace[node2]:
+                continue
             rt_node1 = self._make_rt_node(node1)
             rt_node2 = self._make_rt_node(node2)
             self.tree.graph.add_edge(rt_node1, rt_node2)

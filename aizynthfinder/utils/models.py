@@ -15,6 +15,8 @@ from tensorflow_serving.apis import (
     get_model_metadata_pb2,
     prediction_service_pb2_grpc,
 )
+
+# pylint: disable=no-name-in-module
 from tensorflow.keras.metrics import top_k_categorical_accuracy
 from tensorflow.keras.models import load_model as load_keras_model
 
