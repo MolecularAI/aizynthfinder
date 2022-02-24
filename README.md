@@ -62,7 +62,7 @@ First, install these conda packages
 
 Secondly, install the ``aizynthfinder`` package
 
-    python -m pip install https://github.com/MolecularAI/aizynthfinder/archive/v3.0.0.tar.gz
+    python -m pip install https://github.com/MolecularAI/aizynthfinder/archive/v3.3.0.tar.gz
 
 
 if you want to install the latest version
@@ -160,4 +160,5 @@ The software is licensed under the MIT license (see LICENSE file), and is free a
 1. Thakkar A, Kogej T, Reymond J-L, et al (2019) Datasets and their influence on the development of computer assisted synthesis planning tools in the pharmaceutical domain. Chem Sci. https://doi.org/10.1039/C9SC04944D
 2. Genheden S, Thakkar A, Chadimova V, et al (2020) AiZynthFinder: a fast, robust and flexible open-source software for retrosynthetic planning. J. Cheminf. https://jcheminf.biomedcentral.com/articles/10.1186/s13321-020-00472-1
 3. Genheden S, Engkvist O, Bjerrum E (2020) A Quick Policy to Filter Reactions Based on Feasibility in AI-Guided Retrosynthetic Planning. ChemRxiv. Preprint. https://doi.org/10.26434/chemrxiv.13280495.v1 
-4. Genheden S, Engkvist O, Bjerrum E (2020) Clustering of synthetic routes using tree edit distance. ChemRxiv. Preprint. https://doi.org/10.26434/chemrxiv.13372475.v1  
+4. Genheden S, Engkvist O, Bjerrum E (2021) Clustering of synthetic routes using tree edit distance. J. Chem. Inf. Model. 61:3899–3907 [https://doi.org/10.1021/acs.jcim.1c00232](https://doi.org/10.1021/acs.jcim.1c00232)
+5. Genheden S, Engkvist O, Bjerrum E (2022) Fast prediction of distances between synthetic routes with deep learning. Mach. Learn. Sci. Technol. 3:015018 [https://doi.org/10.1088/2632-2153/ac4a91](https://doi.org/10.1088/2632-2153/ac4a91) 
