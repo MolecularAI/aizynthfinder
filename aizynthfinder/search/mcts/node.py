@@ -244,6 +244,9 @@ class MctsNode:
             self.is_expandable = False
             self.is_expanded = False
 
+        if self.tree:
+            self.tree.profiling["expansion_calls"] += 1
+
     def is_terminal(self) -> bool:
         """
         Node is terminal if its unexpandable, or the internal state is terminal (solved)
@@ -413,7 +416,9 @@ class MctsNode:
             return self._children[child_idx]
 
         reaction = self._children_actions[child_idx]
-        if not reaction.reactants:
+        if reaction.unqueried:
+            if self.tree:
+                self.tree.profiling["reactants_generations"] += 1
             _ = reaction.reactants
 
         if not self._check_child_reaction(reaction):

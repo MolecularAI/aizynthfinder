@@ -256,6 +256,13 @@ class RetroReaction(abc.ABC, _ReactionInterfaceMixin):
                 self._smiles = ""  # noqa
         return self._smiles
 
+    @property
+    def unqueried(self) -> bool:
+        """
+        Return True if the reactants has never been retrieved
+        """
+        return self._reactants is None
+
     def copy(self, index: int = None) -> "RetroReaction":
         """
         Shallow copy of this instance.

@@ -14,11 +14,11 @@ node [label="\N"];
         image="{{ image_filepath }}"
     ];
     {% endfor %}
-    {% for reaction in reactions %}
+    {% for reaction, reaction_shape in reactions %}
     {{ id(reaction) }} [
         label="",
         fillcolor="black",
-        shape="circle",
+        shape="{{ reaction_shape }}",
         style="filled",
         width="0.1",
         fixedsize="true"

@@ -1,5 +1,15 @@
 # CHANGELOG
 
+## Version 3.2.0 2022-02-24
+
+### Features
+
+- Profiling feature enabled in search trees
+- New, customizable configuration of training pre-processing tools
+- Generic post-processing support in aizynthcli
+- Introduce short aliases for filter policies
+- Reaction shape support in GraphViz visualisation of routes
+
 ## Version 3.1.0 2021-12-21
 
 ### Features

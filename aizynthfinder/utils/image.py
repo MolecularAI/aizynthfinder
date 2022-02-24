@@ -51,23 +51,28 @@ def _clean_up_images() -> None:
         pass
 
 
-def molecule_to_image(mol: Molecule, frame_color: PilColor) -> PilImage:
+def molecule_to_image(
+    mol: Molecule, frame_color: PilColor, size: int = 300
+) -> PilImage:
     """
     Create a pretty image of a molecule,
     with a colored frame around it
 
     :param mol: the molecule
     :param frame_color: the color of the frame
+    :param size: the size of the image
     :return: the produced image
     """
     mol = Chem.MolFromSmiles(mol.smiles)
-    img = Draw.MolToImage(mol)
+    img = Draw.MolToImage(mol, size=(size, size))
     cropped_img = crop_image(img)
     return draw_rounded_rectangle(cropped_img, frame_color)
 
 
 def molecules_to_images(
-    mols: Sequence[Molecule], frame_colors: Sequence[PilColor]
+    mols: Sequence[Molecule],
+    frame_colors: Sequence[PilColor],
+    size: int = 300,
 ) -> List[PilImage]:
     """
     Create pretty images of molecules with a colored frame around each one of them.
@@ -76,9 +81,9 @@ def molecules_to_images(
 
     :param mols: the molecules
     :param frame_colors: the color of the frame for each molecule
+    :param size: the sub-image size
     :return: the produced images
     """
-    size = 300
     # Make sanitized copies of all molecules
     mol_copies = [mol.make_unique() for mol in mols]
     for mol in mol_copies:
@@ -172,7 +177,7 @@ def draw_rounded_rectangle(
 
 
 def save_molecule_images(
-    molecules: Sequence[Molecule], frame_colors: Sequence[PilColor]
+    molecules: Sequence[Molecule], frame_colors: Sequence[PilColor], size: int = 300
 ) -> Dict[Molecule, str]:
     """
     Create images of a list of molecules and save them to disc
@@ -180,16 +185,17 @@ def save_molecule_images(
 
     :param molecules: the molecules to save as images
     :param frame_colors: the color of the frame around each image
+    :param size: the sub-image size for each molecule
     :return: the filename of the created images
     """
     global IMAGE_FOLDER
 
     try:
-        images = molecules_to_images(molecules, frame_colors)
+        images = molecules_to_images(molecules, frame_colors, size)
     # pylint: disable=broad-except
     except Exception:  # noqa
         images = [
-            molecule_to_image(molecule, frame_color)
+            molecule_to_image(molecule, frame_color, size)
             for molecule, frame_color in zip(molecules, frame_colors)
         ]
 
@@ -206,6 +212,7 @@ def make_graphviz_image(
     reactions: Union[Sequence[RetroReaction], Sequence[FixedRetroReaction]],
     edges: Sequence[Tuple[Any, Any]],
     frame_colors: Sequence[PilColor],
+    reaction_shapes: Sequence[str] = None,
     use_splines: bool = True,
 ) -> PilImage:
     """
@@ -216,6 +223,7 @@ def make_graphviz_image(
     :param reactions: the reaction nodes
     :param edges: the edges of the graph
     :param frame_colors: the color of the frame around each image
+    :param reaction_shapes: optional specification of shapes for each reaction
     :param use_splines: if True tries to use splines to connect nodes in image
     :raises FileNotFoundError: if the image could not be produced
     :return: the create image
@@ -224,7 +232,7 @@ def make_graphviz_image(
     def _create_image(use_splines):
         txt = template.render(
             molecules=mol_spec,
-            reactions=reactions,
+            reactions=rxn_spec,
             edges=edges,
             use_splines=use_splines,
         )
@@ -242,6 +250,8 @@ def make_graphviz_image(
         return output_img2
 
     mol_spec = save_molecule_images(molecules, frame_colors)
+    reaction_shapes = reaction_shapes or ["circle"] * len(reactions)
+    rxn_spec = zip(reactions, reaction_shapes)
 
     template_filepath = os.path.join(data_path(), "templates", "reaction_tree.dot")
     with open(template_filepath, "r") as fileobj:

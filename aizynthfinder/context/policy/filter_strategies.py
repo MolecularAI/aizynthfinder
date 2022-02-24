@@ -80,9 +80,7 @@ class QuickKerasFilter(FilterStrategy):
         self.model = load_model(source, key, self._config.use_remote_models)
         self._prod_fp_name = kwargs.get("prod_fp_name", "input_1")
         self._rxn_fp_name = kwargs.get("rxn_fp_name", "input_2")
-        self._exclude_from_policy: List[str] = kwargs.get(
-            "exclude_from_policy", []
-        )
+        self._exclude_from_policy: List[str] = kwargs.get("exclude_from_policy", [])
 
     def apply(self, reaction: RetroReaction) -> None:
         if reaction.metadata.get("policy_name", "") in self._exclude_from_policy:
@@ -144,3 +142,10 @@ class ReactantsCountFilter(FilterStrategy):
             raise RejectionException(
                 f"{reaction} was filtered out because number of reactants disagree with the template"
             )
+
+
+FILTER_STRATEGY_ALIAS = {
+    "feasibility": "QuickKerasFilter",
+    "quick_keras_filter": "QuickKerasFilter",
+    "reactants_count": "ReactantsCountFilter",
+}

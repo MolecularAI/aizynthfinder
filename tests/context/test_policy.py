@@ -224,9 +224,7 @@ def test_load_filter_policy_from_config_custom(default_config, mock_keras_model)
     filter_policy.load_from_config(
         **{
             "QuickKerasFilter": {"policy1": {"source": "dummy1"}},
-            "aizynthfinder.context.policy.QuickKerasFilter": {
-                "policy2": {"source": "dummy1"}
-            },
+            "feasibility": {"policy2": {"source": "dummy1"}},
         }
     )
     assert "policy1" in filter_policy.items

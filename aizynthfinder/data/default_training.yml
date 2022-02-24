@@ -1,5 +1,14 @@
 library_headers: ["index", "ID", "reaction_hash", "reactants", "products", "classification", "retro_template", "template_hash", "selectivity", "outcomes", "template_code"]
+column_map:
+  reaction_hash: reaction_hash
+  reactants: reactants
+  products: products
+  retro_template: retro_template
+  template_hash: template_hash
 metadata_headers: ["template_hash", "classification"]
+in_csv_headers: False
+csv_sep: ","
+reaction_smiles_column: ""
 output_path: "."
 file_prefix: ""
 file_postfix:

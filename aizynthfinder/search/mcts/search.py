@@ -34,6 +34,10 @@ class MctsSearchTree:
             self.root = None
         self.config = config
         self._graph: Optional[nx.DiGraph] = None
+        self.profiling = {
+            "expansion_calls": 0,
+            "reactants_generations": 0,
+        }
 
     @classmethod
     def from_json(cls, filename: str, config: Configuration) -> "MctsSearchTree":

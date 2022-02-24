@@ -19,7 +19,9 @@ from aizynthfinder.utils.files import cat_hdf_files, split_file, start_processes
 from aizynthfinder.utils.logging import logger, setup_logger
 
 if TYPE_CHECKING:
-    from aizynthfinder.utils.type_utils import StrDict
+    from aizynthfinder.utils.type_utils import StrDict, Callable, List, Optional
+
+    _PostProcessingJob = Callable[[AiZynthFinder], StrDict]
 
 
 def _do_clustering(
@@ -39,6 +41,13 @@ def _do_clustering(
 
     results["cluster_time"] = (time.perf_counter_ns() - time0) * 1e-9
     results["distance_matrix"] = finder.routes.distance_matrix().tolist()
+
+
+def _do_post_processing(
+    finder: AiZynthFinder, results: StrDict, jobs: List[_PostProcessingJob]
+) -> None:
+    for job in jobs:
+        results.update(job(finder))
 
 
 def _get_arguments() -> argparse.Namespace:
@@ -87,7 +96,26 @@ def _get_arguments() -> argparse.Namespace:
         "--route_distance_model",
         help="if provided, calculate route distances for clustering with this ML model",
     )
+    parser.add_argument(
+        "--post_processing",
+        nargs="+",
+        help="a number of modules that performs post-processing tasks",
+    )
     return parser.parse_args()
+
+
+def _load_postprocessing_jobs(modules: Optional[List[str]]) -> List[_PostProcessingJob]:
+    jobs: List[_PostProcessingJob] = []
+    for module_name in modules or []:
+        try:
+            module = importlib.import_module(module_name)
+        except ModuleNotFoundError:
+            pass
+        else:
+            if hasattr(module, "post_processing"):
+                print(f"Adding post-processing job from {module_name}")
+                jobs.append(getattr(module, "post_processing"))
+    return jobs
 
 
 def _select_stocks(finder: AiZynthFinder, args: argparse.Namespace) -> None:
@@ -108,7 +136,8 @@ def _process_single_smiles(
     finder: AiZynthFinder,
     output_name: str,
     do_clustering: bool,
-    route_distance_model: str = None,
+    route_distance_model: Optional[str],
+    post_processing: List[_PostProcessingJob],
 ) -> None:
     output_name = output_name or "trees.json"
     finder.target_smiles = smiles
@@ -128,6 +157,7 @@ def _process_single_smiles(
         _do_clustering(
             finder, stats, detailed_results=False, model_path=route_distance_model
         )
+    _do_post_processing(finder, stats, post_processing)
     stats_str = "\n".join(
         f"{key.replace('_', ' ')}: {value}" for key, value in stats.items()
     )
@@ -139,7 +169,8 @@ def _process_multi_smiles(
     finder: AiZynthFinder,
     output_name: str,
     do_clustering: bool,
-    route_distance_model: str = None,
+    route_distance_model: Optional[str],
+    post_processing: List[_PostProcessingJob],
 ) -> None:
     output_name = output_name or "output.hdf5"
     with open(filename, "r") as fileobj:
@@ -159,6 +190,7 @@ def _process_multi_smiles(
             _do_clustering(
                 finder, stats, detailed_results=True, model_path=route_distance_model
             )
+        _do_post_processing(finder, stats, post_processing)
         for key, value in stats.items():
             results[key].append(value)
         results["top_scores"].append(
@@ -195,6 +227,8 @@ def _multiprocess_smiles(args: argparse.Namespace) -> None:
             cmd_args.append("--cluster")
         if args.route_distance_model:
             cmd_args.extend(["--route_distance_model", args.route_distance_model])
+        if args.post_processing:
+            cmd_args.extend(["--post_processing"] + args.post_processing)
         return cmd_args
 
     if not os.path.exists(args.smiles):
@@ -228,11 +262,19 @@ def main() -> None:
 
     finder = AiZynthFinder(configfile=args.config)
     _select_stocks(finder, args)
+    post_processing = _load_postprocessing_jobs(args.post_processing)
     finder.expansion_policy.select(args.policy or finder.expansion_policy.items[0])
     finder.filter_policy.select(args.filter)
 
     func = _process_multi_smiles if multi_smiles else _process_single_smiles
-    func(args.smiles, finder, args.output, args.cluster, args.route_distance_model)
+    func(
+        args.smiles,
+        finder,
+        args.output,
+        args.cluster,
+        args.route_distance_model,
+        post_processing,
+    )
 
 
 if __name__ == "__main__":

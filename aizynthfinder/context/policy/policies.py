@@ -13,6 +13,7 @@ from aizynthfinder.context.policy.expansion_strategies import (
 from aizynthfinder.context.policy.filter_strategies import (
     FilterStrategy,
     QuickKerasFilter,
+    FILTER_STRATEGY_ALIAS,
 )
 from aizynthfinder.context.policy.expansion_strategies import (
     __name__ as expansion_strategy_module,
@@ -196,8 +197,9 @@ class FilterPolicy(ContextCollection):
         for strategy_spec, strategy_config in config.items():
             if strategy_spec in ["files", "quick-filter"]:
                 continue
+            strategy_spec2 = FILTER_STRATEGY_ALIAS.get(strategy_spec, strategy_spec)
             cls = load_dynamic_class(
-                strategy_spec, filter_strategy_module, PolicyException
+                strategy_spec2, filter_strategy_module, PolicyException
             )
             for key, policy_spec in strategy_config.items():
                 obj = cls(key, self._config, **(policy_spec or {}))

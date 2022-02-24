@@ -152,6 +152,7 @@ class TreeAnalysis:
             "precursors_not_in_stock": mols_not_in_stock,
             "precursors_availability": availability,
             "policy_used_counts": policy_used_counts,
+            "profiling": getattr(self.search_tree, "profiling", {}),
         }
 
     def _tree_statistics_mcts(self) -> StrDict:
@@ -192,6 +193,7 @@ class TreeAnalysis:
             "precursors_not_in_stock": mols_not_in_stock,
             "precursors_availability": ";".join(top_state.stock_availability),
             "policy_used_counts": policy_used_counts,
+            "profiling": getattr(self.search_tree, "profiling", {}),
         }
 
     @staticmethod

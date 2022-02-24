@@ -1,5 +1,6 @@
 import os
 import glob
+import sys
 
 import pandas as pd
 import yaml
@@ -126,6 +127,29 @@ def test_cli_multiple_smiles(
     assert f"Output saved to {output_name}" in output.out
 
 
+def test_cli_single_smile_with_postprocessing(
+    mocker, add_cli_arguments, tmpdir, capsys, shared_datadir
+):
+    module_path = str(shared_datadir)
+    sys.path.append(module_path)
+    finder_patch = mocker.patch("aizynthfinder.interfaces.aizynthcli.AiZynthFinder")
+    finder_patch.return_value.extract_statistics.return_value = {"a": 1, "b": 2}
+    mocker.patch("aizynthfinder.interfaces.aizynthcli.json.dump")
+    output_name = str(tmpdir / "trees.json")
+    add_cli_arguments(
+        "--post_processing post_processing_test --smiles COO --config config_local.yml --output "
+        + output_name
+    )
+
+    cli_main()
+
+    output = capsys.readouterr()
+    assert "quantity: 5" in output.out
+    assert "another quantity: 10" in output.out
+
+    sys.path.remove(module_path)
+
+
 def test_make_stock_from_plain_file(
     create_dummy_smiles_source, tmpdir, add_cli_arguments, default_config
 ):
@@ -158,9 +182,8 @@ def test_preprocess_expansion(write_yaml, shared_datadir, add_cli_arguments):
             "split_size": {"training": 0.6, "testing": 0.2, "validation": 0.2},
         }
     )
-    add_cli_arguments(config_path)
 
-    expansion_main()
+    expansion_main([config_path])
 
     with open(shared_datadir / "dummy_template_library.csv", "r") as fileobj:
         lines = fileobj.read().splitlines()
@@ -204,9 +227,8 @@ def test_preprocess_expansion_no_class(write_yaml, shared_datadir, add_cli_argum
             "split_size": {"training": 0.6, "testing": 0.2, "validation": 0.2},
         }
     )
-    add_cli_arguments(config_path)
 
-    expansion_main()
+    expansion_main([config_path])
 
     with open(shared_datadir / "dummy_noclass_template_library.csv", "r") as fileobj:
         lines = fileobj.read().splitlines()
@@ -233,6 +255,46 @@ def test_preprocess_expansion_no_class(write_yaml, shared_datadir, add_cli_argum
         assert column in data.columns
 
 
+def test_preprocess_expansion_csv_headers(write_yaml, shared_datadir):
+    config_path = write_yaml(
+        {
+            "file_prefix": str(shared_datadir / "dummy2"),
+            "split_size": {"training": 0.6, "testing": 0.2, "validation": 0.2},
+            "column_map": {
+                "reaction_hash": "PseudoHash",
+            },
+            "in_csv_headers": True,
+            "reaction_smiles_column": "RSMI",
+        }
+    )
+
+    expansion_main([config_path])
+
+    with open(shared_datadir / "dummy2_template_library.csv", "r") as fileobj:
+        lines = fileobj.read().splitlines()
+    assert len(lines) == 11
+
+    with open(shared_datadir / "dummy2_training.csv", "r") as fileobj:
+        lines = fileobj.read().splitlines()
+    assert len(lines) == 7
+
+    with open(shared_datadir / "dummy2_testing.csv", "r") as fileobj:
+        lines = fileobj.read().splitlines()
+    assert len(lines) == 3
+
+    with open(shared_datadir / "dummy2_validation.csv", "r") as fileobj:
+        lines = fileobj.read().splitlines()
+    assert len(lines) == 3
+
+    data = pd.read_hdf(shared_datadir / "dummy2_unique_templates.hdf5", "table")
+    config = Config(config_path)
+    assert len(data) == 2
+    assert "retro_template" in data.columns
+    assert "library_occurrence" in data.columns
+    for column in config["metadata_headers"]:
+        assert column in data.columns
+
+
 def test_preprocess_expansion_bad_product(
     write_yaml, shared_datadir, add_cli_arguments
 ):
@@ -242,9 +304,9 @@ def test_preprocess_expansion_bad_product(
             "split_size": {"training": 0.6, "testing": 0.2, "validation": 0.2},
         }
     )
-    add_cli_arguments(config_path)
+
     with pytest.raises(MoleculeException):
-        expansion_main()
+        expansion_main([config_path])
 
 
 def test_preprocess_expansion_skip_bad_product(
@@ -257,9 +319,8 @@ def test_preprocess_expansion_skip_bad_product(
             "remove_unsanitizable_products": True,
         }
     )
-    add_cli_arguments(config_path)
 
-    expansion_main()
+    expansion_main([config_path])
 
     with open(shared_datadir / "dummy_sani_template_library.csv", "r") as fileobj:
         lines = fileobj.read().splitlines()
@@ -273,9 +334,8 @@ def test_preprocess_recommender(write_yaml, shared_datadir, add_cli_arguments):
             "split_size": {"training": 0.6, "testing": 0.2, "validation": 0.2},
         }
     )
-    add_cli_arguments(config_path)
 
-    expansion_main()
+    expansion_main([config_path])
 
     with open(shared_datadir / "dummy_template_library.csv", "r") as fileobj:
         lines = fileobj.read().splitlines()
@@ -286,7 +346,7 @@ def test_preprocess_recommender(write_yaml, shared_datadir, add_cli_arguments):
     os.remove(shared_datadir / "dummy_validation.csv")
     os.remove(shared_datadir / "dummy_unique_templates.hdf5")
 
-    recommender_main()
+    recommender_main([config_path])
 
     with open(shared_datadir / "dummy_training.csv", "r") as fileobj:
         lines = fileobj.read().splitlines()
@@ -301,6 +361,50 @@ def test_preprocess_recommender(write_yaml, shared_datadir, add_cli_arguments):
     assert len(lines) == 2
 
     data = pd.read_hdf(shared_datadir / "dummy_unique_templates.hdf5", "table")
+    assert len(data) == 2
+
+
+def test_preprocess_recommender_csv_headers(
+    write_yaml, shared_datadir, add_cli_arguments
+):
+    config_path = write_yaml(
+        {
+            "file_prefix": str(shared_datadir / "dummy2"),
+            "split_size": {"training": 0.6, "testing": 0.2, "validation": 0.2},
+            "column_map": {
+                "reaction_hash": "PseudoHash",
+            },
+            "in_csv_headers": True,
+            "reaction_smiles_column": "RSMI",
+        }
+    )
+
+    expansion_main([config_path])
+
+    with open(shared_datadir / "dummy2_template_library.csv", "r") as fileobj:
+        lines = fileobj.read().splitlines()
+    assert len(lines) == 11
+
+    os.remove(shared_datadir / "dummy2_training.csv")
+    os.remove(shared_datadir / "dummy2_testing.csv")
+    os.remove(shared_datadir / "dummy2_validation.csv")
+    os.remove(shared_datadir / "dummy2_unique_templates.hdf5")
+
+    recommender_main([config_path])
+
+    with open(shared_datadir / "dummy2_training.csv", "r") as fileobj:
+        lines = fileobj.read().splitlines()
+    assert len(lines) == 7
+
+    with open(shared_datadir / "dummy2_testing.csv", "r") as fileobj:
+        lines = fileobj.read().splitlines()
+    assert len(lines) == 3
+
+    with open(shared_datadir / "dummy2_validation.csv", "r") as fileobj:
+        lines = fileobj.read().splitlines()
+    assert len(lines) == 3
+
+    data = pd.read_hdf(shared_datadir / "dummy2_unique_templates.hdf5", "table")
     assert len(data) == 2
 
 
@@ -328,14 +432,12 @@ def test_preprocess_filter(write_yaml, shared_datadir, add_cli_arguments):
         }
     )
 
-    add_cli_arguments(f"{config_path} strict")
-    make_false_main()
+    make_false_main([config_path, "strict"])
 
     duplicate_file("make_false_template_library_false.csv")
     duplicate_file("make_false_template_library.csv")
 
-    add_cli_arguments(config_path)
-    filter_main()
+    filter_main([config_path])
 
     with open(shared_datadir / "make_false_training.csv", "r") as fileobj:
         lines = fileobj.read().splitlines()
@@ -348,6 +450,55 @@ def test_preprocess_filter(write_yaml, shared_datadir, add_cli_arguments):
     with open(shared_datadir / "make_false_validation.csv", "r") as fileobj:
         lines = fileobj.read().splitlines()
     assert len(lines) == 2
+
+
+def test_preprocess_filter_csv_headers(write_yaml, shared_datadir, add_cli_arguments):
+    def duplicate_file(filename):
+        with open(shared_datadir / filename, "r") as fileobj:
+            lines = fileobj.read().splitlines()
+        lines = lines + lines[1:]
+        with open(shared_datadir / filename, "w") as fileobj:
+            fileobj.write("\n".join(lines))
+
+    config_path = write_yaml(
+        {
+            "file_prefix": str(shared_datadir / "make_false2"),
+            "split_size": {"training": 0.6, "testing": 0.2, "validation": 0.2},
+            "library_headers": [
+                "index",
+                "reaction_hash",
+                "reactants",
+                "products",
+                "retro_template",
+                "template_hash",
+                "template_code",
+            ],
+            "column_map": {
+                "reaction_hash": "PseudoHash",
+            },
+            "in_csv_headers": True,
+            "reaction_smiles_column": "RSMI",
+            "csv_sep": "\t",
+        }
+    )
+
+    make_false_main([config_path, "strict"])
+
+    duplicate_file("make_false2_template_library_false.csv")
+    duplicate_file("make_false2_template_library.csv")
+
+    filter_main([config_path])
+    with open(shared_datadir / "make_false2_training.csv", "r") as fileobj:
+        lines = fileobj.read().splitlines()
+    assert len(lines) == 7
+
+    with open(shared_datadir / "make_false2_testing.csv", "r") as fileobj:
+        lines = fileobj.read().splitlines()
+    assert len(lines) == 3
+
+    with open(shared_datadir / "make_false2_validation.csv", "r") as fileobj:
+        lines = fileobj.read().splitlines()
+    assert len(lines) == 3
 
 
 def test_make_false_products(write_yaml, shared_datadir, add_cli_arguments):
@@ -365,9 +516,8 @@ def test_make_false_products(write_yaml, shared_datadir, add_cli_arguments):
             ],
         }
     )
-    add_cli_arguments(f"{config_path} strict")
 
-    make_false_main()
+    make_false_main([config_path, "strict"])
 
     with open(shared_datadir / "make_false_template_library_false.csv", "r") as fileobj:
         lines = fileobj.read().splitlines()

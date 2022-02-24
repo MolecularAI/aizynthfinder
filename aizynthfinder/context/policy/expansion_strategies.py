@@ -130,6 +130,7 @@ class TemplateBasedExpansionStrategy(ExpansionStrategy):
                 metadata["policy_probability_rank"] = idx
                 metadata["policy_name"] = self.key
                 metadata["template_code"] = move_index
+                metadata["template"] = move[self._config.template_column]
                 possible_actions.append(
                     TemplatedRetroReaction(
                         mol,

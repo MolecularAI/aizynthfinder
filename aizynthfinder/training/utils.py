@@ -193,7 +193,12 @@ def split_and_save_data(
     for label_prefix, arr in array_dict.items():
         filename = config.filename(label_prefix + data_label)
         if isinstance(data, pd.DataFrame):
-            arr.to_csv(filename, mode="w", header=False, index=False)
+            arr.to_csv(
+                filename,
+                sep=config["csv_sep"],
+                header=config["in_csv_headers"],
+                index=False,
+            )
         elif isinstance(data, np.ndarray):
             np.savez(filename, arr)
         else:
@@ -257,3 +262,20 @@ def reaction_to_fingerprints(args: Sequence[str], config: Config) -> np.ndarray:
     reactant_fp = reactants_to_fingerprint([reactants_smiles], config)
 
     return (product_fp - reactant_fp).astype(np.int8)
+
+
+def split_reaction_smiles(data: pd.DataFrame, config: Config) -> pd.DataFrame:
+    """
+    Split a column of reaction SMILES into reactant and product columns
+
+    :param data: the dateframe to process
+    :param config: the training configuration
+    :return: the new dataframe
+    """
+    smiles_split = data[config["reaction_smiles_column"]].str.split(">", expand=True)
+    return data.assign(
+        **{
+            config["column_map"]["reactants"]: smiles_split[0],
+            config["column_map"]["products"]: smiles_split[2],
+        }
+    )

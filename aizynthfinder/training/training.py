@@ -1,6 +1,7 @@
 """ Module containing routines to setup the training of policies.
 """
 import argparse
+from typing import Optional, Sequence
 
 from aizynthfinder.training.utils import Config
 from aizynthfinder.training.keras_models import (
@@ -10,7 +11,7 @@ from aizynthfinder.training.keras_models import (
 )
 
 
-def main() -> None:
+def main(optional_args: Optional[Sequence[str]] = None) -> None:
     """Entry-point for the aizynth_training tool"""
     parser = argparse.ArgumentParser("Tool to train a network policy")
     parser.add_argument("config", help="the filename to a configuration file")
@@ -19,7 +20,7 @@ def main() -> None:
         choices=["expansion", "filter", "recommender"],
         help="the model to train",
     )
-    args = parser.parse_args()
+    args = parser.parse_args(optional_args)
 
     config = Config(args.config)
     if args.model == "expansion":

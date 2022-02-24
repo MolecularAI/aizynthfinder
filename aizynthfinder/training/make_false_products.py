@@ -16,6 +16,7 @@ from aizynthfinder.training.utils import (
     reverse_template,
     reaction_hash,
     reactants_to_fingerprint,
+    split_reaction_smiles,
 )
 from aizynthfinder.utils.models import CUSTOM_OBJECTS, load_keras_model
 
@@ -27,6 +28,7 @@ if TYPE_CHECKING:
         Any,
         Callable,
         List,
+        Sequence,
     )
 
     _DfGenerator = Iterable[Optional[pd.DataFrame]]
@@ -71,7 +73,9 @@ def recommender_application(library: pd.DataFrame, config: Config, _) -> _DfGene
     topn = config["negative_data"]["recommender_topn"]
 
     def prediction_sampler(row):
-        fingerprint = reactants_to_fingerprint([row.reactants], config)
+        fingerprint = reactants_to_fingerprint(
+            [row[config["column_map"]["reactants"]]], config
+        )
         fingerprint = fingerprint.reshape([1, config["fingerprint_len"]])
         prediction = model.predict(fingerprint).flatten()
         prediction_indices = prediction.argsort()[::-1][:topn]
@@ -105,21 +109,23 @@ def strict_application(
 def _apply_forward_reaction(
     template_row: pd.Series, config: Config
 ) -> Optional[pd.DataFrame]:
-    smarts_fwd = reverse_template(template_row.retro_template)
-    mols = create_reactants_molecules(template_row.reactants)
+    smarts_fwd = reverse_template(template_row[config["column_map"]["retro_template"]])
+    mols = create_reactants_molecules(template_row[config["column_map"]["reactants"]])
 
     try:
-        ref_mol = Molecule(smiles=template_row.products, sanitize=True)
+        ref_mol = Molecule(
+            smiles=template_row[config["column_map"]["products"]], sanitize=True
+        )
     except MoleculeException as err:
         raise _ReactionException(
-            f"reaction {template_row.reaction_hash} failed with msg {str(err)}"
+            f"reaction {template_row[config['column_map']['reaction_hash']]} failed with msg {str(err)}"
         )
 
     try:
         products = Reaction(mols=mols, smarts=smarts_fwd).apply()
     except ValueError as err:
         raise _ReactionException(
-            f"reaction {template_row.reaction_hash} failed with msg {str(err)}"
+            f"reaction {template_row[config['column_map']['reaction_hash']]} failed with msg {str(err)}"
         )
 
     new_products = {product[0] for product in products if product[0] != ref_mol}
@@ -131,7 +137,7 @@ def _apply_forward_reaction(
     }
     if not correct_products:
         raise _ReactionException(
-            f"reaction {template_row.reaction_hash} failed to produce correct product"
+            f"reaction {template_row[config['column_map']['reaction_hash']]} failed to produce correct product"
         )
 
     return _new_dataframe(
@@ -139,13 +145,14 @@ def _apply_forward_reaction(
         config,
         nrows=len(new_products),
         reaction_hash=[
-            reaction_hash(template_row.reactants, product) for product in new_products
+            reaction_hash(template_row[config["column_map"]["reactants"]], product)
+            for product in new_products
         ],
         products=[product.smiles for product in new_products],
     )
 
 
-def _get_config() -> Tuple[Config, str]:
+def _get_config(optional_args: Optional[Sequence[str]] = None) -> Tuple[Config, str]:
     parser = argparse.ArgumentParser("Tool to generate artificial negative reactions")
     parser.add_argument("config", help="the filename to a configuration file")
     parser.add_argument(
@@ -153,7 +160,7 @@ def _get_config() -> Tuple[Config, str]:
         choices=["strict", "random", "recommender"],
         help="the method to create random data",
     )
-    args = parser.parse_args()
+    args = parser.parse_args(optional_args)
 
     return Config(args.config), args.method
 
@@ -161,8 +168,14 @@ def _get_config() -> Tuple[Config, str]:
 def _new_dataframe(
     original: pd.Series, config: Config, nrows: int = 1, **kwargs: Any
 ) -> pd.DataFrame:
-    dict_ = {"index": 0}
-    for column in config["library_headers"][1:]:
+    dict_ = {}
+    if config["in_csv_headers"]:
+        columns = list(original.index)
+        print(columns)
+    else:
+        dict_["index"] = 0
+        columns = config["library_headers"][1:]
+    for column in columns:
         dict_[column] = kwargs.get(column, [original[column]] * nrows)
     return pd.DataFrame(dict_)
 
@@ -171,18 +184,25 @@ def _sample_library(
     library: pd.DataFrame, config: Config, sampler_func: Callable
 ) -> _DfGenerator:
     for _, row in library.iterrows():
-        mols = create_reactants_molecules(row.reactants)
+        mols = create_reactants_molecules(row[config["column_map"]["reactants"]])
         try:
-            ref_mol = Molecule(smiles=row.products, sanitize=True)
+            ref_mol = Molecule(
+                smiles=row[config["column_map"]["products"]], sanitize=True
+            )
         except MoleculeException:
             yield None
             continue
 
         new_product = None
         for template_row in sampler_func(row):
-            if row.template_hash == template_row.template_hash:
+            if (
+                row[config["column_map"]["template_hash"]]
+                == template_row[config["column_map"]["template_hash"]]
+            ):
                 continue
-            smarts_fwd = reverse_template(template_row.retro_template)
+            smarts_fwd = reverse_template(
+                template_row[config["column_map"]["retro_template"]]
+            )
             try:
                 new_product = Reaction(mols=mols, smarts=smarts_fwd).apply()[0][0]
             except (ValueError, IndexError):
@@ -199,18 +219,20 @@ def _sample_library(
         yield _new_dataframe(
             row,
             config,
-            reaction_hash=[reaction_hash(row.reactants, new_product)],
+            reaction_hash=[
+                reaction_hash(row[config["column_map"]["reactants"]], new_product)
+            ],
             products=[new_product.smiles],
             classification=[""],
-            retro_template=[template_row.retro_template],
-            template_hash=[template_row.template_hash],
+            retro_template=[template_row[config["column_map"]["retro_template"]]],
+            template_hash=[template_row[config["column_map"]["template_hash"]]],
             selectivity=[0],
             outcomes=[1],
-            template_code=[template_row.template_code],
+            template_code=[template_row["template_code"]],
         )
 
 
-def main() -> None:
+def main(optional_args: Optional[Sequence[str]] = None) -> None:
     """Entry-point for the make_false_products tool"""
     methods = {
         "strict": strict_application,
@@ -218,15 +240,18 @@ def main() -> None:
         "recommender": recommender_application,
     }
 
-    config, selected_method = _get_config()
+    config, selected_method = _get_config(optional_args)
     filename = config.filename("library")
     library = pd.read_csv(
         filename,
         index_col=False,
-        header=None,
-        names=config["library_headers"],
+        header=0 if config["in_csv_headers"] else None,
+        names=None if config["in_csv_headers"] else config["library_headers"],
+        sep=config["csv_sep"],
     )
-    false_lib = pd.DataFrame({column: [] for column in config["library_headers"]})
+    if config["reaction_smiles_column"]:
+        library = split_reaction_smiles(library, config)
+    false_lib = pd.DataFrame({column: [] for column in library.columns})
 
     progress_bar = tqdm.tqdm(total=len(library))
     errors: List[str] = []
@@ -238,9 +263,9 @@ def main() -> None:
 
     false_lib.to_csv(
         config.filename("false_library"),
-        mode="w",
-        header=False,
+        header=config["in_csv_headers"],
         index=False,
+        sep=config["csv_sep"],
     )
     with open(config.filename("_errors.txt"), "w") as fileobj:
         fileobj.write("\n".join(errors))
