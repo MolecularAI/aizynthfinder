@@ -62,7 +62,7 @@ First, install these conda packages
 
 Secondly, install the ``aizynthfinder`` package
 
-    python -m pip install https://github.com/MolecularAI/aizynthfinder/archive/v3.3.0.tar.gz
+    python -m pip install https://github.com/MolecularAI/aizynthfinder/archive/v3.3.1.tar.gz
 
 
 if you want to install the latest version

@@ -1,5 +1,11 @@
 # CHANGELOG
 
+## Version 3.3.1 2022-03-09
+
+### Trivial changes
+
+- Updated pinned versions of route_distances, jinja2 and tensorflow
+
 ## Version 3.3.0 2022-02-24
 
 ### Features
