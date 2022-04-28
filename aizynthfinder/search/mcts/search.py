@@ -99,7 +99,7 @@ class MctsSearchTree:
         return self._graph
 
     def nodes(self) -> List[MctsNode]:
-        """ Return all the nodes in the search tree """
+        """Return all the nodes in the search tree"""
         return list(self.graph())
 
     def one_iteration(self) -> bool:

@@ -257,7 +257,7 @@ def main(optional_args: Optional[Sequence[str]] = None) -> None:
     errors: List[str] = []
     for new_df in methods[selected_method](library, config, errors):
         if new_df is not None:
-            false_lib = false_lib.append(new_df, sort=False)
+            false_lib = pd.concat([false_lib, new_df])
         progress_bar.update(1)
     progress_bar.close()
 

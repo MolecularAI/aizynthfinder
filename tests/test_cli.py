@@ -94,6 +94,19 @@ def test_cli_single_smiles(mocker, add_cli_arguments, tmpdir, capsys):
     assert "b: 2" in output.out
 
 
+def test_cli_single_smiles_unsanitizable(add_cli_arguments, tmpdir, capsys):
+    output_name = str(tmpdir / "trees.json")
+    add_cli_arguments(
+        "--smiles n1(c(=O)[nH]c2c(c1=O)c(c(s2)C(=O)N(C)C)C)c1c(N(=O)O)cccc1 --config config_local.yml --output "
+        + output_name
+    )
+    print("Running...")
+    cli_main()
+
+    output = capsys.readouterr()
+    assert "Failed to setup search" in output.out
+
+
 def test_cli_multiple_smiles(
     mocker,
     add_cli_arguments,
@@ -125,6 +138,28 @@ def test_cli_multiple_smiles(
     output = capsys.readouterr()
     assert output.out.count("Done with") == 4
     assert f"Output saved to {output_name}" in output.out
+
+
+def test_cli_multiple_smiles_unsanitizable(
+    add_cli_arguments,
+    tmpdir,
+    capsys,
+):
+    smiles_input = str(tmpdir / "smiles_source.txt")
+    with open(smiles_input, "w") as fileobj:
+        fileobj.write("n1(c(=O)[nH]c2c(c1=O)c(c(s2)C(=O)N(C)C)C)c1c(N(=O)O)cccc1")
+    output_name = str(tmpdir / "data.hdf5")
+    add_cli_arguments(
+        f"--smiles {smiles_input} --config config_local.yml --output {output_name}"
+    )
+
+    cli_main()
+
+    output = capsys.readouterr()
+    assert "Failed to setup search" in output.out
+    assert output.out.count("Done with") == 0
+    assert f"Output saved to {output_name}" in output.out
+    assert len(pd.read_hdf(output_name, "table")) == 0
 
 
 def test_cli_single_smile_with_postprocessing(

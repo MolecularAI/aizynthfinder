@@ -7,7 +7,7 @@ class CostException(Exception):
 
 
 class ExternalModelAPIError(Exception):
-    """ Custom error type to signal failure in External model"""
+    """Custom error type to signal failure in External model"""
 
 
 class MoleculeException(Exception):
@@ -23,7 +23,7 @@ class PolicyException(Exception):
 
 
 class RejectionException(Exception):
-    """ An exception raised if a retro action should be rejected"""
+    """An exception raised if a retro action should be rejected"""
 
 
 class ScorerException(Exception):

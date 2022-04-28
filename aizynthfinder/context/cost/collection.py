@@ -17,7 +17,7 @@ if TYPE_CHECKING:
 
 
 class MoleculeCost(ContextCollection):
-    """ Collection of molecular cost objects """
+    """Collection of molecular cost objects"""
 
     _single_selection: bool = True
     _collection_name: str = "molecule cost"

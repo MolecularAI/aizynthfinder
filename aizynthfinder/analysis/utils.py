@@ -37,6 +37,7 @@ class RouteSelectionArguments:
     If `return_all` is True, it will return all solved routes if there is at least one is solved, otherwise
     the `nmin` and `nmax` will be used.
     """
+
     nmin: int = 5
     nmax: int = 25
     return_all: bool = False

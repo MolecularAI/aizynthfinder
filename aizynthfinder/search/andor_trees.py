@@ -17,21 +17,21 @@ if TYPE_CHECKING:
 
 
 class TreeNodeMixin:
-    """ A mixin class for node in a tree """
+    """A mixin class for node in a tree"""
 
     @property
     def prop(self) -> StrDict:
-        """ Dictionary with publicly exposed properties """
+        """Dictionary with publicly exposed properties"""
         return {}
 
     @property
     def children(self) -> List["TreeNodeMixin"]:
-        """ List of children nodes """
+        """List of children nodes"""
         return []
 
 
 class AndOrSearchTreeBase(abc.ABC):
-    """ A base class for a search tree based on an AND/OR structure """
+    """A base class for a search tree based on an AND/OR structure"""
 
     def __init__(self, config: Configuration, root_smiles: str = None) -> None:
         self.config = config
@@ -39,17 +39,17 @@ class AndOrSearchTreeBase(abc.ABC):
 
     @property
     def mol_nodes(self) -> List[TreeNodeMixin]:
-        """ Return the molecule nodes of the tree """
+        """Return the molecule nodes of the tree"""
         return []
 
     @abc.abstractmethod
     def one_iteration(self) -> bool:  # pylint: disable=no-self-use
-        """ Perform one iteration of the search """
+        """Perform one iteration of the search"""
         return False
 
     @abc.abstractmethod
     def routes(self) -> List[ReactionTree]:  # pylint: disable=no-self-use
-        """ Return the routes of the tree """
+        """Return the routes of the tree"""
         return []
 
 
@@ -150,7 +150,7 @@ class _AndOrTrace(nx.DiGraph):
 
     @property
     def first_reaction(self) -> TreeNodeMixin:
-        """ Return the first reaction or raise an exception """
+        """Return the first reaction or raise an exception"""
         assert self._first_reaction is not None
         return self._first_reaction
 

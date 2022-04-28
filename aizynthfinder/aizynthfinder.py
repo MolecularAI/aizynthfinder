@@ -20,6 +20,7 @@ from aizynthfinder.analysis import (
 )
 from aizynthfinder.chem import Molecule, TreeMolecule, FixedRetroReaction
 from aizynthfinder.search.andor_trees import AndOrSearchTreeBase
+from aizynthfinder.utils.exceptions import MoleculeException
 
 if TYPE_CHECKING:
     from aizynthfinder.utils.type_utils import (
@@ -147,6 +148,11 @@ class AiZynthFinder:
         """
         if not self.target_mol:
             raise ValueError("No target molecule set")
+
+        try:
+            self.target_mol.sanitize()
+        except MoleculeException:
+            raise ValueError("Target molecule unsanitizable")
 
         self.stock.reset_exclusion_list()
         if self.config.exclude_target_from_stock and self.target_mol in self.stock:

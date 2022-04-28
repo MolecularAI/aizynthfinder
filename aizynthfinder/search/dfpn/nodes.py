@@ -30,32 +30,32 @@ class _SuperNode(TreeNodeMixin):
 
     @property  # type: ignore
     def children(self) -> List[ReactionNode]:  # type: ignore
-        """ Gives the reaction children nodes """
+        """Gives the reaction children nodes"""
         return self._children  # type: ignore
 
     @property
     def closed(self) -> bool:
-        """ Return if the node is proven or disproven """
+        """Return if the node is proven or disproven"""
         return self.proven or self.disproven
 
     @property
     def proven(self) -> bool:
-        """ Return if the node is proven"""
+        """Return if the node is proven"""
         return self.pn == 0
 
     @property
     def disproven(self) -> bool:
-        """ Return if the node is disproven"""
+        """Return if the node is disproven"""
         return self.dn == 0
 
     def explorable(self) -> bool:
-        """ Return if the node can be explored by the search algorithm"""
+        """Return if the node can be explored by the search algorithm"""
         return not (
             self.closed or self.pn > self.pn_threshold or self.dn > self.dn_threshold
         )
 
     def reset(self) -> None:
-        """ Reset the thresholds """
+        """Reset the thresholds"""
         if self.closed or self.expandable:
             return
         for child in self._children:
@@ -65,7 +65,7 @@ class _SuperNode(TreeNodeMixin):
         self.dn_threshold = BIG_INT
 
     def update(self) -> None:
-        """ Update the proof and disproof numbers """
+        """Update the proof and disproof numbers"""
         raise NotImplementedError("Implement a child class")
 
     def _set_disproven(self) -> None:
@@ -139,7 +139,7 @@ class MoleculeNode(_SuperNode):
         return {"solved": self.proven, "mol": self.mol}
 
     def expand(self) -> None:
-        """ Expand the molecule by utilising an expansion policy """
+        """Expand the molecule by utilising an expansion policy"""
         self.expandable = False
         reactions, priors = self._config.expansion_policy([self.mol])
         self.tree.profiling["expansion_calls"] += 1
@@ -194,7 +194,7 @@ class MoleculeNode(_SuperNode):
         return best_child
 
     def update(self) -> None:
-        """ Update the proof and disproof numbers """
+        """Update the proof and disproof numbers"""
         func = all if self.parent is None else any
         if func(child.proven for child in self._children):
             self._set_proven()
@@ -277,7 +277,7 @@ class ReactionNode(_SuperNode):
 
     @property  # type: ignore
     def children(self) -> List[MoleculeNode]:  # type: ignore
-        """ Gives the molecule children nodes """
+        """Gives the molecule children nodes"""
         return self._children  # type: ignore
 
     @property
@@ -286,7 +286,7 @@ class ReactionNode(_SuperNode):
 
     @property
     def proven(self) -> bool:
-        """ Return if the node is proven """
+        """Return if the node is proven"""
         if self.expandable:
             return False
         if self.pn == 0:
@@ -295,7 +295,7 @@ class ReactionNode(_SuperNode):
 
     @property
     def disproven(self) -> bool:
-        """ Return if the node is disproven """
+        """Return if the node is disproven"""
         if self.expandable:
             return False
         if self.dn == 0:
@@ -303,7 +303,7 @@ class ReactionNode(_SuperNode):
         return any(child.disproven for child in self._children)
 
     def expand(self) -> None:
-        """ Expand the node by creating nodes for each reactant """
+        """Expand the node by creating nodes for each reactant"""
         self.expandable = False
         reactants = self.reaction.reactants[self.reaction.index]
         self._children = [
@@ -331,7 +331,7 @@ class ReactionNode(_SuperNode):
         return best_child
 
     def update(self) -> None:
-        """ Update the proof and disproof numbers"""
+        """Update the proof and disproof numbers"""
         if all(child.proven for child in self._children):
             self._set_proven()
             return
