@@ -94,13 +94,13 @@ def test_cli_single_smiles(mocker, add_cli_arguments, tmpdir, capsys):
     assert "b: 2" in output.out
 
 
-def test_cli_single_smiles_unsanitizable(add_cli_arguments, tmpdir, capsys):
+def test_cli_single_smiles_unsanitizable(mocker, add_cli_arguments, tmpdir, capsys):
+    mocker.patch("aizynthfinder.context.config.Configuration.from_file")
     output_name = str(tmpdir / "trees.json")
     add_cli_arguments(
         "--smiles n1(c(=O)[nH]c2c(c1=O)c(c(s2)C(=O)N(C)C)C)c1c(N(=O)O)cccc1 --config config_local.yml --output "
         + output_name
     )
-    print("Running...")
     cli_main()
 
     output = capsys.readouterr()
@@ -141,10 +141,12 @@ def test_cli_multiple_smiles(
 
 
 def test_cli_multiple_smiles_unsanitizable(
+    mocker,
     add_cli_arguments,
     tmpdir,
     capsys,
 ):
+    mocker.patch("aizynthfinder.context.config.Configuration.from_file")
     smiles_input = str(tmpdir / "smiles_source.txt")
     with open(smiles_input, "w") as fileobj:
         fileobj.write("n1(c(=O)[nH]c2c(c1=O)c(c(s2)C(=O)N(C)C)C)c1c(N(=O)O)cccc1")
