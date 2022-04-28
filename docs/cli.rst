@@ -48,7 +48,7 @@ This is an example of how to create images of the top-ranked routes for the firs
 .. code-block::
 
     import pandas as pd
-    from aizynthfinder.analysis import ReactionTree
+    from aizynthfinder.reactiontree import ReactionTree
 
     data = pd.read_hdf("output.hdf5", "table")
     all_trees = data.trees.values  # This contains a list of all the trees for all the compounds

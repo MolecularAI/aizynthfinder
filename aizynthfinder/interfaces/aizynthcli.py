@@ -141,7 +141,11 @@ def _process_single_smiles(
 ) -> None:
     output_name = output_name or "trees.json"
     finder.target_smiles = smiles
-    finder.prepare_tree()
+    try:
+        finder.prepare_tree()
+    except ValueError as err:
+        print(f"Failed to setup search due to: '{str(err).lower()}'")
+        return
     finder.tree_search(show_progress=True)
     finder.build_routes()
 
@@ -179,7 +183,11 @@ def _process_multi_smiles(
     results = defaultdict(list)
     for smi in smiles:
         finder.target_smiles = smi
-        finder.prepare_tree()
+        try:
+            finder.prepare_tree()
+        except ValueError as err:
+            print(f"Failed to setup search for {smi} due to: '{str(err).lower()}'")
+            continue
         search_time = finder.tree_search()
         finder.build_routes()
         stats = finder.extract_statistics()

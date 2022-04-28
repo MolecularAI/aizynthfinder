@@ -45,7 +45,7 @@ def cat_hdf_files(
         if trees_name:
             trees.extend(new_data["trees"].values)
             new_data = new_data[columns]
-        data = data.append(new_data)
+        data = pd.concat([data, new_data])
 
     with warnings.catch_warnings():  # This wil suppress a PerformanceWarning
         warnings.simplefilter("ignore")

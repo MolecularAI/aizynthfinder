@@ -101,7 +101,7 @@ class MoleculeNode(TreeNodeMixin):
 
     @property  # type: ignore
     def children(self) -> List[ReactionNode]:  # type: ignore
-        """ Gives the reaction children nodes """
+        """Gives the reaction children nodes"""
         return self._children
 
     @children.setter
@@ -301,7 +301,7 @@ class ReactionNode(TreeNodeMixin):
 
     @property  # type: ignore
     def children(self) -> List[MoleculeNode]:  # type: ignore
-        """ Gives the molecule children nodes """
+        """Gives the molecule children nodes"""
         return self._children
 
     @children.setter

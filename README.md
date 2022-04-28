@@ -18,7 +18,7 @@ Before you begin, ensure you have met the following requirements:
 
 * Linux, Windows or macOS platforms are supported - as long as the dependencies are supported on these platforms.
 
-* You have installed [anaconda](https://www.anaconda.com/) or [miniconda](https://docs.conda.io/en/latest/miniconda.html) with python 3.6 - 3.8
+* You have installed [anaconda](https://www.anaconda.com/) or [miniconda](https://docs.conda.io/en/latest/miniconda.html) with python 3.6 - 3.9
 
 The tool has been developed on a Linux platform, but the software has been tested on Windows 10 and macOS Catalina.
 
@@ -62,7 +62,7 @@ First, install these conda packages
 
 Secondly, install the ``aizynthfinder`` package
 
-    python -m pip install https://github.com/MolecularAI/aizynthfinder/archive/v3.3.1.tar.gz
+    python -m pip install https://github.com/MolecularAI/aizynthfinder/archive/v3.4.0.tar.gz
 
 
 if you want to install the latest version

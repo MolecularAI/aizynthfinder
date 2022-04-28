@@ -133,7 +133,7 @@ class RouteCollection:
         n_clusters: int,
         max_clusters: int = 5,
         distances_model: str = "ted",
-        **kwargs: Any
+        **kwargs: Any,
     ) -> np.ndarray:
         """
         Cluster the route collection into a number of clusters.

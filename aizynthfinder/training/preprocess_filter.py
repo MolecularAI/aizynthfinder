@@ -46,7 +46,7 @@ def main(optional_args: Optional[Sequence[str]] = None) -> None:
         sep=config["csv_sep"],
     )
     false_dataset["true_product"] = 0
-    dataset = true_dataset.append(false_dataset, sort=False)
+    dataset = pd.concat([true_dataset, false_dataset])
 
     if config["reaction_smiles_column"]:
         dataset = split_reaction_smiles(dataset, config)

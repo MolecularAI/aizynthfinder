@@ -100,7 +100,7 @@ class Molecule:
 
     @property
     def weight(self) -> float:
-        """ Return the exact molecular weight of the molecule """
+        """Return the exact molecular weight of the molecule"""
         self.sanitize(raise_exception=False)
         return Descriptors.ExactMolWt(self.rd_mol)
 

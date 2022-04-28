@@ -1,5 +1,16 @@
 # CHANGELOG
 
+## Version 3.4.0 2022-04-28
+
+### Features
+
+- Gracefully fail predictions with aizynthcli if target is unsanitizable (Github issue 66)
+
+### Trivial changes
+- Update version of Sphinx, scikit-learn and Black
+- Remove usage of depracted Pandas function append (Github issue 63)
+- Correct documentation of aizynthcli (Github issue 67)
+
 ## Version 3.3.1 2022-03-09
 
 ### Trivial changes

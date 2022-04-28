@@ -167,7 +167,7 @@ class MctsNode:
 
     @property
     def state(self) -> MctsState:
-        """ Return the underlying state of the node """
+        """Return the underlying state of the node"""
         return self._state
 
     def actions_to(self) -> List[RetroReaction]:

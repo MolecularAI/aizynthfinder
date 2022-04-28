@@ -76,7 +76,7 @@ class SearchTree(AndOrSearchTreeBase):
 
     @property
     def mol_nodes(self) -> Sequence[MoleculeNode]:  # type: ignore
-        """ Return the molecule nodes of the tree """
+        """Return the molecule nodes of the tree"""
         return self._mol_nodes
 
     def one_iteration(self) -> bool:

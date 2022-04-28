@@ -332,7 +332,7 @@ class TemplatedRetroReaction(RetroReaction):
 
     @property
     def rd_reaction(self) -> RdReaction:
-        """ Return the RDKit reaction created from the SMART """
+        """Return the RDKit reaction created from the SMART"""
         if self._rd_reaction is None:
             self._rd_reaction = AllChem.ReactionFromSmarts(self.smarts)
         return self._rd_reaction
