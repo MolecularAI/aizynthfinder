@@ -105,7 +105,7 @@ class LocalKerasModel:
         :param args: the input vectors
         :return: the vector of the output layer
         """
-        return self.model.predict(args)
+        return self.model.predict(args, verbose=0)
 
 
 def _log_and_reraise_exceptions(method: Callable) -> Callable:
