@@ -83,6 +83,17 @@ class ExpansionPolicy(ContextCollection):
                 "Only objects of classes inherited from ExpansionStrategy can be added"
             )
         self._items[source.key] = source
+        
+    def load_from_gcs(self, **config: Any) -> None:
+        """
+        Load one or more expansion policies from a configuration file
+        pointing to a Google Cloud Storage account.
+        
+        The format should be:
+        
+        :param config: the configuration
+        """
+        pass
 
     def load_from_config(self, **config: Any) -> None:
         """
