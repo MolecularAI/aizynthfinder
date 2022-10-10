@@ -15,7 +15,8 @@ from tensorflow_serving.apis import (
     get_model_metadata_pb2,
     prediction_service_pb2_grpc,
 )
-
+import h5py
+import gcsfs
 # pylint: disable=no-name-in-module
 from tensorflow.keras.metrics import top_k_categorical_accuracy
 from tensorflow.keras.models import load_model as load_keras_model
@@ -39,6 +40,10 @@ CUSTOM_OBJECTS = {"top10_acc": top10_acc, "top50_acc": top50_acc, "tf": tf}
 
 _logger = logger()
 
+# TODO: Move to env vars
+PROJECT_NAME = "lyrical-compass-357817"
+GOOGLE_APPLICATION_CREDENTIALS = "../lyrical-compass-357817-48467f0ce70f.json"
+
 TF_SERVING_HOST = os.environ.get("TF_SERVING_HOST")
 TF_SERVING_REST_PORT = os.environ.get("TF_SERVING_REST_PORT")
 TF_SERVING_GRPC_PORT = os.environ.get("TF_SERVING_GRPC_PORT")
@@ -46,7 +51,7 @@ TF_SERVING_GRPC_PORT = os.environ.get("TF_SERVING_GRPC_PORT")
 
 def load_model(
     source: str, key: str, use_remote_models: bool
-) -> Union["LocalKerasModel", "ExternalModelViaGRPC", "ExternalModelViaREST"]:
+) -> Union["LocalKerasModel", "ExternalModelViaGRPC", "ExternalModelViaREST", "GoogleCloudModel"]:
     """
     Load model from a configuration specification.
 
@@ -63,6 +68,11 @@ def load_model(
     """
     if not use_remote_models:
         return LocalKerasModel(source)
+    
+    try:
+        return GoogleCloudModel(key)
+    except:
+        pass
 
     try:
         return ExternalModelViaGRPC(key)
@@ -75,6 +85,37 @@ def load_model(
     return LocalKerasModel(source)
 
 
+class GoogleCloudModel:
+    """
+    
+    """
+    
+    def __init__(self, name: str) -> None:
+        print(f"\nGetting {name} from Google Cloud.\n")
+        bucket = gcsfs.GCSFileSystem(token=GOOGLE_APPLICATION_CREDENTIALS,
+                                     project=PROJECT_NAME)
+        with bucket.open(name, "rb") as cloud_file:
+            data = h5py.File(cloud_file, "r")
+            self.model = load_keras_model(data, custom_objects=CUSTOM_OBJECTS)
+            
+        try:
+            self._model_dimensions = int(self.model.inupt.shape[1])
+        except AttributeError:
+            self._model_dimensions = int(self.model.input[0].shape[1])
+        self.output_size = int(self.model.output.shape[1])
+    
+    def __len__(self) -> int:
+        return self._model_dimensions
+        
+    def predict(self, *args: np.ndarray, **kwargs: np.ndarray) -> np.ndarray:
+        """
+        Perform a forward pass of the neural network.
+
+        :param args: the input vectors
+        :return: the vector of the output layer
+        """
+        return self.model.predict(args, verbose=0)
+    
 class LocalKerasModel:
     """
     A keras policy model that is executed locally.
