@@ -88,6 +88,7 @@ class TemplateBasedExpansionStrategy(ExpansionStrategy):
         self._logger.info(
             f"Loading template-based expansion policy model from {source} to {self.key}"
         )
+        print(f"\n\nFrom TemplateBasedExpansionStrategy:\nsource = {source}\nkey = {self.key}\nconfig = {self._config}")
         self.model = load_model(source, self.key, self._config.use_remote_models)
 
         self._logger.info(f"Loading templates from {templatefile} to {self.key}")

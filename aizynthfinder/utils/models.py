@@ -84,6 +84,7 @@ def load_model(
         pass
     return LocalKerasModel(source)
 
+
 class GoogleCloudModel:
     """
     
@@ -97,7 +98,6 @@ class GoogleCloudModel:
             data = h5py.File(cloud_file, "r")
             self.model = load_keras_model(data, custom_objects=CUSTOM_OBJECTS)
             
-        bucket.close()
         try:
             self._model_dimensions = int(self.model.inupt.shape[1])
         except AttributeError:
