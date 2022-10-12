@@ -92,7 +92,8 @@ class Configuration:  # pylint: disable=R0902
         config_obj = Configuration()
         src_copy = dict(source)  # Make a copy so we can pop items
         config_obj._update_from_config(src_copy)
-
+        
+        # This may be where I can hack the system a bit...
         config_obj.expansion_policy.load_from_config(**src_copy.get("policy", {}))
         config_obj.filter_policy.load_from_config(**src_copy.get("filter", {}))
         config_obj.stock.load_from_config(**src_copy.get("stock", {}))

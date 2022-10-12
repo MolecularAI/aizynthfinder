@@ -94,6 +94,7 @@ class ExpansionPolicy(ContextCollection):
         :param config: the configuration
         """
         pass
+    
 
     def load_from_config(self, **config: Any) -> None:
         """
