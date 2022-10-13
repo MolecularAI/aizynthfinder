@@ -2,10 +2,14 @@
 """
 from __future__ import annotations
 import abc
+from re import template
 from typing import TYPE_CHECKING
 
+import os
 import numpy as np
 import pandas as pd
+import gcsfs
+import h5py
 
 from aizynthfinder.chem import TemplatedRetroReaction
 from aizynthfinder.utils.models import load_model
@@ -19,6 +23,8 @@ if TYPE_CHECKING:
     from aizynthfinder.chem import TreeMolecule
     from aizynthfinder.chem.reaction import RetroReaction
 
+PROJECT_NAME = os.environ.get("PROJECT_NAME")
+GOOGLE_APPLICATION_CREDENTIALS = os.environ.get("GOOGLE_APPLICATION_CREDENTIALS")
 
 class ExpansionStrategy(abc.ABC):
     """
@@ -84,15 +90,36 @@ class TemplateBasedExpansionStrategy(ExpansionStrategy):
 
         source = kwargs["source"]
         templatefile = kwargs["templatefile"]
+        print(f"Source = {source}\tTemplate = {templatefile}")
 
         self._logger.info(
             f"Loading template-based expansion policy model from {source} to {self.key}"
         )
-        print(f"\n\nFrom TemplateBasedExpansionStrategy:\nsource = {source}\nkey = {self.key}\nconfig = {self._config}")
+        # print(f"\n\nFrom TemplateBasedExpansionStrategy:\nsource = {source}\nkey = {self.key}\nconfig = {self._config}")
         self.model = load_model(source, self.key, self._config.use_remote_models)
 
         self._logger.info(f"Loading templates from {templatefile} to {self.key}")
-        self.templates: pd.DataFrame = pd.read_hdf(templatefile, "table")
+        print(f"Loading templates from {templatefile} to {self.key} and {source}")
+        if "gs://" in templatefile:
+            # Load from google cloud
+            bucket = gcsfs.GCSFileSystem(
+                token=GOOGLE_APPLICATION_CREDENTIALS,
+                project=PROJECT_NAME)
+            with bucket.open(templatefile, "rb") as cloud_file:
+                ext = templatefile.rsplit(".")[-1]
+                if ext == "hdf5":
+                    # Soln from: https://stackoverflow.com/questions/40472912/hdf5-file-to-pandas-dataframe
+                    # but doesn't seem to work properly
+                    data = h5py.File(cloud_file, "r")
+                    try:
+                        self.templates: pd.DataFrame = pd.DataFrame(np.array(data["table"]))
+                    except KeyError:
+                        pass
+                        # raise KeyError(f"Error with {key} and {source}.\nFile keys = {data.keys()}")
+                elif ext == "csv":
+                    self.templates: pd.DataFrame = pd.read_csv(cloud_file, index_col=0)
+        else:       
+            self.templates: pd.DataFrame = pd.read_hdf(templatefile, "table")
 
         if hasattr(self.model, "output_size") and len(self.templates) != self.model.output_size:  # type: ignore
             raise PolicyException(

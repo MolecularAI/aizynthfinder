@@ -40,9 +40,8 @@ CUSTOM_OBJECTS = {"top10_acc": top10_acc, "top50_acc": top50_acc, "tf": tf}
 
 _logger = logger()
 
-# TODO: Move to env vars
-PROJECT_NAME = "lyrical-compass-357817"
-GOOGLE_APPLICATION_CREDENTIALS = "../lyrical-compass-357817-48467f0ce70f.json"
+PROJECT_NAME = os.environ.get("PROJECT_NAME")
+GOOGLE_APPLICATION_CREDENTIALS = os.environ.get("GOOGLE_APPLICATION_CREDENTIALS")
 
 TF_SERVING_HOST = os.environ.get("TF_SERVING_HOST")
 TF_SERVING_REST_PORT = os.environ.get("TF_SERVING_REST_PORT")
@@ -67,12 +66,14 @@ def load_model(
     :return: a model object with a predict object
     """
     if not use_remote_models:
+        print(f"Loading local Keras model from {source}")
         return LocalKerasModel(source)
     
     try:
-        return GoogleCloudModel(key)
+        return GoogleCloudModel(source, key)
     except:
-        pass
+        raise ValueError(f"Unable to load model from GCP:\n\tsource = {source}\n\tkey = {key}")
+        # pass
 
     try:
         return ExternalModelViaGRPC(key)
@@ -87,19 +88,25 @@ def load_model(
 
 class GoogleCloudModel:
     """
-    
+    Loads a Keras policy model from GCP that is executed locally.
+
+    The size of the input vector can be determined with the len() method.
+
+    :ivar model: the compiled model
+    :ivar output_size: the length of the output vector
+
+    :param filename: the path to a Keras checkpoint file
     """
-    
-    def __init__(self, name: str) -> None:
-        print(f"\nGetting {name} from Google Cloud.\n")
+    def __init__(self, source: str, name: str) -> None:
+        print(f"\nGetting {name} from Google Cloud.\n{type(source)}\n{source}")
         bucket = gcsfs.GCSFileSystem(token=GOOGLE_APPLICATION_CREDENTIALS,
                                      project=PROJECT_NAME)
-        with bucket.open(name, "rb") as cloud_file:
+        with bucket.open(source, "rb") as cloud_file:
             data = h5py.File(cloud_file, "r")
             self.model = load_keras_model(data, custom_objects=CUSTOM_OBJECTS)
             
         try:
-            self._model_dimensions = int(self.model.inupt.shape[1])
+            self._model_dimensions = int(self.model.input.shape[1])
         except AttributeError:
             self._model_dimensions = int(self.model.input[0].shape[1])
         self.output_size = int(self.model.output.shape[1])

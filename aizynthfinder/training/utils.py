@@ -11,7 +11,7 @@ import numpy as np
 import pandas as pd
 from scipy import sparse
 from sklearn.model_selection import train_test_split
-
+from datetime import datetime
 
 from aizynthfinder.utils.paths import data_path
 from aizynthfinder.chem import Molecule, MoleculeException
@@ -191,7 +191,10 @@ def split_and_save_data(
 
     array_dict = {"training_": train_arr, "validation_": val_arr, "testing_": test_arr}
     for label_prefix, arr in array_dict.items():
-        filename = config.filename(label_prefix + data_label)
+        try:
+            filename = config.filename(label_prefix + data_label)
+        except:
+            filename = config["file_prefix"] + datetime.now().strftime("%Y-%m-%d-%H:%S") + ".csv"
         if isinstance(data, pd.DataFrame):
             arr.to_csv(
                 filename,

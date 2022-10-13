@@ -94,6 +94,7 @@ class ExpansionPolicy(ContextCollection):
         :param config: the configuration
         """
         pass
+    
 
     def load_from_config(self, **config: Any) -> None:
         """
@@ -120,6 +121,7 @@ class ExpansionPolicy(ContextCollection):
         files_spec = config.get("files", config.get("template-based", {}))
         for key, policy_spec in files_spec.items():
             modelfile, templatefile = policy_spec
+            print(f"Loading template-based policy:\nModel = {modelfile}\nTemplate = {templatefile}")
             strategy = TemplateBasedExpansionStrategy(
                 key, self._config, source=modelfile, templatefile=templatefile
             )
@@ -127,7 +129,9 @@ class ExpansionPolicy(ContextCollection):
 
         # Load policies specifying a module and class, e.g. package.module.MyStrategyClass
         for strategy_spec, strategy_config in config.items():
+            # print(f"\nLoading dynamic class.\n{strategy_spec}\n{strategy_config}")
             if strategy_spec in ["files", "template-based"]:
+                # Our setup doesn't get past this
                 continue
             cls = load_dynamic_class(
                 strategy_spec, expansion_strategy_module, PolicyException

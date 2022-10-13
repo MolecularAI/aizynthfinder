@@ -3,7 +3,7 @@
 import argparse
 import os
 from typing import Sequence, Optional
-
+from datetime import datetime
 import pandas as pd
 import numpy as np
 from sklearn.preprocessing import LabelBinarizer, LabelEncoder
@@ -55,6 +55,7 @@ def _filter_dataset(config: Config) -> pd.DataFrame:
     )
     dataset.to_csv(
         config.filename("library"),
+        # config.get("library", "library" + datetime.now().strftime("%Y-%m-%d-%H:%S") + ".csv"),
         mode="w",
         header=config["in_csv_headers"],
         index=False,
