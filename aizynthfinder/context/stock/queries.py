@@ -5,6 +5,9 @@ import os
 from typing import TYPE_CHECKING
 
 import pandas as pd
+import numpy as np
+import h5py
+import gcsfs
 
 from aizynthfinder.chem import Molecule
 from aizynthfinder.utils.mongo import get_mongo_client
@@ -17,6 +20,8 @@ if TYPE_CHECKING:
     # pylint: disable=ungrouped-imports
     from aizynthfinder.utils.type_utils import Set, Optional
 
+PROJECT_NAME = os.environ.get("PROJECT_NAME")
+GOOGLE_APPLICATION_CREDENTIALS = os.environ.get("GOOGLE_APPLICATION_CREDENTIALS")
 
 # pylint: disable=no-self-use
 class StockQueryMixin:
@@ -92,8 +97,21 @@ class InMemoryInchiKeyQuery(StockQueryMixin):
     """
 
     def __init__(self, filename: str) -> None:
+        print(f"Stock file = {filename}")
         ext = os.path.splitext(filename)[1]
-        if ext in [".h5", ".hdf5"]:
+        if "gs://" in filename:
+            bucket = gcsfs.GCSFileSystem(
+                token=GOOGLE_APPLICATION_CREDENTIALS,
+                project=PROJECT_NAME)
+            with bucket.open(filename, "rb") as cloud_file:
+                if ext == ".csv":
+                    stock = pd.read_csv(cloud_file)
+                    inchis = stock.inchi_key.values
+                elif ext in [".hf", ".hdf5"]:
+                    data = h5py.File(cloud_file, "r")
+                    stock = pd.DataFrame(np.array(data["table"]))
+                    inchis = stock.inchi_key.values
+        elif ext in [".h5", ".hdf5"]:
             stock = pd.read_hdf(filename, key="table")  # type: ignore
             inchis = stock.inchi_key.values  # type: ignore
         elif ext == ".csv":
