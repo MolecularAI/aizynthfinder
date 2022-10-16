@@ -208,7 +208,8 @@ def split_and_save_data(
             sparse.save_npz(filename, arr, compressed=True)
 
 
-def smiles_to_fingerprint(args: Sequence[str], config: Config) -> np.ndarray:
+def smiles_to_fingerprint(args: Sequence[str], config: Config,
+                          warn: bool=False) -> np.ndarray:
     """
     Convert a SMILES to a fingerprint vector
 
@@ -217,14 +218,19 @@ def smiles_to_fingerprint(args: Sequence[str], config: Config) -> np.ndarray:
     :return: the fingerprint
     """
     smiles = args[0]
-    return (
-        Molecule(smiles=smiles)
-        .fingerprint(
-            config["fingerprint_radius"],
-            config["fingerprint_len"],
+    try:
+        return (
+            Molecule(smiles=smiles)
+            .fingerprint(
+                config["fingerprint_radius"],
+                config["fingerprint_len"],
+            )
+            .astype(np.int8)
         )
-        .astype(np.int8)
-    )
+    except:
+        if warn:
+            pass
+        return np.nan
 
 
 def reactants_to_fingerprint(args: Sequence[str], config: Config) -> np.ndarray:
