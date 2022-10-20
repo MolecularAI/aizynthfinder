@@ -100,13 +100,13 @@ class TemplateBasedExpansionStrategy(ExpansionStrategy):
 
         self._logger.info(f"Loading templates from {templatefile} to {self.key}")
         print(f"Loading templates from {templatefile} to {self.key} and {source}")
+        ext = templatefile.rsplit(".")[-1]
         if "gs://" in templatefile:
             # Load from google cloud
             bucket = gcsfs.GCSFileSystem(
                 token=GOOGLE_APPLICATION_CREDENTIALS,
                 project=PROJECT_NAME)
             with bucket.open(templatefile, "rb") as cloud_file:
-                ext = templatefile.rsplit(".")[-1]
                 if ext == "hdf5":
                     # Soln from: https://stackoverflow.com/questions/40472912/hdf5-file-to-pandas-dataframe
                     # but doesn't seem to work properly
@@ -118,6 +118,8 @@ class TemplateBasedExpansionStrategy(ExpansionStrategy):
                         # raise KeyError(f"Error with {key} and {source}.\nFile keys = {data.keys()}")
                 elif ext == "csv":
                     self.templates: pd.DataFrame = pd.read_csv(cloud_file, index_col=0)
+        elif ext == "csv":
+            self.templates: pd.DataFrame = pd.read_csv(templatefile)
         else:       
             self.templates: pd.DataFrame = pd.read_hdf(templatefile, "table")
 
