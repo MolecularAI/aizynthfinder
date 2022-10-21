@@ -323,6 +323,9 @@ class TemplatedRetroReaction(RetroReaction):
         super().__init__(mol, index, metadata, **kwargs)
         self.smarts: str = kwargs["smarts"]
         self._use_rdchiral: bool = kwargs.get("use_rdchiral", True)
+        self._reaction_source: str = kwargs.get("reaction_source", "rdkit")
+        self._template_fallback: str = kwargs.get("template_fallback", True)
+        self.templates = kwargs.get("templates", None)
         self._rd_reaction: Optional[RdReaction] = None
 
     def __str__(self) -> str:
@@ -353,9 +356,12 @@ class TemplatedRetroReaction(RetroReaction):
         return dict_
 
     def _apply(self) -> Tuple[Tuple[TreeMolecule, ...], ...]:
-        if self._use_rdchiral:
+        if self._reaction_source == "rdkit":
+            return self._apply_with_rdkit()
+        elif self._reaction_source == "rdchiral":
             return self._apply_with_rdchiral()
-        return self._apply_with_rdkit()
+        elif self._reaction_source == "templates":
+            return self._apply_with_templates()
 
     def _apply_with_rdchiral(self) -> Tuple[Tuple[TreeMolecule, ...], ...]:
         """
@@ -370,6 +376,10 @@ class TemplatedRetroReaction(RetroReaction):
             logger().debug(
                 f"Runtime error in RDChiral with template {self.smarts} on {self.mol.smiles}\n{err}"
             )
+            reactants = []
+        except MoleculeException:
+            if self._template_fallback: # TODO: come up with a better name
+                return self._apply_with_templates()
             reactants = []
 
         # Turning rdchiral outcome into rdkit tuple of tuples to maintain compatibility
@@ -395,8 +405,12 @@ class TemplatedRetroReaction(RetroReaction):
             self.mol.sanitize()
         except MoleculeException:
             reactants_list = []
-        else:
+        try:
             reactants_list = rxn.RunReactants([self.mol.rd_mol])
+        except:
+            if self._template_fallback: # TODO: come up with a better name
+                return self._apply_with_templates()
+            reactants_list = []
 
         outcomes = []
         for reactants in reactants_list:
@@ -412,6 +426,29 @@ class TemplatedRetroReaction(RetroReaction):
         self._reactants = tuple(outcomes)
 
         return self._reactants
+    
+    def _apply_with_templates(self) -> Tuple[Tuple[TreeMolecule, ...], ...]:
+        # TODO: get column names from config file
+        rxn = self.templates.loc[self.templates["retro_template"]==self.smiles]
+        reactants_list = []
+        for r in rxn["reactants"].values:
+            reactants_list.append((AllChem.MolFromSmiles(r),))
+        
+        outcomes = []
+        for reactants in reactants_list:
+            try:
+                mols = tuple(
+                TreeMolecule(parent=self.mol, rd_mol=mol, sanitize=True)
+                    for mol in reactants
+                )
+            except MoleculeException:
+                pass
+            else:
+                outcomes.append(mols)
+        self._reactants = tuple(outcomes)
+        
+        return self._reactants
+        
 
     def _make_smiles(self):
         return AllChem.ReactionToSmiles(self.rd_reaction)

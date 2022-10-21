@@ -144,7 +144,7 @@ def _train_keras_model(
     metrics: List[Any],
     config: Config,
 ) -> None:
-    adam = Adam(lr=0.001, beta_1=0.9, beta_2=0.999, epsilon=None, decay=0.0)
+    adam = Adam(learning_rate=0.001, beta_1=0.9, beta_2=0.999, epsilon=None, decay=0.0)
 
     model.compile(
         optimizer=adam,
@@ -152,7 +152,7 @@ def _train_keras_model(
         metrics=metrics,
     )
 
-    model.fit_generator(
+    model.fit(
         train_seq,
         steps_per_epoch=None,
         epochs=config["epochs"],
