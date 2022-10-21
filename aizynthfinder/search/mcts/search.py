@@ -116,7 +116,7 @@ class MctsSearchTree:
         leaf.expand()
         rollout_child = None
         while not leaf.is_terminal():
-            child = leaf.promising_child()
+            child = leaf.promising_child() # Pass templates?
             if not rollout_child:
                 rollout_child = child
             if child:
