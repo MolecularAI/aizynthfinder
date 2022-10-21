@@ -324,6 +324,7 @@ class TemplatedRetroReaction(RetroReaction):
         self.smarts: str = kwargs["smarts"]
         self._use_rdchiral: bool = kwargs.get("use_rdchiral", True)
         self._reaction_source: str = kwargs.get("reaction_source", "rdkit")
+        self._template_fallback: str = kwargs.get("template_fallback", True)
         self.templates = kwargs.get("templates", None)
         self._rd_reaction: Optional[RdReaction] = None
 
@@ -355,9 +356,9 @@ class TemplatedRetroReaction(RetroReaction):
         return dict_
 
     def _apply(self) -> Tuple[Tuple[TreeMolecule, ...], ...]:
-        if self.reaction_source == "rdkit":
+        if self._reaction_source == "rdkit":
             return self._apply_with_rdkit()
-        elif self.reaction_source == "rdchiral":
+        elif self._reaction_source == "rdchiral":
             return self._apply_with_rdchiral()
         elif self._reaction_source == "templates":
             return self._apply_with_templates()
@@ -375,6 +376,10 @@ class TemplatedRetroReaction(RetroReaction):
             logger().debug(
                 f"Runtime error in RDChiral with template {self.smarts} on {self.mol.smiles}\n{err}"
             )
+            reactants = []
+        except MoleculeException:
+            if self._template_fallback: # TODO: come up with a better name
+                return self._apply_with_templates()
             reactants = []
 
         # Turning rdchiral outcome into rdkit tuple of tuples to maintain compatibility
@@ -403,6 +408,8 @@ class TemplatedRetroReaction(RetroReaction):
         try:
             reactants_list = rxn.RunReactants([self.mol.rd_mol])
         except:
+            if self._template_fallback: # TODO: come up with a better name
+                return self._apply_with_templates()
             reactants_list = []
 
         outcomes = []
