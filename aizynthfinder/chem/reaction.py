@@ -6,7 +6,9 @@ import abc
 from typing import TYPE_CHECKING
 
 import numpy as np
+from rdkit import Chem
 from rdkit.Chem import AllChem
+from rdkit.DataStructs import FingerprintSimilarity
 from rdchiral import main as rdc
 
 from aizynthfinder.utils.logging import logger
@@ -429,26 +431,65 @@ class TemplatedRetroReaction(RetroReaction):
     
     def _apply_with_templates(self) -> Tuple[Tuple[TreeMolecule, ...], ...]:
         # TODO: get column names from config file
-        rxn = self.templates.loc[self.templates["retro_template"]==self.smiles]
-        reactants_list = []
-        for r in rxn["reactants"].values:
-            reactants_list.append((AllChem.MolFromSmiles(r),))
+        rxn = self.templates.loc[self.templates["retro_template"]==self.smarts]["retro_template"]
+        reactants_list = rxn.values[0].split(">>")[0].split(".")
+        rxn_fp = Chem.RDKFingerprint(self.mol.rd_mol)
+        react_rp = [
+            {"smarts": r,
+             "mol": Chem.MolFromSmarts(r),
+             "fp": Chem.RDKFingerprint(Chem.MolFromSmarts(r))}
+            for r in reactants_list
+            ]
+        sims = [
+            {"mol": x["mol"],
+             "sim": FingerprintSimilarity(rxn_fp, x["fp"])}
+            for x in react_rp
+            ]
+        sorted_sims = sorted(sims, key=lambda m: m["sim"], reverse=True)
+        if len(sorted_sims) > 1:
+            sorted_sims.pop(0)
+        
+        reactants = [(r["mol"],) for r in sorted_sims]
         
         outcomes = []
-        for reactants in reactants_list:
+        for r in reactants:
             try:
                 mols = tuple(
-                TreeMolecule(parent=self.mol, rd_mol=mol, sanitize=True)
-                    for mol in reactants
+                    TreeMolecule(parent=self.mol, rd_mol=mol,
+                                 sanitize=True)
+                    for mol in r
                 )
             except MoleculeException:
                 pass
             else:
                 outcomes.append(mols)
+
         self._reactants = tuple(outcomes)
         
         return self._reactants
+    
+    
+    # def _apply_with_templates(self) -> Tuple[Tuple[TreeMolecule, ...], ...]:
+    #     # TODO: get column names from config file
+    #     rxn = self.templates.loc[self.templates["retro_template"]==self.smarts]
+    #     reactants_list = []
+    #     for r in rxn["reactants"].values:
+    #         reactants_list.append((AllChem.MolFromSmiles(r),))
         
+    #     outcomes = []
+    #     for reactants in reactants_list:
+    #         try:
+    #             mols = tuple(
+    #             TreeMolecule(parent=self.mol, rd_mol=mol, sanitize=True)
+    #                 for mol in reactants
+    #             )
+    #         except MoleculeException:
+    #             pass
+    #         else:
+    #             outcomes.append(mols)
+    #     self._reactants = tuple(outcomes)
+        
+    #     return self._reactants        
 
     def _make_smiles(self):
         return AllChem.ReactionToSmiles(self.rd_reaction)

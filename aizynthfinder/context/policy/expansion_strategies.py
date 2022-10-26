@@ -167,7 +167,7 @@ class TemplateBasedExpansionStrategy(ExpansionStrategy):
                         smarts=move[self._config.template_column],
                         metadata=metadata,
                         reaction_source=self._config.reaction_source,
-                        template_fallback=self.config.template_fallback,
+                        template_fallback=self._config.template_fallback,
                         use_rdchiral=self._config.use_rdchiral,
                         templates=self.templates,
                     )
