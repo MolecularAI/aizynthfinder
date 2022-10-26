@@ -431,13 +431,14 @@ class TemplatedRetroReaction(RetroReaction):
     
     def _apply_with_templates(self) -> Tuple[Tuple[TreeMolecule, ...], ...]:
         # TODO: get column names from config file
-        rxn = self.templates.loc[self.templates["retro_template"]==self.smarts]
+        rxn = self.templates.loc[self.templates["retro_template"]==self.smarts]["retro_template"]
+        reactants_list = rxn.values[0].split(">>")[0].split(".")
         rxn_fp = Chem.RDKFingerprint(self.mol.rd_mol)
         react_rp = [
             {"smarts": r,
              "mol": Chem.MolFromSmarts(r),
              "fp": Chem.RDKFingerprint(Chem.MolFromSmarts(r))}
-            for r in rxn["reactants"].values.tolist()
+            for r in reactants_list
             ]
         sims = [
             {"mol": x["mol"],
@@ -445,14 +446,18 @@ class TemplatedRetroReaction(RetroReaction):
             for x in react_rp
             ]
         sorted_sims = sorted(sims, key=lambda m: m["sim"], reverse=True)
-        sorted_sims.pop(0)
+        if len(sorted_sims) > 1:
+            sorted_sims.pop(0)
+        
+        reactants = [(r["mol"],) for r in sorted_sims]
         
         outcomes = []
-        for r in sorted_sims:
+        for r in reactants:
             try:
                 mols = tuple(
-                    TreeMolecule(parent=self.mol, rd_mol=r["mol"],
+                    TreeMolecule(parent=self.mol, rd_mol=mol,
                                  sanitize=True)
+                    for mol in r
                 )
             except MoleculeException:
                 pass
@@ -484,40 +489,7 @@ class TemplatedRetroReaction(RetroReaction):
     #             outcomes.append(mols)
     #     self._reactants = tuple(outcomes)
         
-    #     return self._reactants
-    
-    
-    def _get_new_reactants(self):
-        # TODO: get column names from config file
-        # TODO: can get data directly from reactants
-        rxn = self.templates.loc[self.templates["retro_template"]==self.smarts]["retro_template"]
-        reactants = rxn.split(">>")[0].split(".")
-        
-        # If only one reactant is provided, return the molecule
-        if len(reactants) == 1:
-            return self.mol
-        
-        fp = Chem.RDKFingerprint(self.rd_mol)
-        
-        react_rp = [
-            {"smarts": r, 
-             "mol": Chem.MolFromSmarts(r), 
-             "fp": Chem.RDKFingerprint(Chem.MolFromSmarts(r))} 
-            for r in reactants]
-        
-        sims = [
-            {"mol": x["mol"], 
-             "sim": FingerprintSimilarity(fp, x["fp"])} 
-            for x in react_rp]
-        
-        sorted_sims = sorted(sims, key=lambda m: m["sim"], reverse=True)
-        sorted_sims.pop(0) # Removes most similar molecule
-        
-        mol_list = [x["mol"] for x in sorted_sims]
-        # mol_list.append(self.mol)
-        
-        return mol_list
-        
+    #     return self._reactants        
 
     def _make_smiles(self):
         return AllChem.ReactionToSmiles(self.rd_reaction)
