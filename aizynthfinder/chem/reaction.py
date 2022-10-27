@@ -9,6 +9,7 @@ import numpy as np
 from rdkit import Chem
 from rdkit.Chem import AllChem
 from rdkit.DataStructs import FingerprintSimilarity
+from rdkit.Chem.rdchem import KekulizeException
 from rdchiral import main as rdc
 
 from aizynthfinder.utils.logging import logger
@@ -449,17 +450,19 @@ class TemplatedRetroReaction(RetroReaction):
         if len(sorted_sims) > 1:
             sorted_sims.pop(0)
         
-        reactants = [(r["mol"],) for r in sorted_sims]
+        reactants = [r["mol"] for r in sorted_sims]
+        reactants.append(self.mol.rd_mol)
         
         outcomes = []
-        for r in reactants:
+        for mol in reactants:
             try:
-                mols = tuple(
+                mols = (
                     TreeMolecule(parent=self.mol, rd_mol=mol,
-                                 sanitize=True)
-                    for mol in r
+                                 sanitize=True),
                 )
-            except MoleculeException:
+                # Check for Inchi Conversion
+                Chem.MolToInchi(mol)
+            except (MoleculeException, KekulizeException):
                 pass
             else:
                 outcomes.append(mols)
