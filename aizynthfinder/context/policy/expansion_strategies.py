@@ -54,6 +54,7 @@ class ExpansionStrategy(abc.ABC):
         self._config = config
         self._logger = logger()
         self.key = key
+        self.inchi_fail = 0
 
     def __call__(
         self, molecules: Sequence[TreeMolecule]
@@ -90,7 +91,7 @@ class TemplateBasedExpansionStrategy(ExpansionStrategy):
 
         source = kwargs["source"]
         templatefile = kwargs["templatefile"]
-        print(f"Source = {source}\tTemplate = {templatefile}")
+        # print(f"Source = {source}\tTemplate = {templatefile}")
 
         self._logger.info(
             f"Loading template-based expansion policy model from {source} to {self.key}"
@@ -170,6 +171,7 @@ class TemplateBasedExpansionStrategy(ExpansionStrategy):
                         template_fallback=self._config.template_fallback,
                         use_rdchiral=self._config.use_rdchiral,
                         templates=self.templates,
+                        inchi_fail=self.inchi_fail
                     )
                 )
         return possible_actions, priors  # type: ignore

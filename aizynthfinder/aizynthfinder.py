@@ -129,6 +129,7 @@ class AiZynthFinder:
         """Extracts tree statistics as a dictionary"""
         if not self.analysis:
             return {}
+        exp_sel = self.expansion_policy._selection[0]
         stats = {
             "target": self.target_smiles,
             "search_time": self.search_stats["time"],
@@ -136,6 +137,7 @@ class AiZynthFinder:
             "first_solution_iteration": self.search_stats.get(
                 "first_solution_iteration", 0
             ),
+            "inchi_failures": self.expansion_policy._items[exp_sel].inchi_fail,
         }
         stats.update(self.analysis.tree_statistics())
         return stats
