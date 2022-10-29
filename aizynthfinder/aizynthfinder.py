@@ -138,6 +138,7 @@ class AiZynthFinder:
                 "first_solution_iteration", 0
             ),
             "inchi_failures": self.expansion_policy._items[exp_sel].inchi_fail,
+            "rdkit_failures": self.expansion_policy._items[exp_sel].rdkit_fail,
         }
         stats.update(self.analysis.tree_statistics())
         return stats
