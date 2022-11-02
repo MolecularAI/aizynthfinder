@@ -438,6 +438,7 @@ class TemplatedRetroReaction(RetroReaction):
         # TODO: get column names from config file
         rxn = AllChem.ReactionFromSmarts(self.smarts)
         reactants_list = self.smarts.split(">>")[0].split(".")
+        num_reactants = len(reactants_list)
         rxn_fp = Chem.RDKFingerprint(self.mol.rd_mol)
         react_rp = [
             {"smarts": r,
@@ -451,46 +452,47 @@ class TemplatedRetroReaction(RetroReaction):
             for x in react_rp
             ]
         sorted_sims = sorted(sims, key=lambda m: m["sim"], reverse=True)
-        # if len(sorted_sims) > 1:
-        sorted_sims.pop(0)
         
         exp_reactants = [r["mol"] for r in sorted_sims]
         exp_reactants.append(self.mol.rd_mol)
         
-        reactants = []
-        for r in exp_reactants:
-            try:
-                _reactants = rxn.RunReactants((r,))
-            except:
-                pass
-            else:
-                reactants.append(_reactants)
+        if len(exp_reactants) > num_reactants:
+            diff = len(exp_reactants) - num_reactants
+            # TODO: Ensure this works for a variety of lengths
+            exp_reactants = exp_reactants[-diff + 1:]
+            
+        try:
+            reactants = rxn.RunReactants(exp_reactants)
+        except:
+            # Run individually if the reactions fail
+            reactants = []
+            for r in exp_reactants:
+                try:
+                    _reactants = rxn.RunReactants((r,))
+                except:
+                    pass
+                else:
+                    reactants.append(_reactants)
         
         outcomes = []
         for r in reactants:
             if len(r) == 0:
                 continue
             try:
-                # mols = (
-                #     TreeMolecule(parent=self.mol, rd_mol=mol,
-                #                  sanitize=True),
-                # )
                 mols = tuple(
                     TreeMolecule(parent=self.mol, rd_mol=m, sanitize=True)
                         for mol in r for m in mol
                 )
-                # Check for Inchi Conversion
                 [Chem.MolToInchi(m) for mol in r for m in mol]
             except (MoleculeException, KekulizeException):
                 self.inchi_fail += 1
                 pass
             else:
                 outcomes.append(mols)
-
-        self._reactants = tuple(outcomes)
-        
-        return self._reactants
-    
+                
+        # Get data formatting right, even if it is messy
+        flat = [j for i in outcomes for j in i]
+        return tuple([(i,) for i in flat])
     
     # def _apply_with_templates(self) -> Tuple[Tuple[TreeMolecule, ...], ...]:
     #     # TODO: get column names from config file
