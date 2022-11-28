@@ -254,6 +254,7 @@ class AiZynthExpander:
 
         self.expansion_policy = self.config.expansion_policy
         self.filter_policy = self.config.filter_policy
+        self.stats: StrDict = {}
 
     def do_expansion(
         self,
@@ -280,6 +281,7 @@ class AiZynthExpander:
         :param filter_func: an additional filter function
         :return: the grouped reactions
         """
+        self.stats = {"non-applicable": 0}
 
         mol = TreeMolecule(parent=None, smiles=smiles)
         actions, _ = self.expansion_policy.get_actions([mol])
@@ -287,6 +289,7 @@ class AiZynthExpander:
         for action in actions:
             reactants = action.reactants
             if not reactants:
+                self.stats["non-applicable"] += 1
                 continue
             if filter_func and not filter_func(action):
                 continue

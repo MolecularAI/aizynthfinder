@@ -6,7 +6,7 @@ from typing import TYPE_CHECKING
 
 import numpy as np
 
-# pylint: disable=no-name-in-module
+# pylint: disable=all
 from tensorflow.keras.layers import Dense, Dropout, Input, Dot
 from tensorflow.keras.models import Sequential, Model
 from tensorflow.keras.optimizers import Adam
@@ -18,6 +18,8 @@ from tensorflow.keras.callbacks import (
     ReduceLROnPlateau,
 )
 from tensorflow.keras import regularizers
+
+# pylint: enable=all
 from sklearn.utils import shuffle
 from scipy import sparse
 

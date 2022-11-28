@@ -1,5 +1,20 @@
 # CHANGELOG
 
+## Version 3.5.0 2022-11-28 (2022-07-21)
+
+### Features
+
+- Atom-mapping is tracked from product to reactant
+- Support loading of template library from (gzipped) CSV file
+- Support of saving aizynthcli output to (gzipped) JSON file
+- AiZynthExpander now tracks non-applicable templates
+
+### Bug-fixes
+- Fixed failing test case
+
+### Trival changes
+- Silent progress bar when utilizing local Keras model
+
 ## Version 3.4.0 2022-04-28
 
 ### Features

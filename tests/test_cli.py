@@ -126,7 +126,7 @@ def test_cli_multiple_smiles(
         "aizynthfinder.interfaces.aizynthcli.pd.DataFrame.from_dict"
     )
     smiles_input = create_dummy_smiles_source("txt")
-    output_name = str(tmpdir / "data.hdf5")
+    output_name = str(tmpdir / "data.json.gz")
     add_cli_arguments(
         f"--smiles {smiles_input} --config config_local.yml --output {output_name}"
     )
@@ -150,7 +150,7 @@ def test_cli_multiple_smiles_unsanitizable(
     smiles_input = str(tmpdir / "smiles_source.txt")
     with open(smiles_input, "w") as fileobj:
         fileobj.write("n1(c(=O)[nH]c2c(c1=O)c(c(s2)C(=O)N(C)C)C)c1c(N(=O)O)cccc1")
-    output_name = str(tmpdir / "data.hdf5")
+    output_name = str(tmpdir / "data.json.gz")
     add_cli_arguments(
         f"--smiles {smiles_input} --config config_local.yml --output {output_name}"
     )
@@ -161,7 +161,7 @@ def test_cli_multiple_smiles_unsanitizable(
     assert "Failed to setup search" in output.out
     assert output.out.count("Done with") == 0
     assert f"Output saved to {output_name}" in output.out
-    assert len(pd.read_hdf(output_name, "table")) == 0
+    assert len(pd.read_json(output_name, orient="table")) == 0
 
 
 def test_cli_single_smile_with_postprocessing(

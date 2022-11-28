@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "aizynthfinder"
-version = "3.4.0"
+version = "3.5.0"
 description = "Retrosynthetic route finding using neural network guided Monte-Carlo tree search"
 authors = ["Molecular AI group <samuel.genheden@astrazeneca.com>"]
 license = "MIT"

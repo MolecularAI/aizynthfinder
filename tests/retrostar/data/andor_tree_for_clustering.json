@@ -1,115 +1,2914 @@
 {
   "tree": {
     "cost": 0.0,
-    "expandable": true,
-    "value": 0.0,
-    "mol": 140605332219984,
+    "expandable": false,
+    "value": 3.170205421745777,
+    "mol": 139643154371392,
     "children": [
       {
-        "cost": 5.0,
-        "value": 5.0,
-        "target_value": 5.0,
+        "cost": 0.10074622184038162,
+        "value": 3.170205421745777,
+        "target_value": 3.170205421745777,
         "reaction": {
-          "mol": 140605332219984,
-          "smarts": "([c:8]-[NH;D2;+0:7]-[c;H0;D3;+0:1]1:[c:2]:[c:3]:[#7;a:4]:[c:5]:[c:6]:1)>>(Cl-[c;H0;D3;+0:1]1:[c:2]:[c:3]:[#7;a:4]:[c:5]:[c:6]:1).([NH2;D1;+0:7]-[c:8])",
+          "mol": 139643154371392,
           "index": 0,
-          "metadata": {}
+          "metadata": {},
+          "smarts": "([O;D1;H0:2]=[C;H0;D3;+0:1](-[c:3])-[NH;D2;+0:4]-[c:5])>>(Cl-[C;H0;D3;+0:1](=[O;D1;H0:2])-[c:3]).([NH2;D1;+0:4]-[c:5])",
+          "reactants": [
+            [
+              139643166203664,
+              139643171528960
+            ]
+          ],
+          "class": "aizynthfinder.chem.reaction.TemplatedRetroReaction"
         },
         "children": [
           {
             "cost": 0.0,
             "expandable": false,
-            "value": 0,
-            "mol": 140605332201936,
+            "value": 0.0,
+            "mol": 139643166203664,
             "children": []
           },
           {
             "cost": 0.0,
             "expandable": false,
-            "value": 0,
-            "mol": 140605332205072,
-            "children": []
-          }
-        ]
-      },
-      {
-        "cost": 10.0,
-        "value": 10.0,
-        "target_value": 10.0,
-        "reaction": {
-          "mol": 140605332219984,
-          "smarts": "([S;D1;H0:3]=[C;H0;D3;+0:4](-[NH;D2;+0:1]-[c:2])-[NH;D2;+0:5]-[c:6])>>([NH2;D1;+0:1]-[c:2]).([S;D1;H0:3]=[C;H0;D2;+0:4]=[N;H0;D2;+0:5]-[c:6])",
-          "index": 1,
-          "metadata": {}
-        },
-        "children": [
-          {
-            "cost": 0.0,
-            "expandable": true,
-            "value": 0.0,
-            "mol": 140598039857296,
+            "value": 3.0694591999053955,
+            "mol": 139643171528960,
             "children": [
               {
-                "cost": 2.5,
-                "value": 2.5,
-                "target_value": 12.5,
+                "cost": 0.7208150029182434,
+                "value": 3.1994336247444153,
+                "target_value": 3.300179846584797,
                 "reaction": {
-                  "mol": 140598039857296,
-                  "smarts": "([c:8]-[NH;D2;+0:7]-[c;H0;D3;+0:1]1:[c:2]:[c:3]:[#7;a:4]:[c:5]:[c:6]:1)>>(Cl-[c;H0;D3;+0:1]1:[c:2]:[c:3]:[#7;a:4]:[c:5]:[c:6]:1).([NH2;D1;+0:7]-[c:8])",
+                  "mol": 139643171528960,
                   "index": 0,
-                  "metadata": {}
+                  "metadata": {},
+                  "smarts": "([NH2;D1;+0:1]-[c:2])>>(O=[N+;H0;D3:1](-[O-])-[c:2])",
+                  "reactants": [
+                    [
+                      139643166201504
+                    ]
+                  ],
+                  "class": "aizynthfinder.chem.reaction.TemplatedRetroReaction"
                 },
                 "children": [
                   {
                     "cost": 0.0,
                     "expandable": false,
-                    "value": 0,
-                    "mol": 140598039857616,
+                    "value": 2.478618621826172,
+                    "mol": 139643166201504,
+                    "children": [
+                      {
+                        "cost": 2.478618621826172,
+                        "value": 2.478618621826172,
+                        "target_value": 3.300179846584797,
+                        "reaction": {
+                          "mol": 139643166201504,
+                          "index": 0,
+                          "metadata": {},
+                          "smarts": "([C:2]-[N;H0;D3;+0:3](-[C:4])-[CH3;D1;+0:1])>>(I-[CH3;D1;+0:1]).([C:2]-[NH;D2;+0:3]-[C:4])",
+                          "reactants": [
+                            [
+                              139643162454288
+                            ]
+                          ],
+                          "class": "aizynthfinder.chem.reaction.TemplatedRetroReaction"
+                        },
+                        "children": [
+                          {
+                            "cost": 0.0,
+                            "expandable": true,
+                            "value": 0.0,
+                            "mol": 139643162454288,
+                            "children": []
+                          }
+                        ]
+                      },
+                      {
+                        "cost": 4.106889247894287,
+                        "value": 4.106889247894287,
+                        "target_value": 4.928450472652912,
+                        "reaction": {
+                          "mol": 139643166201504,
+                          "index": 0,
+                          "metadata": {},
+                          "smarts": "([C:1]-[C;H0;D3;+0:2](=[O;H0;D1;+0:3])-[c:4])>>([C:1]-[CH;D3;+0:2](-[OH;D1;+0:3])-[c:4])",
+                          "reactants": [
+                            [
+                              139643162454624
+                            ]
+                          ],
+                          "class": "aizynthfinder.chem.reaction.TemplatedRetroReaction"
+                        },
+                        "children": [
+                          {
+                            "cost": 0.0,
+                            "expandable": true,
+                            "value": 0.0,
+                            "mol": 139643162454624,
+                            "children": []
+                          }
+                        ]
+                      },
+                      {
+                        "cost": 4.682793140411377,
+                        "value": 4.682793140411377,
+                        "target_value": 5.504354365170002,
+                        "reaction": {
+                          "mol": 139643166201504,
+                          "index": 0,
+                          "metadata": {},
+                          "smarts": "([#7:2]-[CH3;D1;+0:1])>>(C-C(-C)(-C)-O-[C;H0;D3;+0:1](=O)-[#7:2])",
+                          "reactants": [
+                            [
+                              139643162455056
+                            ]
+                          ],
+                          "class": "aizynthfinder.chem.reaction.TemplatedRetroReaction"
+                        },
+                        "children": [
+                          {
+                            "cost": 0.0,
+                            "expandable": true,
+                            "value": 0.0,
+                            "mol": 139643162455056,
+                            "children": []
+                          }
+                        ]
+                      },
+                      {
+                        "cost": 5.297028541564941,
+                        "value": 5.297028541564941,
+                        "target_value": 6.118589766323566,
+                        "reaction": {
+                          "mol": 139643166201504,
+                          "index": 0,
+                          "metadata": {},
+                          "smarts": "([C:1]-[N;H0;D3;+0:2](-[C:3])-[C;H3;D1;+0])>>([C:1]-[NH;D2;+0:2]-[C:3])",
+                          "reactants": [
+                            [
+                              139643162454144
+                            ]
+                          ],
+                          "class": "aizynthfinder.chem.reaction.TemplatedRetroReaction"
+                        },
+                        "children": [
+                          {
+                            "cost": 0.0,
+                            "expandable": true,
+                            "value": 0.0,
+                            "mol": 139643162454144,
+                            "children": []
+                          }
+                        ]
+                      },
+                      {
+                        "cost": 6.402892589569092,
+                        "value": 6.402892589569092,
+                        "target_value": 7.224453814327717,
+                        "reaction": {
+                          "mol": 139643166201504,
+                          "index": 0,
+                          "metadata": {},
+                          "smarts": "([#7:2]-[CH3;D1;+0:1])>>(O=[C;H0;D3;+0:1](-[#7:2])-O-C-c1:c:c:c:c:c:1)",
+                          "reactants": [
+                            [
+                              139643162454048
+                            ]
+                          ],
+                          "class": "aizynthfinder.chem.reaction.TemplatedRetroReaction"
+                        },
+                        "children": [
+                          {
+                            "cost": 0.0,
+                            "expandable": true,
+                            "value": 0.0,
+                            "mol": 139643162454048,
+                            "children": []
+                          }
+                        ]
+                      },
+                      {
+                        "cost": 6.734926223754883,
+                        "value": 6.734926223754883,
+                        "target_value": 7.556487448513508,
+                        "reaction": {
+                          "mol": 139643166201504,
+                          "index": 0,
+                          "metadata": {},
+                          "smarts": "([c:2]:[cH;D2;+0:1]:[c:3])>>(Cl-[c;H0;D3;+0:1](:[c:2]):[c:3])",
+                          "reactants": [
+                            [
+                              139643162455488
+                            ],
+                            [
+                              139643162455728
+                            ],
+                            [
+                              139643162455968
+                            ]
+                          ],
+                          "class": "aizynthfinder.chem.reaction.TemplatedRetroReaction"
+                        },
+                        "children": [
+                          {
+                            "cost": 0.0,
+                            "expandable": true,
+                            "value": 0.0,
+                            "mol": 139643162455488,
+                            "children": []
+                          }
+                        ]
+                      },
+                      {
+                        "cost": 6.734926223754883,
+                        "value": 6.734926223754883,
+                        "target_value": 7.556487448513508,
+                        "reaction": {
+                          "mol": 139643166201504,
+                          "index": 1,
+                          "metadata": {},
+                          "smarts": "([c:2]:[cH;D2;+0:1]:[c:3])>>(Cl-[c;H0;D3;+0:1](:[c:2]):[c:3])",
+                          "reactants": [
+                            [
+                              139643162455488
+                            ],
+                            [
+                              139643162455728
+                            ],
+                            [
+                              139643162455968
+                            ]
+                          ],
+                          "class": "aizynthfinder.chem.reaction.TemplatedRetroReaction"
+                        },
+                        "children": [
+                          {
+                            "cost": 0.0,
+                            "expandable": true,
+                            "value": 0.0,
+                            "mol": 139643162455728,
+                            "children": []
+                          }
+                        ]
+                      },
+                      {
+                        "cost": 6.734926223754883,
+                        "value": 6.734926223754883,
+                        "target_value": 7.556487448513508,
+                        "reaction": {
+                          "mol": 139643166201504,
+                          "index": 2,
+                          "metadata": {},
+                          "smarts": "([c:2]:[cH;D2;+0:1]:[c:3])>>(Cl-[c;H0;D3;+0:1](:[c:2]):[c:3])",
+                          "reactants": [
+                            [
+                              139643162455488
+                            ],
+                            [
+                              139643162455728
+                            ],
+                            [
+                              139643162455968
+                            ]
+                          ],
+                          "class": "aizynthfinder.chem.reaction.TemplatedRetroReaction"
+                        },
+                        "children": [
+                          {
+                            "cost": 0.0,
+                            "expandable": true,
+                            "value": 0.0,
+                            "mol": 139643162455968,
+                            "children": []
+                          }
+                        ]
+                      },
+                      {
+                        "cost": 6.907755374908447,
+                        "value": 6.907755374908447,
+                        "target_value": 7.729316599667072,
+                        "reaction": {
+                          "mol": 139643166201504,
+                          "index": 0,
+                          "metadata": {},
+                          "smarts": "([C:3]-[N;H0;D3;+0:4](-[C:5])-[CH2;D2;+0:1]-[C:2])>>(Cl-[CH2;D2;+0:1]-[C:2]).([C:3]-[NH;D2;+0:4]-[C:5])",
+                          "reactants": [
+                            [
+                              139643166201120
+                            ],
+                            [
+                              139643166202416
+                            ]
+                          ],
+                          "class": "aizynthfinder.chem.reaction.TemplatedRetroReaction"
+                        },
+                        "children": [
+                          {
+                            "cost": 0.0,
+                            "expandable": true,
+                            "value": 0.0,
+                            "mol": 139643166201120,
+                            "children": []
+                          }
+                        ]
+                      },
+                      {
+                        "cost": 6.907755374908447,
+                        "value": 6.907755374908447,
+                        "target_value": 7.729316599667072,
+                        "reaction": {
+                          "mol": 139643166201504,
+                          "index": 1,
+                          "metadata": {},
+                          "smarts": "([C:3]-[N;H0;D3;+0:4](-[C:5])-[CH2;D2;+0:1]-[C:2])>>(Cl-[CH2;D2;+0:1]-[C:2]).([C:3]-[NH;D2;+0:4]-[C:5])",
+                          "reactants": [
+                            [
+                              139643166201120
+                            ],
+                            [
+                              139643166202416
+                            ]
+                          ],
+                          "class": "aizynthfinder.chem.reaction.TemplatedRetroReaction"
+                        },
+                        "children": [
+                          {
+                            "cost": 0.0,
+                            "expandable": true,
+                            "value": 0.0,
+                            "mol": 139643166202416,
+                            "children": []
+                          }
+                        ]
+                      }
+                    ]
+                  }
+                ]
+              },
+              {
+                "cost": 2.1505701541900635,
+                "value": 3.151626080274582,
+                "target_value": 3.2523723021149635,
+                "reaction": {
+                  "mol": 139643171528960,
+                  "index": 0,
+                  "metadata": {},
+                  "smarts": "([C:2]-[N;H0;D3;+0:3](-[C:4])-[CH3;D1;+0:1])>>(O=[CH2;D1;+0:1]).([C:2]-[NH;D2;+0:3]-[C:4])",
+                  "reactants": [
+                    [
+                      139643173163552,
+                      139643173165280
+                    ]
+                  ],
+                  "class": "aizynthfinder.chem.reaction.TemplatedRetroReaction"
+                },
+                "children": [
+                  {
+                    "cost": 0.0,
+                    "expandable": false,
+                    "value": 0.0,
+                    "mol": 139643173163552,
                     "children": []
                   },
                   {
                     "cost": 0.0,
                     "expandable": false,
-                    "value": 0,
-                    "mol": 140605332368528,
-                    "children": []
+                    "value": 1.0010559260845184,
+                    "mol": 139643173165280,
+                    "children": [
+                      {
+                        "cost": 0.3793273866176605,
+                        "value": 1.0010559260845184,
+                        "target_value": 3.2523723021149635,
+                        "reaction": {
+                          "mol": 139643173165280,
+                          "index": 0,
+                          "metadata": {},
+                          "smarts": "([C:2]-[NH;D2;+0:1]-[C:3])>>(C-C(-C)(-C)-O-C(=O)-[N;H0;D3;+0:1](-[C:2])-[C:3])",
+                          "reactants": [
+                            [
+                              139643162452464
+                            ]
+                          ],
+                          "class": "aizynthfinder.chem.reaction.TemplatedRetroReaction"
+                        },
+                        "children": [
+                          {
+                            "cost": 0.0,
+                            "expandable": false,
+                            "value": 0.6217285394668579,
+                            "mol": 139643162452464,
+                            "children": [
+                              {
+                                "cost": 0.6217285394668579,
+                                "value": 0.6217285394668579,
+                                "target_value": 3.2523723021149635,
+                                "reaction": {
+                                  "mol": 139643162452464,
+                                  "index": 0,
+                                  "metadata": {},
+                                  "smarts": "([NH2;D1;+0:1]-[c:2])>>(O=[N+;H0;D3:1](-[O-])-[c:2])",
+                                  "reactants": [
+                                    [
+                                      139643166163824
+                                    ]
+                                  ],
+                                  "class": "aizynthfinder.chem.reaction.TemplatedRetroReaction"
+                                },
+                                "children": [
+                                  {
+                                    "cost": 0.0,
+                                    "expandable": true,
+                                    "value": 0.0,
+                                    "mol": 139643166163824,
+                                    "children": []
+                                  }
+                                ]
+                              },
+                              {
+                                "cost": 2.7375824451446533,
+                                "value": 2.7375824451446533,
+                                "target_value": 5.368226207792759,
+                                "reaction": {
+                                  "mol": 139643162452464,
+                                  "index": 0,
+                                  "metadata": {},
+                                  "smarts": "([C:2]-[C;H0;D3;+0:1](=[O;D1;H0:3])-[c;H0;D3;+0:5](:[c:4]):[c:6])>>(C-O-N(-C)-[C;H0;D3;+0:1](-[C:2])=[O;D1;H0:3]).([c:4]:[cH;D2;+0:5]:[c:6])",
+                                  "reactants": [
+                                    [
+                                      139643164870880,
+                                      139643164872128
+                                    ]
+                                  ],
+                                  "class": "aizynthfinder.chem.reaction.TemplatedRetroReaction"
+                                },
+                                "children": [
+                                  {
+                                    "cost": 0.0,
+                                    "expandable": false,
+                                    "value": 0.0,
+                                    "mol": 139643164870880,
+                                    "children": []
+                                  },
+                                  {
+                                    "cost": 0.0,
+                                    "expandable": false,
+                                    "value": 0.0,
+                                    "mol": 139643164872128,
+                                    "children": []
+                                  }
+                                ]
+                              },
+                              {
+                                "cost": 4.452865123748779,
+                                "value": 4.452865123748779,
+                                "target_value": 7.083508886396885,
+                                "reaction": {
+                                  "mol": 139643162452464,
+                                  "index": 0,
+                                  "metadata": {},
+                                  "smarts": "([NH2;D1;+0:2]-[c:1])>>([c:1]-[N;H0;D2;+0:2]=C(-c1:c:c:c:c:c:1)-c1:c:c:c:c:c:1)",
+                                  "reactants": [
+                                    [
+                                      139643171738528
+                                    ]
+                                  ],
+                                  "class": "aizynthfinder.chem.reaction.TemplatedRetroReaction"
+                                },
+                                "children": [
+                                  {
+                                    "cost": 0.0,
+                                    "expandable": true,
+                                    "value": 0.0,
+                                    "mol": 139643171738528,
+                                    "children": []
+                                  }
+                                ]
+                              },
+                              {
+                                "cost": 4.696177005767822,
+                                "value": 4.696177005767822,
+                                "target_value": 7.326820768415928,
+                                "reaction": {
+                                  "mol": 139643162452464,
+                                  "index": 0,
+                                  "metadata": {},
+                                  "smarts": "([NH2;D1;+0:1]-[c:2])>>(C-C(-C)(-C)-O-C(=O)-[NH;D2;+0:1]-[c:2])",
+                                  "reactants": [
+                                    [
+                                      139643164872464
+                                    ]
+                                  ],
+                                  "class": "aizynthfinder.chem.reaction.TemplatedRetroReaction"
+                                },
+                                "children": [
+                                  {
+                                    "cost": 0.0,
+                                    "expandable": true,
+                                    "value": 0.0,
+                                    "mol": 139643164872464,
+                                    "children": []
+                                  }
+                                ]
+                              },
+                              {
+                                "cost": 4.707756996154785,
+                                "value": 4.707756996154785,
+                                "target_value": 7.338400758802891,
+                                "reaction": {
+                                  "mol": 139643162452464,
+                                  "index": 0,
+                                  "metadata": {},
+                                  "smarts": "([NH2;D1;+0:1]-[c:2])>>(F-C(-F)(-F)-C(=O)-[NH;D2;+0:1]-[c:2])",
+                                  "reactants": [
+                                    [
+                                      139643171738432
+                                    ]
+                                  ],
+                                  "class": "aizynthfinder.chem.reaction.TemplatedRetroReaction"
+                                },
+                                "children": [
+                                  {
+                                    "cost": 0.0,
+                                    "expandable": true,
+                                    "value": 0.0,
+                                    "mol": 139643171738432,
+                                    "children": []
+                                  }
+                                ]
+                              },
+                              {
+                                "cost": 4.782713413238525,
+                                "value": 4.782713413238525,
+                                "target_value": 7.413357175886631,
+                                "reaction": {
+                                  "mol": 139643162452464,
+                                  "index": 0,
+                                  "metadata": {},
+                                  "smarts": "([N;H2;D1;+0]-[c;H0;D3;+0:1](:[c:2]):[c:3])>>(Br-[c;H0;D3;+0:1](:[c:2]):[c:3])",
+                                  "reactants": [
+                                    [
+                                      139643171739248
+                                    ]
+                                  ],
+                                  "class": "aizynthfinder.chem.reaction.TemplatedRetroReaction"
+                                },
+                                "children": [
+                                  {
+                                    "cost": 0.0,
+                                    "expandable": true,
+                                    "value": 0.0,
+                                    "mol": 139643171739248,
+                                    "children": []
+                                  }
+                                ]
+                              },
+                              {
+                                "cost": 5.140331745147705,
+                                "value": 5.140331745147705,
+                                "target_value": 7.770975507795811,
+                                "reaction": {
+                                  "mol": 139643162452464,
+                                  "index": 0,
+                                  "metadata": {},
+                                  "smarts": "([c:2]:[cH;D2;+0:1]:[c:3])>>(Cl-[c;H0;D3;+0:1](:[c:2]):[c:3])",
+                                  "reactants": [
+                                    [
+                                      139643171739344
+                                    ],
+                                    [
+                                      139643171739536
+                                    ],
+                                    [
+                                      139643171739632
+                                    ]
+                                  ],
+                                  "class": "aizynthfinder.chem.reaction.TemplatedRetroReaction"
+                                },
+                                "children": [
+                                  {
+                                    "cost": 0.0,
+                                    "expandable": true,
+                                    "value": 0.0,
+                                    "mol": 139643171739344,
+                                    "children": []
+                                  }
+                                ]
+                              },
+                              {
+                                "cost": 5.140331745147705,
+                                "value": 5.140331745147705,
+                                "target_value": 7.770975507795811,
+                                "reaction": {
+                                  "mol": 139643162452464,
+                                  "index": 1,
+                                  "metadata": {},
+                                  "smarts": "([c:2]:[cH;D2;+0:1]:[c:3])>>(Cl-[c;H0;D3;+0:1](:[c:2]):[c:3])",
+                                  "reactants": [
+                                    [
+                                      139643171739344
+                                    ],
+                                    [
+                                      139643171739536
+                                    ],
+                                    [
+                                      139643171739632
+                                    ]
+                                  ],
+                                  "class": "aizynthfinder.chem.reaction.TemplatedRetroReaction"
+                                },
+                                "children": [
+                                  {
+                                    "cost": 0.0,
+                                    "expandable": true,
+                                    "value": 0.0,
+                                    "mol": 139643171739536,
+                                    "children": []
+                                  }
+                                ]
+                              },
+                              {
+                                "cost": 5.140331745147705,
+                                "value": 5.140331745147705,
+                                "target_value": 7.770975507795811,
+                                "reaction": {
+                                  "mol": 139643162452464,
+                                  "index": 2,
+                                  "metadata": {},
+                                  "smarts": "([c:2]:[cH;D2;+0:1]:[c:3])>>(Cl-[c;H0;D3;+0:1](:[c:2]):[c:3])",
+                                  "reactants": [
+                                    [
+                                      139643171739344
+                                    ],
+                                    [
+                                      139643171739536
+                                    ],
+                                    [
+                                      139643171739632
+                                    ]
+                                  ],
+                                  "class": "aizynthfinder.chem.reaction.TemplatedRetroReaction"
+                                },
+                                "children": [
+                                  {
+                                    "cost": 0.0,
+                                    "expandable": true,
+                                    "value": 0.0,
+                                    "mol": 139643171739632,
+                                    "children": []
+                                  }
+                                ]
+                              },
+                              {
+                                "cost": 5.220434665679932,
+                                "value": 5.220434665679932,
+                                "target_value": 7.851078428328037,
+                                "reaction": {
+                                  "mol": 139643162452464,
+                                  "index": 0,
+                                  "metadata": {},
+                                  "smarts": "([NH2;D1;+0:1]-[c:2])>>(C-C(=O)-[NH;D2;+0:1]-[c:2])",
+                                  "reactants": [
+                                    [
+                                      139643171738048
+                                    ]
+                                  ],
+                                  "class": "aizynthfinder.chem.reaction.TemplatedRetroReaction"
+                                },
+                                "children": [
+                                  {
+                                    "cost": 0.0,
+                                    "expandable": true,
+                                    "value": 0.0,
+                                    "mol": 139643171738048,
+                                    "children": []
+                                  }
+                                ]
+                              },
+                              {
+                                "cost": 5.325563430786133,
+                                "value": 5.325563430786133,
+                                "target_value": 7.956207193434238,
+                                "reaction": {
+                                  "mol": 139643162452464,
+                                  "index": 0,
+                                  "metadata": {},
+                                  "smarts": "([NH2;D1;+0:4]-[c;H0;D3;+0:1](:[c:2]):[c:3])>>(F-[c;H0;D3;+0:1](:[c:2]):[c:3]).([NH3;D0;+0:4])",
+                                  "reactants": [
+                                    [
+                                      139643171740112,
+                                      139643171740688
+                                    ]
+                                  ],
+                                  "class": "aizynthfinder.chem.reaction.TemplatedRetroReaction"
+                                },
+                                "children": [
+                                  {
+                                    "cost": 0.0,
+                                    "expandable": true,
+                                    "value": 0.0,
+                                    "mol": 139643171740112,
+                                    "children": []
+                                  },
+                                  {
+                                    "cost": 0.0,
+                                    "expandable": false,
+                                    "value": 0.0,
+                                    "mol": 139643171740688,
+                                    "children": []
+                                  }
+                                ]
+                              },
+                              {
+                                "cost": 5.484682083129883,
+                                "value": 5.484682083129883,
+                                "target_value": 8.115325845777988,
+                                "reaction": {
+                                  "mol": 139643162452464,
+                                  "index": 0,
+                                  "metadata": {},
+                                  "smarts": "([NH2;D1;+0:1]-[c:2])>>(O=C(-O-C-c1:c:c:c:c:c:1)-[NH;D2;+0:1]-[c:2])",
+                                  "reactants": [
+                                    [
+                                      139643171740400
+                                    ]
+                                  ],
+                                  "class": "aizynthfinder.chem.reaction.TemplatedRetroReaction"
+                                },
+                                "children": [
+                                  {
+                                    "cost": 0.0,
+                                    "expandable": true,
+                                    "value": 0.0,
+                                    "mol": 139643171740400,
+                                    "children": []
+                                  }
+                                ]
+                              },
+                              {
+                                "cost": 5.642376899719238,
+                                "value": 5.642376899719238,
+                                "target_value": 8.273020662367344,
+                                "reaction": {
+                                  "mol": 139643162452464,
+                                  "index": 0,
+                                  "metadata": {},
+                                  "smarts": "([NH2;D1;+0:1]-[c:2])>>(C-C(-C)(-C)-C(=O)-[NH;D2;+0:1]-[c:2])",
+                                  "reactants": [
+                                    [
+                                      139643171741456
+                                    ]
+                                  ],
+                                  "class": "aizynthfinder.chem.reaction.TemplatedRetroReaction"
+                                },
+                                "children": [
+                                  {
+                                    "cost": 0.0,
+                                    "expandable": true,
+                                    "value": 0.0,
+                                    "mol": 139643171741456,
+                                    "children": []
+                                  }
+                                ]
+                              },
+                              {
+                                "cost": 5.65239143371582,
+                                "value": 5.65239143371582,
+                                "target_value": 8.283035196363926,
+                                "reaction": {
+                                  "mol": 139643162452464,
+                                  "index": 0,
+                                  "metadata": {},
+                                  "smarts": "([NH2;D1;+0:2]-[c:1])>>([c:1]-[N;H0;D3;+0:2](-C-c1:c:c:c:c:c:1)-C-c1:c:c:c:c:c:1)",
+                                  "reactants": [
+                                    [
+                                      139643171741024
+                                    ]
+                                  ],
+                                  "class": "aizynthfinder.chem.reaction.TemplatedRetroReaction"
+                                },
+                                "children": [
+                                  {
+                                    "cost": 0.0,
+                                    "expandable": true,
+                                    "value": 0.0,
+                                    "mol": 139643171741024,
+                                    "children": []
+                                  }
+                                ]
+                              },
+                              {
+                                "cost": 5.692169189453125,
+                                "value": 5.692169189453125,
+                                "target_value": 8.32281295210123,
+                                "reaction": {
+                                  "mol": 139643162452464,
+                                  "index": 0,
+                                  "metadata": {},
+                                  "smarts": "([N;H2;D1;+0]-[c;H0;D3;+0:1](:[c:2]):[c:3])>>(O-C(=O)-[c;H0;D3;+0:1](:[c:2]):[c:3])",
+                                  "reactants": [
+                                    [
+                                      139643171740928
+                                    ]
+                                  ],
+                                  "class": "aizynthfinder.chem.reaction.TemplatedRetroReaction"
+                                },
+                                "children": [
+                                  {
+                                    "cost": 0.0,
+                                    "expandable": true,
+                                    "value": 0.0,
+                                    "mol": 139643171740928,
+                                    "children": []
+                                  }
+                                ]
+                              },
+                              {
+                                "cost": 5.69961404800415,
+                                "value": 5.69961404800415,
+                                "target_value": 8.330257810652256,
+                                "reaction": {
+                                  "mol": 139643162452464,
+                                  "index": 0,
+                                  "metadata": {},
+                                  "smarts": "([NH2;D1;+0:2]-[c:1])>>([c:1]-[NH;D2;+0:2]-C-c1:c:c:c:c:c:1)",
+                                  "reactants": [
+                                    [
+                                      139643171740640
+                                    ]
+                                  ],
+                                  "class": "aizynthfinder.chem.reaction.TemplatedRetroReaction"
+                                },
+                                "children": [
+                                  {
+                                    "cost": 0.0,
+                                    "expandable": true,
+                                    "value": 0.0,
+                                    "mol": 139643171740640,
+                                    "children": []
+                                  }
+                                ]
+                              },
+                              {
+                                "cost": 6.433506011962891,
+                                "value": 6.433506011962891,
+                                "target_value": 9.064149774610996,
+                                "reaction": {
+                                  "mol": 139643162452464,
+                                  "index": 0,
+                                  "metadata": {},
+                                  "smarts": "([C:1]-[C;H0;D3;+0:2](=[O;H0;D1;+0:3])-[c:4])>>([C:1]-[CH;D3;+0:2](-[OH;D1;+0:3])-[c:4])",
+                                  "reactants": [
+                                    [
+                                      139643171740880
+                                    ]
+                                  ],
+                                  "class": "aizynthfinder.chem.reaction.TemplatedRetroReaction"
+                                },
+                                "children": [
+                                  {
+                                    "cost": 0.0,
+                                    "expandable": true,
+                                    "value": 0.0,
+                                    "mol": 139643171740880,
+                                    "children": []
+                                  }
+                                ]
+                              },
+                              {
+                                "cost": 6.7731475830078125,
+                                "value": 6.7731475830078125,
+                                "target_value": 9.403791345655918,
+                                "reaction": {
+                                  "mol": 139643162452464,
+                                  "index": 0,
+                                  "metadata": {},
+                                  "smarts": "([N;H2;D1;+0]-[c;H0;D3;+0:1](:[c:2]):[c:3])>>(Cl-[c;H0;D3;+0:1](:[c:2]):[c:3])",
+                                  "reactants": [
+                                    [
+                                      139643171740016
+                                    ]
+                                  ],
+                                  "class": "aizynthfinder.chem.reaction.TemplatedRetroReaction"
+                                },
+                                "children": [
+                                  {
+                                    "cost": 0.0,
+                                    "expandable": true,
+                                    "value": 0.0,
+                                    "mol": 139643171740016,
+                                    "children": []
+                                  }
+                                ]
+                              },
+                              {
+                                "cost": 6.814378261566162,
+                                "value": 6.814378261566162,
+                                "target_value": 9.445022024214268,
+                                "reaction": {
+                                  "mol": 139643162452464,
+                                  "index": 0,
+                                  "metadata": {},
+                                  "smarts": "([NH2;D1;+0:4]-[c:5].[c:2]:[cH;D2;+0:1]:[c:3])>>(Cl-[c;H0;D3;+0:1](:[c:2]):[c:3].O=[N+;H0;D3:4](-[O-])-[c:5])",
+                                  "reactants": [
+                                    [
+                                      139643164869104
+                                    ],
+                                    [
+                                      139643164869056
+                                    ]
+                                  ],
+                                  "class": "aizynthfinder.chem.reaction.TemplatedRetroReaction"
+                                },
+                                "children": [
+                                  {
+                                    "cost": 0.0,
+                                    "expandable": true,
+                                    "value": 0.0,
+                                    "mol": 139643164869104,
+                                    "children": []
+                                  }
+                                ]
+                              },
+                              {
+                                "cost": 6.814378261566162,
+                                "value": 6.814378261566162,
+                                "target_value": 9.445022024214268,
+                                "reaction": {
+                                  "mol": 139643162452464,
+                                  "index": 1,
+                                  "metadata": {},
+                                  "smarts": "([NH2;D1;+0:4]-[c:5].[c:2]:[cH;D2;+0:1]:[c:3])>>(Cl-[c;H0;D3;+0:1](:[c:2]):[c:3].O=[N+;H0;D3:4](-[O-])-[c:5])",
+                                  "reactants": [
+                                    [
+                                      139643164869104
+                                    ],
+                                    [
+                                      139643164869056
+                                    ]
+                                  ],
+                                  "class": "aizynthfinder.chem.reaction.TemplatedRetroReaction"
+                                },
+                                "children": [
+                                  {
+                                    "cost": 0.0,
+                                    "expandable": true,
+                                    "value": 0.0,
+                                    "mol": 139643164869056,
+                                    "children": []
+                                  }
+                                ]
+                              },
+                              {
+                                "cost": 6.907755374908447,
+                                "value": 6.907755374908447,
+                                "target_value": 9.538399137556553,
+                                "reaction": {
+                                  "mol": 139643162452464,
+                                  "index": 0,
+                                  "metadata": {},
+                                  "smarts": "([NH2;D1;+0:5]-[c:4]:[cH;D2;+0:3]:[cH;D2;+0:1]:[c:2])>>(Cl-[c;H0;D3;+0:1](:[c:2]):[c;H0;D3;+0:3](-Cl):[c:4]-[N+;H0;D3:5](=O)-[O-])",
+                                  "reactants": [
+                                    [
+                                      139643173070016
+                                    ]
+                                  ],
+                                  "class": "aizynthfinder.chem.reaction.TemplatedRetroReaction"
+                                },
+                                "children": [
+                                  {
+                                    "cost": 0.0,
+                                    "expandable": true,
+                                    "value": 0.0,
+                                    "mol": 139643173070016,
+                                    "children": []
+                                  }
+                                ]
+                              },
+                              {
+                                "cost": 6.907755374908447,
+                                "value": 6.907755374908447,
+                                "target_value": 9.538399137556553,
+                                "reaction": {
+                                  "mol": 139643162452464,
+                                  "index": 0,
+                                  "metadata": {},
+                                  "smarts": "([NH2;D1;+0:4]-[c;H0;D3;+0:1](:[c:2]):[c:3])>>(Br-[c;H0;D3;+0:1](:[c:2]):[c:3]).([NH4+;D0:4])",
+                                  "reactants": [
+                                    [
+                                      139643171739392,
+                                      139643164870496
+                                    ]
+                                  ],
+                                  "class": "aizynthfinder.chem.reaction.TemplatedRetroReaction"
+                                },
+                                "children": [
+                                  {
+                                    "cost": 0.0,
+                                    "expandable": true,
+                                    "value": 0.0,
+                                    "mol": 139643171739392,
+                                    "children": []
+                                  },
+                                  {
+                                    "cost": 0.0,
+                                    "expandable": false,
+                                    "value": 0.0,
+                                    "mol": 139643164870496,
+                                    "children": []
+                                  }
+                                ]
+                              }
+                            ]
+                          }
+                        ]
+                      },
+                      {
+                        "cost": 2.2950503826141357,
+                        "value": 2.2950503826141357,
+                        "target_value": 4.546366758644581,
+                        "reaction": {
+                          "mol": 139643173165280,
+                          "index": 0,
+                          "metadata": {},
+                          "smarts": "([NH2;D1;+0:1]-[c:2])>>(O=[N+;H0;D3:1](-[O-])-[c:2])",
+                          "reactants": [
+                            [
+                              139643162692720
+                            ]
+                          ],
+                          "class": "aizynthfinder.chem.reaction.TemplatedRetroReaction"
+                        },
+                        "children": [
+                          {
+                            "cost": 0.0,
+                            "expandable": true,
+                            "value": 0.0,
+                            "mol": 139643162692720,
+                            "children": []
+                          }
+                        ]
+                      },
+                      {
+                        "cost": 2.758237600326538,
+                        "value": 2.758237600326538,
+                        "target_value": 5.009553976356983,
+                        "reaction": {
+                          "mol": 139643173165280,
+                          "index": 0,
+                          "metadata": {},
+                          "smarts": "([C:1]-[NH;D2;+0:2]-[C:3])>>([C:1]-[N;H0;D3;+0:2](-[C:3])-C-c1:c:c:c:c:c:1)",
+                          "reactants": [
+                            [
+                              139643162692240
+                            ]
+                          ],
+                          "class": "aizynthfinder.chem.reaction.TemplatedRetroReaction"
+                        },
+                        "children": [
+                          {
+                            "cost": 0.0,
+                            "expandable": true,
+                            "value": 0.0,
+                            "mol": 139643162692240,
+                            "children": []
+                          }
+                        ]
+                      },
+                      {
+                        "cost": 2.81253981590271,
+                        "value": 2.81253981590271,
+                        "target_value": 5.063856191933155,
+                        "reaction": {
+                          "mol": 139643173165280,
+                          "index": 0,
+                          "metadata": {},
+                          "smarts": "([C:2]-[NH;D2;+0:1]-[C:3])>>(O=C(-O-C-c1:c:c:c:c:c:1)-[N;H0;D3;+0:1](-[C:2])-[C:3])",
+                          "reactants": [
+                            [
+                              139643162690464
+                            ]
+                          ],
+                          "class": "aizynthfinder.chem.reaction.TemplatedRetroReaction"
+                        },
+                        "children": [
+                          {
+                            "cost": 0.0,
+                            "expandable": true,
+                            "value": 0.0,
+                            "mol": 139643162690464,
+                            "children": []
+                          }
+                        ]
+                      },
+                      {
+                        "cost": 4.225465774536133,
+                        "value": 4.225465774536133,
+                        "target_value": 6.476782150566578,
+                        "reaction": {
+                          "mol": 139643173165280,
+                          "index": 0,
+                          "metadata": {},
+                          "smarts": "([NH2;D1;+0:1]-[c:2])>>(C-C(-C)(-C)-O-C(=O)-[NH;D2;+0:1]-[c:2])",
+                          "reactants": [
+                            [
+                              139643164991936
+                            ]
+                          ],
+                          "class": "aizynthfinder.chem.reaction.TemplatedRetroReaction"
+                        },
+                        "children": [
+                          {
+                            "cost": 0.0,
+                            "expandable": true,
+                            "value": 0.0,
+                            "mol": 139643164991936,
+                            "children": []
+                          }
+                        ]
+                      },
+                      {
+                        "cost": 4.908669948577881,
+                        "value": 4.908669948577881,
+                        "target_value": 7.159986324608326,
+                        "reaction": {
+                          "mol": 139643173165280,
+                          "index": 0,
+                          "metadata": {},
+                          "smarts": "([C:2]-[NH;D2;+0:1]-[C:3])>>(C-C(=O)-[N;H0;D3;+0:1](-[C:2])-[C:3])",
+                          "reactants": [
+                            [
+                              139643162692624
+                            ]
+                          ],
+                          "class": "aizynthfinder.chem.reaction.TemplatedRetroReaction"
+                        },
+                        "children": [
+                          {
+                            "cost": 0.0,
+                            "expandable": true,
+                            "value": 0.0,
+                            "mol": 139643162692624,
+                            "children": []
+                          }
+                        ]
+                      },
+                      {
+                        "cost": 5.097917079925537,
+                        "value": 5.097917079925537,
+                        "target_value": 7.349233455955982,
+                        "reaction": {
+                          "mol": 139643173165280,
+                          "index": 0,
+                          "metadata": {},
+                          "smarts": "([NH2;D1;+0:1]-[c:2])>>(C-C(=O)-[NH;D2;+0:1]-[c:2])",
+                          "reactants": [
+                            [
+                              139643164991840
+                            ]
+                          ],
+                          "class": "aizynthfinder.chem.reaction.TemplatedRetroReaction"
+                        },
+                        "children": [
+                          {
+                            "cost": 0.0,
+                            "expandable": true,
+                            "value": 0.0,
+                            "mol": 139643164991840,
+                            "children": []
+                          }
+                        ]
+                      },
+                      {
+                        "cost": 5.568554878234863,
+                        "value": 5.568554878234863,
+                        "target_value": 7.819871254265308,
+                        "reaction": {
+                          "mol": 139643173165280,
+                          "index": 0,
+                          "metadata": {},
+                          "smarts": "([C:2]-[NH;D2;+0:1]-[C:3])>>(F-C(-F)(-F)-C(=O)-[N;H0;D3;+0:1](-[C:2])-[C:3])",
+                          "reactants": [
+                            [
+                              139643164991984
+                            ]
+                          ],
+                          "class": "aizynthfinder.chem.reaction.TemplatedRetroReaction"
+                        },
+                        "children": [
+                          {
+                            "cost": 0.0,
+                            "expandable": true,
+                            "value": 0.0,
+                            "mol": 139643164991984,
+                            "children": []
+                          }
+                        ]
+                      },
+                      {
+                        "cost": 5.573371887207031,
+                        "value": 5.573371887207031,
+                        "target_value": 7.824688263237476,
+                        "reaction": {
+                          "mol": 139643173165280,
+                          "index": 0,
+                          "metadata": {},
+                          "smarts": "([C:2]-[NH;D2;+0:1]-[C:3])>>(C-C-O-C(=O)-[N;H0;D3;+0:1](-[C:2])-[C:3])",
+                          "reactants": [
+                            [
+                              139643164993136
+                            ]
+                          ],
+                          "class": "aizynthfinder.chem.reaction.TemplatedRetroReaction"
+                        },
+                        "children": [
+                          {
+                            "cost": 0.0,
+                            "expandable": true,
+                            "value": 0.0,
+                            "mol": 139643164993136,
+                            "children": []
+                          }
+                        ]
+                      },
+                      {
+                        "cost": 5.792516231536865,
+                        "value": 5.792516231536865,
+                        "target_value": 8.04383260756731,
+                        "reaction": {
+                          "mol": 139643173165280,
+                          "index": 0,
+                          "metadata": {},
+                          "smarts": "([NH2;D1;+0:1]-[c:2])>>(F-C(-F)(-F)-C(=O)-[NH;D2;+0:1]-[c:2])",
+                          "reactants": [
+                            [
+                              139643164992800
+                            ]
+                          ],
+                          "class": "aizynthfinder.chem.reaction.TemplatedRetroReaction"
+                        },
+                        "children": [
+                          {
+                            "cost": 0.0,
+                            "expandable": true,
+                            "value": 0.0,
+                            "mol": 139643164992800,
+                            "children": []
+                          }
+                        ]
+                      },
+                      {
+                        "cost": 6.1294732093811035,
+                        "value": 6.1294732093811035,
+                        "target_value": 8.380789585411549,
+                        "reaction": {
+                          "mol": 139643173165280,
+                          "index": 0,
+                          "metadata": {},
+                          "smarts": "([NH2;D1;+0:1]-[c:2])>>(O=C-[NH;D2;+0:1]-[c:2])",
+                          "reactants": [
+                            [
+                              139643164992944
+                            ]
+                          ],
+                          "class": "aizynthfinder.chem.reaction.TemplatedRetroReaction"
+                        },
+                        "children": [
+                          {
+                            "cost": 0.0,
+                            "expandable": true,
+                            "value": 0.0,
+                            "mol": 139643164992944,
+                            "children": []
+                          }
+                        ]
+                      },
+                      {
+                        "cost": 6.494046688079834,
+                        "value": 6.494046688079834,
+                        "target_value": 8.745363064110279,
+                        "reaction": {
+                          "mol": 139643173165280,
+                          "index": 0,
+                          "metadata": {},
+                          "smarts": "([C:2]-[NH;D2;+0:1]-[C:3].[NH2;D1;+0:4]-[c:5])>>(C-C(-C)(-C)-O-C(=O)-[N;H0;D3;+0:1](-[C:2])-[C:3].C-C(-C)(-C)-O-C(=O)-[NH;D2;+0:4]-[c:5])",
+                          "reactants": [
+                            [
+                              139643164993280
+                            ]
+                          ],
+                          "class": "aizynthfinder.chem.reaction.TemplatedRetroReaction"
+                        },
+                        "children": [
+                          {
+                            "cost": 0.0,
+                            "expandable": true,
+                            "value": 0.0,
+                            "mol": 139643164993280,
+                            "children": []
+                          }
+                        ]
+                      },
+                      {
+                        "cost": 6.691080093383789,
+                        "value": 6.691080093383789,
+                        "target_value": 8.942396469414234,
+                        "reaction": {
+                          "mol": 139643173165280,
+                          "index": 0,
+                          "metadata": {},
+                          "smarts": "([NH2;D1;+0:1]-[c:2])>>(C-C(-C)(-C)-C(=O)-[NH;D2;+0:1]-[c:2])",
+                          "reactants": [
+                            [
+                              139643164992848
+                            ]
+                          ],
+                          "class": "aizynthfinder.chem.reaction.TemplatedRetroReaction"
+                        },
+                        "children": [
+                          {
+                            "cost": 0.0,
+                            "expandable": true,
+                            "value": 0.0,
+                            "mol": 139643164992848,
+                            "children": []
+                          }
+                        ]
+                      },
+                      {
+                        "cost": 6.875414848327637,
+                        "value": 6.875414848327637,
+                        "target_value": 9.126731224358082,
+                        "reaction": {
+                          "mol": 139643173165280,
+                          "index": 0,
+                          "metadata": {},
+                          "smarts": "([c:2]:[cH;D2;+0:1]:[c:3])>>(Cl-[c;H0;D3;+0:1](:[c:2]):[c:3])",
+                          "reactants": [
+                            [
+                              139643164994720
+                            ],
+                            [
+                              139643164994864
+                            ],
+                            [
+                              139643164992512
+                            ]
+                          ],
+                          "class": "aizynthfinder.chem.reaction.TemplatedRetroReaction"
+                        },
+                        "children": [
+                          {
+                            "cost": 0.0,
+                            "expandable": true,
+                            "value": 0.0,
+                            "mol": 139643164994720,
+                            "children": []
+                          }
+                        ]
+                      },
+                      {
+                        "cost": 6.875414848327637,
+                        "value": 6.875414848327637,
+                        "target_value": 9.126731224358082,
+                        "reaction": {
+                          "mol": 139643173165280,
+                          "index": 1,
+                          "metadata": {},
+                          "smarts": "([c:2]:[cH;D2;+0:1]:[c:3])>>(Cl-[c;H0;D3;+0:1](:[c:2]):[c:3])",
+                          "reactants": [
+                            [
+                              139643164994720
+                            ],
+                            [
+                              139643164994864
+                            ],
+                            [
+                              139643164992512
+                            ]
+                          ],
+                          "class": "aizynthfinder.chem.reaction.TemplatedRetroReaction"
+                        },
+                        "children": [
+                          {
+                            "cost": 0.0,
+                            "expandable": true,
+                            "value": 0.0,
+                            "mol": 139643164994864,
+                            "children": []
+                          }
+                        ]
+                      },
+                      {
+                        "cost": 6.875414848327637,
+                        "value": 6.875414848327637,
+                        "target_value": 9.126731224358082,
+                        "reaction": {
+                          "mol": 139643173165280,
+                          "index": 2,
+                          "metadata": {},
+                          "smarts": "([c:2]:[cH;D2;+0:1]:[c:3])>>(Cl-[c;H0;D3;+0:1](:[c:2]):[c:3])",
+                          "reactants": [
+                            [
+                              139643164994720
+                            ],
+                            [
+                              139643164994864
+                            ],
+                            [
+                              139643164992512
+                            ]
+                          ],
+                          "class": "aizynthfinder.chem.reaction.TemplatedRetroReaction"
+                        },
+                        "children": [
+                          {
+                            "cost": 0.0,
+                            "expandable": true,
+                            "value": 0.0,
+                            "mol": 139643164992512,
+                            "children": []
+                          }
+                        ]
+                      },
+                      {
+                        "cost": 6.907755374908447,
+                        "value": 6.907755374908447,
+                        "target_value": 9.159071750938892,
+                        "reaction": {
+                          "mol": 139643173165280,
+                          "index": 0,
+                          "metadata": {},
+                          "smarts": "([N;H2;D1;+0]-[c;H0;D3;+0:1](:[c:2]):[c:3])>>(O-C(=O)-[c;H0;D3;+0:1](:[c:2]):[c:3])",
+                          "reactants": [
+                            [
+                              139643164992080
+                            ]
+                          ],
+                          "class": "aizynthfinder.chem.reaction.TemplatedRetroReaction"
+                        },
+                        "children": [
+                          {
+                            "cost": 0.0,
+                            "expandable": true,
+                            "value": 0.0,
+                            "mol": 139643164992080,
+                            "children": []
+                          }
+                        ]
+                      },
+                      {
+                        "cost": 6.907755374908447,
+                        "value": 6.907755374908447,
+                        "target_value": 9.159071750938892,
+                        "reaction": {
+                          "mol": 139643173165280,
+                          "index": 0,
+                          "metadata": {},
+                          "smarts": "([NH2;D1;+0:4]-[c;H0;D3;+0:1](:[c:2]):[c:3])>>(F-[c;H0;D3;+0:1](:[c:2]):[c:3]).([NH3;D0;+0:4])",
+                          "reactants": [
+                            [
+                              139643164995392,
+                              139643164995248
+                            ]
+                          ],
+                          "class": "aizynthfinder.chem.reaction.TemplatedRetroReaction"
+                        },
+                        "children": [
+                          {
+                            "cost": 0.0,
+                            "expandable": false,
+                            "value": 0.0,
+                            "mol": 139643164995392,
+                            "children": []
+                          },
+                          {
+                            "cost": 0.0,
+                            "expandable": true,
+                            "value": 0.0,
+                            "mol": 139643164995248,
+                            "children": []
+                          }
+                        ]
+                      },
+                      {
+                        "cost": 6.907755374908447,
+                        "value": 6.907755374908447,
+                        "target_value": 9.159071750938892,
+                        "reaction": {
+                          "mol": 139643173165280,
+                          "index": 0,
+                          "metadata": {},
+                          "smarts": "([NH2;D1;+0:1]-[c:2])>>(O=C(-O-C-c1:c:c:c:c:c:1)-[NH;D2;+0:1]-[c:2])",
+                          "reactants": [
+                            [
+                              139643155805712
+                            ]
+                          ],
+                          "class": "aizynthfinder.chem.reaction.TemplatedRetroReaction"
+                        },
+                        "children": [
+                          {
+                            "cost": 0.0,
+                            "expandable": true,
+                            "value": 0.0,
+                            "mol": 139643155805712,
+                            "children": []
+                          }
+                        ]
+                      },
+                      {
+                        "cost": 6.907755374908447,
+                        "value": 6.907755374908447,
+                        "target_value": 9.159071750938892,
+                        "reaction": {
+                          "mol": 139643173165280,
+                          "index": 0,
+                          "metadata": {},
+                          "smarts": "([C:2]-[NH;D2;+0:1]-[C:3])>>(C-C-C-C-O-C(=O)-[N;H0;D3;+0:1](-[C:2])-[C:3])",
+                          "reactants": [
+                            [
+                              139643164856432
+                            ]
+                          ],
+                          "class": "aizynthfinder.chem.reaction.TemplatedRetroReaction"
+                        },
+                        "children": [
+                          {
+                            "cost": 0.0,
+                            "expandable": true,
+                            "value": 0.0,
+                            "mol": 139643164856432,
+                            "children": []
+                          }
+                        ]
+                      },
+                      {
+                        "cost": 6.907755374908447,
+                        "value": 6.907755374908447,
+                        "target_value": 9.159071750938892,
+                        "reaction": {
+                          "mol": 139643173165280,
+                          "index": 0,
+                          "metadata": {},
+                          "smarts": "([N;H2;D1;+0]-[c;H0;D3;+0:2](:[c:1]):[c:3])>>([c:1]:[cH;D2;+0:2]:[c:3])",
+                          "reactants": [
+                            [
+                              139643164857152
+                            ]
+                          ],
+                          "class": "aizynthfinder.chem.reaction.TemplatedRetroReaction"
+                        },
+                        "children": [
+                          {
+                            "cost": 0.0,
+                            "expandable": false,
+                            "value": 0.0,
+                            "mol": 139643164857152,
+                            "children": []
+                          }
+                        ]
+                      },
+                      {
+                        "cost": 6.907755374908447,
+                        "value": 6.907755374908447,
+                        "target_value": 9.159071750938892,
+                        "reaction": {
+                          "mol": 139643173165280,
+                          "index": 0,
+                          "metadata": {},
+                          "smarts": "([C:2]-[NH;D2;+0:1]-[C:3])>>(O=C(-[O-])-[N;H0;D3;+0:1](-[C:2])-[C:3])",
+                          "reactants": [
+                            [
+                              139643164856960
+                            ]
+                          ],
+                          "class": "aizynthfinder.chem.reaction.TemplatedRetroReaction"
+                        },
+                        "children": [
+                          {
+                            "cost": 0.0,
+                            "expandable": true,
+                            "value": 0.0,
+                            "mol": 139643164856960,
+                            "children": []
+                          }
+                        ]
+                      },
+                      {
+                        "cost": 6.907755374908447,
+                        "value": 6.907755374908447,
+                        "target_value": 9.159071750938892,
+                        "reaction": {
+                          "mol": 139643173165280,
+                          "index": 0,
+                          "metadata": {},
+                          "smarts": "([C:2]-[NH;D2;+0:1]-[C:3])>>(O=C(-[N;H0;D3;+0:1](-[C:2])-[C:3])-c1:c:c:c:c:c:1)",
+                          "reactants": [
+                            [
+                              139643164857104
+                            ]
+                          ],
+                          "class": "aizynthfinder.chem.reaction.TemplatedRetroReaction"
+                        },
+                        "children": [
+                          {
+                            "cost": 0.0,
+                            "expandable": true,
+                            "value": 0.0,
+                            "mol": 139643164857104,
+                            "children": []
+                          }
+                        ]
+                      },
+                      {
+                        "cost": 6.907755374908447,
+                        "value": 6.907755374908447,
+                        "target_value": 9.159071750938892,
+                        "reaction": {
+                          "mol": 139643173165280,
+                          "index": 0,
+                          "metadata": {},
+                          "smarts": "([NH2;D1;+0:2]-[c:1])>>([c:1]-[NH;D2;+0:2]-C-c1:c:c:c:c:c:1)",
+                          "reactants": [
+                            [
+                              139643164993712
+                            ]
+                          ],
+                          "class": "aizynthfinder.chem.reaction.TemplatedRetroReaction"
+                        },
+                        "children": [
+                          {
+                            "cost": 0.0,
+                            "expandable": true,
+                            "value": 0.0,
+                            "mol": 139643164993712,
+                            "children": []
+                          }
+                        ]
+                      },
+                      {
+                        "cost": 6.907755374908447,
+                        "value": 6.907755374908447,
+                        "target_value": 9.159071750938892,
+                        "reaction": {
+                          "mol": 139643173165280,
+                          "index": 0,
+                          "metadata": {},
+                          "smarts": "([NH2;D1;+0:2]-[c:1])>>([c:1]-[N;H0;D2;+0:2]=C(-c1:c:c:c:c:c:1)-c1:c:c:c:c:c:1)",
+                          "reactants": [
+                            [
+                              139643164993664
+                            ]
+                          ],
+                          "class": "aizynthfinder.chem.reaction.TemplatedRetroReaction"
+                        },
+                        "children": [
+                          {
+                            "cost": 0.0,
+                            "expandable": true,
+                            "value": 0.0,
+                            "mol": 139643164993664,
+                            "children": []
+                          }
+                        ]
+                      },
+                      {
+                        "cost": 6.907755374908447,
+                        "value": 6.907755374908447,
+                        "target_value": 9.159071750938892,
+                        "reaction": {
+                          "mol": 139643173165280,
+                          "index": 0,
+                          "metadata": {},
+                          "smarts": "([C:1]-[CH;D3;+0:2]1-[CH2;D2;+0:3]-[CH2;D2;+0:4]-[NH;D2;+0:5]-[CH2;D2;+0:6]-[CH2;D2;+0:7]-1)>>([C:1]-[c;H0;D3;+0:2]1:[cH;D2;+0:3]:[cH;D2;+0:4]:[n;H0;D2;+0:5]:[cH;D2;+0:6]:[cH;D2;+0:7]:1)",
+                          "reactants": [
+                            [
+                              139643164994192
+                            ]
+                          ],
+                          "class": "aizynthfinder.chem.reaction.TemplatedRetroReaction"
+                        },
+                        "children": [
+                          {
+                            "cost": 0.0,
+                            "expandable": true,
+                            "value": 0.0,
+                            "mol": 139643164994192,
+                            "children": []
+                          }
+                        ]
+                      },
+                      {
+                        "cost": 6.907755374908447,
+                        "value": 6.907755374908447,
+                        "target_value": 9.159071750938892,
+                        "reaction": {
+                          "mol": 139643173165280,
+                          "index": 0,
+                          "metadata": {},
+                          "smarts": "([F;H0;D1;+0]-[c;H0;D3;+0:2](:[c:1]):[c:3])>>([c:1]:[cH;D2;+0:2]:[c:3])",
+                          "reactants": [
+                            [
+                              139643166164976
+                            ]
+                          ],
+                          "class": "aizynthfinder.chem.reaction.TemplatedRetroReaction"
+                        },
+                        "children": [
+                          {
+                            "cost": 0.0,
+                            "expandable": true,
+                            "value": 0.0,
+                            "mol": 139643166164976,
+                            "children": []
+                          }
+                        ]
+                      },
+                      {
+                        "cost": 6.907755374908447,
+                        "value": 6.907755374908447,
+                        "target_value": 9.159071750938892,
+                        "reaction": {
+                          "mol": 139643173165280,
+                          "index": 0,
+                          "metadata": {},
+                          "smarts": "([C:2]-[NH;D2;+0:1]-[C:3])>>(C-C-[N;H0;D3;+0:1](-[C:2])-[C:3])",
+                          "reactants": [
+                            [
+                              139643171531312
+                            ]
+                          ],
+                          "class": "aizynthfinder.chem.reaction.TemplatedRetroReaction"
+                        },
+                        "children": [
+                          {
+                            "cost": 0.0,
+                            "expandable": true,
+                            "value": 0.0,
+                            "mol": 139643171531312,
+                            "children": []
+                          }
+                        ]
+                      },
+                      {
+                        "cost": 6.907755374908447,
+                        "value": 6.907755374908447,
+                        "target_value": 9.159071750938892,
+                        "reaction": {
+                          "mol": 139643173165280,
+                          "index": 0,
+                          "metadata": {},
+                          "smarts": "([N;H2;D1;+0]-[c;H0;D3;+0:1](:[c:2]):[c:3])>>(Cl-[c;H0;D3;+0:1](:[c:2]):[c:3])",
+                          "reactants": [
+                            [
+                              139643164994768
+                            ]
+                          ],
+                          "class": "aizynthfinder.chem.reaction.TemplatedRetroReaction"
+                        },
+                        "children": [
+                          {
+                            "cost": 0.0,
+                            "expandable": true,
+                            "value": 0.0,
+                            "mol": 139643164994768,
+                            "children": []
+                          }
+                        ]
+                      },
+                      {
+                        "cost": 6.907755374908447,
+                        "value": 6.907755374908447,
+                        "target_value": 9.159071750938892,
+                        "reaction": {
+                          "mol": 139643173165280,
+                          "index": 0,
+                          "metadata": {},
+                          "smarts": "([C:2]-[C;H0;D3;+0:1](=[O;D1;H0:3])-[c;H0;D3;+0:5](:[c:4]):[c:6])>>(C-O-N(-C)-[C;H0;D3;+0:1](-[C:2])=[O;D1;H0:3]).([c:4]:[cH;D2;+0:5]:[c:6])",
+                          "reactants": [
+                            [
+                              139643166164112,
+                              139643166166464
+                            ]
+                          ],
+                          "class": "aizynthfinder.chem.reaction.TemplatedRetroReaction"
+                        },
+                        "children": [
+                          {
+                            "cost": 0.0,
+                            "expandable": false,
+                            "value": 0.0,
+                            "mol": 139643166164112,
+                            "children": []
+                          },
+                          {
+                            "cost": 0.0,
+                            "expandable": false,
+                            "value": 0.0,
+                            "mol": 139643166166464,
+                            "children": []
+                          }
+                        ]
+                      },
+                      {
+                        "cost": 6.907755374908447,
+                        "value": 6.907755374908447,
+                        "target_value": 9.159071750938892,
+                        "reaction": {
+                          "mol": 139643173165280,
+                          "index": 0,
+                          "metadata": {},
+                          "smarts": "([N;H2;D1;+0]-[c;H0;D3;+0:1](:[c:2]):[c:3])>>(Br-[c;H0;D3;+0:1](:[c:2]):[c:3])",
+                          "reactants": [
+                            [
+                              139643166164448
+                            ]
+                          ],
+                          "class": "aizynthfinder.chem.reaction.TemplatedRetroReaction"
+                        },
+                        "children": [
+                          {
+                            "cost": 0.0,
+                            "expandable": true,
+                            "value": 0.0,
+                            "mol": 139643166164448,
+                            "children": []
+                          }
+                        ]
+                      },
+                      {
+                        "cost": 6.907755374908447,
+                        "value": 6.907755374908447,
+                        "target_value": 9.159071750938892,
+                        "reaction": {
+                          "mol": 139643173165280,
+                          "index": 0,
+                          "metadata": {},
+                          "smarts": "([C:2]-[NH;D2;+0:1]-[C:3])>>(F-c1:c:c:c(-C-N-c2:n:c(-[N;H0;D3;+0:1](-[C:2])-[C:3]):n:c:c:2-c2:c:c:c(-F):c:c:2-F):c(-F):c:1)",
+                          "reactants": [
+                            [
+                              139643166163392
+                            ]
+                          ],
+                          "class": "aizynthfinder.chem.reaction.TemplatedRetroReaction"
+                        },
+                        "children": [
+                          {
+                            "cost": 0.0,
+                            "expandable": true,
+                            "value": 0.0,
+                            "mol": 139643166163392,
+                            "children": []
+                          }
+                        ]
+                      }
+                    ]
                   }
                 ]
               },
               {
-                "cost": 7.0,
-                "value": 7.0,
-                "target_value": 17.0,
+                "cost": 3.0694591999053955,
+                "value": 3.0694591999053955,
+                "target_value": 3.170205421745777,
                 "reaction": {
-                  "mol": 140598039857296,
-                  "smarts": "([c:2]:[c;H0;D3;+0:1](:[c:3])-[NH;D2;+0:4]-[c:5])>>(Br-[c;H0;D3;+0:1](:[c:2]):[c:3]).([NH2;D1;+0:4]-[c:5])",
-                  "index": 1,
-                  "metadata": {}
+                  "mol": 139643171528960,
+                  "index": 0,
+                  "metadata": {},
+                  "smarts": "([NH2;D1;+0:1]-[c:2])>>(C-C(=O)-[NH;D2;+0:1]-[c:2])",
+                  "reactants": [
+                    [
+                      139643173069200
+                    ]
+                  ],
+                  "class": "aizynthfinder.chem.reaction.TemplatedRetroReaction"
                 },
                 "children": [
                   {
                     "cost": 0.0,
                     "expandable": true,
                     "value": 0.0,
-                    "mol": 140605332368656,
+                    "mol": 139643173069200,
+                    "children": []
+                  }
+                ]
+              },
+              {
+                "cost": 3.152578115463257,
+                "value": 3.152578115463257,
+                "target_value": 3.2533243373036385,
+                "reaction": {
+                  "mol": 139643171528960,
+                  "index": 0,
+                  "metadata": {},
+                  "smarts": "([NH2;D1;+0:1]-[c:2])>>(C-C(-C)(-C)-O-C(=O)-[NH;D2;+0:1]-[c:2])",
+                  "reactants": [
+                    [
+                      139643173069008
+                    ]
+                  ],
+                  "class": "aizynthfinder.chem.reaction.TemplatedRetroReaction"
+                },
+                "children": [
+                  {
+                    "cost": 0.0,
+                    "expandable": true,
+                    "value": 0.0,
+                    "mol": 139643173069008,
+                    "children": []
+                  }
+                ]
+              },
+              {
+                "cost": 3.273343801498413,
+                "value": 3.273343801498413,
+                "target_value": 3.3740900233387947,
+                "reaction": {
+                  "mol": 139643171528960,
+                  "index": 0,
+                  "metadata": {},
+                  "smarts": "([NH2;D1;+0:1]-[c:2])>>(F-C(-F)(-F)-C(=O)-[NH;D2;+0:1]-[c:2])",
+                  "reactants": [
+                    [
+                      139643173069440
+                    ]
+                  ],
+                  "class": "aizynthfinder.chem.reaction.TemplatedRetroReaction"
+                },
+                "children": [
+                  {
+                    "cost": 0.0,
+                    "expandable": true,
+                    "value": 0.0,
+                    "mol": 139643173069440,
+                    "children": []
+                  }
+                ]
+              },
+              {
+                "cost": 3.5829217433929443,
+                "value": 3.5829217433929443,
+                "target_value": 3.683667965233326,
+                "reaction": {
+                  "mol": 139643171528960,
+                  "index": 0,
+                  "metadata": {},
+                  "smarts": "([NH2;D1;+0:2]-[c:1])>>([c:1]-[N;H0;D2;+0:2]=C(-c1:c:c:c:c:c:1)-c1:c:c:c:c:c:1)",
+                  "reactants": [
+                    [
+                      139643173166960
+                    ]
+                  ],
+                  "class": "aizynthfinder.chem.reaction.TemplatedRetroReaction"
+                },
+                "children": [
+                  {
+                    "cost": 0.0,
+                    "expandable": true,
+                    "value": 0.0,
+                    "mol": 139643173166960,
+                    "children": []
+                  }
+                ]
+              },
+              {
+                "cost": 3.6675679683685303,
+                "value": 3.6675679683685303,
+                "target_value": 3.768314190208912,
+                "reaction": {
+                  "mol": 139643171528960,
+                  "index": 0,
+                  "metadata": {},
+                  "smarts": "([C:2]-[N;H0;D3;+0:3](-[C:4])-[CH3;D1;+0:1])>>(I-[CH3;D1;+0:1]).([C:2]-[NH;D2;+0:3]-[C:4])",
+                  "reactants": [
+                    [
+                      139643173069680,
+                      139643173069968
+                    ]
+                  ],
+                  "class": "aizynthfinder.chem.reaction.TemplatedRetroReaction"
+                },
+                "children": [
+                  {
+                    "cost": 0.0,
+                    "expandable": false,
+                    "value": 0.0,
+                    "mol": 139643173069680,
+                    "children": []
+                  },
+                  {
+                    "cost": 0.0,
+                    "expandable": true,
+                    "value": 0.0,
+                    "mol": 139643173069968,
+                    "children": []
+                  }
+                ]
+              },
+              {
+                "cost": 4.240368843078613,
+                "value": 4.240368843078613,
+                "target_value": 4.341115064918995,
+                "reaction": {
+                  "mol": 139643171528960,
+                  "index": 0,
+                  "metadata": {},
+                  "smarts": "([NH2;D1;+0:1]-[c:2])>>(C-C(-C)(-C)-C(=O)-[NH;D2;+0:1]-[c:2])",
+                  "reactants": [
+                    [
+                      139643173070400
+                    ]
+                  ],
+                  "class": "aizynthfinder.chem.reaction.TemplatedRetroReaction"
+                },
+                "children": [
+                  {
+                    "cost": 0.0,
+                    "expandable": true,
+                    "value": 0.0,
+                    "mol": 139643173070400,
+                    "children": []
+                  }
+                ]
+              },
+              {
+                "cost": 4.31692361831665,
+                "value": 4.31692361831665,
+                "target_value": 4.417669840157032,
+                "reaction": {
+                  "mol": 139643171528960,
+                  "index": 0,
+                  "metadata": {},
+                  "smarts": "([c:2]:[cH;D2;+0:1]:[c:3])>>(Cl-[c;H0;D3;+0:1](:[c:2]):[c:3])",
+                  "reactants": [
+                    [
+                      139643173070880
+                    ],
+                    [
+                      139643173070832
+                    ],
+                    [
+                      139643173068960
+                    ]
+                  ],
+                  "class": "aizynthfinder.chem.reaction.TemplatedRetroReaction"
+                },
+                "children": [
+                  {
+                    "cost": 0.0,
+                    "expandable": true,
+                    "value": 0.0,
+                    "mol": 139643173070880,
+                    "children": []
+                  }
+                ]
+              },
+              {
+                "cost": 4.31692361831665,
+                "value": 4.31692361831665,
+                "target_value": 4.417669840157032,
+                "reaction": {
+                  "mol": 139643171528960,
+                  "index": 1,
+                  "metadata": {},
+                  "smarts": "([c:2]:[cH;D2;+0:1]:[c:3])>>(Cl-[c;H0;D3;+0:1](:[c:2]):[c:3])",
+                  "reactants": [
+                    [
+                      139643173070880
+                    ],
+                    [
+                      139643173070832
+                    ],
+                    [
+                      139643173068960
+                    ]
+                  ],
+                  "class": "aizynthfinder.chem.reaction.TemplatedRetroReaction"
+                },
+                "children": [
+                  {
+                    "cost": 0.0,
+                    "expandable": true,
+                    "value": 0.0,
+                    "mol": 139643173070832,
+                    "children": []
+                  }
+                ]
+              },
+              {
+                "cost": 4.31692361831665,
+                "value": 4.31692361831665,
+                "target_value": 4.417669840157032,
+                "reaction": {
+                  "mol": 139643171528960,
+                  "index": 2,
+                  "metadata": {},
+                  "smarts": "([c:2]:[cH;D2;+0:1]:[c:3])>>(Cl-[c;H0;D3;+0:1](:[c:2]):[c:3])",
+                  "reactants": [
+                    [
+                      139643173070880
+                    ],
+                    [
+                      139643173070832
+                    ],
+                    [
+                      139643173068960
+                    ]
+                  ],
+                  "class": "aizynthfinder.chem.reaction.TemplatedRetroReaction"
+                },
+                "children": [
+                  {
+                    "cost": 0.0,
+                    "expandable": true,
+                    "value": 0.0,
+                    "mol": 139643173068960,
+                    "children": []
+                  }
+                ]
+              },
+              {
+                "cost": 4.852601051330566,
+                "value": 4.852601051330566,
+                "target_value": 4.953347273170948,
+                "reaction": {
+                  "mol": 139643171528960,
+                  "index": 0,
+                  "metadata": {},
+                  "smarts": "([C:2]-[CH;D3;+0:1](-[C:3])-[C;H0;D3;+0:4](=[O;H0;D1;+0:6])-[c:5])>>(Cl-[CH;D3;+0:1](-[C:2])-[C:3]).(N#[C;H0;D2;+0:4]-[c:5]).([OH2;D0;+0:6])",
+                  "reactants": [
+                    [
+                      139643173070448,
+                      139643173070736,
+                      139643173069632
+                    ]
+                  ],
+                  "class": "aizynthfinder.chem.reaction.TemplatedRetroReaction"
+                },
+                "children": [
+                  {
+                    "cost": 0.0,
+                    "expandable": false,
+                    "value": 0.0,
+                    "mol": 139643173070448,
                     "children": []
                   },
                   {
                     "cost": 0.0,
                     "expandable": false,
-                    "value": 0,
-                    "mol": 140602867801296,
+                    "value": 0.0,
+                    "mol": 139643173070736,
+                    "children": []
+                  },
+                  {
+                    "cost": 0.0,
+                    "expandable": false,
+                    "value": 0.0,
+                    "mol": 139643173069632,
+                    "children": []
+                  }
+                ]
+              },
+              {
+                "cost": 5.2155046463012695,
+                "value": 5.2155046463012695,
+                "target_value": 5.316250868141651,
+                "reaction": {
+                  "mol": 139643171528960,
+                  "index": 0,
+                  "metadata": {},
+                  "smarts": "([#7:2]-[CH3;D1;+0:1])>>(C-C(-C)(-C)-O-[C;H0;D3;+0:1](=O)-[#7:2])",
+                  "reactants": [
+                    [
+                      139643173071264
+                    ]
+                  ],
+                  "class": "aizynthfinder.chem.reaction.TemplatedRetroReaction"
+                },
+                "children": [
+                  {
+                    "cost": 0.0,
+                    "expandable": true,
+                    "value": 0.0,
+                    "mol": 139643173071264,
+                    "children": []
+                  }
+                ]
+              },
+              {
+                "cost": 5.3915696144104,
+                "value": 5.3915696144104,
+                "target_value": 5.492315836250782,
+                "reaction": {
+                  "mol": 139643171528960,
+                  "index": 0,
+                  "metadata": {},
+                  "smarts": "([N;H2;D1;+0]-[c;H0;D3;+0:1](:[c:2]):[c:3])>>(Cl-[c;H0;D3;+0:1](:[c:2]):[c:3])",
+                  "reactants": [
+                    [
+                      139643173071600
+                    ]
+                  ],
+                  "class": "aizynthfinder.chem.reaction.TemplatedRetroReaction"
+                },
+                "children": [
+                  {
+                    "cost": 0.0,
+                    "expandable": true,
+                    "value": 0.0,
+                    "mol": 139643173071600,
+                    "children": []
+                  }
+                ]
+              },
+              {
+                "cost": 5.560334205627441,
+                "value": 5.560334205627441,
+                "target_value": 5.661080427467823,
+                "reaction": {
+                  "mol": 139643171528960,
+                  "index": 0,
+                  "metadata": {},
+                  "smarts": "([NH2;D1;+0:1]-[c:2])>>(O=C(-O-C-c1:c:c:c:c:c:1)-[NH;D2;+0:1]-[c:2])",
+                  "reactants": [
+                    [
+                      139643173072032
+                    ]
+                  ],
+                  "class": "aizynthfinder.chem.reaction.TemplatedRetroReaction"
+                },
+                "children": [
+                  {
+                    "cost": 0.0,
+                    "expandable": true,
+                    "value": 0.0,
+                    "mol": 139643173072032,
+                    "children": []
+                  }
+                ]
+              },
+              {
+                "cost": 5.652981281280518,
+                "value": 5.652981281280518,
+                "target_value": 5.753727503120899,
+                "reaction": {
+                  "mol": 139643171528960,
+                  "index": 0,
+                  "metadata": {},
+                  "smarts": "([N;H2;D1;+0]-[c;H0;D3;+0:1](:[c:2]):[c:3])>>(Br-[c;H0;D3;+0:1](:[c:2]):[c:3])",
+                  "reactants": [
+                    [
+                      139643173070592
+                    ]
+                  ],
+                  "class": "aizynthfinder.chem.reaction.TemplatedRetroReaction"
+                },
+                "children": [
+                  {
+                    "cost": 0.0,
+                    "expandable": true,
+                    "value": 0.0,
+                    "mol": 139643173070592,
+                    "children": []
+                  }
+                ]
+              },
+              {
+                "cost": 5.810171127319336,
+                "value": 5.810171127319336,
+                "target_value": 5.910917349159718,
+                "reaction": {
+                  "mol": 139643171528960,
+                  "index": 0,
+                  "metadata": {},
+                  "smarts": "([C:2]-[C;H0;D3;+0:1](=[O;D1;H0:3])-[c;H0;D3;+0:5](:[c:4]):[c:6])>>(C-O-N(-C)-[C;H0;D3;+0:1](-[C:2])=[O;D1;H0:3]).([c:4]:[cH;D2;+0:5]:[c:6])",
+                  "reactants": [
+                    [
+                      139643173070544,
+                      139643173070064
+                    ]
+                  ],
+                  "class": "aizynthfinder.chem.reaction.TemplatedRetroReaction"
+                },
+                "children": [
+                  {
+                    "cost": 0.0,
+                    "expandable": false,
+                    "value": 0.0,
+                    "mol": 139643173070544,
+                    "children": []
+                  },
+                  {
+                    "cost": 0.0,
+                    "expandable": false,
+                    "value": 0.0,
+                    "mol": 139643173070064,
+                    "children": []
+                  }
+                ]
+              },
+              {
+                "cost": 5.950585842132568,
+                "value": 5.950585842132568,
+                "target_value": 6.05133206397295,
+                "reaction": {
+                  "mol": 139643171528960,
+                  "index": 0,
+                  "metadata": {},
+                  "smarts": "([NH2;D1;+0:2]-[c:1])>>([c:1]-[NH;D2;+0:2]-C-c1:c:c:c:c:c:1)",
+                  "reactants": [
+                    [
+                      139643173072272
+                    ]
+                  ],
+                  "class": "aizynthfinder.chem.reaction.TemplatedRetroReaction"
+                },
+                "children": [
+                  {
+                    "cost": 0.0,
+                    "expandable": true,
+                    "value": 0.0,
+                    "mol": 139643173072272,
+                    "children": []
+                  }
+                ]
+              },
+              {
+                "cost": 6.106892108917236,
+                "value": 6.106892108917236,
+                "target_value": 6.207638330757618,
+                "reaction": {
+                  "mol": 139643171528960,
+                  "index": 0,
+                  "metadata": {},
+                  "smarts": "([N;H2;D1;+0]-[c;H0;D3;+0:1](:[c:2]):[c:3])>>(O-C(=O)-[c;H0;D3;+0:1](:[c:2]):[c:3])",
+                  "reactants": [
+                    [
+                      139643173072320
+                    ]
+                  ],
+                  "class": "aizynthfinder.chem.reaction.TemplatedRetroReaction"
+                },
+                "children": [
+                  {
+                    "cost": 0.0,
+                    "expandable": true,
+                    "value": 0.0,
+                    "mol": 139643173072320,
+                    "children": []
+                  }
+                ]
+              },
+              {
+                "cost": 6.275547027587891,
+                "value": 6.275547027587891,
+                "target_value": 6.376293249428272,
+                "reaction": {
+                  "mol": 139643171528960,
+                  "index": 0,
+                  "metadata": {},
+                  "smarts": "([NH2;D1;+0:4]-[c;H0;D3;+0:1](:[c:2]):[c:3])>>(F-[c;H0;D3;+0:1](:[c:2]):[c:3]).([NH3;D0;+0:4])",
+                  "reactants": [
+                    [
+                      139643172995808,
+                      139643172995136
+                    ]
+                  ],
+                  "class": "aizynthfinder.chem.reaction.TemplatedRetroReaction"
+                },
+                "children": [
+                  {
+                    "cost": 0.0,
+                    "expandable": true,
+                    "value": 0.0,
+                    "mol": 139643172995808,
+                    "children": []
+                  },
+                  {
+                    "cost": 0.0,
+                    "expandable": false,
+                    "value": 0.0,
+                    "mol": 139643172995136,
+                    "children": []
+                  }
+                ]
+              },
+              {
+                "cost": 6.425144195556641,
+                "value": 6.425144195556641,
+                "target_value": 6.525890417397022,
+                "reaction": {
+                  "mol": 139643171528960,
+                  "index": 0,
+                  "metadata": {},
+                  "smarts": "([C:1]-[N;H0;D3;+0:2](-[C:3])-[C;H3;D1;+0])>>([C:1]-[NH;D2;+0:2]-[C:3])",
+                  "reactants": [
+                    [
+                      139643173072224
+                    ]
+                  ],
+                  "class": "aizynthfinder.chem.reaction.TemplatedRetroReaction"
+                },
+                "children": [
+                  {
+                    "cost": 0.0,
+                    "expandable": true,
+                    "value": 0.0,
+                    "mol": 139643173072224,
+                    "children": []
+                  }
+                ]
+              },
+              {
+                "cost": 6.469336032867432,
+                "value": 6.469336032867432,
+                "target_value": 6.570082254707813,
+                "reaction": {
+                  "mol": 139643171528960,
+                  "index": 0,
+                  "metadata": {},
+                  "smarts": "([NH2;D1;+0:1]-[c:2])>>(O=C-[NH;D2;+0:1]-[c:2])",
+                  "reactants": [
+                    [
+                      139643172995568
+                    ]
+                  ],
+                  "class": "aizynthfinder.chem.reaction.TemplatedRetroReaction"
+                },
+                "children": [
+                  {
+                    "cost": 0.0,
+                    "expandable": true,
+                    "value": 0.0,
+                    "mol": 139643172995568,
+                    "children": []
+                  }
+                ]
+              },
+              {
+                "cost": 6.587630748748779,
+                "value": 6.587630748748779,
+                "target_value": 6.688376970589161,
+                "reaction": {
+                  "mol": 139643171528960,
+                  "index": 0,
+                  "metadata": {},
+                  "smarts": "([C:2]-[N;H0;D3;+0:3](-[C:4])-[CH3;D1;+0:1])>>(O-[CH3;D1;+0:1]).([C:2]-[NH;D2;+0:3]-[C:4])",
+                  "reactants": [
+                    [
+                      139643173071648,
+                      139643173071360
+                    ]
+                  ],
+                  "class": "aizynthfinder.chem.reaction.TemplatedRetroReaction"
+                },
+                "children": [
+                  {
+                    "cost": 0.0,
+                    "expandable": false,
+                    "value": 0.0,
+                    "mol": 139643173071648,
+                    "children": []
+                  },
+                  {
+                    "cost": 0.0,
+                    "expandable": true,
+                    "value": 0.0,
+                    "mol": 139643173071360,
+                    "children": []
+                  }
+                ]
+              },
+              {
+                "cost": 6.601748943328857,
+                "value": 6.601748943328857,
+                "target_value": 6.702495165169239,
+                "reaction": {
+                  "mol": 139643171528960,
+                  "index": 0,
+                  "metadata": {},
+                  "smarts": "([C:1]-[C;H0;D3;+0:2](=[O;H0;D1;+0:3])-[c:4])>>([C:1]-[CH;D3;+0:2](-[OH;D1;+0:3])-[c:4])",
+                  "reactants": [
+                    [
+                      139643172995856
+                    ]
+                  ],
+                  "class": "aizynthfinder.chem.reaction.TemplatedRetroReaction"
+                },
+                "children": [
+                  {
+                    "cost": 0.0,
+                    "expandable": true,
+                    "value": 0.0,
+                    "mol": 139643172995856,
+                    "children": []
+                  }
+                ]
+              },
+              {
+                "cost": 6.609378337860107,
+                "value": 6.609378337860107,
+                "target_value": 6.710124559700489,
+                "reaction": {
+                  "mol": 139643171528960,
+                  "index": 0,
+                  "metadata": {},
+                  "smarts": "([N;H2;D1;+0]-[c;H0;D3;+0:2](:[c:1]):[c:3])>>([c:1]:[cH;D2;+0:2]:[c:3])",
+                  "reactants": [
+                    [
+                      139643172995472
+                    ]
+                  ],
+                  "class": "aizynthfinder.chem.reaction.TemplatedRetroReaction"
+                },
+                "children": [
+                  {
+                    "cost": 0.0,
+                    "expandable": false,
+                    "value": 0.0,
+                    "mol": 139643172995472,
+                    "children": []
+                  }
+                ]
+              },
+              {
+                "cost": 6.733030796051025,
+                "value": 6.733030796051025,
+                "target_value": 6.833777017891407,
+                "reaction": {
+                  "mol": 139643171528960,
+                  "index": 0,
+                  "metadata": {},
+                  "smarts": "([C:2]-[C;H0;D3;+0:1](=[O;D1;H0:3])-[c;H0;D3;+0:4](:[c:5]):[c:6])>>(Cl-[C;H0;D3;+0:1](-[C:2])=[O;D1;H0:3]).(I-[c;H0;D3;+0:4](:[c:5]):[c:6])",
+                  "reactants": [
+                    [
+                      139643173164800,
+                      139643173164224
+                    ]
+                  ],
+                  "class": "aizynthfinder.chem.reaction.TemplatedRetroReaction"
+                },
+                "children": [
+                  {
+                    "cost": 0.0,
+                    "expandable": false,
+                    "value": 0.0,
+                    "mol": 139643173164800,
+                    "children": []
+                  },
+                  {
+                    "cost": 0.0,
+                    "expandable": false,
+                    "value": 0.0,
+                    "mol": 139643173164224,
+                    "children": []
+                  }
+                ]
+              },
+              {
+                "cost": 6.907755374908447,
+                "value": 6.907755374908447,
+                "target_value": 7.008501596748829,
+                "reaction": {
+                  "mol": 139643171528960,
+                  "index": 0,
+                  "metadata": {},
+                  "smarts": "([NH2;D1;+0:5]-[c:4]:[cH;D2;+0:3]:[cH;D2;+0:1]:[c:2])>>(Cl-[c;H0;D3;+0:1](:[c:2]):[c;H0;D3;+0:3](-Cl):[c:4]-[N+;H0;D3:5](=O)-[O-])",
+                  "reactants": [
+                    [
+                      139643173163312
+                    ]
+                  ],
+                  "class": "aizynthfinder.chem.reaction.TemplatedRetroReaction"
+                },
+                "children": [
+                  {
+                    "cost": 0.0,
+                    "expandable": true,
+                    "value": 0.0,
+                    "mol": 139643173163312,
+                    "children": []
+                  }
+                ]
+              },
+              {
+                "cost": 6.907755374908447,
+                "value": 6.907755374908447,
+                "target_value": 7.008501596748829,
+                "reaction": {
+                  "mol": 139643171528960,
+                  "index": 0,
+                  "metadata": {},
+                  "smarts": "([NH2;D1;+0:2]-[c:1])>>([c:1]-[N;H0;D3;+0:2](-C-c1:c:c:c:c:c:1)-C-c1:c:c:c:c:c:1)",
+                  "reactants": [
+                    [
+                      139643173164848
+                    ]
+                  ],
+                  "class": "aizynthfinder.chem.reaction.TemplatedRetroReaction"
+                },
+                "children": [
+                  {
+                    "cost": 0.0,
+                    "expandable": true,
+                    "value": 0.0,
+                    "mol": 139643173164848,
                     "children": []
                   }
                 ]
               }
             ]
+          }
+        ]
+      },
+      {
+        "cost": 3.309605598449707,
+        "value": 3.309605598449707,
+        "target_value": 3.309605598449707,
+        "reaction": {
+          "mol": 139643154371392,
+          "index": 0,
+          "metadata": {},
+          "smarts": "([O;D1;H0:2]=[C;H0;D3;+0:1](-[c:3])-[NH;D2;+0:4]-[c:5])>>(O-[C;H0;D3;+0:1](=[O;D1;H0:2])-[c:3]).([NH2;D1;+0:4]-[c:5])",
+          "reactants": [
+            [
+              139643157042560,
+              139643157043712
+            ]
+          ],
+          "class": "aizynthfinder.chem.reaction.TemplatedRetroReaction"
+        },
+        "children": [
+          {
+            "cost": 0.0,
+            "expandable": false,
+            "value": 0.0,
+            "mol": 139643157042560,
+            "children": []
+          },
+          {
+            "cost": 0.0,
+            "expandable": true,
+            "value": 0.0,
+            "mol": 139643157043712,
+            "children": []
+          }
+        ]
+      },
+      {
+        "cost": 4.04685640335083,
+        "value": 4.04685640335083,
+        "target_value": 4.04685640335083,
+        "reaction": {
+          "mol": 139643154371392,
+          "index": 0,
+          "metadata": {},
+          "smarts": "([C:2]-[N;H0;D3;+0:3](-[C:4])-[CH3;D1;+0:1])>>(O=[CH2;D1;+0:1]).([C:2]-[NH;D2;+0:3]-[C:4])",
+          "reactants": [
+            [
+              139643166200256,
+              139643166201936
+            ]
+          ],
+          "class": "aizynthfinder.chem.reaction.TemplatedRetroReaction"
+        },
+        "children": [
+          {
+            "cost": 0.0,
+            "expandable": false,
+            "value": 0.0,
+            "mol": 139643166200256,
+            "children": []
+          },
+          {
+            "cost": 0.0,
+            "expandable": true,
+            "value": 0.0,
+            "mol": 139643166201936,
+            "children": []
+          }
+        ]
+      },
+      {
+        "cost": 6.790102005004883,
+        "value": 6.790102005004883,
+        "target_value": 6.790102005004883,
+        "reaction": {
+          "mol": 139643154371392,
+          "index": 0,
+          "metadata": {},
+          "smarts": "([#7:2]-[CH3;D1;+0:1])>>(C-C(-C)(-C)-O-[C;H0;D3;+0:1](=O)-[#7:2])",
+          "reactants": [
+            [
+              139643166202032
+            ]
+          ],
+          "class": "aizynthfinder.chem.reaction.TemplatedRetroReaction"
+        },
+        "children": [
+          {
+            "cost": 0.0,
+            "expandable": true,
+            "value": 0.0,
+            "mol": 139643166202032,
+            "children": []
+          }
+        ]
+      },
+      {
+        "cost": 6.830040454864502,
+        "value": 6.830040454864502,
+        "target_value": 6.830040454864502,
+        "reaction": {
+          "mol": 139643154371392,
+          "index": 0,
+          "metadata": {},
+          "smarts": "([C:2]-[N;H0;D3;+0:3](-[C:4])-[CH3;D1;+0:1])>>(I-[CH3;D1;+0:1]).([C:2]-[NH;D2;+0:3]-[C:4])",
+          "reactants": [
+            [
+              139643166200736,
+              139643166203376
+            ]
+          ],
+          "class": "aizynthfinder.chem.reaction.TemplatedRetroReaction"
+        },
+        "children": [
+          {
+            "cost": 0.0,
+            "expandable": false,
+            "value": 0.0,
+            "mol": 139643166200736,
+            "children": []
+          },
+          {
+            "cost": 0.0,
+            "expandable": true,
+            "value": 0.0,
+            "mol": 139643166203376,
+            "children": []
+          }
+        ]
+      },
+      {
+        "cost": 6.907755374908447,
+        "value": 6.907755374908447,
+        "target_value": 6.907755374908447,
+        "reaction": {
+          "mol": 139643154371392,
+          "index": 0,
+          "metadata": {},
+          "smarts": "([C:1]-[C;H0;D3;+0:2](=[O;H0;D1;+0:3])-[c:4])>>([C:1]-[CH;D3;+0:2](-[OH;D1;+0:3])-[c:4])",
+          "reactants": [
+            [
+              139643166200976
+            ]
+          ],
+          "class": "aizynthfinder.chem.reaction.TemplatedRetroReaction"
+        },
+        "children": [
+          {
+            "cost": 0.0,
+            "expandable": true,
+            "value": 0.0,
+            "mol": 139643166200976,
+            "children": []
+          }
+        ]
+      },
+      {
+        "cost": 6.907755374908447,
+        "value": 6.907755374908447,
+        "target_value": 6.907755374908447,
+        "reaction": {
+          "mol": 139643154371392,
+          "index": 0,
+          "metadata": {},
+          "smarts": "([#7:2]-[CH3;D1;+0:1])>>(O=[C;H0;D3;+0:1](-[#7:2])-O-C-c1:c:c:c:c:c:1)",
+          "reactants": [
+            [
+              139643166200112
+            ]
+          ],
+          "class": "aizynthfinder.chem.reaction.TemplatedRetroReaction"
+        },
+        "children": [
+          {
+            "cost": 0.0,
+            "expandable": true,
+            "value": 0.0,
+            "mol": 139643166200112,
+            "children": []
+          }
+        ]
+      },
+      {
+        "cost": 6.907755374908447,
+        "value": 6.907755374908447,
+        "target_value": 6.907755374908447,
+        "reaction": {
+          "mol": 139643154371392,
+          "index": 0,
+          "metadata": {},
+          "smarts": "([C:2]-[CH;D3;+0:1](-[C:3])-[C;H0;D3;+0:4](=[O;H0;D1;+0:6])-[c:5])>>(Cl-[CH;D3;+0:1](-[C:2])-[C:3]).(N#[C;H0;D2;+0:4]-[c:5]).([OH2;D0;+0:6])",
+          "reactants": [
+            [
+              139643166200352,
+              139643166202848,
+              139643166202608
+            ]
+          ],
+          "class": "aizynthfinder.chem.reaction.TemplatedRetroReaction"
+        },
+        "children": [
+          {
+            "cost": 0.0,
+            "expandable": true,
+            "value": 0.0,
+            "mol": 139643166200352,
+            "children": []
           },
           {
             "cost": 0.0,
             "expandable": false,
-            "value": 0,
-            "mol": 140605332204496,
+            "value": 0.0,
+            "mol": 139643166202848,
+            "children": []
+          },
+          {
+            "cost": 0.0,
+            "expandable": false,
+            "value": 0.0,
+            "mol": 139643166202608,
+            "children": []
+          }
+        ]
+      },
+      {
+        "cost": 6.907755374908447,
+        "value": 6.907755374908447,
+        "target_value": 6.907755374908447,
+        "reaction": {
+          "mol": 139643154371392,
+          "index": 0,
+          "metadata": {},
+          "smarts": "([O;D1;H0:2]=[C;H0;D3;+0:1](-[NH;D2;+0:9]-[c:10])-[c:3]1:[c:4]:[c:5]:[c:6]:[c:7]:[c:8]:1)>>(C-O-[C;H0;D3;+0:1](=[O;D1;H0:2])-[c:3]1:[c:4]:[c:5]:[c:6]:[c:7]:[c:8]:1).([NH2;D1;+0:9]-[c:10])",
+          "reactants": [
+            [
+              139643166201024,
+              139643166201744
+            ]
+          ],
+          "class": "aizynthfinder.chem.reaction.TemplatedRetroReaction"
+        },
+        "children": [
+          {
+            "cost": 0.0,
+            "expandable": false,
+            "value": 0.0,
+            "mol": 139643166201024,
+            "children": []
+          },
+          {
+            "cost": 0.0,
+            "expandable": true,
+            "value": 0.0,
+            "mol": 139643166201744,
+            "children": []
+          }
+        ]
+      },
+      {
+        "cost": 6.907755374908447,
+        "value": 6.907755374908447,
+        "target_value": 6.907755374908447,
+        "reaction": {
+          "mol": 139643154371392,
+          "index": 0,
+          "metadata": {},
+          "smarts": "([C:5]-[C;H0;D3;+0:4](=[O;D1;H0:6])-[c;H0;D3;+0:1](:[c:2]):[c:3])>>(Br-[c;H0;D3;+0:1](:[c:2]):[c:3]).(C-O-N(-C)-[C;H0;D3;+0:4](-[C:5])=[O;D1;H0:6])",
+          "reactants": [
+            [
+              139643166202176,
+              139643166201600
+            ]
+          ],
+          "class": "aizynthfinder.chem.reaction.TemplatedRetroReaction"
+        },
+        "children": [
+          {
+            "cost": 0.0,
+            "expandable": false,
+            "value": 0.0,
+            "mol": 139643166202176,
+            "children": []
+          },
+          {
+            "cost": 0.0,
+            "expandable": true,
+            "value": 0.0,
+            "mol": 139643166201600,
             "children": []
           }
         ]
@@ -117,59 +2916,873 @@
     ]
   },
   "molecules": {
-    "140605332219984": {
-      "smiles": "Cc1ccc2nc3ccccc3c(Nc3ccc(NC(=S)Nc4ccccc4)cc3)c2c1",
+    "139643154371392": {
+      "smiles": "CN1CCC(C(=O)c2cccc(NC(=O)c3ccc(F)cc3)c2F)CC1",
       "class": "TreeMolecule",
       "parent": null,
-      "transform": 0
+      "transform": 0,
+      "tracked_atom_indices": {}
     },
-    "140605332201936": {
-      "smiles": "Cc1ccc2nc3ccccc3c(Cl)c2c1",
+    "139643166203664": {
+      "smiles": "[C:14](=[O:15])([c:16]1[cH:17][cH:18][c:19]([F:20])[cH:21][cH:22]1)[Cl:900]",
       "class": "TreeMolecule",
-      "parent": 140605332219984,
-      "transform": 1
+      "parent": 139643154371392,
+      "transform": 1,
+      "tracked_atom_indices": {}
     },
-    "140605332205072": {
-      "smiles": "Nc1ccc(NC(=S)Nc2ccccc2)cc1",
+    "139643171528960": {
+      "smiles": "[CH3:1][N:2]1[CH2:3][CH2:4][CH:5]([C:6](=[O:7])[c:8]2[cH:9][cH:10][cH:11][c:12]([NH2:13])[c:23]2[F:24])[CH2:25][CH2:26]1",
       "class": "TreeMolecule",
-      "parent": 140605332219984,
-      "transform": 1
+      "parent": 139643154371392,
+      "transform": 1,
+      "tracked_atom_indices": {}
     },
-    "140598039857296": {
-      "smiles": "Cc1ccc2nc3ccccc3c(Nc3ccc(N=C=S)cc3)c2c1",
+    "139643166201504": {
+      "smiles": "[CH3:1][N:2]1[CH2:3][CH2:4][CH:5]([C:6](=[O:7])[c:8]2[cH:9][cH:10][cH:11][c:12]([N+:13](=[O:900])[O-:901])[c:23]2[F:24])[CH2:25][CH2:26]1",
       "class": "TreeMolecule",
-      "parent": 140605332219984,
-      "transform": 1
+      "parent": 139643171528960,
+      "transform": 2,
+      "tracked_atom_indices": {}
     },
-    "140598039857616": {
-      "smiles": "Cc1ccc2nc3ccccc3c(Cl)c2c1",
+    "139643162454288": {
+      "smiles": "[CH3:1][I:900]=[N+:13]([c:12]1[cH:11][cH:10][cH:9][c:8]([C:6]([CH:5]2[CH2:4][CH2:3][NH:2][CH2:26][CH2:25]2)=[O:7])[c:23]1[F:24])[O-:901]",
       "class": "TreeMolecule",
-      "parent": 140598039857296,
-      "transform": 2
+      "parent": 139643166201504,
+      "transform": 3,
+      "tracked_atom_indices": {}
     },
-    "140605332368528": {
-      "smiles": "Nc1ccc(N=C=S)cc1",
+    "139643162454624": {
+      "smiles": "[CH3:1][N:2]1[CH2:3][CH2:4][CH:5]([CH:6]([OH:7])[c:8]2[cH:9][cH:10][cH:11][c:12]([N+:13](=[O:900])[O-:901])[c:23]2[F:24])[CH2:25][CH2:26]1",
       "class": "TreeMolecule",
-      "parent": 140598039857296,
-      "transform": 2
+      "parent": 139643166201504,
+      "transform": 3,
+      "tracked_atom_indices": {}
     },
-    "140605332368656": {
-      "smiles": "Cc1ccc2nc3ccccc3c(Br)c2c1",
+    "139643162455056": {
+      "smiles": "[C:1]([N:2]1[CH2:3][CH2:4][CH:5]([C:6](=[O:7])[c:8]2[cH:9][cH:10][cH:11][c:12]([N+:13](=[O:900])[O-:901])[c:23]2[F:24])[CH2:25][CH2:26]1)([O:904][C:901]([CH3:900])([CH3:902])[CH3:903])=[O:905]",
       "class": "TreeMolecule",
-      "parent": 140598039857296,
-      "transform": 2
+      "parent": 139643166201504,
+      "transform": 3,
+      "tracked_atom_indices": {}
     },
-    "140602867801296": {
-      "smiles": "Nc1ccc(N=C=S)cc1",
+    "139643162454144": {
+      "smiles": "[NH:2]1[CH2:3][CH2:4][CH:5]([C:6](=[O:7])[c:8]2[cH:9][cH:10][cH:11][c:12]([N+:13](=[O:900])[O-:901])[c:23]2[F:24])[CH2:25][CH2:26]1",
       "class": "TreeMolecule",
-      "parent": 140598039857296,
-      "transform": 2
+      "parent": 139643166201504,
+      "transform": 3,
+      "tracked_atom_indices": {}
     },
-    "140605332204496": {
-      "smiles": "Nc1ccccc1",
+    "139643162454048": {
+      "smiles": "[C:1]([N:2]1[CH2:3][CH2:4][CH:5]([C:6](=[O:7])[c:8]2[cH:9][cH:10][cH:11][c:12]([N+:13](=[O:900])[O-:901])[c:23]2[F:24])[CH2:25][CH2:26]1)(=[O:900])[O:901][CH2:902][c:903]1[cH:904][cH:905][cH:906][cH:907][cH:908]1",
       "class": "TreeMolecule",
-      "parent": 140605332219984,
-      "transform": 1
+      "parent": 139643166201504,
+      "transform": 3,
+      "tracked_atom_indices": {}
+    },
+    "139643162455488": {
+      "smiles": "[CH3:1][N:2]1[CH2:3][CH2:4][CH:5]([C:6](=[O:7])[c:8]2[cH:9][cH:10][c:11]([Cl:900])[c:12]([N+:13](=[O:900])[O-:901])[c:23]2[F:24])[CH2:25][CH2:26]1",
+      "class": "TreeMolecule",
+      "parent": 139643166201504,
+      "transform": 3,
+      "tracked_atom_indices": {}
+    },
+    "139643162455728": {
+      "smiles": "[CH3:1][N:2]1[CH2:3][CH2:4][CH:5]([C:6](=[O:7])[c:8]2[cH:9][c:10]([Cl:900])[cH:11][c:12]([N+:13](=[O:900])[O-:901])[c:23]2[F:24])[CH2:25][CH2:26]1",
+      "class": "TreeMolecule",
+      "parent": 139643166201504,
+      "transform": 3,
+      "tracked_atom_indices": {}
+    },
+    "139643162455968": {
+      "smiles": "[CH3:1][N:2]1[CH2:3][CH2:4][CH:5]([C:6](=[O:7])[c:8]2[c:9]([Cl:900])[cH:10][cH:11][c:12]([N+:13](=[O:900])[O-:901])[c:23]2[F:24])[CH2:25][CH2:26]1",
+      "class": "TreeMolecule",
+      "parent": 139643166201504,
+      "transform": 3,
+      "tracked_atom_indices": {}
+    },
+    "139643166201120": {
+      "smiles": "[CH3:1][NH:2][CH2:3][CH2:4][CH:5]([C:6](=[O:7])[c:8]1[cH:9][cH:10][cH:11][c:12]([N+:13](=[O:900])[O-:901])[c:23]1[F:24])[CH2:25][CH2:26][Cl:900]",
+      "class": "TreeMolecule",
+      "parent": 139643166201504,
+      "transform": 3,
+      "tracked_atom_indices": {}
+    },
+    "139643166202416": {
+      "smiles": "[CH3:1][NH:2][CH2:26][CH2:25][CH:5]([CH2:4][CH2:3][Cl:900])[C:6](=[O:7])[c:8]1[cH:9][cH:10][cH:11][c:12]([N+:13](=[O:900])[O-:901])[c:23]1[F:24]",
+      "class": "TreeMolecule",
+      "parent": 139643166201504,
+      "transform": 3,
+      "tracked_atom_indices": {}
+    },
+    "139643173163552": {
+      "smiles": "[CH2:1]=[O:900]",
+      "class": "TreeMolecule",
+      "parent": 139643171528960,
+      "transform": 2,
+      "tracked_atom_indices": {}
+    },
+    "139643173165280": {
+      "smiles": "[NH:2]1[CH2:3][CH2:4][CH:5]([C:6](=[O:7])[c:8]2[cH:9][cH:10][cH:11][c:12]([NH2:13])[c:23]2[F:24])[CH2:25][CH2:26]1",
+      "class": "TreeMolecule",
+      "parent": 139643171528960,
+      "transform": 2,
+      "tracked_atom_indices": {}
+    },
+    "139643162452464": {
+      "smiles": "[N:2]1([C:905]([O:904][C:901]([CH3:900])([CH3:902])[CH3:903])=[O:906])[CH2:3][CH2:4][CH:5]([C:6](=[O:7])[c:8]2[cH:9][cH:10][cH:11][c:12]([NH2:13])[c:23]2[F:24])[CH2:25][CH2:26]1",
+      "class": "TreeMolecule",
+      "parent": 139643173165280,
+      "transform": 3,
+      "tracked_atom_indices": {}
+    },
+    "139643166163824": {
+      "smiles": "[N:2]1([C:905]([O:904][C:901]([CH3:900])([CH3:902])[CH3:903])=[O:906])[CH2:3][CH2:4][CH:5]([C:6](=[O:7])[c:8]2[cH:9][cH:10][cH:11][c:12]([N+:13](=[O:900])[O-:901])[c:23]2[F:24])[CH2:25][CH2:26]1",
+      "class": "TreeMolecule",
+      "parent": 139643162452464,
+      "transform": 4,
+      "tracked_atom_indices": {}
+    },
+    "139643164870880": {
+      "smiles": "[N:2]1([C:905]([O:904][C:901]([CH3:900])([CH3:902])[CH3:903])=[O:906])[CH2:3][CH2:4][CH:5]([C:6](=[O:7])[N:902]([O:901][CH3:900])[CH3:903])[CH2:25][CH2:26]1",
+      "class": "TreeMolecule",
+      "parent": 139643162452464,
+      "transform": 4,
+      "tracked_atom_indices": {}
+    },
+    "139643164872128": {
+      "smiles": "[cH:8]1[cH:9][cH:10][cH:11][c:12]([NH2:13])[c:23]1[F:24]",
+      "class": "TreeMolecule",
+      "parent": 139643162452464,
+      "transform": 4,
+      "tracked_atom_indices": {}
+    },
+    "139643171738528": {
+      "smiles": "[N:2]1([C:905]([O:904][C:901]([CH3:900])([CH3:902])[CH3:903])=[O:906])[CH2:3][CH2:4][CH:5]([C:6](=[O:7])[c:8]2[cH:9][cH:10][cH:11][c:12]([N:13]=[C:900]([c:901]3[cH:902][cH:903][cH:904][cH:905][cH:906]3)[c:907]3[cH:908][cH:909][cH:910][cH:911][cH:912]3)[c:23]2[F:24])[CH2:25][CH2:26]1",
+      "class": "TreeMolecule",
+      "parent": 139643162452464,
+      "transform": 4,
+      "tracked_atom_indices": {}
+    },
+    "139643164872464": {
+      "smiles": "[N:2]1([C:905]([O:904][C:901]([CH3:900])([CH3:902])[CH3:903])=[O:906])[CH2:3][CH2:4][CH:5]([C:6](=[O:7])[c:8]2[cH:9][cH:10][cH:11][c:12]([NH:13][C:905]([O:904][C:901]([CH3:900])([CH3:902])[CH3:903])=[O:906])[c:23]2[F:24])[CH2:25][CH2:26]1",
+      "class": "TreeMolecule",
+      "parent": 139643162452464,
+      "transform": 4,
+      "tracked_atom_indices": {}
+    },
+    "139643171738432": {
+      "smiles": "[N:2]1([C:905]([O:904][C:901]([CH3:900])([CH3:902])[CH3:903])=[O:906])[CH2:3][CH2:4][CH:5]([C:6](=[O:7])[c:8]2[cH:9][cH:10][cH:11][c:12]([NH:13][C:904]([C:901]([F:900])([F:902])[F:903])=[O:905])[c:23]2[F:24])[CH2:25][CH2:26]1",
+      "class": "TreeMolecule",
+      "parent": 139643162452464,
+      "transform": 4,
+      "tracked_atom_indices": {}
+    },
+    "139643171739248": {
+      "smiles": "[N:2]1([C:905]([O:904][C:901]([CH3:900])([CH3:902])[CH3:903])=[O:906])[CH2:3][CH2:4][CH:5]([C:6](=[O:7])[c:8]2[cH:9][cH:10][cH:11][c:12]([Br:900])[c:23]2[F:24])[CH2:25][CH2:26]1",
+      "class": "TreeMolecule",
+      "parent": 139643162452464,
+      "transform": 4,
+      "tracked_atom_indices": {}
+    },
+    "139643171739344": {
+      "smiles": "[N:2]1([C:905]([O:904][C:901]([CH3:900])([CH3:902])[CH3:903])=[O:906])[CH2:3][CH2:4][CH:5]([C:6](=[O:7])[c:8]2[c:9]([Cl:900])[cH:10][cH:11][c:12]([NH2:13])[c:23]2[F:24])[CH2:25][CH2:26]1",
+      "class": "TreeMolecule",
+      "parent": 139643162452464,
+      "transform": 4,
+      "tracked_atom_indices": {}
+    },
+    "139643171739536": {
+      "smiles": "[N:2]1([C:905]([O:904][C:901]([CH3:900])([CH3:902])[CH3:903])=[O:906])[CH2:3][CH2:4][CH:5]([C:6](=[O:7])[c:8]2[cH:9][cH:10][c:11]([Cl:900])[c:12]([NH2:13])[c:23]2[F:24])[CH2:25][CH2:26]1",
+      "class": "TreeMolecule",
+      "parent": 139643162452464,
+      "transform": 4,
+      "tracked_atom_indices": {}
+    },
+    "139643171739632": {
+      "smiles": "[N:2]1([C:905]([O:904][C:901]([CH3:900])([CH3:902])[CH3:903])=[O:906])[CH2:3][CH2:4][CH:5]([C:6](=[O:7])[c:8]2[cH:9][c:10]([Cl:900])[cH:11][c:12]([NH2:13])[c:23]2[F:24])[CH2:25][CH2:26]1",
+      "class": "TreeMolecule",
+      "parent": 139643162452464,
+      "transform": 4,
+      "tracked_atom_indices": {}
+    },
+    "139643171738048": {
+      "smiles": "[N:2]1([C:905]([O:904][C:901]([CH3:900])([CH3:902])[CH3:903])=[O:906])[CH2:3][CH2:4][CH:5]([C:6](=[O:7])[c:8]2[cH:9][cH:10][cH:11][c:12]([NH:13][C:901]([CH3:900])=[O:902])[c:23]2[F:24])[CH2:25][CH2:26]1",
+      "class": "TreeMolecule",
+      "parent": 139643162452464,
+      "transform": 4,
+      "tracked_atom_indices": {}
+    },
+    "139643171740112": {
+      "smiles": "[N:2]1([C:905]([O:904][C:901]([CH3:900])([CH3:902])[CH3:903])=[O:906])[CH2:3][CH2:4][CH:5]([C:6](=[O:7])[c:8]2[cH:9][cH:10][cH:11][c:12]([F:900])[c:23]2[F:24])[CH2:25][CH2:26]1",
+      "class": "TreeMolecule",
+      "parent": 139643162452464,
+      "transform": 4,
+      "tracked_atom_indices": {}
+    },
+    "139643171740688": {
+      "smiles": "[NH3:13]",
+      "class": "TreeMolecule",
+      "parent": 139643162452464,
+      "transform": 4,
+      "tracked_atom_indices": {}
+    },
+    "139643171740400": {
+      "smiles": "[N:2]1([C:905]([O:904][C:901]([CH3:900])([CH3:902])[CH3:903])=[O:906])[CH2:3][CH2:4][CH:5]([C:6](=[O:7])[c:8]2[cH:9][cH:10][cH:11][c:12]([NH:13][C:901](=[O:900])[O:902][CH2:903][c:904]3[cH:905][cH:906][cH:907][cH:908][cH:909]3)[c:23]2[F:24])[CH2:25][CH2:26]1",
+      "class": "TreeMolecule",
+      "parent": 139643162452464,
+      "transform": 4,
+      "tracked_atom_indices": {}
+    },
+    "139643171741456": {
+      "smiles": "[N:2]1([C:905]([O:904][C:901]([CH3:900])([CH3:902])[CH3:903])=[O:906])[CH2:3][CH2:4][CH:5]([C:6](=[O:7])[c:8]2[cH:9][cH:10][cH:11][c:12]([NH:13][C:904]([C:901]([CH3:900])([CH3:902])[CH3:903])=[O:905])[c:23]2[F:24])[CH2:25][CH2:26]1",
+      "class": "TreeMolecule",
+      "parent": 139643162452464,
+      "transform": 4,
+      "tracked_atom_indices": {}
+    },
+    "139643171741024": {
+      "smiles": "[N:2]1([C:905]([O:904][C:901]([CH3:900])([CH3:902])[CH3:903])=[O:906])[CH2:3][CH2:4][CH:5]([C:6](=[O:7])[c:8]2[cH:9][cH:10][cH:11][c:12]([N:13]([CH2:900][c:901]3[cH:902][cH:903][cH:904][cH:905][cH:906]3)[CH2:907][c:908]3[cH:909][cH:910][cH:911][cH:912][cH:913]3)[c:23]2[F:24])[CH2:25][CH2:26]1",
+      "class": "TreeMolecule",
+      "parent": 139643162452464,
+      "transform": 4,
+      "tracked_atom_indices": {}
+    },
+    "139643171740928": {
+      "smiles": "[N:2]1([C:905]([O:904][C:901]([CH3:900])([CH3:902])[CH3:903])=[O:906])[CH2:3][CH2:4][CH:5]([C:6](=[O:7])[c:8]2[cH:9][cH:10][cH:11][c:12]([C:901]([OH:900])=[O:902])[c:23]2[F:24])[CH2:25][CH2:26]1",
+      "class": "TreeMolecule",
+      "parent": 139643162452464,
+      "transform": 4,
+      "tracked_atom_indices": {}
+    },
+    "139643171740640": {
+      "smiles": "[N:2]1([C:905]([O:904][C:901]([CH3:900])([CH3:902])[CH3:903])=[O:906])[CH2:3][CH2:4][CH:5]([C:6](=[O:7])[c:8]2[cH:9][cH:10][cH:11][c:12]([NH:13][CH2:900][c:901]3[cH:902][cH:903][cH:904][cH:905][cH:906]3)[c:23]2[F:24])[CH2:25][CH2:26]1",
+      "class": "TreeMolecule",
+      "parent": 139643162452464,
+      "transform": 4,
+      "tracked_atom_indices": {}
+    },
+    "139643171740880": {
+      "smiles": "[N:2]1([C:905]([O:904][C:901]([CH3:900])([CH3:902])[CH3:903])=[O:906])[CH2:3][CH2:4][CH:5]([CH:6]([OH:7])[c:8]2[cH:9][cH:10][cH:11][c:12]([NH2:13])[c:23]2[F:24])[CH2:25][CH2:26]1",
+      "class": "TreeMolecule",
+      "parent": 139643162452464,
+      "transform": 4,
+      "tracked_atom_indices": {}
+    },
+    "139643171740016": {
+      "smiles": "[N:2]1([C:905]([O:904][C:901]([CH3:900])([CH3:902])[CH3:903])=[O:906])[CH2:3][CH2:4][CH:5]([C:6](=[O:7])[c:8]2[cH:9][cH:10][cH:11][c:12]([Cl:900])[c:23]2[F:24])[CH2:25][CH2:26]1",
+      "class": "TreeMolecule",
+      "parent": 139643162452464,
+      "transform": 4,
+      "tracked_atom_indices": {}
+    },
+    "139643164869104": {
+      "smiles": "[N:2]1([C:905]([O:904][C:901]([CH3:900])([CH3:902])[CH3:903])=[O:906])[CH2:3][CH2:4][CH:5]([C:6](=[O:7])[c:8]2[c:9]([Cl:900])[cH:10][cH:11][c:12]([N+:13](=[O:901])[O-:902])[c:23]2[F:24])[CH2:25][CH2:26]1",
+      "class": "TreeMolecule",
+      "parent": 139643162452464,
+      "transform": 4,
+      "tracked_atom_indices": {}
+    },
+    "139643164869056": {
+      "smiles": "[N:2]1([C:905]([O:904][C:901]([CH3:900])([CH3:902])[CH3:903])=[O:906])[CH2:3][CH2:4][CH:5]([C:6](=[O:7])[c:8]2[cH:9][c:10]([Cl:900])[cH:11][c:12]([N+:13](=[O:901])[O-:902])[c:23]2[F:24])[CH2:25][CH2:26]1",
+      "class": "TreeMolecule",
+      "parent": 139643162452464,
+      "transform": 4,
+      "tracked_atom_indices": {}
+    },
+    "139643173070016": {
+      "smiles": "[N:2]1([C:905]([O:904][C:901]([CH3:900])([CH3:902])[CH3:903])=[O:906])[CH2:3][CH2:4][CH:5]([C:6](=[O:7])[c:8]2[cH:9][c:10]([Cl:900])[c:11]([Cl:901])[c:12]([N+:13](=[O:902])[O-:903])[c:23]2[F:24])[CH2:25][CH2:26]1",
+      "class": "TreeMolecule",
+      "parent": 139643162452464,
+      "transform": 4,
+      "tracked_atom_indices": {}
+    },
+    "139643171739392": {
+      "smiles": "[N:2]1([C:905]([O:904][C:901]([CH3:900])([CH3:902])[CH3:903])=[O:906])[CH2:3][CH2:4][CH:5]([C:6](=[O:7])[c:8]2[cH:9][cH:10][cH:11][c:12]([Br:900])[c:23]2[F:24])[CH2:25][CH2:26]1",
+      "class": "TreeMolecule",
+      "parent": 139643162452464,
+      "transform": 4,
+      "tracked_atom_indices": {}
+    },
+    "139643164870496": {
+      "smiles": "[NH4+:13]",
+      "class": "TreeMolecule",
+      "parent": 139643162452464,
+      "transform": 4,
+      "tracked_atom_indices": {}
+    },
+    "139643162692720": {
+      "smiles": "[NH:2]1[CH2:3][CH2:4][CH:5]([C:6](=[O:7])[c:8]2[cH:9][cH:10][cH:11][c:12]([N+:13](=[O:900])[O-:901])[c:23]2[F:24])[CH2:25][CH2:26]1",
+      "class": "TreeMolecule",
+      "parent": 139643173165280,
+      "transform": 3,
+      "tracked_atom_indices": {}
+    },
+    "139643162692240": {
+      "smiles": "[N:2]1([CH2:900][c:901]2[cH:902][cH:903][cH:904][cH:905][cH:906]2)[CH2:3][CH2:4][CH:5]([C:6](=[O:7])[c:8]2[cH:9][cH:10][cH:11][c:12]([NH2:13])[c:23]2[F:24])[CH2:25][CH2:26]1",
+      "class": "TreeMolecule",
+      "parent": 139643173165280,
+      "transform": 3,
+      "tracked_atom_indices": {}
+    },
+    "139643162690464": {
+      "smiles": "[N:2]1([C:901](=[O:900])[O:902][CH2:903][c:904]2[cH:905][cH:906][cH:907][cH:908][cH:909]2)[CH2:3][CH2:4][CH:5]([C:6](=[O:7])[c:8]2[cH:9][cH:10][cH:11][c:12]([NH2:13])[c:23]2[F:24])[CH2:25][CH2:26]1",
+      "class": "TreeMolecule",
+      "parent": 139643173165280,
+      "transform": 3,
+      "tracked_atom_indices": {}
+    },
+    "139643164991936": {
+      "smiles": "[NH:2]1[CH2:3][CH2:4][CH:5]([C:6](=[O:7])[c:8]2[cH:9][cH:10][cH:11][c:12]([NH:13][C:905]([O:904][C:901]([CH3:900])([CH3:902])[CH3:903])=[O:906])[c:23]2[F:24])[CH2:25][CH2:26]1",
+      "class": "TreeMolecule",
+      "parent": 139643173165280,
+      "transform": 3,
+      "tracked_atom_indices": {}
+    },
+    "139643162692624": {
+      "smiles": "[N:2]1([C:901]([CH3:900])=[O:902])[CH2:3][CH2:4][CH:5]([C:6](=[O:7])[c:8]2[cH:9][cH:10][cH:11][c:12]([NH2:13])[c:23]2[F:24])[CH2:25][CH2:26]1",
+      "class": "TreeMolecule",
+      "parent": 139643173165280,
+      "transform": 3,
+      "tracked_atom_indices": {}
+    },
+    "139643164991840": {
+      "smiles": "[NH:2]1[CH2:3][CH2:4][CH:5]([C:6](=[O:7])[c:8]2[cH:9][cH:10][cH:11][c:12]([NH:13][C:901]([CH3:900])=[O:902])[c:23]2[F:24])[CH2:25][CH2:26]1",
+      "class": "TreeMolecule",
+      "parent": 139643173165280,
+      "transform": 3,
+      "tracked_atom_indices": {}
+    },
+    "139643164991984": {
+      "smiles": "[N:2]1([C:904]([C:901]([F:900])([F:902])[F:903])=[O:905])[CH2:3][CH2:4][CH:5]([C:6](=[O:7])[c:8]2[cH:9][cH:10][cH:11][c:12]([NH2:13])[c:23]2[F:24])[CH2:25][CH2:26]1",
+      "class": "TreeMolecule",
+      "parent": 139643173165280,
+      "transform": 3,
+      "tracked_atom_indices": {}
+    },
+    "139643164993136": {
+      "smiles": "[N:2]1([C:903]([O:902][CH2:901][CH3:900])=[O:904])[CH2:3][CH2:4][CH:5]([C:6](=[O:7])[c:8]2[cH:9][cH:10][cH:11][c:12]([NH2:13])[c:23]2[F:24])[CH2:25][CH2:26]1",
+      "class": "TreeMolecule",
+      "parent": 139643173165280,
+      "transform": 3,
+      "tracked_atom_indices": {}
+    },
+    "139643164992800": {
+      "smiles": "[NH:2]1[CH2:3][CH2:4][CH:5]([C:6](=[O:7])[c:8]2[cH:9][cH:10][cH:11][c:12]([NH:13][C:904]([C:901]([F:900])([F:902])[F:903])=[O:905])[c:23]2[F:24])[CH2:25][CH2:26]1",
+      "class": "TreeMolecule",
+      "parent": 139643173165280,
+      "transform": 3,
+      "tracked_atom_indices": {}
+    },
+    "139643164992944": {
+      "smiles": "[NH:2]1[CH2:3][CH2:4][CH:5]([C:6](=[O:7])[c:8]2[cH:9][cH:10][cH:11][c:12]([NH:13][CH:901]=[O:900])[c:23]2[F:24])[CH2:25][CH2:26]1",
+      "class": "TreeMolecule",
+      "parent": 139643173165280,
+      "transform": 3,
+      "tracked_atom_indices": {}
+    },
+    "139643164993280": {
+      "smiles": "[N:2]1([C:905]([O:904][C:901]([CH3:900])([CH3:902])[CH3:903])=[O:906])[CH2:3][CH2:4][CH:5]([C:6](=[O:7])[c:8]2[cH:9][cH:10][cH:11][c:12]([NH:13][C:912]([O:911][C:908]([CH3:907])([CH3:909])[CH3:910])=[O:913])[c:23]2[F:24])[CH2:25][CH2:26]1",
+      "class": "TreeMolecule",
+      "parent": 139643173165280,
+      "transform": 3,
+      "tracked_atom_indices": {}
+    },
+    "139643164992848": {
+      "smiles": "[NH:2]1[CH2:3][CH2:4][CH:5]([C:6](=[O:7])[c:8]2[cH:9][cH:10][cH:11][c:12]([NH:13][C:904]([C:901]([CH3:900])([CH3:902])[CH3:903])=[O:905])[c:23]2[F:24])[CH2:25][CH2:26]1",
+      "class": "TreeMolecule",
+      "parent": 139643173165280,
+      "transform": 3,
+      "tracked_atom_indices": {}
+    },
+    "139643164994720": {
+      "smiles": "[NH:2]1[CH2:3][CH2:4][CH:5]([C:6](=[O:7])[c:8]2[cH:9][c:10]([Cl:900])[cH:11][c:12]([NH2:13])[c:23]2[F:24])[CH2:25][CH2:26]1",
+      "class": "TreeMolecule",
+      "parent": 139643173165280,
+      "transform": 3,
+      "tracked_atom_indices": {}
+    },
+    "139643164994864": {
+      "smiles": "[NH:2]1[CH2:3][CH2:4][CH:5]([C:6](=[O:7])[c:8]2[c:9]([Cl:900])[cH:10][cH:11][c:12]([NH2:13])[c:23]2[F:24])[CH2:25][CH2:26]1",
+      "class": "TreeMolecule",
+      "parent": 139643173165280,
+      "transform": 3,
+      "tracked_atom_indices": {}
+    },
+    "139643164992512": {
+      "smiles": "[NH:2]1[CH2:3][CH2:4][CH:5]([C:6](=[O:7])[c:8]2[cH:9][cH:10][c:11]([Cl:900])[c:12]([NH2:13])[c:23]2[F:24])[CH2:25][CH2:26]1",
+      "class": "TreeMolecule",
+      "parent": 139643173165280,
+      "transform": 3,
+      "tracked_atom_indices": {}
+    },
+    "139643164992080": {
+      "smiles": "[NH:2]1[CH2:3][CH2:4][CH:5]([C:6](=[O:7])[c:8]2[cH:9][cH:10][cH:11][c:12]([C:901]([OH:900])=[O:902])[c:23]2[F:24])[CH2:25][CH2:26]1",
+      "class": "TreeMolecule",
+      "parent": 139643173165280,
+      "transform": 3,
+      "tracked_atom_indices": {}
+    },
+    "139643164995392": {
+      "smiles": "[NH3:13]",
+      "class": "TreeMolecule",
+      "parent": 139643173165280,
+      "transform": 3,
+      "tracked_atom_indices": {}
+    },
+    "139643164995248": {
+      "smiles": "[NH:2]1[CH2:3][CH2:4][CH:5]([C:6](=[O:7])[c:8]2[cH:9][cH:10][cH:11][c:12]([F:900])[c:23]2[F:24])[CH2:25][CH2:26]1",
+      "class": "TreeMolecule",
+      "parent": 139643173165280,
+      "transform": 3,
+      "tracked_atom_indices": {}
+    },
+    "139643155805712": {
+      "smiles": "[NH:2]1[CH2:3][CH2:4][CH:5]([C:6](=[O:7])[c:8]2[cH:9][cH:10][cH:11][c:12]([NH:13][C:901](=[O:900])[O:902][CH2:903][c:904]3[cH:905][cH:906][cH:907][cH:908][cH:909]3)[c:23]2[F:24])[CH2:25][CH2:26]1",
+      "class": "TreeMolecule",
+      "parent": 139643173165280,
+      "transform": 3,
+      "tracked_atom_indices": {}
+    },
+    "139643164856432": {
+      "smiles": "[N:2]1([C:905]([O:904][CH2:903][CH2:902][CH2:901][CH3:900])=[O:906])[CH2:3][CH2:4][CH:5]([C:6](=[O:7])[c:8]2[cH:9][cH:10][cH:11][c:12]([NH2:13])[c:23]2[F:24])[CH2:25][CH2:26]1",
+      "class": "TreeMolecule",
+      "parent": 139643173165280,
+      "transform": 3,
+      "tracked_atom_indices": {}
+    },
+    "139643164857152": {
+      "smiles": "[NH:2]1[CH2:3][CH2:4][CH:5]([C:6](=[O:7])[c:8]2[cH:9][cH:10][cH:11][cH:12][c:23]2[F:24])[CH2:25][CH2:26]1",
+      "class": "TreeMolecule",
+      "parent": 139643173165280,
+      "transform": 3,
+      "tracked_atom_indices": {}
+    },
+    "139643164856960": {
+      "smiles": "[N:2]1([C:901](=[O:900])[O-:902])[CH2:3][CH2:4][CH:5]([C:6](=[O:7])[c:8]2[cH:9][cH:10][cH:11][c:12]([NH2:13])[c:23]2[F:24])[CH2:25][CH2:26]1",
+      "class": "TreeMolecule",
+      "parent": 139643173165280,
+      "transform": 3,
+      "tracked_atom_indices": {}
+    },
+    "139643164857104": {
+      "smiles": "[N:2]1([C:901](=[O:900])[c:902]2[cH:903][cH:904][cH:905][cH:906][cH:907]2)[CH2:3][CH2:4][CH:5]([C:6](=[O:7])[c:8]2[cH:9][cH:10][cH:11][c:12]([NH2:13])[c:23]2[F:24])[CH2:25][CH2:26]1",
+      "class": "TreeMolecule",
+      "parent": 139643173165280,
+      "transform": 3,
+      "tracked_atom_indices": {}
+    },
+    "139643164993712": {
+      "smiles": "[NH:2]1[CH2:3][CH2:4][CH:5]([C:6](=[O:7])[c:8]2[cH:9][cH:10][cH:11][c:12]([NH:13][CH2:900][c:901]3[cH:902][cH:903][cH:904][cH:905][cH:906]3)[c:23]2[F:24])[CH2:25][CH2:26]1",
+      "class": "TreeMolecule",
+      "parent": 139643173165280,
+      "transform": 3,
+      "tracked_atom_indices": {}
+    },
+    "139643164993664": {
+      "smiles": "[NH:2]1[CH2:3][CH2:4][CH:5]([C:6](=[O:7])[c:8]2[cH:9][cH:10][cH:11][c:12]([N:13]=[C:900]([c:901]3[cH:902][cH:903][cH:904][cH:905][cH:906]3)[c:907]3[cH:908][cH:909][cH:910][cH:911][cH:912]3)[c:23]2[F:24])[CH2:25][CH2:26]1",
+      "class": "TreeMolecule",
+      "parent": 139643173165280,
+      "transform": 3,
+      "tracked_atom_indices": {}
+    },
+    "139643164994192": {
+      "smiles": "[n:2]1[cH:3][cH:4][c:5]([C:6](=[O:7])[c:8]2[cH:9][cH:10][cH:11][c:12]([NH2:13])[c:23]2[F:24])[cH:25][cH:26]1",
+      "class": "TreeMolecule",
+      "parent": 139643173165280,
+      "transform": 3,
+      "tracked_atom_indices": {}
+    },
+    "139643166164976": {
+      "smiles": "[NH:2]1[CH2:3][CH2:4][CH:5]([C:6](=[O:7])[c:8]2[cH:9][cH:10][cH:11][c:12]([NH2:13])[cH:23]2)[CH2:25][CH2:26]1",
+      "class": "TreeMolecule",
+      "parent": 139643173165280,
+      "transform": 3,
+      "tracked_atom_indices": {}
+    },
+    "139643171531312": {
+      "smiles": "[N:2]1([CH2:901][CH3:900])[CH2:3][CH2:4][CH:5]([C:6](=[O:7])[c:8]2[cH:9][cH:10][cH:11][c:12]([NH2:13])[c:23]2[F:24])[CH2:25][CH2:26]1",
+      "class": "TreeMolecule",
+      "parent": 139643173165280,
+      "transform": 3,
+      "tracked_atom_indices": {}
+    },
+    "139643164994768": {
+      "smiles": "[NH:2]1[CH2:3][CH2:4][CH:5]([C:6](=[O:7])[c:8]2[cH:9][cH:10][cH:11][c:12]([Cl:900])[c:23]2[F:24])[CH2:25][CH2:26]1",
+      "class": "TreeMolecule",
+      "parent": 139643173165280,
+      "transform": 3,
+      "tracked_atom_indices": {}
+    },
+    "139643166164112": {
+      "smiles": "[NH:2]1[CH2:3][CH2:4][CH:5]([C:6](=[O:7])[N:902]([O:901][CH3:900])[CH3:903])[CH2:25][CH2:26]1",
+      "class": "TreeMolecule",
+      "parent": 139643173165280,
+      "transform": 3,
+      "tracked_atom_indices": {}
+    },
+    "139643166166464": {
+      "smiles": "[cH:8]1[cH:9][cH:10][cH:11][c:12]([NH2:13])[c:23]1[F:24]",
+      "class": "TreeMolecule",
+      "parent": 139643173165280,
+      "transform": 3,
+      "tracked_atom_indices": {}
+    },
+    "139643166164448": {
+      "smiles": "[NH:2]1[CH2:3][CH2:4][CH:5]([C:6](=[O:7])[c:8]2[cH:9][cH:10][cH:11][c:12]([Br:900])[c:23]2[F:24])[CH2:25][CH2:26]1",
+      "class": "TreeMolecule",
+      "parent": 139643173165280,
+      "transform": 3,
+      "tracked_atom_indices": {}
+    },
+    "139643166163392": {
+      "smiles": "[N:2]1([c:909]2[n:908][c:907]([NH:906][CH2:905][c:904]3[cH:903][cH:902][c:901]([F:900])[cH:923][c:921]3[F:922])[c:912](-[c:913]3[cH:914][cH:915][c:916]([F:917])[cH:918][c:919]3[F:920])[cH:911][n:910]2)[CH2:3][CH2:4][CH:5]([C:6](=[O:7])[c:8]2[cH:9][cH:10][cH:11][c:12]([NH2:13])[c:23]2[F:24])[CH2:25][CH2:26]1",
+      "class": "TreeMolecule",
+      "parent": 139643173165280,
+      "transform": 3,
+      "tracked_atom_indices": {}
+    },
+    "139643173069200": {
+      "smiles": "[CH3:1][N:2]1[CH2:3][CH2:4][CH:5]([C:6](=[O:7])[c:8]2[cH:9][cH:10][cH:11][c:12]([NH:13][C:901]([CH3:900])=[O:902])[c:23]2[F:24])[CH2:25][CH2:26]1",
+      "class": "TreeMolecule",
+      "parent": 139643171528960,
+      "transform": 2,
+      "tracked_atom_indices": {}
+    },
+    "139643173069008": {
+      "smiles": "[CH3:1][N:2]1[CH2:3][CH2:4][CH:5]([C:6](=[O:7])[c:8]2[cH:9][cH:10][cH:11][c:12]([NH:13][C:905]([O:904][C:901]([CH3:900])([CH3:902])[CH3:903])=[O:906])[c:23]2[F:24])[CH2:25][CH2:26]1",
+      "class": "TreeMolecule",
+      "parent": 139643171528960,
+      "transform": 2,
+      "tracked_atom_indices": {}
+    },
+    "139643173069440": {
+      "smiles": "[CH3:1][N:2]1[CH2:3][CH2:4][CH:5]([C:6](=[O:7])[c:8]2[cH:9][cH:10][cH:11][c:12]([NH:13][C:904]([C:901]([F:900])([F:902])[F:903])=[O:905])[c:23]2[F:24])[CH2:25][CH2:26]1",
+      "class": "TreeMolecule",
+      "parent": 139643171528960,
+      "transform": 2,
+      "tracked_atom_indices": {}
+    },
+    "139643173166960": {
+      "smiles": "[CH3:1][N:2]1[CH2:3][CH2:4][CH:5]([C:6](=[O:7])[c:8]2[cH:9][cH:10][cH:11][c:12]([N:13]=[C:900]([c:901]3[cH:902][cH:903][cH:904][cH:905][cH:906]3)[c:907]3[cH:908][cH:909][cH:910][cH:911][cH:912]3)[c:23]2[F:24])[CH2:25][CH2:26]1",
+      "class": "TreeMolecule",
+      "parent": 139643171528960,
+      "transform": 2,
+      "tracked_atom_indices": {}
+    },
+    "139643173069680": {
+      "smiles": "[CH3:1][I:900]",
+      "class": "TreeMolecule",
+      "parent": 139643171528960,
+      "transform": 2,
+      "tracked_atom_indices": {}
+    },
+    "139643173069968": {
+      "smiles": "[NH:2]1[CH2:3][CH2:4][CH:5]([C:6](=[O:7])[c:8]2[cH:9][cH:10][cH:11][c:12]([NH2:13])[c:23]2[F:24])[CH2:25][CH2:26]1",
+      "class": "TreeMolecule",
+      "parent": 139643171528960,
+      "transform": 2,
+      "tracked_atom_indices": {}
+    },
+    "139643173070400": {
+      "smiles": "[CH3:1][N:2]1[CH2:3][CH2:4][CH:5]([C:6](=[O:7])[c:8]2[cH:9][cH:10][cH:11][c:12]([NH:13][C:904]([C:901]([CH3:900])([CH3:902])[CH3:903])=[O:905])[c:23]2[F:24])[CH2:25][CH2:26]1",
+      "class": "TreeMolecule",
+      "parent": 139643171528960,
+      "transform": 2,
+      "tracked_atom_indices": {}
+    },
+    "139643173070880": {
+      "smiles": "[CH3:1][N:2]1[CH2:3][CH2:4][CH:5]([C:6](=[O:7])[c:8]2[c:9]([Cl:900])[cH:10][cH:11][c:12]([NH2:13])[c:23]2[F:24])[CH2:25][CH2:26]1",
+      "class": "TreeMolecule",
+      "parent": 139643171528960,
+      "transform": 2,
+      "tracked_atom_indices": {}
+    },
+    "139643173070832": {
+      "smiles": "[CH3:1][N:2]1[CH2:3][CH2:4][CH:5]([C:6](=[O:7])[c:8]2[cH:9][cH:10][c:11]([Cl:900])[c:12]([NH2:13])[c:23]2[F:24])[CH2:25][CH2:26]1",
+      "class": "TreeMolecule",
+      "parent": 139643171528960,
+      "transform": 2,
+      "tracked_atom_indices": {}
+    },
+    "139643173068960": {
+      "smiles": "[CH3:1][N:2]1[CH2:3][CH2:4][CH:5]([C:6](=[O:7])[c:8]2[cH:9][c:10]([Cl:900])[cH:11][c:12]([NH2:13])[c:23]2[F:24])[CH2:25][CH2:26]1",
+      "class": "TreeMolecule",
+      "parent": 139643171528960,
+      "transform": 2,
+      "tracked_atom_indices": {}
+    },
+    "139643173070448": {
+      "smiles": "[C:6]([c:8]1[cH:9][cH:10][cH:11][c:12]([NH2:13])[c:23]1[F:24])#[N:901]",
+      "class": "TreeMolecule",
+      "parent": 139643171528960,
+      "transform": 2,
+      "tracked_atom_indices": {}
+    },
+    "139643173070736": {
+      "smiles": "[CH3:1][N:2]1[CH2:3][CH2:4][CH:5]([Cl:900])[CH2:25][CH2:26]1",
+      "class": "TreeMolecule",
+      "parent": 139643171528960,
+      "transform": 2,
+      "tracked_atom_indices": {}
+    },
+    "139643173069632": {
+      "smiles": "[OH2:7]",
+      "class": "TreeMolecule",
+      "parent": 139643171528960,
+      "transform": 2,
+      "tracked_atom_indices": {}
+    },
+    "139643173071264": {
+      "smiles": "[C:1]([N:2]1[CH2:3][CH2:4][CH:5]([C:6](=[O:7])[c:8]2[cH:9][cH:10][cH:11][c:12]([NH2:13])[c:23]2[F:24])[CH2:25][CH2:26]1)([O:904][C:901]([CH3:900])([CH3:902])[CH3:903])=[O:905]",
+      "class": "TreeMolecule",
+      "parent": 139643171528960,
+      "transform": 2,
+      "tracked_atom_indices": {}
+    },
+    "139643173071600": {
+      "smiles": "[CH3:1][N:2]1[CH2:3][CH2:4][CH:5]([C:6](=[O:7])[c:8]2[cH:9][cH:10][cH:11][c:12]([Cl:900])[c:23]2[F:24])[CH2:25][CH2:26]1",
+      "class": "TreeMolecule",
+      "parent": 139643171528960,
+      "transform": 2,
+      "tracked_atom_indices": {}
+    },
+    "139643173072032": {
+      "smiles": "[CH3:1][N:2]1[CH2:3][CH2:4][CH:5]([C:6](=[O:7])[c:8]2[cH:9][cH:10][cH:11][c:12]([NH:13][C:901](=[O:900])[O:902][CH2:903][c:904]3[cH:905][cH:906][cH:907][cH:908][cH:909]3)[c:23]2[F:24])[CH2:25][CH2:26]1",
+      "class": "TreeMolecule",
+      "parent": 139643171528960,
+      "transform": 2,
+      "tracked_atom_indices": {}
+    },
+    "139643173070592": {
+      "smiles": "[CH3:1][N:2]1[CH2:3][CH2:4][CH:5]([C:6](=[O:7])[c:8]2[cH:9][cH:10][cH:11][c:12]([Br:900])[c:23]2[F:24])[CH2:25][CH2:26]1",
+      "class": "TreeMolecule",
+      "parent": 139643171528960,
+      "transform": 2,
+      "tracked_atom_indices": {}
+    },
+    "139643173070544": {
+      "smiles": "[CH3:1][N:2]1[CH2:3][CH2:4][CH:5]([C:6](=[O:7])[N:902]([O:901][CH3:900])[CH3:903])[CH2:25][CH2:26]1",
+      "class": "TreeMolecule",
+      "parent": 139643171528960,
+      "transform": 2,
+      "tracked_atom_indices": {}
+    },
+    "139643173070064": {
+      "smiles": "[cH:8]1[cH:9][cH:10][cH:11][c:12]([NH2:13])[c:23]1[F:24]",
+      "class": "TreeMolecule",
+      "parent": 139643171528960,
+      "transform": 2,
+      "tracked_atom_indices": {}
+    },
+    "139643173072272": {
+      "smiles": "[CH3:1][N:2]1[CH2:3][CH2:4][CH:5]([C:6](=[O:7])[c:8]2[cH:9][cH:10][cH:11][c:12]([NH:13][CH2:900][c:901]3[cH:902][cH:903][cH:904][cH:905][cH:906]3)[c:23]2[F:24])[CH2:25][CH2:26]1",
+      "class": "TreeMolecule",
+      "parent": 139643171528960,
+      "transform": 2,
+      "tracked_atom_indices": {}
+    },
+    "139643173072320": {
+      "smiles": "[CH3:1][N:2]1[CH2:3][CH2:4][CH:5]([C:6](=[O:7])[c:8]2[cH:9][cH:10][cH:11][c:12]([C:901]([OH:900])=[O:902])[c:23]2[F:24])[CH2:25][CH2:26]1",
+      "class": "TreeMolecule",
+      "parent": 139643171528960,
+      "transform": 2,
+      "tracked_atom_indices": {}
+    },
+    "139643172995808": {
+      "smiles": "[CH3:1][N:2]1[CH2:3][CH2:4][CH:5]([C:6](=[O:7])[c:8]2[cH:9][cH:10][cH:11][c:12]([F:900])[c:23]2[F:24])[CH2:25][CH2:26]1",
+      "class": "TreeMolecule",
+      "parent": 139643171528960,
+      "transform": 2,
+      "tracked_atom_indices": {}
+    },
+    "139643172995136": {
+      "smiles": "[NH3:13]",
+      "class": "TreeMolecule",
+      "parent": 139643171528960,
+      "transform": 2,
+      "tracked_atom_indices": {}
+    },
+    "139643173072224": {
+      "smiles": "[NH:2]1[CH2:3][CH2:4][CH:5]([C:6](=[O:7])[c:8]2[cH:9][cH:10][cH:11][c:12]([NH2:13])[c:23]2[F:24])[CH2:25][CH2:26]1",
+      "class": "TreeMolecule",
+      "parent": 139643171528960,
+      "transform": 2,
+      "tracked_atom_indices": {}
+    },
+    "139643172995568": {
+      "smiles": "[CH3:1][N:2]1[CH2:3][CH2:4][CH:5]([C:6](=[O:7])[c:8]2[cH:9][cH:10][cH:11][c:12]([NH:13][CH:901]=[O:900])[c:23]2[F:24])[CH2:25][CH2:26]1",
+      "class": "TreeMolecule",
+      "parent": 139643171528960,
+      "transform": 2,
+      "tracked_atom_indices": {}
+    },
+    "139643173071648": {
+      "smiles": "[CH3:1][OH:900]",
+      "class": "TreeMolecule",
+      "parent": 139643171528960,
+      "transform": 2,
+      "tracked_atom_indices": {}
+    },
+    "139643173071360": {
+      "smiles": "[NH:2]1[CH2:3][CH2:4][CH:5]([C:6](=[O:7])[c:8]2[cH:9][cH:10][cH:11][c:12]([NH2:13])[c:23]2[F:24])[CH2:25][CH2:26]1",
+      "class": "TreeMolecule",
+      "parent": 139643171528960,
+      "transform": 2,
+      "tracked_atom_indices": {}
+    },
+    "139643172995856": {
+      "smiles": "[CH3:1][N:2]1[CH2:3][CH2:4][CH:5]([CH:6]([OH:7])[c:8]2[cH:9][cH:10][cH:11][c:12]([NH2:13])[c:23]2[F:24])[CH2:25][CH2:26]1",
+      "class": "TreeMolecule",
+      "parent": 139643171528960,
+      "transform": 2,
+      "tracked_atom_indices": {}
+    },
+    "139643172995472": {
+      "smiles": "[CH3:1][N:2]1[CH2:3][CH2:4][CH:5]([C:6](=[O:7])[c:8]2[cH:9][cH:10][cH:11][cH:12][c:23]2[F:24])[CH2:25][CH2:26]1",
+      "class": "TreeMolecule",
+      "parent": 139643171528960,
+      "transform": 2,
+      "tracked_atom_indices": {}
+    },
+    "139643173164800": {
+      "smiles": "[CH3:1][N:2]1[CH2:3][CH2:4][CH:5]([C:6](=[O:7])[Cl:900])[CH2:25][CH2:26]1",
+      "class": "TreeMolecule",
+      "parent": 139643171528960,
+      "transform": 2,
+      "tracked_atom_indices": {}
+    },
+    "139643173164224": {
+      "smiles": "[c:8]1([I:901])[cH:9][cH:10][cH:11][c:12]([NH2:13])[c:23]1[F:24]",
+      "class": "TreeMolecule",
+      "parent": 139643171528960,
+      "transform": 2,
+      "tracked_atom_indices": {}
+    },
+    "139643173163312": {
+      "smiles": "[CH3:1][N:2]1[CH2:3][CH2:4][CH:5]([C:6](=[O:7])[c:8]2[cH:9][c:10]([Cl:900])[c:11]([Cl:901])[c:12]([N+:13](=[O:902])[O-:903])[c:23]2[F:24])[CH2:25][CH2:26]1",
+      "class": "TreeMolecule",
+      "parent": 139643171528960,
+      "transform": 2,
+      "tracked_atom_indices": {}
+    },
+    "139643173164848": {
+      "smiles": "[CH3:1][N:2]1[CH2:3][CH2:4][CH:5]([C:6](=[O:7])[c:8]2[cH:9][cH:10][cH:11][c:12]([N:13]([CH2:900][c:901]3[cH:902][cH:903][cH:904][cH:905][cH:906]3)[CH2:907][c:908]3[cH:909][cH:910][cH:911][cH:912][cH:913]3)[c:23]2[F:24])[CH2:25][CH2:26]1",
+      "class": "TreeMolecule",
+      "parent": 139643171528960,
+      "transform": 2,
+      "tracked_atom_indices": {}
+    },
+    "139643157042560": {
+      "smiles": "[C:14](=[O:15])([c:16]1[cH:17][cH:18][c:19]([F:20])[cH:21][cH:22]1)[OH:900]",
+      "class": "TreeMolecule",
+      "parent": 139643154371392,
+      "transform": 1,
+      "tracked_atom_indices": {}
+    },
+    "139643157043712": {
+      "smiles": "[CH3:1][N:2]1[CH2:3][CH2:4][CH:5]([C:6](=[O:7])[c:8]2[cH:9][cH:10][cH:11][c:12]([NH2:13])[c:23]2[F:24])[CH2:25][CH2:26]1",
+      "class": "TreeMolecule",
+      "parent": 139643154371392,
+      "transform": 1,
+      "tracked_atom_indices": {}
+    },
+    "139643166200256": {
+      "smiles": "[CH2:1]=[O:900]",
+      "class": "TreeMolecule",
+      "parent": 139643154371392,
+      "transform": 1,
+      "tracked_atom_indices": {}
+    },
+    "139643166201936": {
+      "smiles": "[NH:2]1[CH2:3][CH2:4][CH:5]([C:6](=[O:7])[c:8]2[cH:9][cH:10][cH:11][c:12]([NH:13][C:14](=[O:15])[c:16]3[cH:17][cH:18][c:19]([F:20])[cH:21][cH:22]3)[c:23]2[F:24])[CH2:25][CH2:26]1",
+      "class": "TreeMolecule",
+      "parent": 139643154371392,
+      "transform": 1,
+      "tracked_atom_indices": {}
+    },
+    "139643166202032": {
+      "smiles": "[C:1]([N:2]1[CH2:3][CH2:4][CH:5]([C:6](=[O:7])[c:8]2[cH:9][cH:10][cH:11][c:12]([NH:13][C:14](=[O:15])[c:16]3[cH:17][cH:18][c:19]([F:20])[cH:21][cH:22]3)[c:23]2[F:24])[CH2:25][CH2:26]1)([O:904][C:901]([CH3:900])([CH3:902])[CH3:903])=[O:905]",
+      "class": "TreeMolecule",
+      "parent": 139643154371392,
+      "transform": 1,
+      "tracked_atom_indices": {}
+    },
+    "139643166200736": {
+      "smiles": "[CH3:1][I:900]",
+      "class": "TreeMolecule",
+      "parent": 139643154371392,
+      "transform": 1,
+      "tracked_atom_indices": {}
+    },
+    "139643166203376": {
+      "smiles": "[NH:2]1[CH2:3][CH2:4][CH:5]([C:6](=[O:7])[c:8]2[cH:9][cH:10][cH:11][c:12]([NH:13][C:14](=[O:15])[c:16]3[cH:17][cH:18][c:19]([F:20])[cH:21][cH:22]3)[c:23]2[F:24])[CH2:25][CH2:26]1",
+      "class": "TreeMolecule",
+      "parent": 139643154371392,
+      "transform": 1,
+      "tracked_atom_indices": {}
+    },
+    "139643166200976": {
+      "smiles": "[CH3:1][N:2]1[CH2:3][CH2:4][CH:5]([CH:6]([OH:7])[c:8]2[cH:9][cH:10][cH:11][c:12]([NH:13][C:14](=[O:15])[c:16]3[cH:17][cH:18][c:19]([F:20])[cH:21][cH:22]3)[c:23]2[F:24])[CH2:25][CH2:26]1",
+      "class": "TreeMolecule",
+      "parent": 139643154371392,
+      "transform": 1,
+      "tracked_atom_indices": {}
+    },
+    "139643166200112": {
+      "smiles": "[C:1]([N:2]1[CH2:3][CH2:4][CH:5]([C:6](=[O:7])[c:8]2[cH:9][cH:10][cH:11][c:12]([NH:13][C:14](=[O:15])[c:16]3[cH:17][cH:18][c:19]([F:20])[cH:21][cH:22]3)[c:23]2[F:24])[CH2:25][CH2:26]1)(=[O:900])[O:901][CH2:902][c:903]1[cH:904][cH:905][cH:906][cH:907][cH:908]1",
+      "class": "TreeMolecule",
+      "parent": 139643154371392,
+      "transform": 1,
+      "tracked_atom_indices": {}
+    },
+    "139643166200352": {
+      "smiles": "[C:6]([c:8]1[cH:9][cH:10][cH:11][c:12]([NH:13][C:14](=[O:15])[c:16]2[cH:17][cH:18][c:19]([F:20])[cH:21][cH:22]2)[c:23]1[F:24])#[N:901]",
+      "class": "TreeMolecule",
+      "parent": 139643154371392,
+      "transform": 1,
+      "tracked_atom_indices": {}
+    },
+    "139643166202848": {
+      "smiles": "[CH3:1][N:2]1[CH2:3][CH2:4][CH:5]([Cl:900])[CH2:25][CH2:26]1",
+      "class": "TreeMolecule",
+      "parent": 139643154371392,
+      "transform": 1,
+      "tracked_atom_indices": {}
+    },
+    "139643166202608": {
+      "smiles": "[OH2:7]",
+      "class": "TreeMolecule",
+      "parent": 139643154371392,
+      "transform": 1,
+      "tracked_atom_indices": {}
+    },
+    "139643166201024": {
+      "smiles": "[C:14](=[O:15])([c:16]1[cH:17][cH:18][c:19]([F:20])[cH:21][cH:22]1)[O:901][CH3:900]",
+      "class": "TreeMolecule",
+      "parent": 139643154371392,
+      "transform": 1,
+      "tracked_atom_indices": {}
+    },
+    "139643166201744": {
+      "smiles": "[CH3:1][N:2]1[CH2:3][CH2:4][CH:5]([C:6](=[O:7])[c:8]2[cH:9][cH:10][cH:11][c:12]([NH2:13])[c:23]2[F:24])[CH2:25][CH2:26]1",
+      "class": "TreeMolecule",
+      "parent": 139643154371392,
+      "transform": 1,
+      "tracked_atom_indices": {}
+    },
+    "139643166202176": {
+      "smiles": "[CH3:1][N:2]1[CH2:3][CH2:4][CH:5]([C:6](=[O:7])[N:903]([O:902][CH3:901])[CH3:904])[CH2:25][CH2:26]1",
+      "class": "TreeMolecule",
+      "parent": 139643154371392,
+      "transform": 1,
+      "tracked_atom_indices": {}
+    },
+    "139643166201600": {
+      "smiles": "[c:8]1([Br:900])[cH:9][cH:10][cH:11][c:12]([NH:13][C:14](=[O:15])[c:16]2[cH:17][cH:18][c:19]([F:20])[cH:21][cH:22]2)[c:23]1[F:24]",
+      "class": "TreeMolecule",
+      "parent": 139643154371392,
+      "transform": 1,
+      "tracked_atom_indices": {}
     }
   }
 }

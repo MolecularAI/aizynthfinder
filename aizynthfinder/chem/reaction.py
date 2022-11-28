@@ -3,11 +3,16 @@
 from __future__ import annotations
 import hashlib
 import abc
+from functools import partial
 from typing import TYPE_CHECKING
 
 import numpy as np
+from rdkit import Chem
 from rdkit.Chem import AllChem
+from rdkit.Chem.rdchem import ChiralType, BondDir, BondStereo
 from rdchiral import main as rdc
+from rdchiral.bonds import get_atoms_across_double_bonds
+from rdchiral.initialization import BondDirOpposite
 
 from aizynthfinder.utils.logging import logger
 from aizynthfinder.chem.mol import MoleculeException, Molecule, TreeMolecule
@@ -22,6 +27,7 @@ if TYPE_CHECKING:
         StrDict,
         Iterable,
         Any,
+        Set,
     )
     from aizynthfinder.chem.mol import UniqueMolecule
 
@@ -227,6 +233,23 @@ class RetroReaction(abc.ABC, _ReactionInterfaceMixin):
         self._smiles: Optional[str] = None
         self._kwargs: StrDict = kwargs
 
+    @classmethod
+    def from_serialization(
+        cls, init_args: StrDict, reactants: List[List[TreeMolecule]]
+    ) -> "RetroReaction":
+        """
+        Create an object from a serialization. It does
+        1) instantiate an object using the `init_args` and
+        2) set the reactants to a tuple-form of `reactants
+
+        :param init_args: the arguments passed to the `__init__` method
+        :param reactants: the reactants
+        :return: the deserialized object
+        """
+        obj = cls(**init_args)
+        obj._reactants = tuple(tuple(mol for mol in lst_) for lst_ in reactants)
+        return obj
+
     def __str__(self) -> str:
         return f"reaction on molecule {self.mol.smiles}"
 
@@ -277,6 +300,15 @@ class RetroReaction(abc.ABC, _ReactionInterfaceMixin):
         new_reaction._smiles = self._smiles
         return new_reaction
 
+    def mapped_reaction_smiles(self) -> str:
+        """
+        Get the mapped reaction SMILES if it exists
+        :return: the SMILES
+        """
+        reactants = self.mol.mapped_smiles
+        products = ".".join(mol.mapped_smiles for mol in self._products_getter())
+        return reactants + ">>" + products
+
     def to_dict(self) -> StrDict:
         """
         Return the retro reaction as dictionary
@@ -302,6 +334,18 @@ class RetroReaction(abc.ABC, _ReactionInterfaceMixin):
 
     def _reactants_getter(self) -> List[TreeMolecule]:
         return [self.mol]
+
+    @staticmethod
+    def _update_unmapped_atom_num(mol: TreeMolecule, exclude_nums: Set[int]) -> None:
+        mapped_nums = {num for num in mol.mapping_to_index.keys() if 0 < num < 900}
+        offset = max(mapped_nums) + 1 if mapped_nums else 1
+        for atom in mol.mapped_mol.GetAtoms():
+            if 0 < atom.GetAtomMapNum() < 900:
+                continue
+            while offset in exclude_nums:
+                offset += 1
+            atom.SetAtomMapNum(offset)
+            exclude_nums.add(offset)
 
 
 class TemplatedRetroReaction(RetroReaction):
@@ -363,12 +407,17 @@ class TemplatedRetroReaction(RetroReaction):
         Will try to sanitize the reactants, and if that fails it will not return that molecule
         """
         reaction = rdc.rdchiralReaction(self.smarts)
-        rct = rdc.rdchiralReactants(self.mol.smiles)
+        rct = _RdChiralProductWrapper(self.mol)
         try:
-            reactants = rdc.rdchiralRun(reaction, rct)
+            reactants = rdc.rdchiralRun(reaction, rct, keep_mapnums=True)
         except RuntimeError as err:
             logger().debug(
                 f"Runtime error in RDChiral with template {self.smarts} on {self.mol.smiles}\n{err}"
+            )
+            reactants = []
+        except KeyError as err:
+            logger().debug(
+                f"Index error in RDChiral with template {self.smarts} on {self.mol.mapped_smiles}\n{err}"
             )
             reactants = []
 
@@ -376,15 +425,24 @@ class TemplatedRetroReaction(RetroReaction):
         outcomes = []
         for reactant_str in reactants:
             smiles_list = reactant_str.split(".")
+            exclude_nums = set(self.mol.mapping_to_index.keys())
+            update_func = partial(
+                self._update_unmapped_atom_num, exclude_nums=exclude_nums
+            )
             try:
-                rct = tuple(
-                    TreeMolecule(parent=self.mol, smiles=smi, sanitize=True)
+                rct_objs = tuple(
+                    TreeMolecule(
+                        parent=self.mol,
+                        smiles=smi,
+                        sanitize=True,
+                        mapping_update_callback=update_func,
+                    )
                     for smi in smiles_list
                 )
             except MoleculeException:
                 pass
             else:
-                outcomes.append(rct)
+                outcomes.append(rct_objs)
         self._reactants = tuple(outcomes)
 
         return self._reactants
@@ -392,17 +450,22 @@ class TemplatedRetroReaction(RetroReaction):
     def _apply_with_rdkit(self) -> Tuple[Tuple[TreeMolecule, ...], ...]:
         rxn = AllChem.ReactionFromSmarts(self.smarts)
         try:
-            self.mol.sanitize()
-        except MoleculeException:
+            reactants_list = rxn.RunReactants([self.mol.mapped_mol])
+        except:  # pylint: disable=bare-except
             reactants_list = []
-        else:
-            reactants_list = rxn.RunReactants([self.mol.rd_mol])
 
         outcomes = []
         for reactants in reactants_list:
+            exclude_nums = set(self.mol.mapping_to_index.keys())
+            update_func = partial(self._inherit_atom_mapping, exclude_nums=exclude_nums)
             try:
                 mols = tuple(
-                    TreeMolecule(parent=self.mol, rd_mol=mol, sanitize=True)
+                    TreeMolecule(
+                        parent=self.mol,
+                        rd_mol=mol,
+                        sanitize=True,
+                        mapping_update_callback=update_func,
+                    )
                     for mol in reactants
                 )
             except MoleculeException:
@@ -415,6 +478,27 @@ class TemplatedRetroReaction(RetroReaction):
 
     def _make_smiles(self):
         return AllChem.ReactionToSmiles(self.rd_reaction)
+
+    def _inherit_atom_mapping(self, mol: TreeMolecule, exclude_nums: Set[int]) -> None:
+        """
+        Update the internal atom mapping dictionary by inspecting the `reaction_atom_idx`
+        property of the atoms and comparing it with the parent-molecule.
+
+        This is used for child molecules created by RDKit reaction application.
+        RDChiral takes care of this automatically.
+        """
+        if mol.parent is None:
+            return
+
+        for atom in mol.mapped_mol.GetAtoms():
+            if not atom.HasProp("react_atom_idx"):
+                continue
+            index = atom.GetProp("react_atom_idx")
+            mapping = mol.parent.index_to_mapping.get(int(index))
+            if mapping:
+                atom.SetAtomMapNum(mapping)
+
+        self._update_unmapped_atom_num(mol, exclude_nums)
 
 
 class SmilesBasedRetroReaction(RetroReaction):
@@ -436,6 +520,7 @@ class SmilesBasedRetroReaction(RetroReaction):
     ):
         super().__init__(mol, index, metadata, **kwargs)
         self.reactants_str: str = kwargs["reactants_str"]
+        self._mapped_prod_smiles = kwargs.get("mapped_prod_smiles")
 
     def __str__(self) -> str:
         return (
@@ -445,14 +530,23 @@ class SmilesBasedRetroReaction(RetroReaction):
     def to_dict(self) -> StrDict:
         dict_ = super().to_dict()
         dict_["reactants_str"] = self.reactants_str
+        dict_["mapped_prod_smiles"] = self._mapped_prod_smiles
         return dict_
 
     def _apply(self) -> Tuple[Tuple[TreeMolecule, ...], ...]:
         outcomes = []
         smiles_list = self.reactants_str.split(".")
+
+        exclude_nums = set(self.mol.mapping_to_index.keys())
+        update_func = partial(self._remap, exclude_nums=exclude_nums)
         try:
             rct = tuple(
-                TreeMolecule(parent=self.mol, smiles=smi, sanitize=True)
+                TreeMolecule(
+                    parent=self.mol,
+                    smiles=smi,
+                    sanitize=True,
+                    mapping_update_callback=update_func,
+                )
                 for smi in smiles_list
             )
         except MoleculeException:
@@ -462,6 +556,30 @@ class SmilesBasedRetroReaction(RetroReaction):
         self._reactants = tuple(outcomes)
 
         return self._reactants
+
+    def _remap(self, mol: TreeMolecule, exclude_nums: Set[int]) -> None:
+        """Find the mapping between parent and child and then re-map the child molecule"""
+        if not self._mapped_prod_smiles:
+            self._update_unmapped_atom_num(mol, exclude_nums)
+            return
+
+        parent_remapping = {}
+        pmol = Molecule(smiles=self._mapped_prod_smiles, sanitize=True)
+        for atom_idx1, atom_idx2 in enumerate(
+            pmol.rd_mol.GetSubstructMatch(self.mol.mapped_mol)
+        ):
+            atom1 = self.mol.mapped_mol.GetAtomWithIdx(atom_idx1)
+            atom2 = pmol.rd_mol.GetAtomWithIdx(atom_idx2)
+            if atom1.GetAtomMapNum() > 0 and atom2.GetAtomMapNum() > 0:
+                parent_remapping[atom2.GetAtomMapNum()] = atom1.GetAtomMapNum()
+
+        for atom in mol.mapped_mol.GetAtoms():
+            if atom.GetAtomMapNum() and atom.GetAtomMapNum() in parent_remapping:
+                atom.SetAtomMapNum(parent_remapping[atom.GetAtomMapNum()])
+            else:
+                atom.SetAtomMapNum(0)
+
+        self._update_unmapped_atom_num(mol, exclude_nums)
 
     def _make_smiles(self):
         rstr = ".".join(reactant.smiles for reactant in self.reactants[0])
@@ -530,3 +648,53 @@ def hash_reactions(
         hash_list.sort()
     hash_list_str = ".".join(hash_list)
     return hashlib.sha224(hash_list_str.encode("utf8")).hexdigest()
+
+
+class _RdChiralProductWrapper:
+    """
+    Reimplementation of `rdchiralReaction`
+    to preserve product molecule already created
+    """
+
+    # pylint: disable=W0106,C0103
+    def __init__(self, product: TreeMolecule) -> None:
+        product.sanitize()
+        self.reactant_smiles = product.smiles
+
+        # Initialize into RDKit mol
+        self.reactants = Chem.Mol(product.mapped_mol.ToBinary())
+        Chem.AssignStereochemistry(self.reactants, flagPossibleStereoCenters=True)
+        self.reactants.UpdatePropertyCache(strict=False)
+
+        self.atoms_r = {a.GetAtomMapNum(): a for a in self.reactants.GetAtoms()}
+        self.idx_to_mapnum = lambda idx: self.reactants.GetAtomWithIdx(
+            idx
+        ).GetAtomMapNum()
+
+        # Create copy of molecule without chiral information, used with
+        # RDKit's naive runReactants
+        self.reactants_achiral = Chem.Mol(product.rd_mol.ToBinary())
+        [
+            a.SetChiralTag(ChiralType.CHI_UNSPECIFIED)
+            for a in self.reactants_achiral.GetAtoms()
+        ]
+        [
+            (b.SetStereo(BondStereo.STEREONONE), b.SetBondDir(BondDir.NONE))
+            for b in self.reactants_achiral.GetBonds()
+        ]
+
+        # Pre-list reactant bonds (for stitching broken products)
+        self.bonds_by_mapnum = [
+            (b.GetBeginAtom().GetAtomMapNum(), b.GetEndAtom().GetAtomMapNum(), b)
+            for b in self.reactants.GetBonds()
+        ]
+
+        # Pre-list chiral double bonds (for copying back into outcomes/matching)
+        self.bond_dirs_by_mapnum = {}
+        for (i, j, b) in self.bonds_by_mapnum:
+            if b.GetBondDir() != BondDir.NONE:
+                self.bond_dirs_by_mapnum[(i, j)] = b.GetBondDir()
+                self.bond_dirs_by_mapnum[(j, i)] = BondDirOpposite[b.GetBondDir()]
+
+        # Get atoms across double bonds defined by mapnum
+        self.atoms_across_double_bonds = get_atoms_across_double_bonds(self.reactants)

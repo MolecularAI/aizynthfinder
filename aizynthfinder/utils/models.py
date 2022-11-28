@@ -16,10 +16,11 @@ from tensorflow_serving.apis import (
     prediction_service_pb2_grpc,
 )
 
-# pylint: disable=no-name-in-module
+# pylint: disable=all
 from tensorflow.keras.metrics import top_k_categorical_accuracy
 from tensorflow.keras.models import load_model as load_keras_model
 
+# pylint: enable=all
 from aizynthfinder.utils.logging import logger
 from aizynthfinder.utils.exceptions import ExternalModelAPIError
 

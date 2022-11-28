@@ -33,12 +33,14 @@ def test_add_tree_mol():
             "class": "TreeMolecule",
             "parent": id(mol1),
             "transform": 2,
+            "tracked_atom_indices": {},
         },
         id(mol1): {
             "smiles": "CCC",
             "class": "TreeMolecule",
             "parent": None,
             "transform": 1,
+            "tracked_atom_indices": {},
         },
     }
 

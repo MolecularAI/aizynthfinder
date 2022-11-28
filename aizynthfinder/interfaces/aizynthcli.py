@@ -4,7 +4,6 @@ from __future__ import annotations
 import argparse
 import json
 import os
-import warnings
 import logging
 import importlib
 import tempfile
@@ -15,7 +14,12 @@ from typing import TYPE_CHECKING
 import pandas as pd
 
 from aizynthfinder.aizynthfinder import AiZynthFinder
-from aizynthfinder.utils.files import cat_hdf_files, split_file, start_processes
+from aizynthfinder.utils.files import (
+    cat_datafiles,
+    save_datafile,
+    split_file,
+    start_processes,
+)
 from aizynthfinder.utils.logging import logger, setup_logger
 
 if TYPE_CHECKING:
@@ -176,7 +180,7 @@ def _process_multi_smiles(
     route_distance_model: Optional[str],
     post_processing: List[_PostProcessingJob],
 ) -> None:
-    output_name = output_name or "output.hdf5"
+    output_name = output_name or "output.json.gz"
     with open(filename, "r") as fileobj:
         smiles = [line.strip() for line in fileobj.readlines()]
 
@@ -207,9 +211,7 @@ def _process_multi_smiles(
         results["trees"].append(finder.routes.dicts)
 
     data = pd.DataFrame.from_dict(results)
-    with warnings.catch_warnings():  # This wil suppress a PerformanceWarning
-        warnings.simplefilter("ignore")
-        data.to_hdf(output_name, key="table", mode="w")
+    save_datafile(data, output_name)
     logger().info(f"Output saved to {output_name}")
 
 
@@ -222,7 +224,7 @@ def _multiprocess_smiles(args: argparse.Namespace) -> None:
             "--config",
             args.config,
             "--output",
-            hdf_files[index - 1],
+            json_files[index - 1],
         ]
         if args.policy:
             cmd_args.extend(["--policy"] + args.policy)
@@ -246,14 +248,14 @@ def _multiprocess_smiles(args: argparse.Namespace) -> None:
 
     setup_logger(logging.INFO)
     filenames = split_file(args.smiles, args.nproc)
-    hdf_files = [tempfile.mktemp(suffix=".hdf") for _ in range(args.nproc)]
+    json_files = [tempfile.mktemp(suffix=".json.gz") for _ in range(args.nproc)]
     start_processes(filenames, "aizynthcli", create_cmd)
 
-    if not all(os.path.exists(filename) for filename in hdf_files):
+    if not all(os.path.exists(filename) for filename in json_files):
         raise FileNotFoundError(
             "Not all output files produced. Please check the individual log files: 'aizynthcli*.log'"
         )
-    cat_hdf_files(hdf_files, args.output or "output.hdf5")
+    cat_datafiles(json_files, args.output or "output.json.gz")
 
 
 def main() -> None:

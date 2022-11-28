@@ -49,6 +49,11 @@ class MoleculeSerializer:
         if isinstance(mol, aizynthfinder.chem.TreeMolecule):
             dict_["parent"] = self[mol.parent]
             dict_["transform"] = mol.transform
+            dict_["tracked_atom_indices"] = mol.tracked_atom_indices
+            if not mol.parent:
+                dict_["smiles"] = mol.original_smiles
+            else:
+                dict_["smiles"] = mol.mapped_smiles
         self._store[id_] = dict_
 
 
@@ -100,10 +105,15 @@ class MoleculeDeserializer:
             cls = spec["class"]
             if "parent" in spec:
                 spec["parent"] = self[spec["parent"]]
+            tracked_atom_indices = None
+            if "tracked_atom_indices" in spec:
+                tracked_atom_indices = spec.pop("tracked_atom_indices")
 
             kwargs = dict(spec)
             del kwargs["class"]
             self._objects[id_] = getattr(aizynthfinder.chem, cls)(**kwargs)
+            if tracked_atom_indices is not None:
+                self._objects[id_].tracked_atom_indices = tracked_atom_indices
 
 
 def serialize_action(
@@ -118,6 +128,10 @@ def serialize_action(
     """
     dict_ = action.to_dict()
     dict_["mol"] = molecule_store[dict_["mol"]]
+    if not action.unqueried:
+        dict_["reactants"] = [
+            [molecule_store[item] for item in lst_] for lst_ in action.reactants
+        ]
     dict_["class"] = f"{action.__class__.__module__}.{action.__class__.__name__}"
     return dict_
 
@@ -133,10 +147,15 @@ def deserialize_action(
     :return: the created action object
     """
     mol_spec = dict_.pop("mol")
-    mol = molecule_store.get_tree_molecules([mol_spec])[0]
+    dict_["mol"] = molecule_store.get_tree_molecules([mol_spec])[0]
     try:
         class_spec = dict_.pop("class")
     except KeyError:
         class_spec = "aizynthfinder.chem.TemplatedRetroReaction"
     cls = load_dynamic_class(class_spec)
-    return cls(mol, **dict_)
+    if "reactants" in dict_:
+        reactants = [
+            molecule_store.get_tree_molecules(lst_) for lst_ in dict_.pop("reactants")
+        ]
+        return cls.from_serialization(dict_, reactants)
+    return cls(**dict_)

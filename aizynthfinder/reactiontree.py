@@ -333,10 +333,13 @@ class ReactionTreeLoader(abc.ABC):
     def _unique_reaction(self, reaction: RetroReaction) -> FixedRetroReaction:
         id_ = id(reaction)
         if id_ not in self._unique_reactions:
+            metadata = dict(reaction.metadata)
+            if ":" in reaction.mapped_reaction_smiles():
+                metadata["mapped_reaction_smiles"] = reaction.mapped_reaction_smiles()
             self._unique_reactions[id_] = FixedRetroReaction(
                 self._unique_mol(reaction.mol),
                 smiles=reaction.smiles,
-                metadata=reaction.metadata,
+                metadata=metadata,
             )
         return self._unique_reactions[id_]
 

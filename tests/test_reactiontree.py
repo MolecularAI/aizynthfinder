@@ -4,6 +4,12 @@ from aizynthfinder.reactiontree import ReactionTree
 
 
 def test_mcts_route_to_reactiontree(setup_linear_mcts, load_reaction_tree):
+    def remove_metadata(tree_dict):
+        if "metadata" in tree_dict:
+            tree_dict["metadata"] = {}
+        for child in tree_dict.get("children", []):
+            remove_metadata(child)
+
     _, node = setup_linear_mcts()
     expected_dict = load_reaction_tree("linear_route.json")
 
@@ -22,7 +28,9 @@ def test_mcts_route_to_reactiontree(setup_linear_mcts, load_reaction_tree):
         "c1ccccc1",
         "OOc1ccccc1",
     }
-    assert reaction_tree.to_dict() == expected_dict
+    actual_dict = reaction_tree.to_dict()
+    remove_metadata(actual_dict)
+    assert actual_dict == expected_dict
 
 
 def test_reactiontree_from_dict(load_reaction_tree):
