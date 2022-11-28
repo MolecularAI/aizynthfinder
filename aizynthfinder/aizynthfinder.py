@@ -163,6 +163,24 @@ class AiZynthFinder:
         self.analysis = None
         self.routes = RouteCollection([])
 
+    def stock_info(self) -> StrDict:
+        """
+        Return the stock availability for all leaf nodes in all collected reaction trees
+
+        The key of the return dictionary will be the SMILES string of the leaves,
+        and the value will be the stock availability
+
+        :return: the collected stock information.
+        """
+        if not self.analysis:
+            return {}
+        _stock_info = {}
+        for tree in self.routes.reaction_trees:
+            for leaf in tree.leafs():
+                if leaf.smiles not in _stock_info:
+                    _stock_info[leaf.smiles] = self.stock.availability_list(leaf)
+        return _stock_info
+
     def tree_search(self, show_progress: bool = False) -> float:
         """
         Perform the actual tree search

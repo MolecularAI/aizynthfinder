@@ -3,9 +3,16 @@ import numpy as np
 import tensorflow as tf
 
 import aizynthfinder.utils.models as models
-from aizynthfinder.utils.models import ExternalModelViaREST, ExternalModelViaGRPC
+from aizynthfinder.utils.models import (
+    ExternalModelViaREST,
+    ExternalModelViaGRPC,
+    SUPPORT_EXTERNAL_APIS,
+)
 
 
+@pytest.mark.xfail(
+    condition=not SUPPORT_EXTERNAL_APIS, reason="API packages not installed"
+)
 @pytest.fixture()
 def setup_rest_mock(mocker):
     models.TF_SERVING_HOST = "localhost"
@@ -27,6 +34,9 @@ def setup_rest_mock(mocker):
     models.TF_SERVING_REST_PORT = None
 
 
+@pytest.mark.xfail(
+    condition=not SUPPORT_EXTERNAL_APIS, reason="API packages not installed"
+)
 @pytest.fixture()
 def setup_grpc_mock(mocker, signature_grpc):
     models.TF_SERVING_HOST = "localhost"
@@ -92,6 +102,9 @@ def signature_grpc():
     }
 
 
+@pytest.mark.xfail(
+    condition=not SUPPORT_EXTERNAL_APIS, reason="API packages not installed"
+)
 def test_setup_tf_rest_model(signature_rest, setup_rest_mock):
     setup_rest_mock(signature_rest)
 
@@ -100,6 +113,9 @@ def test_setup_tf_rest_model(signature_rest, setup_rest_mock):
     assert len(model) == 2048
 
 
+@pytest.mark.xfail(
+    condition=not SUPPORT_EXTERNAL_APIS, reason="API packages not installed"
+)
 def test_predict_tf_rest_model(signature_rest, setup_rest_mock):
     responses = [signature_rest, {"outputs": [0.0, 1.0]}]
     setup_rest_mock(responses)
@@ -110,6 +126,9 @@ def test_predict_tf_rest_model(signature_rest, setup_rest_mock):
     assert list(out) == [0.0, 1.0]
 
 
+@pytest.mark.xfail(
+    condition=not SUPPORT_EXTERNAL_APIS, reason="API packages not installed"
+)
 def test_setup_tf_grpc_model(setup_grpc_mock):
     setup_grpc_mock()
 
@@ -118,6 +137,9 @@ def test_setup_tf_grpc_model(setup_grpc_mock):
     assert len(model) == 2048
 
 
+@pytest.mark.xfail(
+    condition=not SUPPORT_EXTERNAL_APIS, reason="API packages not installed"
+)
 def test_predict_tf_grpc_model(setup_grpc_mock):
     setup_grpc_mock({"output": tf.make_tensor_proto(tf.constant([0.0, 1.0]))})
     model = ExternalModelViaGRPC("dummy")

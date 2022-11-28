@@ -1,5 +1,9 @@
 {
   "type": "mol",
+  "route_metadata": {
+    "created_at_iteration": 1,
+    "is_solved": true
+  },
   "hide": false,
   "smiles": "OOc1ccc(-c2ccc(NC3CCCC(C4C=CC=C4)C3)cc2)cc1",
   "is_chemical": true,

@@ -7,7 +7,10 @@ import os
 import yaml
 
 # See Github issue 30 why sklearn is imported here
-import sklearn  # noqa
+try:
+    import sklearn  # noqa
+except ImportError:
+    pass
 from rdkit import RDLogger
 
 from aizynthfinder.utils.paths import data_path

@@ -6,7 +6,7 @@ import pytest
 
 from aizynthfinder.analysis import TreeAnalysis, RouteCollection
 from aizynthfinder.analysis.utils import RouteSelectionArguments
-from aizynthfinder.reactiontree import ReactionTree
+from aizynthfinder.reactiontree import ReactionTree, SUPPORT_DISTANCES
 from aizynthfinder.search.mcts import MctsSearchTree
 from aizynthfinder.context.scoring import StateScorer, NumberOfReactionsScorer
 
@@ -130,7 +130,7 @@ def test_create_route_collection_full(setup_analysis, mocker):
 
     mocker.patch("aizynthfinder.reactiontree.ReactionTree.to_dict")
     mocker.patch("aizynthfinder.reactiontree.json.dumps")
-    mocker.patch("aizynthfinder.utils.image.make_graphviz_image")
+    mocker.patch("aizynthfinder.reactiontree.RouteImageFactory")
 
     # Just see that the code does not crash, does not verify content
     assert len(routes.images) == 5
@@ -186,6 +186,50 @@ def test_dict_with_scores(setup_analysis):
     assert "scores" not in routes.dicts[0]
     assert "scores" in dicts[0]
     assert np.round(dicts[0]["scores"]["state score"], 3) == 0.994
+
+
+def test_dict_with_extras_no_arg(setup_analysis):
+    analysis, _ = setup_analysis()
+    routes = RouteCollection.from_analysis(analysis)
+
+    dicts = routes.dict_with_extra()
+
+    assert "scores" not in dicts[0]
+    assert "metadata" not in dicts[0]
+
+
+def test_dict_with_extras_only_score(setup_analysis):
+    analysis, _ = setup_analysis()
+    routes = RouteCollection.from_analysis(analysis)
+
+    dicts = routes.dict_with_extra(include_scores=True)
+
+    assert "scores" in dicts[0]
+    assert "metadata" not in dicts[0]
+    assert np.round(dicts[0]["scores"]["state score"], 3) == 0.994
+
+
+def test_dict_with_extras_only_metadata(setup_analysis):
+    analysis, _ = setup_analysis()
+    routes = RouteCollection.from_analysis(analysis)
+
+    dicts = routes.dict_with_extra(include_metadata=True)
+
+    assert "scores" not in dicts[0]
+    assert "metadata" in dicts[0]
+    assert dicts[0]["metadata"] == {"created_at_iteration": 0, "is_solved": True}
+
+
+def test_dict_with_extras_all(setup_analysis):
+    analysis, _ = setup_analysis()
+    routes = RouteCollection.from_analysis(analysis)
+
+    dicts = routes.dict_with_extra(include_metadata=True, include_scores=True)
+
+    assert "scores" in dicts[0]
+    assert "metadata" in dicts[0]
+    assert np.round(dicts[0]["scores"]["state score"], 3) == 0.994
+    assert dicts[0]["metadata"] == {"created_at_iteration": 0, "is_solved": True}
 
 
 def test_compute_new_score_for_trees(default_config, setup_linear_reaction_tree):
@@ -294,6 +338,9 @@ def test_create_combine_tree_to_visjs(load_reaction_tree, tmpdir):
         assert len([name for name in tarobj.getnames() if name.endswith(".png")]) == 8
 
 
+@pytest.mark.xfail(
+    condition=not SUPPORT_DISTANCES, reason="route_distances not installed"
+)
 def test_distance_collection(load_reaction_tree):
     collection = RouteCollection(
         reaction_trees=[
@@ -318,6 +365,9 @@ def test_distance_collection(load_reaction_tree):
     assert pytest.approx(dist_mat3[2, 1], abs=1e-2) == 0.7483
 
 
+@pytest.mark.xfail(
+    condition=not SUPPORT_DISTANCES, reason="route_distances not installed"
+)
 def test_clustering_collection(load_reaction_tree):
     collection = RouteCollection(
         reaction_trees=[
@@ -334,6 +384,9 @@ def test_clustering_collection(load_reaction_tree):
     assert collection.clusters[1].reaction_trees == [collection.reaction_trees[0]]
 
 
+@pytest.mark.xfail(
+    condition=not SUPPORT_DISTANCES, reason="route_distances not installed"
+)
 def test_clustering_collection_timeout(load_reaction_tree):
     collection = RouteCollection(
         reaction_trees=[

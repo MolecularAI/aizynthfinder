@@ -7,20 +7,32 @@ import yaml
 import pytest
 
 from aizynthfinder.interfaces import AiZynthApp
-from aizynthfinder.interfaces.gui import ClusteringGui
 from aizynthfinder.interfaces.aizynthapp import main as app_main
 from aizynthfinder.interfaces.aizynthcli import main as cli_main
 from aizynthfinder.tools.make_stock import main as make_stock_main
 from aizynthfinder.tools.cat_output import main as cat_main
-from aizynthfinder.training.preprocess_expansion import main as expansion_main
-from aizynthfinder.training.preprocess_recommender import main as recommender_main
-from aizynthfinder.training.preprocess_filter import main as filter_main
-from aizynthfinder.training.make_false_products import main as make_false_main
 from aizynthfinder.tools.download_public_data import main as download_main
-from aizynthfinder.training.utils import Config
 from aizynthfinder.chem import MoleculeException
 from aizynthfinder.analysis import RouteCollection
 from aizynthfinder.reactiontree import ReactionTree
+
+try:
+    from aizynthfinder.training.utils import Config
+    from aizynthfinder.training.preprocess_expansion import main as expansion_main
+    from aizynthfinder.training.preprocess_recommender import main as recommender_main
+    from aizynthfinder.training.preprocess_filter import main as filter_main
+    from aizynthfinder.training.make_false_products import main as make_false_main
+except ImportError:
+    SUPPORT_TRAINING = False
+else:
+    SUPPORT_TRAINING = True
+
+try:
+    from aizynthfinder.interfaces.gui import ClusteringGui
+except ImportError:
+    SUPPORT_CLUSTERING = False
+else:
+    SUPPORT_CLUSTERING = True
 
 
 def test_create_gui_app(mocker):
@@ -34,6 +46,9 @@ def test_create_gui_app(mocker):
     display_patch.assert_called()
 
 
+@pytest.mark.xfail(
+    condition=not SUPPORT_CLUSTERING, reason="route_distances not installed"
+)
 def test_create_clustering_gui(mocker, load_reaction_tree):
     collection = RouteCollection(
         reaction_trees=[
@@ -187,6 +202,21 @@ def test_cli_single_smile_with_postprocessing(
     sys.path.remove(module_path)
 
 
+def test_cli_smiles_argument_incorrect(
+    add_cli_arguments,
+    tmpdir,
+    capsys,
+):
+    smiles_input = str(tmpdir / "smiles_source.txt")
+    add_cli_arguments(f"--smiles {smiles_input} --config config_local.yml")
+
+    cli_main()
+
+    output = capsys.readouterr()
+    assert "Cannot start retrosynthesis planning." in output.out
+    assert smiles_input in output.out
+
+
 def test_make_stock_from_plain_file(
     create_dummy_smiles_source, tmpdir, add_cli_arguments, default_config
 ):
@@ -212,6 +242,7 @@ def test_cat_main(tmpdir, add_cli_arguments, create_dummy_stock1, create_dummy_s
     assert len(data) == 4
 
 
+@pytest.mark.xfail(condition=not SUPPORT_TRAINING, reason="dependencies not installed")
 def test_preprocess_expansion(write_yaml, shared_datadir, add_cli_arguments):
     config_path = write_yaml(
         {
@@ -247,6 +278,7 @@ def test_preprocess_expansion(write_yaml, shared_datadir, add_cli_arguments):
         assert column in data.columns
 
 
+@pytest.mark.xfail(condition=not SUPPORT_TRAINING, reason="dependencies not installed")
 def test_preprocess_expansion_no_class(write_yaml, shared_datadir, add_cli_arguments):
     config_path = write_yaml(
         {
@@ -292,6 +324,7 @@ def test_preprocess_expansion_no_class(write_yaml, shared_datadir, add_cli_argum
         assert column in data.columns
 
 
+@pytest.mark.xfail(condition=not SUPPORT_TRAINING, reason="dependencies not installed")
 def test_preprocess_expansion_csv_headers(write_yaml, shared_datadir):
     config_path = write_yaml(
         {
@@ -332,6 +365,7 @@ def test_preprocess_expansion_csv_headers(write_yaml, shared_datadir):
         assert column in data.columns
 
 
+@pytest.mark.xfail(condition=not SUPPORT_TRAINING, reason="dependencies not installed")
 def test_preprocess_expansion_bad_product(
     write_yaml, shared_datadir, add_cli_arguments
 ):
@@ -346,6 +380,7 @@ def test_preprocess_expansion_bad_product(
         expansion_main([config_path])
 
 
+@pytest.mark.xfail(condition=not SUPPORT_TRAINING, reason="dependencies not installed")
 def test_preprocess_expansion_skip_bad_product(
     write_yaml, shared_datadir, add_cli_arguments
 ):
@@ -364,6 +399,7 @@ def test_preprocess_expansion_skip_bad_product(
     assert len(lines) == 10
 
 
+@pytest.mark.xfail(condition=not SUPPORT_TRAINING, reason="dependencies not installed")
 def test_preprocess_recommender(write_yaml, shared_datadir, add_cli_arguments):
     config_path = write_yaml(
         {
@@ -401,6 +437,7 @@ def test_preprocess_recommender(write_yaml, shared_datadir, add_cli_arguments):
     assert len(data) == 2
 
 
+@pytest.mark.xfail(condition=not SUPPORT_TRAINING, reason="dependencies not installed")
 def test_preprocess_recommender_csv_headers(
     write_yaml, shared_datadir, add_cli_arguments
 ):
@@ -445,6 +482,7 @@ def test_preprocess_recommender_csv_headers(
     assert len(data) == 2
 
 
+@pytest.mark.xfail(condition=not SUPPORT_TRAINING, reason="dependencies not installed")
 def test_preprocess_filter(write_yaml, shared_datadir, add_cli_arguments):
     def duplicate_file(filename):
         with open(shared_datadir / filename, "r") as fileobj:
@@ -489,6 +527,7 @@ def test_preprocess_filter(write_yaml, shared_datadir, add_cli_arguments):
     assert len(lines) == 2
 
 
+@pytest.mark.xfail(condition=not SUPPORT_TRAINING, reason="dependencies not installed")
 def test_preprocess_filter_csv_headers(write_yaml, shared_datadir, add_cli_arguments):
     def duplicate_file(filename):
         with open(shared_datadir / filename, "r") as fileobj:
@@ -538,6 +577,7 @@ def test_preprocess_filter_csv_headers(write_yaml, shared_datadir, add_cli_argum
     assert len(lines) == 3
 
 
+@pytest.mark.xfail(condition=not SUPPORT_TRAINING, reason="dependencies not installed")
 def test_make_false_products(write_yaml, shared_datadir, add_cli_arguments):
     config_path = write_yaml(
         {

@@ -15,6 +15,7 @@ from PIL import Image, ImageDraw
 from rdkit.Chem import Draw
 from rdkit import Chem
 
+from aizynthfinder.chem import Molecule
 from aizynthfinder.utils.paths import data_path
 
 if TYPE_CHECKING:
@@ -30,9 +31,10 @@ if TYPE_CHECKING:
         PilImage,
         PilColor,
         List,
+        FrameColors,
+        StrDict,
     )
     from aizynthfinder.chem import (
-        Molecule,
         UniqueMolecule,
         RetroReaction,
         FixedRetroReaction,
@@ -316,3 +318,158 @@ def make_visjs_page(
 
     basename, _ = os.path.splitext(filename)
     shutil.make_archive(basename, "tar", root_dir=tmpdir)
+
+
+class RouteImageFactory:
+    """
+    Factory class for drawing a route
+
+    :param route: the dictionary representation of the route
+    :param in_stock_colors: the colors around molecules, defaults to {True: "green", False: "orange"}
+    :param show_all: if True, also show nodes that are marked as hidden
+    :param margin: the margin between images
+    """
+
+    def __init__(
+        self,
+        route: StrDict,
+        in_stock_colors: FrameColors = None,
+        show_all: bool = True,
+        margin: int = 100,
+    ) -> None:
+        in_stock_colors = in_stock_colors or {
+            True: "green",
+            False: "orange",
+        }
+        self.show_all: bool = show_all
+        self.margin: int = margin
+
+        self._stock_lookup: StrDict = {}
+        self._mol_lookup: StrDict = {}
+        self._extract_molecules(route)
+        images = molecules_to_images(
+            list(self._mol_lookup.values()),
+            [in_stock_colors[val] for val in self._stock_lookup.values()],
+        )
+        self._image_lookup = dict(zip(self._mol_lookup.keys(), images))
+
+        self._mol_tree = self._extract_mol_tree(route)
+        self._add_effective_size(self._mol_tree)
+
+        pos0 = (
+            self._mol_tree["eff_width"] - self._mol_tree["image"].width + self.margin,
+            int(self._mol_tree["eff_height"] * 0.5)
+            - int(self._mol_tree["image"].height * 0.5),
+        )
+        self._add_pos(self._mol_tree, pos0)
+
+        self.image = Image.new(
+            self._mol_tree["image"].mode,
+            (self._mol_tree["eff_width"] + self.margin, self._mol_tree["eff_height"]),
+            color="white",
+        )
+        self._draw = ImageDraw.Draw(self.image)
+        self._make_image(self._mol_tree)
+        self.image = crop_image(self.image)
+
+    def _add_effective_size(self, tree_dict: StrDict) -> None:
+        children = tree_dict.get("children", [])
+        for child in children:
+            self._add_effective_size(child)
+        if children:
+            tree_dict["eff_height"] = sum(
+                child["eff_height"] for child in children
+            ) + self.margin * (len(children) - 1)
+            tree_dict["eff_width"] = (
+                max(child["eff_width"] for child in children)
+                + tree_dict["image"].size[0]
+                + self.margin
+            )
+        else:
+            tree_dict["eff_height"] = tree_dict["image"].size[1]
+            tree_dict["eff_width"] = tree_dict["image"].size[0] + self.margin
+
+    def _add_pos(self, tree_dict: StrDict, pos: Tuple[int, int]) -> None:
+        tree_dict["left"] = pos[0]
+        tree_dict["top"] = pos[1]
+        children = tree_dict.get("children")
+        if not children:
+            return
+
+        mid_y = pos[1] + int(
+            tree_dict["image"].height * 0.5
+        )  # Mid-point of image along y
+        children_height = sum(
+            child["eff_height"] for child in children
+        ) + self.margin * (len(children) - 1)
+        childen_leftmost = min(
+            pos[0] - self.margin - child["image"].width for child in children
+        )
+        child_y = mid_y - int(children_height * 0.5)  # Top-most edge of children
+        child_ys = []
+        # Now compute first guess of y-pos for children
+        for child in children:
+            y_adjust = int((child["eff_height"] - child["image"].height) * 0.5)
+            child_ys.append(child_y + y_adjust)
+            child_y += self.margin + child["eff_height"]
+
+        for idx, (child, child_y0) in enumerate(zip(children, child_ys)):
+            child_x = childen_leftmost  # pos[0] - self.margin - child["image"].width
+            child_y = child_y0
+            # Overwrite first guess if child does not have any children
+            if not child.get("children") and idx == 0 and len(children) > 1:
+                child_y = child_ys[idx + 1] - self.margin - child["image"].height
+            elif not child.get("children") and idx > 0:
+                child_y = (
+                    child_ys[idx - 1] + self.margin + children[idx - 1]["image"].height
+                )
+            self._add_pos(child, (child_x, child_y))
+
+    def _extract_mol_tree(self, tree_dict: StrDict) -> StrDict:
+        dict_ = {
+            "smiles": tree_dict["smiles"],
+            "image": self._image_lookup[tree_dict["smiles"]],
+        }
+        if tree_dict.get("children"):
+            dict_["children"] = [
+                self._extract_mol_tree(grandchild)
+                for grandchild in tree_dict.get("children")[0]["children"]  # type: ignore
+                if not (grandchild.get("hide", False) and not self.show_all)
+            ]
+        return dict_
+
+    def _extract_molecules(self, tree_dict: StrDict) -> None:
+        if tree_dict["type"] == "mol":
+            self._stock_lookup[tree_dict["smiles"]] = tree_dict.get("in_stock", False)
+            self._mol_lookup[tree_dict["smiles"]] = Molecule(smiles=tree_dict["smiles"])
+        for child in tree_dict.get("children", []):
+            self._extract_molecules(child)
+
+    def _make_image(self, tree_dict: StrDict) -> None:
+        self.image.paste(tree_dict["image"], (tree_dict["left"], tree_dict["top"]))
+        children = tree_dict.get("children")
+        if not children:
+            return
+
+        children_right = max(child["left"] + child["image"].width for child in children)
+        mid_x = children_right + int(0.5 * (tree_dict["left"] - children_right))
+        mid_y = tree_dict["top"] + int(tree_dict["image"].height * 0.5)
+
+        self._draw.line((tree_dict["left"], mid_y, mid_x, mid_y), fill="black")
+        for child in children:
+            self._make_image(child)
+            child_mid_y = child["top"] + int(0.5 * child["image"].height)
+            self._draw.line(
+                (
+                    mid_x,
+                    mid_y,
+                    mid_x,
+                    child_mid_y,
+                    child["left"] + child["image"].width,
+                    child_mid_y,
+                ),
+                fill="black",
+            )
+        self._draw.ellipse(
+            (mid_x - 8, mid_y - 8, mid_x + 8, mid_y + 8), fill="black", outline="black"
+        )

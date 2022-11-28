@@ -142,6 +142,11 @@ class MongoDbInchiKeyQuery(StockQueryMixin):
         self.client = get_mongo_client(
             host or os.environ.get("MONGODB_HOST") or "localhost"
         )
+        if self.client is None:
+            raise ImportError(
+                "Cannot use this stock query class because it seems like pymongo is not installed. "
+                "Please install aizynthfinder with extras dependencies."
+            )
         self.database: MongoDatabase = self.client[database]
         self.molecules: MongoCollection = self.database[collection]
         self._len: Optional[int] = None

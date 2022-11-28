@@ -5,8 +5,15 @@ from typing import Sequence, Optional
 
 import pandas as pd
 import numpy as np
-from sklearn.preprocessing import LabelBinarizer
-from scipy import sparse
+
+try:
+    from sklearn.preprocessing import LabelBinarizer
+    from scipy import sparse
+except ImportError:
+    raise ImportError(
+        "Training is not supported by this installation."
+        " Please install aizynthfinder with extras dependencies."
+    )
 
 from aizynthfinder.training.utils import (
     Config,

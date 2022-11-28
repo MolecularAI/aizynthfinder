@@ -20,6 +20,7 @@ from aizynthfinder.utils.files import (
     split_file,
     start_processes,
 )
+from aizynthfinder.chem import Molecule
 from aizynthfinder.utils.logging import logger, setup_logger
 
 if TYPE_CHECKING:
@@ -205,10 +206,13 @@ def _process_multi_smiles(
         _do_post_processing(finder, stats, post_processing)
         for key, value in stats.items():
             results[key].append(value)
+        results["stock_info"].append(finder.stock_info())
         results["top_scores"].append(
             ", ".join("%.4f" % score for score in finder.routes.scores)
         )
-        results["trees"].append(finder.routes.dicts)
+        results["trees"].append(
+            finder.routes.dict_with_extra(include_metadata=True, include_scores=True)
+        )
 
     data = pd.DataFrame.from_dict(results)
     save_datafile(data, output_name)
@@ -261,14 +265,25 @@ def _multiprocess_smiles(args: argparse.Namespace) -> None:
 def main() -> None:
     """Entry point for the aizynthcli command"""
     args = _get_arguments()
+
+    file_level_logging = logging.DEBUG if args.log_to_file else None
+    setup_logger(logging.INFO, file_level_logging)
+
+    if not os.path.exists(args.smiles):
+        mol = Molecule(smiles=args.smiles)
+        if mol.rd_mol is None:
+            logger().error(
+                f"The --smiles argument ({args.smiles})"
+                " does not point to an existing file or is a valid RDKit SMILES."
+                " Cannot start retrosynthesis planning."
+            )
+            return
+
     if args.nproc:
         _multiprocess_smiles(args)
         return
 
     multi_smiles = os.path.exists(args.smiles)
-
-    file_level_logging = logging.DEBUG if args.log_to_file else None
-    setup_logger(logging.INFO, file_level_logging)
 
     finder = AiZynthFinder(configfile=args.config)
     _select_stocks(finder, args)

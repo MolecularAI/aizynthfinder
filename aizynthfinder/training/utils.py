@@ -9,8 +9,15 @@ from typing import TYPE_CHECKING
 import yaml
 import numpy as np
 import pandas as pd
-from scipy import sparse
-from sklearn.model_selection import train_test_split
+
+try:
+    from scipy import sparse
+    from sklearn.model_selection import train_test_split
+except ImportError:
+    raise ImportError(
+        "Training is not supported by this installation."
+        " Please install aizynthfinder with extras dependencies."
+    )
 
 
 from aizynthfinder.utils.paths import data_path

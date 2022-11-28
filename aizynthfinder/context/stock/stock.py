@@ -84,11 +84,11 @@ class Stock(ContextCollection):
             raise StockException("Could not obtain amount of molecule")
         return max(amounts)
 
-    def availability_string(self, mol: Molecule) -> str:
+    def availability_list(self, mol: Molecule) -> List[str]:
         """
-        Return a string of what stocks a given mol is available
+        Return a list of what stocks a given mol is available
 
-        If the molecule is not in stock it will return "Not in stock"
+        If the molecule is not in stock it will return any empty list
 
         :param mol: The molecule to query
         :returns: string with a list of stocks that mol was found in
@@ -101,6 +101,18 @@ class Stock(ContextCollection):
                 availability.append(self[key].availability_string(mol))
             except (StockException, AttributeError):
                 availability.append(key)
+        return availability
+
+    def availability_string(self, mol: Molecule) -> str:
+        """
+        Return a string of what stocks a given mol is available
+
+        If the molecule is not in stock it will return "Not in stock"
+
+        :param mol: The molecule to query
+        :returns: string with a list of stocks that mol was found in
+        """
+        availability = self.availability_list(mol)
         if availability:
             return ",".join(availability)
         return "Not in stock"

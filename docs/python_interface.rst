@@ -76,7 +76,7 @@ out all the reactants SMILES strings
 
     reactants_smiles = []
     for reaction_tuple in reactions:
-        reactants_smiles.append([mol.smiles for mol in reaction_tuple[0].reactants])
+        reactants_smiles.append([mol.smiles for mol in reaction_tuple[0].reactants[0])
 
 or you can put all the metadata of all the reactions in a pandas dataframe
 

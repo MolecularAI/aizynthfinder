@@ -1,6 +1,12 @@
 Training
 ========
 
+**------------------------------------------------------------------------------------------------------------------------------------------**
+
+**The use of this functionality is now discouraged and the users should have a look at the AiZynthTrain package for training their models**
+
+**------------------------------------------------------------------------------------------------------------------------------------------**
+
 This page explains the training tools available in the `aizynthfinder` package.
 
 Prerequisites
