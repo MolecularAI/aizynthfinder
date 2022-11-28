@@ -18,7 +18,7 @@ Before you begin, ensure you have met the following requirements:
 
 * Linux, Windows or macOS platforms are supported - as long as the dependencies are supported on these platforms.
 
-* You have installed [anaconda](https://www.anaconda.com/) or [miniconda](https://docs.conda.io/en/latest/miniconda.html) with python 3.6 - 3.9
+* You have installed [anaconda](https://www.anaconda.com/) or [miniconda](https://docs.conda.io/en/latest/miniconda.html) with python 3.8 - 3.9
 
 The tool has been developed on a Linux platform, but the software has been tested on Windows 10 and macOS Catalina.
 
@@ -29,15 +29,16 @@ The tool has been developed on a Linux platform, but the software has been teste
 
 First time, execute the following command in a console or an Anaconda prompt
 
-    conda env create -f https://raw.githubusercontent.com/MolecularAI/aizynthfinder/master/env-users.yml
+    conda create "python>=3.8,<3.10" -n aizynth-env
     
-And if you want to update the environment
-
-    conda env update -n aizynth-env -f https://raw.githubusercontent.com/MolecularAI/aizynthfinder/master/env-users.yml
-    
-The package is now installed in a new conda environment, that you need to activate each time you want to use it
+To install, activate the environment and install the package using pypi
 
     conda activate aizynth-env
+    python -m pip install aizynthfinder[all]
+
+for a smaller package, without all the functionality, you can also type
+
+    python -m pip install aizynthfinder
 
 ### For developers
 
@@ -47,7 +48,7 @@ Then execute the following commands in the root of the repository
 
     conda env create -f env-dev.yml
     conda activate aizynth-dev
-    poetry install --E all
+    poetry install -E all
     
 the `aizynthfinder` package is now installed in editable mode.
 

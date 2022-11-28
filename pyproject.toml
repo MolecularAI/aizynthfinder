@@ -6,6 +6,9 @@ authors = ["Molecular AI group <samuel.genheden@astrazeneca.com>"]
 license = "MIT"
 include = ["aizynthfinder/data/*.yml", "aizynthfinder/data/templates/*"]
 readme = "README.md"
+homepage = "https://github.com/MolecularAI/aizynthfinder/"
+repository = "https://github.com/MolecularAI/aizynthfinder/"
+documentation = "https://molecularai.github.io/aizynthfinder/"
 
 [tool.pytest.ini_options]
 mccabe-complexity = 9
