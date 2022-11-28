@@ -13,6 +13,7 @@
 - Graphviz dependency for route drawing is removed, pure python implementation is used instead
 - Dependencies reworked so that a minimal package can be installed
 - Extra dependencies are related to route distances, clustering, training, MongoDB and external models
+- Downloaded files are now the latest USPTO and Ringbreaker models
 
 ### Trivial changes
 
