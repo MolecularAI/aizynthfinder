@@ -1,5 +1,8 @@
 import os
+import shutil
+import json
 from tarfile import TarFile
+from pathlib import Path
 
 import pytest
 from PIL import Image, ImageDraw
@@ -61,6 +64,9 @@ def test_save_molecule_images():
     assert len(os.listdir(image.IMAGE_FOLDER)) == nfiles + 2
 
 
+@pytest.mark.xfail(
+    condition=shutil.which("dot") is None, reason="graphviz is not installed"
+)
 def test_graphviz_usage(mocker, tmpdir, setup_graphviz_graph):
     mkstemp_patch = mocker.patch("aizynthfinder.utils.image.tempfile.mkstemp")
     files = [
@@ -78,6 +84,9 @@ def test_graphviz_usage(mocker, tmpdir, setup_graphviz_graph):
         assert os.path.exists(filename)
 
 
+@pytest.mark.xfail(
+    condition=shutil.which("dot") is None, reason="graphviz is not installed"
+)
 def test_graphviz_usage_exception_dot(mocker, tmpdir, setup_graphviz_graph):
     exists_patch = mocker.patch("aizynthfinder.utils.image.os.path.exists")
     exists_patch.side_effect = [False, True]
@@ -110,3 +119,20 @@ def test_visjs_page(mocker, tmpdir, setup_graphviz_graph):
     with TarFile(filename) as tarobj:
         assert "./route.html" in tarobj.getnames()
         assert len([name for name in tarobj.getnames() if name.endswith(".png")]) == 1
+
+
+def test_image_factory(request):
+    route_path = Path(request.fspath).parent.parent / "data" / "branched_route.json"
+    with open(route_path, "r") as fileobj:
+        dict_ = json.load(fileobj)
+    dict_["children"][0]["children"][1]["hide"] = True
+
+    factory0 = image.RouteImageFactory(dict_)
+
+    factory_tighter = image.RouteImageFactory(dict_, margin=50)
+    assert factory0.image.width == factory_tighter.image.width + 150
+    assert factory0.image.height == factory_tighter.image.height + 175
+
+    factory_hidden = image.RouteImageFactory(dict_, show_all=False)
+    assert factory0.image.width == factory_hidden.image.width
+    assert factory0.image.height > factory_hidden.image.height

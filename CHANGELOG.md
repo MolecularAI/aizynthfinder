@@ -1,5 +1,40 @@
 # CHANGELOG
 
+## Version 3.6.0 2022-11-28 (2022-11-25)
+
+### Features
+
+- aizynthfinder can now be installed as a pure-python package
+- ReactionTree now store at what iteration the route was created
+- ReactionTree now supports a metadata property
+- MCTS nodes populate a property that stores at what iteration the route was created
+- aizynthcli now outputs stock information and route metadata and scores
+- aizynthcli now has better error handling of invalid SMILES input
+- Graphviz dependency for route drawing is removed, pure python implementation is used instead
+- Dependencies reworked so that a minimal package can be installed
+- Extra dependencies are related to route distances, clustering, training, MongoDB and external models
+- Downloaded files are now the latest USPTO and Ringbreaker models
+
+### Trivial changes
+
+- RDKit and route-distances package now installed from pypi
+- Documentation updated and extended
+
+## Version 3.5.0 2022-11-28 (2022-07-21)
+
+### Features
+
+- Atom-mapping is tracked from product to reactant
+- Support loading of template library from (gzipped) CSV file
+- Support of saving aizynthcli output to (gzipped) JSON file
+- AiZynthExpander now tracks non-applicable templates
+
+### Bug-fixes
+- Fixed failing test case
+
+### Trival changes
+- Silent progress bar when utilizing local Keras model
+
 ## Version 3.4.0 2022-04-28
 
 ### Features

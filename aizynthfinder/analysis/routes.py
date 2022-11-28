@@ -4,14 +4,18 @@ from __future__ import annotations
 from typing import TYPE_CHECKING
 
 import numpy as np
-from route_distances.clustering import ClusteringHelper
-from route_distances.route_distances import route_distances_calculator
+
+try:
+    from route_distances.clustering import ClusteringHelper
+    from route_distances.route_distances import route_distances_calculator
+except ImportError:
+    pass
 
 from aizynthfinder.analysis.utils import (
     CombinedReactionTrees,
     RouteSelectionArguments,
 )
-from aizynthfinder.reactiontree import ReactionTree
+from aizynthfinder.reactiontree import SUPPORT_DISTANCES, ReactionTree
 from aizynthfinder.search.mcts import MctsSearchTree, MctsNode
 from aizynthfinder.analysis import TreeAnalysis
 
@@ -49,6 +53,7 @@ class RouteCollection:
     :ivar scores: initial scores of top-ranked nodes or routes
     :ivar reaction_trees: the reaction trees created from the top-ranked nodes
     :ivar clusters: the created clusters from the collection
+    :ivar route_metadata: the metadata of the reaction trees
 
     :param reaction_trees: the trees to base the collection on
     """
@@ -57,6 +62,8 @@ class RouteCollection:
         self._routes: Sequence[StrDict] = [{} for _ in range(len(reaction_trees))]
         self.reaction_trees = reaction_trees
         self._update_route_dict(reaction_trees, "reaction_tree")
+        self.route_metadata = [rt.metadata for rt in reaction_trees]
+        self._update_route_dict(self.route_metadata, "route_metadata")
 
         self.nodes = self._unpack_kwarg_with_default("nodes", None, **kwargs)
         self.scores = self._unpack_kwarg_with_default("scores", np.nan, **kwargs)
@@ -152,6 +159,12 @@ class RouteCollection:
         :param distances_model: can be ted or lstm and determines how the route distances are computed
         :return: the cluster labels
         """
+        if not SUPPORT_DISTANCES:
+            raise ValueError(
+                "Clustering is not supported by this installation."
+                " Please install aizynthfinder with extras dependencies."
+            )
+
         if len(self.reaction_trees) < 3:
             return np.asarray([])
         dist_kwargs = {
@@ -199,6 +212,26 @@ class RouteCollection:
                 self.all_scores[idx][repr(scorer)] = score
         self._update_route_dict(self.all_scores, "all_score")
 
+    def dict_with_extra(
+        self, include_scores=False, include_metadata=False
+    ) -> Sequence[StrDict]:
+        """
+        Return the routes as dictionaries with optionally all scores and
+        all metadata added to the root (target) node.
+
+        :return: the routes as dictionaries
+        """
+        dicts = []
+        for dict_, scores, metadata in zip(
+            self.dicts, self.all_scores, self.route_metadata
+        ):
+            dicts.append(dict(dict_))
+            if include_scores:
+                dicts[-1]["scores"] = dict(scores)
+            if include_metadata:
+                dicts[-1]["metadata"] = dict(metadata)
+        return dicts
+
     def dict_with_scores(self) -> Sequence[StrDict]:
         """
         Return the routes as dictionaries with all scores added
@@ -206,11 +239,7 @@ class RouteCollection:
 
         :return: the routes as dictionaries
         """
-        dicts = []
-        for dict_, scores in zip(self.dicts, self.all_scores):
-            dicts.append(dict(dict_))
-            dicts[-1]["scores"] = dict(scores)
-        return dicts
+        return self.dict_with_extra(include_scores=True)
 
     def distance_matrix(
         self, recreate: bool = False, model: str = "ted", **kwargs: Any
@@ -229,6 +258,12 @@ class RouteCollection:
         :param model: the type of model to use "ted" or "lstm"
         :return: the square distance matrix
         """
+        if not SUPPORT_DISTANCES:
+            raise ValueError(
+                "Distance calculations are not supported by this installation."
+                " Please install aizynthfinder with extras dependencies."
+            )
+
         if model == "lstm" and not kwargs.get("model_path"):
             raise KeyError(
                 "Need to provide 'model_path' argument when using LSTM model for computing distances"

@@ -1,8 +1,8 @@
-""" Module containing a CLI for concatenating output files (hdf5 files)
+""" Module containing a CLI for concatenating output files (hdf5/json.gz files)
 """
 import argparse
 
-from aizynthfinder.utils.files import cat_hdf_files
+from aizynthfinder.utils.files import cat_datafiles
 
 
 def main() -> None:
@@ -17,7 +17,7 @@ def main() -> None:
     parser.add_argument(
         "--output",
         required=True,
-        default="output.hdf5",
+        default="output.json.gz",
         help="the name of the concatenate output file ",
     )
     parser.add_argument(
@@ -26,7 +26,7 @@ def main() -> None:
     )
     args = parser.parse_args()
 
-    cat_hdf_files(args.files, args.output, args.trees)
+    cat_datafiles(args.files, args.output, args.trees)
 
 
 if __name__ == "__main__":

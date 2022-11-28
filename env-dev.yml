@@ -3,8 +3,5 @@ channels:
   - https://conda.anaconda.org/conda-forge
   - defaults
 dependencies:
-  - python>=3.6,<3.10
-  - graphviz>=2.38,<3.0
-  - pytables>=3.7.0,<4.0.0
-  - rdkit=>2019.09.1
+  - python>=3.8,<3.10
   - poetry>=1.1.4,<2.0

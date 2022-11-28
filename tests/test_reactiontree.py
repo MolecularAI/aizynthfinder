@@ -1,13 +1,20 @@
 import pytest
 
-from aizynthfinder.reactiontree import ReactionTree
+from aizynthfinder.reactiontree import ReactionTree, SUPPORT_DISTANCES
 
 
 def test_mcts_route_to_reactiontree(setup_linear_mcts, load_reaction_tree):
+    def remove_metadata(tree_dict):
+        if "metadata" in tree_dict:
+            tree_dict["metadata"] = {}
+        for child in tree_dict.get("children", []):
+            remove_metadata(child)
+
     _, node = setup_linear_mcts()
     expected_dict = load_reaction_tree("linear_route.json")
 
     reaction_tree = node.to_reaction_tree()
+    assert reaction_tree.metadata == {"created_at_iteration": 1, "is_solved": True}
 
     mol_nodes = list(reaction_tree.molecules())
     assert len(mol_nodes) == 5
@@ -22,7 +29,9 @@ def test_mcts_route_to_reactiontree(setup_linear_mcts, load_reaction_tree):
         "c1ccccc1",
         "OOc1ccccc1",
     }
-    assert reaction_tree.to_dict() == expected_dict
+    actual_dict = reaction_tree.to_dict(include_metadata=True)
+    remove_metadata(actual_dict)
+    assert actual_dict == expected_dict
 
 
 def test_reactiontree_from_dict(load_reaction_tree):
@@ -31,12 +40,12 @@ def test_reactiontree_from_dict(load_reaction_tree):
     rt = ReactionTree.from_dict(expected)
 
     # Simply check that the to_dict() and from_dict() gives/produces the same dict
-    resp = rt.to_dict()
+    resp = rt.to_dict(include_metadata=True)
     assert resp == expected
 
 
 def test_reactiontree_to_image(load_reaction_tree, mocker):
-    patched_make_image = mocker.patch("aizynthfinder.reactiontree.make_graphviz_image")
+    patched_make_image = mocker.patch("aizynthfinder.reactiontree.RouteImageFactory")
 
     tree = load_reaction_tree("linear_route.json")
     rt = ReactionTree.from_dict(tree)
@@ -44,36 +53,6 @@ def test_reactiontree_to_image(load_reaction_tree, mocker):
     rt.to_image()
 
     patched_make_image.assert_called_once()
-    assert len(patched_make_image.call_args[0][0]) == len(list(rt.molecules()))
-    assert len(patched_make_image.call_args[0][1]) == len(list(rt.reactions()))
-
-
-def test_reactiontree_to_image_hiding(load_reaction_tree, mocker):
-    patched_make_image = mocker.patch("aizynthfinder.reactiontree.make_graphviz_image")
-
-    tree = load_reaction_tree("linear_route.json", 1)
-    rt = ReactionTree.from_dict(tree)
-    for idx, reaction in enumerate(rt.reactions()):
-        if idx == 0:
-            continue
-        rt.graph.nodes[reaction]["hide"] = True
-    for idx, mol in enumerate(rt.leafs()):
-        if idx == 2:
-            continue
-        rt.graph.nodes[mol]["hide"] = True
-
-    rt.to_image(show_all=True)
-
-    patched_make_image.assert_called_once()
-    assert len(patched_make_image.call_args[0][0]) == len(list(rt.molecules()))
-    assert len(patched_make_image.call_args[0][1]) == len(list(rt.reactions()))
-
-    patched_make_image.reset_mock()
-
-    rt.to_image(show_all=False)
-
-    assert len(patched_make_image.call_args[0][0]) == len(list(rt.molecules())) - 2
-    assert len(patched_make_image.call_args[0][1]) == len(list(rt.reactions())) - 1
 
 
 def test_route_node_depth_from_mcts(setup_branched_reaction_tree):
@@ -127,6 +106,9 @@ def test_route_node_depth_from_json(load_reaction_tree):
         assert rt.depth(mol) == 2 * rt.graph.nodes[mol]["transform"]
 
 
+@pytest.mark.xfail(
+    condition=not SUPPORT_DISTANCES, reason="route_distances not installed"
+)
 def test_route_distance_self(load_reaction_tree):
     dict_ = load_reaction_tree("branched_route.json", 0)
     rt = ReactionTree.from_dict(dict_)
@@ -134,6 +116,9 @@ def test_route_distance_self(load_reaction_tree):
     assert rt.distance_to(rt) == 0.0
 
 
+@pytest.mark.xfail(
+    condition=not SUPPORT_DISTANCES, reason="route_distances not installed"
+)
 def test_route_distance_other(load_reaction_tree):
     dict_ = load_reaction_tree("branched_route.json")
     rt1 = ReactionTree.from_dict(dict_)

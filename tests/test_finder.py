@@ -35,6 +35,7 @@ def test_dead_end_expansion(setup_aizynthfinder):
     assert len(nodes) == 1
     assert state_smiles(nodes[0].state) == [root_smi]
     assert finder.search_stats["iterations"] == 100
+    assert nodes[0].created_at_iteration == 0
 
 
 def test_one_expansion(setup_aizynthfinder):
@@ -57,6 +58,8 @@ def test_one_expansion(setup_aizynthfinder):
     assert len(nodes) == 2
     assert state_smiles(nodes[0].state) == [root_smi]
     assert state_smiles(nodes[1].state) == child1_smi
+    assert nodes[0].created_at_iteration == 0
+    assert nodes[1].created_at_iteration == 1
     assert finder.search_stats["iterations"] == 1
     assert finder.search_stats["returned_first"]
 
@@ -129,6 +132,12 @@ def test_two_expansions_two_children(setup_aizynthfinder):
 
     nodes = list(finder.tree.graph())
     assert len(nodes) == 5
+    assert nodes[0].created_at_iteration == 0
+    assert nodes[1].created_at_iteration == 1
+    assert nodes[2].created_at_iteration == 1
+    assert nodes[3].created_at_iteration == 2
+    assert nodes[4].created_at_iteration == 2
+
     assert state_smiles(nodes[0].state) == [root_smi]
     assert state_smiles(nodes[1].state) == child1_smi
     assert (
@@ -615,3 +624,22 @@ def test_two_expansions_two_children_one_filtered(setup_aizynthfinder, caplog):
         state_smiles(nodes[2].state) == [child1_smi[0], child1_smi[2]] + grandchild_smi
     )
     assert finder.search_stats["iterations"] == 10
+
+
+def test_stock_info(setup_aizynthfinder):
+    root_smi = "CN1CCC(C(=O)c2cccc(NC(=O)c3ccc(F)cc3)c2F)CC1"
+    child1_smi = ["CN1CCC(Cl)CC1", "N#Cc1cccc(NC(=O)c2ccc(F)cc2)c1F", "O"]
+    lookup = {root_smi: {"smiles": ".".join(child1_smi), "prior": 1.0}}
+    finder = setup_aizynthfinder(lookup, child1_smi)
+
+    # Test first with return_first
+    finder.config.return_first = True
+    finder.tree_search()
+
+    assert finder.stock_info() == {}
+
+    finder.build_routes()
+
+    expected = {smi: ["stock"] for smi in child1_smi}
+    expected[root_smi] = []
+    assert finder.stock_info() == expected

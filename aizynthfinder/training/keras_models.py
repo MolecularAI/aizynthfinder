@@ -6,7 +6,7 @@ from typing import TYPE_CHECKING
 
 import numpy as np
 
-# pylint: disable=no-name-in-module
+# pylint: disable=all
 from tensorflow.keras.layers import Dense, Dropout, Input, Dot
 from tensorflow.keras.models import Sequential, Model
 from tensorflow.keras.optimizers import Adam
@@ -18,8 +18,16 @@ from tensorflow.keras.callbacks import (
     ReduceLROnPlateau,
 )
 from tensorflow.keras import regularizers
-from sklearn.utils import shuffle
-from scipy import sparse
+
+# pylint: enable=all
+try:
+    from sklearn.utils import shuffle
+    from scipy import sparse
+except ImportError:
+    raise ImportError(
+        "Training is not supported by this installation."
+        " Please install aizynthfinder with extras dependencies."
+    )
 
 from aizynthfinder.utils.models import top10_acc, top50_acc
 
@@ -49,7 +57,7 @@ class _InMemorySequence(Sequence):  # pylint: disable=W0223
         return slice(start, end)
 
     @staticmethod
-    def _load_data(filename: str) -> np.ndarray:
+    def _load_data(filename: str) -> Any:
         try:
             return sparse.load_npz(filename)
         except ValueError:

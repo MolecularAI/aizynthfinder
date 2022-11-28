@@ -91,7 +91,12 @@ class TemplateBasedExpansionStrategy(ExpansionStrategy):
         self.model = load_model(source, self.key, self._config.use_remote_models)
 
         self._logger.info(f"Loading templates from {templatefile} to {self.key}")
-        self.templates: pd.DataFrame = pd.read_hdf(templatefile, "table")
+        if templatefile.endswith(".csv.gz") or templatefile.endswith(".csv"):
+            self.templates: pd.DataFrame = pd.read_csv(
+                templatefile, index_col=0, sep="\t"
+            )
+        else:
+            self.templates = pd.read_hdf(templatefile, "table")
 
         if hasattr(self.model, "output_size") and len(self.templates) != self.model.output_size:  # type: ignore
             raise PolicyException(

@@ -4,7 +4,6 @@ from __future__ import annotations
 import argparse
 import json
 import os
-import warnings
 import logging
 import importlib
 import tempfile
@@ -15,7 +14,13 @@ from typing import TYPE_CHECKING
 import pandas as pd
 
 from aizynthfinder.aizynthfinder import AiZynthFinder
-from aizynthfinder.utils.files import cat_hdf_files, split_file, start_processes
+from aizynthfinder.utils.files import (
+    cat_datafiles,
+    save_datafile,
+    split_file,
+    start_processes,
+)
+from aizynthfinder.chem import Molecule
 from aizynthfinder.utils.logging import logger, setup_logger
 
 if TYPE_CHECKING:
@@ -176,7 +181,7 @@ def _process_multi_smiles(
     route_distance_model: Optional[str],
     post_processing: List[_PostProcessingJob],
 ) -> None:
-    output_name = output_name or "output.hdf5"
+    output_name = output_name or "output.json.gz"
     with open(filename, "r") as fileobj:
         smiles = [line.strip() for line in fileobj.readlines()]
 
@@ -201,15 +206,16 @@ def _process_multi_smiles(
         _do_post_processing(finder, stats, post_processing)
         for key, value in stats.items():
             results[key].append(value)
+        results["stock_info"].append(finder.stock_info())
         results["top_scores"].append(
             ", ".join("%.4f" % score for score in finder.routes.scores)
         )
-        results["trees"].append(finder.routes.dicts)
+        results["trees"].append(
+            finder.routes.dict_with_extra(include_metadata=True, include_scores=True)
+        )
 
     data = pd.DataFrame.from_dict(results)
-    with warnings.catch_warnings():  # This wil suppress a PerformanceWarning
-        warnings.simplefilter("ignore")
-        data.to_hdf(output_name, key="table", mode="w")
+    save_datafile(data, output_name)
     logger().info(f"Output saved to {output_name}")
 
 
@@ -222,7 +228,7 @@ def _multiprocess_smiles(args: argparse.Namespace) -> None:
             "--config",
             args.config,
             "--output",
-            hdf_files[index - 1],
+            json_files[index - 1],
         ]
         if args.policy:
             cmd_args.extend(["--policy"] + args.policy)
@@ -246,27 +252,38 @@ def _multiprocess_smiles(args: argparse.Namespace) -> None:
 
     setup_logger(logging.INFO)
     filenames = split_file(args.smiles, args.nproc)
-    hdf_files = [tempfile.mktemp(suffix=".hdf") for _ in range(args.nproc)]
+    json_files = [tempfile.mktemp(suffix=".json.gz") for _ in range(args.nproc)]
     start_processes(filenames, "aizynthcli", create_cmd)
 
-    if not all(os.path.exists(filename) for filename in hdf_files):
+    if not all(os.path.exists(filename) for filename in json_files):
         raise FileNotFoundError(
             "Not all output files produced. Please check the individual log files: 'aizynthcli*.log'"
         )
-    cat_hdf_files(hdf_files, args.output or "output.hdf5")
+    cat_datafiles(json_files, args.output or "output.json.gz")
 
 
 def main() -> None:
     """Entry point for the aizynthcli command"""
     args = _get_arguments()
+
+    file_level_logging = logging.DEBUG if args.log_to_file else None
+    setup_logger(logging.INFO, file_level_logging)
+
+    if not os.path.exists(args.smiles):
+        mol = Molecule(smiles=args.smiles)
+        if mol.rd_mol is None:
+            logger().error(
+                f"The --smiles argument ({args.smiles})"
+                " does not point to an existing file or is a valid RDKit SMILES."
+                " Cannot start retrosynthesis planning."
+            )
+            return
+
     if args.nproc:
         _multiprocess_smiles(args)
         return
 
     multi_smiles = os.path.exists(args.smiles)
-
-    file_level_logging = logging.DEBUG if args.log_to_file else None
-    setup_logger(logging.INFO, file_level_logging)
 
     finder = AiZynthFinder(configfile=args.config)
     _select_stocks(finder, args)

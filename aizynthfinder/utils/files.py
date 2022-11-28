@@ -6,22 +6,61 @@ import time
 import warnings
 import json
 import gzip
+from pathlib import Path
 from typing import TYPE_CHECKING
 
+from deprecated import deprecated
 import more_itertools
 import pandas as pd
 
 from aizynthfinder.utils.logging import logger
 
 if TYPE_CHECKING:
-    from aizynthfinder.utils.type_utils import List, Sequence, Any, Callable
+    from aizynthfinder.utils.type_utils import List, Sequence, Any, Callable, Union
 
 
+def read_datafile(filename: Union[str, Path]) -> pd.DataFrame:
+    """
+    Read aizynth output from disc in either .hdf5 or .json format
+
+    :param filename: the path to the data
+    :return: the loaded data
+    """
+    filename_str = str(filename)
+    if filename_str.endswith(".hdf5") or filename_str.endswith(".hdf"):
+        return pd.read_hdf(filename, "table")
+    return pd.read_json(filename, orient="table")
+
+
+def save_datafile(data: pd.DataFrame, filename: Union[str, Path]) -> None:
+    """
+    Save the given data to disc in either .hdf5 or .json format
+
+    :param data: the data to save
+    :param filename: the path to the data
+    """
+    filename_str = str(filename)
+    if filename_str.endswith(".hdf5") or filename_str.endswith(".hdf"):
+        with warnings.catch_warnings():  # This wil suppress a PerformanceWarning
+            warnings.simplefilter("ignore")
+            data.to_hdf(filename, key="table")
+    else:
+        data.to_json(filename, orient="table")
+
+
+@deprecated(version="4.0.0", reason="replaced by 'cat_datafiles'")
 def cat_hdf_files(
     input_files: List[str], output_name: str, trees_name: str = None
 ) -> None:
+    """Concatenate hdf5 or json datafiles"""
+    cat_datafiles(input_files, output_name, trees_name)
+
+
+def cat_datafiles(
+    input_files: List[str], output_name: str, trees_name: str = None
+) -> None:
     """
-    Concatenate hdf5 files with the key "table"
+    Concatenate hdf5 or json datafiles
 
     if `tree_name` is given, will take out the `trees` column
     from the tables and save it to a gzipped-json file.
@@ -30,7 +69,7 @@ def cat_hdf_files(
     :param output_name: the name of the concatenated file
     :param trees_name: the name of the concatenated trees
     """
-    data = pd.read_hdf(input_files[0], key="table")
+    data = read_datafile(input_files[0])
     if "trees" not in data.columns:
         trees_name = None
 
@@ -41,16 +80,13 @@ def cat_hdf_files(
         data = data[columns]
 
     for filename in input_files[1:]:
-        new_data = pd.read_hdf(filename, key="table")
+        new_data = read_datafile(filename)
         if trees_name:
             trees.extend(new_data["trees"].values)
             new_data = new_data[columns]
         data = pd.concat([data, new_data])
 
-    with warnings.catch_warnings():  # This wil suppress a PerformanceWarning
-        warnings.simplefilter("ignore")
-        data.reset_index().to_hdf(output_name, key="table")
-
+    save_datafile(data.reset_index(), output_name)
     if trees_name:
         if not trees_name.endswith(".gz"):
             trees_name += ".gz"

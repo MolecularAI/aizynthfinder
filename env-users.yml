@@ -3,10 +3,9 @@ channels:
   - conda-forge
   - defaults
 dependencies:
-  - python>=3.6,<3.10
-  - graphviz>=2.38,<3.0
-  - rdkit=>2019.09.1
-  - pytables>=3.7.0,<4.0.0
-  - pip>=20.0 
+  - python>=3.8,<3.10
+  - git
+  - pip>=20.0
   - pip:
-    - https://github.com/MolecularAI/aizynthfinder/archive/v3.4.0.tar.gz
+    - https://github.com/MolecularAI/aizynthfinder/archive/v3.6.0.tar.gz
+    

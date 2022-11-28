@@ -26,6 +26,13 @@ class MctsSearchTree:
     """
 
     def __init__(self, config: Configuration, root_smiles: str = None) -> None:
+
+        self.profiling = {
+            "expansion_calls": 0,
+            "reactants_generations": 0,
+            "iterations": 0,
+        }
+
         if root_smiles:
             self.root: Optional[MctsNode] = MctsNode.create_root(
                 smiles=root_smiles, tree=self, config=config
@@ -34,10 +41,6 @@ class MctsSearchTree:
             self.root = None
         self.config = config
         self._graph: Optional[nx.DiGraph] = None
-        self.profiling = {
-            "expansion_calls": 0,
-            "reactants_generations": 0,
-        }
 
     @classmethod
     def from_json(cls, filename: str, config: Configuration) -> "MctsSearchTree":
@@ -112,6 +115,7 @@ class MctsSearchTree:
 
         :return: if a solution was found
         """
+        self.profiling["iterations"] += 1
         leaf = self.select_leaf()
         leaf.expand()
         rollout_child = None

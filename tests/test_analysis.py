@@ -6,17 +6,17 @@ import pytest
 
 from aizynthfinder.analysis import TreeAnalysis, RouteCollection
 from aizynthfinder.analysis.utils import RouteSelectionArguments
-from aizynthfinder.reactiontree import ReactionTree
+from aizynthfinder.reactiontree import ReactionTree, SUPPORT_DISTANCES
 from aizynthfinder.search.mcts import MctsSearchTree
 from aizynthfinder.context.scoring import StateScorer, NumberOfReactionsScorer
 
 
 def test_sort_nodes(setup_analysis):
-    analysis, nodes = setup_analysis()
+    analysis, _ = setup_analysis()
 
     best_nodes, best_scores = analysis.sort()
 
-    assert len(best_nodes) == 7
+    assert len(best_nodes) == 5
     assert np.round(best_scores[0], 4) == 0.9940
 
     best_nodes, best_scores = analysis.sort(RouteSelectionArguments(nmin=0))
@@ -25,15 +25,15 @@ def test_sort_nodes(setup_analysis):
 
 
 def test_sort_nodes_nmax(setup_analysis):
-    analysis, nodes = setup_analysis()
+    analysis, _ = setup_analysis()
 
-    best_nodes, best_scores = analysis.sort(RouteSelectionArguments(nmax=5))
+    best_nodes, _ = analysis.sort(RouteSelectionArguments(nmax=5))
 
     assert len(best_nodes) == 5
 
 
 def test_sort_nodes_return_all(setup_analysis):
-    analysis, nodes = setup_analysis()
+    analysis, _ = setup_analysis()
 
     best_nodes, best_scores = analysis.sort(RouteSelectionArguments(return_all=True))
 
@@ -55,14 +55,14 @@ def test_sort_routes(setup_analysis_andor_tree):
 
     best_routes, best_scores = analysis.sort()
 
-    assert len(best_routes) == 3
+    assert len(best_routes) == 25
     assert best_scores[0] == 1
 
 
 def test_best_node(setup_analysis):
     analysis, nodes = setup_analysis(scorer=NumberOfReactionsScorer())
 
-    assert analysis.best() is nodes[51]
+    assert analysis.best() is nodes[32]
 
 
 def test_best_route(setup_analysis_andor_tree):
@@ -76,8 +76,8 @@ def test_tree_statistics(setup_analysis):
 
     stats = analysis.tree_statistics()
 
-    assert stats["number_of_nodes"] == 61
-    assert stats["max_transforms"] == 7
+    assert stats["number_of_nodes"] == 40
+    assert stats["max_transforms"] == 6
     assert stats["max_children"] == 10
     assert stats["number_of_routes"] == 10
     assert stats["number_of_solved_routes"] == 1
@@ -86,27 +86,27 @@ def test_tree_statistics(setup_analysis):
     assert stats["number_of_steps"] == 2
     assert stats["number_of_precursors"] == 4
     assert stats["number_of_precursors_in_stock"] == 4
-    mol_str = "CN1CCC(Cl)CC1, O, N#Cc1cccc(N)c1F, O=C(Cl)c1ccc(F)cc1"
+    mol_str = "CN1CCC(Cl)CC1, O, O=C(Cl)c1ccc(F)cc1, N#Cc1cccc(N)c1F"
     assert stats["precursors_in_stock"] == mol_str
     assert stats["precursors_not_in_stock"] == ""
-    assert stats["policy_used_counts"] == {}
+    assert stats["policy_used_counts"] == {"uspto": 39}
 
 
 def test_tree_statistics_andor_tree(setup_analysis_andor_tree):
-    analysis = setup_analysis_andor_tree(scorer=NumberOfReactionsScorer())
+    analysis = setup_analysis_andor_tree()
 
     stats = analysis.tree_statistics()
-    assert stats["number_of_nodes"] == 9
-    assert stats["max_transforms"] == 2
-    assert stats["max_children"] == 2
-    assert stats["number_of_routes"] == 3
-    assert stats["number_of_solved_routes"] == 3
-    assert stats["top_score"] == 1
+    assert stats["number_of_nodes"] == 124
+    assert stats["max_transforms"] == 4
+    assert stats["max_children"] == 32
+    assert stats["number_of_routes"] == 97
+    assert stats["number_of_solved_routes"] == 1
+    assert np.round(stats["top_score"], 3) == 0.994
     assert stats["is_solved"]
-    assert stats["number_of_steps"] == 1
-    assert stats["number_of_precursors"] == 2
-    assert stats["number_of_precursors_in_stock"] == 2
-    mol_str = "Cc1ccc2nc3ccccc3c(Cl)c2c1, Nc1ccc(NC(=S)Nc2ccccc2)cc1"
+    assert stats["number_of_steps"] == 2
+    assert stats["number_of_precursors"] == 3
+    assert stats["number_of_precursors_in_stock"] == 3
+    mol_str = "O=C(Cl)c1ccc(F)cc1, CN1CCC(C(=O)Cl)CC1, Nc1cccc(I)c1F"
     assert stats["precursors_in_stock"] == mol_str
     assert stats["precursors_not_in_stock"] == ""
     assert stats["policy_used_counts"] == {}
@@ -117,7 +117,7 @@ def test_create_route_collection_full(setup_analysis, mocker):
 
     routes = RouteCollection.from_analysis(analysis)
 
-    assert len(routes) == 7
+    assert len(routes) == 5
     # Check a few of the routes
     assert np.round(routes.scores[0], 3) == 0.994
     assert len(routes.reaction_trees[0].graph) == 8
@@ -130,12 +130,12 @@ def test_create_route_collection_full(setup_analysis, mocker):
 
     mocker.patch("aizynthfinder.reactiontree.ReactionTree.to_dict")
     mocker.patch("aizynthfinder.reactiontree.json.dumps")
-    mocker.patch("aizynthfinder.utils.image.make_graphviz_image")
+    mocker.patch("aizynthfinder.reactiontree.RouteImageFactory")
 
     # Just see that the code does not crash, does not verify content
-    assert len(routes.images) == 7
-    assert len(routes.dicts) == 7
-    assert len(routes.jsons) == 7
+    assert len(routes.images) == 5
+    assert len(routes.dicts) == 5
+    assert len(routes.jsons) == 5
 
 
 def test_create_route_collection_andor_tree(setup_analysis_andor_tree):
@@ -143,8 +143,8 @@ def test_create_route_collection_andor_tree(setup_analysis_andor_tree):
 
     routes = RouteCollection.from_analysis(analysis)
 
-    assert len(routes) == 3
-    assert routes.nodes == [None, None, None]
+    assert len(routes) == 21
+    assert routes.nodes == 21 * [None]
 
 
 def test_compute_new_score(setup_analysis):
@@ -186,6 +186,50 @@ def test_dict_with_scores(setup_analysis):
     assert "scores" not in routes.dicts[0]
     assert "scores" in dicts[0]
     assert np.round(dicts[0]["scores"]["state score"], 3) == 0.994
+
+
+def test_dict_with_extras_no_arg(setup_analysis):
+    analysis, _ = setup_analysis()
+    routes = RouteCollection.from_analysis(analysis)
+
+    dicts = routes.dict_with_extra()
+
+    assert "scores" not in dicts[0]
+    assert "metadata" not in dicts[0]
+
+
+def test_dict_with_extras_only_score(setup_analysis):
+    analysis, _ = setup_analysis()
+    routes = RouteCollection.from_analysis(analysis)
+
+    dicts = routes.dict_with_extra(include_scores=True)
+
+    assert "scores" in dicts[0]
+    assert "metadata" not in dicts[0]
+    assert np.round(dicts[0]["scores"]["state score"], 3) == 0.994
+
+
+def test_dict_with_extras_only_metadata(setup_analysis):
+    analysis, _ = setup_analysis()
+    routes = RouteCollection.from_analysis(analysis)
+
+    dicts = routes.dict_with_extra(include_metadata=True)
+
+    assert "scores" not in dicts[0]
+    assert "metadata" in dicts[0]
+    assert dicts[0]["metadata"] == {"created_at_iteration": 0, "is_solved": True}
+
+
+def test_dict_with_extras_all(setup_analysis):
+    analysis, _ = setup_analysis()
+    routes = RouteCollection.from_analysis(analysis)
+
+    dicts = routes.dict_with_extra(include_metadata=True, include_scores=True)
+
+    assert "scores" in dicts[0]
+    assert "metadata" in dicts[0]
+    assert np.round(dicts[0]["scores"]["state score"], 3) == 0.994
+    assert dicts[0]["metadata"] == {"created_at_iteration": 0, "is_solved": True}
 
 
 def test_compute_new_score_for_trees(default_config, setup_linear_reaction_tree):
@@ -239,6 +283,12 @@ def test_create_combine_tree_dict_from_json(load_reaction_tree):
 def test_create_combine_tree_dict_from_tree(
     setup_stock, default_config, load_reaction_tree, shared_datadir
 ):
+    def remove_metadata(tree_dict):
+        if "metadata" in tree_dict:
+            tree_dict["metadata"] = {}
+        for child in tree_dict.get("children", []):
+            remove_metadata(child)
+
     setup_stock(
         default_config,
         "Nc1ccc(NC(=S)Nc2ccccc2)cc1",
@@ -255,9 +305,10 @@ def test_create_combine_tree_dict_from_tree(
     collection = RouteCollection.from_analysis(
         analysis, RouteSelectionArguments(nmin=3)
     )
-    expected = load_reaction_tree("combined_example_tree.json")
+    expected = load_reaction_tree("combined_example_tree2.json")
 
     combined_dict = collection.combined_reaction_trees().to_dict()
+    remove_metadata(combined_dict)  # Mapped reaction SMILES not reproducible!
 
     assert len(combined_dict["children"]) == 2
     assert combined_dict["children"][0]["is_reaction"]
@@ -287,6 +338,9 @@ def test_create_combine_tree_to_visjs(load_reaction_tree, tmpdir):
         assert len([name for name in tarobj.getnames() if name.endswith(".png")]) == 8
 
 
+@pytest.mark.xfail(
+    condition=not SUPPORT_DISTANCES, reason="route_distances not installed"
+)
 def test_distance_collection(load_reaction_tree):
     collection = RouteCollection(
         reaction_trees=[
@@ -311,6 +365,9 @@ def test_distance_collection(load_reaction_tree):
     assert pytest.approx(dist_mat3[2, 1], abs=1e-2) == 0.7483
 
 
+@pytest.mark.xfail(
+    condition=not SUPPORT_DISTANCES, reason="route_distances not installed"
+)
 def test_clustering_collection(load_reaction_tree):
     collection = RouteCollection(
         reaction_trees=[
@@ -327,6 +384,9 @@ def test_clustering_collection(load_reaction_tree):
     assert collection.clusters[1].reaction_trees == [collection.reaction_trees[0]]
 
 
+@pytest.mark.xfail(
+    condition=not SUPPORT_DISTANCES, reason="route_distances not installed"
+)
 def test_clustering_collection_timeout(load_reaction_tree):
     collection = RouteCollection(
         reaction_trees=[

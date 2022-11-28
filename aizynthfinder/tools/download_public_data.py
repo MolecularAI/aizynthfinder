@@ -11,11 +11,19 @@ import tqdm
 FILES_TO_DOWNLOAD = {
     "policy_model": {
         "filename": "uspto_model.hdf5",
-        "url": "https://ndownloader.figshare.com/files/23086454",
+        "url": "https://zenodo.org/record/7341155/files/uspto_keras_model.hdf5",
     },
     "template_file": {
-        "filename": "uspto_templates.hdf5",
-        "url": "https://ndownloader.figshare.com/files/23086457",
+        "filename": "uspto_templates.csv.gz",
+        "url": "https://zenodo.org/record/7341155/files/uspto_unique_templates.csv.gz",
+    },
+    "ringbreaker_model": {
+        "filename": "uspto_ringbreaker_model.hdf5",
+        "url": "https://zenodo.org/record/7341155/files/uspto_ringbreaker_keras_model.hdf5",
+    },
+    "ringbreaker_templates": {
+        "filename": "uspto_ringbreaker_templates.csv.gz",
+        "url": "https://zenodo.org/record/7341155/files/uspto_ringbreaker_unique_templates.csv.gz",
     },
     "stock": {
         "filename": "zinc_stock.hdf5",
@@ -30,6 +38,9 @@ FILES_TO_DOWNLOAD = {
 YAML_TEMPLATE = """policy:
   files:
     uspto:
+      - {}
+      - {}
+    ringbreaker:
       - {}
       - {}
 filter:
@@ -78,6 +89,8 @@ def main() -> None:
             YAML_TEMPLATE.format(
                 os.path.join(path, FILES_TO_DOWNLOAD["policy_model"]["filename"]),
                 os.path.join(path, FILES_TO_DOWNLOAD["template_file"]["filename"]),
+                os.path.join(path, FILES_TO_DOWNLOAD["ringbreaker_model"]["filename"]),
+                os.path.join(path, FILES_TO_DOWNLOAD["ringbreaker_templates"]["filename"]),
                 os.path.join(path, FILES_TO_DOWNLOAD["filter_policy"]["filename"]),
                 os.path.join(path, FILES_TO_DOWNLOAD["stock"]["filename"]),
             )

@@ -17,6 +17,7 @@ class ReactionTreeFromSuperNode(ReactionTreeLoader):
 
     def _load(self, base_node: MctsNode) -> None:  # type: ignore
         actions, nodes = route_to_node(base_node)
+        self.tree.created_at_iteration = base_node.created_at_iteration
         root_mol = nodes[0].state.mols[0]
         self._unique_mols[id(root_mol)] = root_mol.make_unique()
         self._add_node(

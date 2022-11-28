@@ -5,7 +5,13 @@ import json
 import pytest
 import pandas as pd
 
-from aizynthfinder.utils.files import cat_hdf_files, split_file, start_processes
+from aizynthfinder.utils.files import (
+    cat_datafiles,
+    split_file,
+    start_processes,
+    read_datafile,
+    save_datafile,
+)
 
 
 @pytest.fixture
@@ -80,7 +86,7 @@ def test_cat_hdf(create_dummy_stock1, create_dummy_stock2, tmpdir):
     filename = str(tmpdir / "output.hdf")
     inputs = [create_dummy_stock1("hdf5"), create_dummy_stock2]
 
-    cat_hdf_files(inputs, filename)
+    cat_datafiles(inputs, filename)
 
     data = pd.read_hdf(filename, "table")
     assert len(data) == 4
@@ -97,7 +103,7 @@ def test_cat_hdf_no_trees(tmpdir, create_dummy_stock1, create_dummy_stock2):
     tree_filename = str(tmpdir / "trees.json")
     inputs = [create_dummy_stock1("hdf5"), create_dummy_stock2]
 
-    cat_hdf_files(inputs, hdf_filename, tree_filename)
+    cat_datafiles(inputs, hdf_filename, tree_filename)
 
     assert not os.path.exists(tree_filename)
 
@@ -112,10 +118,29 @@ def test_cat_hdf_trees(tmpdir):
     pd.DataFrame({"mol": ["A", "B"], "trees": trees1}).to_hdf(filename1, "table")
     pd.DataFrame({"mol": ["A", "B"], "trees": trees2}).to_hdf(filename2, "table")
 
-    cat_hdf_files([filename1, filename2], hdf_filename, tree_filename)
+    cat_datafiles([filename1, filename2], hdf_filename, tree_filename)
 
     assert os.path.exists(tree_filename + ".gz")
     with gzip.open(tree_filename + ".gz", "rt", encoding="UTF-8") as fileobj:
         trees_cat = json.load(fileobj)
     assert trees_cat == trees1 + trees2
     assert "trees" not in pd.read_hdf(hdf_filename, "table")
+
+
+@pytest.mark.parametrize(
+    ("filename"),
+    [
+        ("temp.json"),
+        ("temp.hdf5"),
+    ],
+)
+def test_save_load_datafile_roundtrip(filename, tmpdir):
+    data1 = pd.DataFrame({"a": [0, 1, 2], "b": [2, 3, 4]})
+
+    save_datafile(data1, tmpdir / filename)
+
+    data2 = read_datafile(tmpdir / filename)
+
+    assert data1.columns.to_list() == data2.columns.to_list()
+    assert data1.a.to_list() == data2.a.to_list()
+    assert data1.b.to_list() == data2.b.to_list()

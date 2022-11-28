@@ -1,8 +1,15 @@
 """ Module containing routines to obtain a MongoClient instance
 """
 from urllib.parse import urlencode
+from typing import Optional
 
-from pymongo import MongoClient
+try:
+    from pymongo import MongoClient
+except ImportError:
+    MongoClient = None
+    HAS_PYMONGO = False
+else:
+    HAS_PYMONGO = True
 
 from aizynthfinder.utils.logging import logger
 
@@ -15,7 +22,7 @@ def get_mongo_client(
     user: str = None,
     password: str = None,
     tls_certs_path: str = "",
-) -> MongoClient:
+) -> Optional[MongoClient]:
     """
     A helper function to create and reuse MongoClient
 
@@ -30,6 +37,9 @@ def get_mongo_client(
     :raises ValueError: if host and port is not given first time
     :return: the MongoDB client
     """
+    if not HAS_PYMONGO:
+        return None
+
     global _CLIENT
     if _CLIENT is None:
         params = {}

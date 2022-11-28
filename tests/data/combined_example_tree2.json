@@ -1,0 +1,103 @@
+{
+    "type": "mol",
+    "hide": false,
+    "smiles": "Cc1ccc2nc3ccccc3c(Nc3ccc(NC(=S)Nc4ccccc4)cc3)c2c1",
+    "is_chemical": true,
+    "in_stock": false,
+    "children": [
+        {
+            "type": "reaction",
+            "hide": false,
+            "smiles": "[c:1]1([N:7][cH3:8])[cH:2][cH:3]:[N:4]:[cH:5][cH:6]1>>Cl[c:1]1[cH:2][cH:3]:[N:4]:[cH:5][cH:6]1.[N:7][cH3:8]",
+            "is_reaction": true,
+            "metadata": {},
+            "children": [
+                {
+                    "type": "mol",
+                    "hide": false,
+                    "smiles": "Cc1ccc2nc3ccccc3c(Cl)c2c1",
+                    "is_chemical": true,
+                    "in_stock": true
+                },
+                {
+                    "type": "mol",
+                    "hide": false,
+                    "smiles": "Nc1ccc(NC(=S)Nc2ccccc2)cc1",
+                    "is_chemical": true,
+                    "in_stock": true
+                }
+            ]
+        },
+        {
+            "type": "reaction",
+            "hide": false,
+            "smiles": "[N:1]([cH3:2])[C:4](=[S:3])[N:5][cH3:6]>>[N:1][cH3:2].[S:3]=[C:4]=[N:5][cH3:6]",
+            "is_reaction": true,
+            "metadata": {},
+            "children": [
+                {
+                    "type": "mol",
+                    "hide": false,
+                    "smiles": "Nc1ccccc1",
+                    "is_chemical": true,
+                    "in_stock": false
+                },
+                {
+                    "type": "mol",
+                    "hide": false,
+                    "smiles": "Cc1ccc2nc3ccccc3c(Nc3ccc(N=C=S)cc3)c2c1",
+                    "is_chemical": true,
+                    "in_stock": false,
+                    "children": [
+                        {
+                            "type": "reaction",
+                            "hide": false,
+                            "smiles": "[c:1]1([N:7][cH3:8])[cH:2][cH:3]:[N:4]:[cH:5][cH:6]1>>Cl[c:1]1[cH:2][cH:3]:[N:4]:[cH:5][cH:6]1.[N:7][cH3:8]",
+                            "is_reaction": true,
+                            "metadata": {},
+                            "children": [
+                                {
+                                    "type": "mol",
+                                    "hide": false,
+                                    "smiles": "Nc1ccc(N=C=S)cc1",
+                                    "is_chemical": true,
+                                    "in_stock": false
+                                },
+                                {
+                                    "type": "mol",
+                                    "hide": false,
+                                    "smiles": "Cc1ccc2nc3ccccc3c(Cl)c2c1",
+                                    "is_chemical": true,
+                                    "in_stock": true
+                                }
+                            ]
+                        },
+                        {
+                            "type": "reaction",
+                            "hide": false,
+                            "smiles": "[c:1]([cH2:2])([cH2:3])[N:4][cH3:5]>>Br[c:1]([cH2:2])[cH2:3].[N:4][cH3:5]",
+                            "is_reaction": true,
+                            "metadata": {},
+                            "children": [
+                                {
+                                    "type": "mol",
+                                    "hide": false,
+                                    "smiles": "Cc1ccc2nc3ccccc3c(N)c2c1",
+                                    "is_chemical": true,
+                                    "in_stock": true
+                                },
+                                {
+                                    "type": "mol",
+                                    "hide": false,
+                                    "smiles": "S=C=Nc1ccc(Br)cc1",
+                                    "is_chemical": true,
+                                    "in_stock": false
+                                }
+                            ]
+                        }
+                    ]
+                }
+            ]
+        }
+    ]
+}

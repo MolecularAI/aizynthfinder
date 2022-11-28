@@ -5,6 +5,7 @@ def test_root_state_properties(generate_root):
     assert round(root.state.score, 4) == 0.0491
     assert root.state.stock_availability == ["Not in stock"]
     assert hash(root.state) == hash(root2.state)
+    assert root.created_at_iteration is None
 
 
 def test_expand_root_node(setup_mcts_search):
@@ -126,3 +127,18 @@ def test_expand_dead_end(setup_policies, generate_root):
 
     assert not node.is_expandable
     assert not node.is_expanded
+
+
+def test_expand_recursive(setup_policies, generate_root, default_config):
+    """This was implemented to check that a non-recursive version
+    of `promising_child` did not raise a recursion exception"""
+    root_smiles = "CCCCOc1ccc(CC(=O)N(C)O)cc1"
+    expansions = {root_smiles: [{"smiles": "", "prior": 0.01} for _ in range(1000)]}
+    setup_policies(expansions)
+    default_config.cutoff_number = 1000
+    node = generate_root(root_smiles, default_config)
+    node.expand()
+
+    child = node.promising_child()
+
+    assert child is None

@@ -317,12 +317,9 @@ def setup_analysis(default_config, shared_datadir, tmpdir, setup_stock):
 def setup_analysis_andor_tree(default_config, shared_datadir, setup_stock):  # noqa
     setup_stock(
         default_config,
-        "Nc1ccc(NC(=S)Nc2ccccc2)cc1",
-        "Cc1ccc2nc3ccccc3c(Cl)c2c1",
-        "Nc1ccccc1",
-        "Nc1ccc(N=C=S)cc1",
-        "Cc1ccc2nc3ccccc3c(Br)c2c1",
-        "Nc1ccc(Br)cc1",
+        "O=C(Cl)c1ccc(F)cc1",
+        "CN1CCC(C(=O)Cl)CC1",
+        "Nc1cccc(I)c1F",
     )
 
     class BasicAndOrTree(AndOrSearchTreeBase):

@@ -7,19 +7,26 @@ from typing import TYPE_CHECKING
 
 import numpy as np
 import requests
-import grpc
 import tensorflow as tf
-from google.protobuf.json_format import MessageToDict
-from tensorflow_serving.apis import (
-    predict_pb2,
-    get_model_metadata_pb2,
-    prediction_service_pb2_grpc,
-)
 
-# pylint: disable=no-name-in-module
+try:
+    import grpc
+    from google.protobuf.json_format import MessageToDict
+    from tensorflow_serving.apis import (
+        predict_pb2,
+        get_model_metadata_pb2,
+        prediction_service_pb2_grpc,
+    )
+except ImportError:
+    SUPPORT_EXTERNAL_APIS = False
+else:
+    SUPPORT_EXTERNAL_APIS = True
+
+# pylint: disable=all
 from tensorflow.keras.metrics import top_k_categorical_accuracy
 from tensorflow.keras.models import load_model as load_keras_model
 
+# pylint: enable=all
 from aizynthfinder.utils.logging import logger
 from aizynthfinder.utils.exceptions import ExternalModelAPIError
 
@@ -129,6 +136,9 @@ class ExternalModelViaREST:
     """
 
     def __init__(self, name: str) -> None:
+        if not SUPPORT_EXTERNAL_APIS:
+            raise ExternalModelAPIError("API packages are not installed.")
+
         self._model_url = self._get_model_url(name)
         self._sig_def = self._get_sig_def()
 
@@ -204,6 +214,9 @@ class ExternalModelViaGRPC:
     """
 
     def __init__(self, name: str) -> None:
+        if not SUPPORT_EXTERNAL_APIS:
+            raise ExternalModelAPIError("API packages are not installed.")
+
         self._server = self._get_server(name)
         self._model_name = name
         self._sig_def = self._get_sig_def()

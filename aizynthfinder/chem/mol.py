@@ -11,7 +11,16 @@ from aizynthfinder.utils.exceptions import MoleculeException
 
 
 if TYPE_CHECKING:
-    from aizynthfinder.utils.type_utils import Dict, Optional, Union, Tuple, RdMol
+    from aizynthfinder.utils.type_utils import (
+        Dict,
+        Optional,
+        Union,
+        Tuple,
+        RdMol,
+        Sequence,
+        List,
+        Callable,
+    )
 
 
 class Molecule:
@@ -50,6 +59,11 @@ class Molecule:
         self._inchi: Optional[str] = None
         self._fingerprints: Dict[Union[Tuple[int, int], Tuple[int]], np.ndarray] = {}
         self._is_sanitized: bool = False
+
+        # Atom mapping -> atom index dictionary
+        self._atom_mappings: Dict[int, int] = {}
+        # Atom index -> atom mapping dictionary
+        self._reverse_atom_mappings: Dict[int, int] = {}
 
         if sanitize:
             self.sanitize()
@@ -97,6 +111,26 @@ class Molecule:
             if self._inchi_key is None:
                 raise MoleculeException("Could not make InChI key")
         return self._inchi_key
+
+    @property
+    def index_to_mapping(self) -> Dict[int, int]:
+        """Return a dictionary mapping to atom indices to atom mappings"""
+        if not self._reverse_atom_mappings:
+            self._reverse_atom_mappings = {
+                index: mapping for mapping, index in self.mapping_to_index.items()
+            }
+        return self._reverse_atom_mappings
+
+    @property
+    def mapping_to_index(self) -> Dict[int, int]:
+        """Return a dictionary mapping to atom mappings to atom indices"""
+        if not self._atom_mappings:
+            self._atom_mappings = {
+                atom.GetAtomMapNum(): atom.GetIdx()
+                for atom in self.rd_mol.GetAtoms()
+                if atom.GetAtomMapNum()
+            }
+        return self._atom_mappings
 
     @property
     def weight(self) -> float:
@@ -153,13 +187,19 @@ class Molecule:
         """
         return UniqueMolecule(rd_mol=self.rd_mol)
 
-    def remove_atom_mapping(self) -> None:
+    def remove_atom_mapping(self, exceptions: Sequence[int] = None) -> None:
         """
         Remove all mappings of the atoms and update the smiles
+
+        :param exceptions: keep the listed atom mappings
         """
+        exceptions = exceptions or []
         for atom in self.rd_mol.GetAtoms():
+            if exceptions and atom.GetAtomMapNum() in exceptions:
+                continue
             atom.SetAtomMapNum(0)
         self.smiles = Chem.MolToSmiles(self.rd_mol)
+        self._clear_cache()
 
     def sanitize(self, raise_exception: bool = True) -> None:
         """
@@ -181,10 +221,15 @@ class Molecule:
             return
 
         self.smiles = Chem.MolToSmiles(self.rd_mol)
+        self._clear_cache()
+        self._is_sanitized = True
+
+    def _clear_cache(self):
         self._inchi = None
         self._inchi_key = None
         self._fingerprints = {}
-        self._is_sanitized = True
+        self._atom_mappings = {}
+        self._reverse_atom_mappings = {}
 
 
 class TreeMolecule(Molecule):
@@ -194,17 +239,26 @@ class TreeMolecule(Molecule):
     If the class is instantiated without specifying the `transform` argument,
     it is computed by increasing the value of the `parent.transform` variable.
 
+    If no parent is provided the atoms with atom mapping number are tracked
+    and inherited to children.
+
+    :ivar mapped_mol: the tracked molecule with atom mappings
+    :ivar mapped_smiles: the SMILES of the tracked molecule with atom mappings
+    :ivar original_smiles: the SMILES as passed when instantiating the class
     :ivar parent: parent molecule
     :ivar transform: a numerical number corresponding to the depth in the tree
+    :ivar tracked_atom_indices: tracked atom indices and what indices they correspond to in this molecule
 
     :param parent: a TreeMolecule object that is the parent
     :param transform: the transform value, defaults to None
     :param rd_mol: a RDKit mol object to encapsulate, defaults to None
     :param smiles: a SMILES to convert to a molecule object, defaults to None
     :param sanitize: if True, the molecule will be immediately sanitized, defaults to False
+    :param mapping_update_callback: if given will call this method before setting up the `mapped_smiles`
     :raises MoleculeException: if neither rd_mol or smiles is given, or if the molecule could not be sanitized
     """
 
+    # pylint: disable=too-many-arguments
     def __init__(
         self,
         parent: Optional["TreeMolecule"],
@@ -212,6 +266,7 @@ class TreeMolecule(Molecule):
         rd_mol: RdMol = None,
         smiles: str = None,
         sanitize: bool = False,
+        mapping_update_callback: Callable[["TreeMolecule"], None] = None,
     ) -> None:
         super().__init__(rd_mol=rd_mol, smiles=smiles, sanitize=sanitize)
         self.parent = parent
@@ -219,6 +274,55 @@ class TreeMolecule(Molecule):
             self.transform: int = parent.transform + 1
         else:
             self.transform = transform or 0
+
+        self.original_smiles = smiles
+        self.tracked_atom_indices: Dict[int, Optional[int]] = {}
+        self.mapped_mol = Chem.Mol(self.rd_mol)
+        if not self.parent:
+            self._init_tracking()
+        elif mapping_update_callback is not None:
+            mapping_update_callback(self)
+
+        AllChem.SanitizeMol(self.mapped_mol)
+        self.mapped_smiles = Chem.MolToSmiles(self.mapped_mol)
+
+        if self.parent:
+            self.remove_atom_mapping()
+            self._update_tracked_atoms()
+
+    @property
+    def mapping_to_index(self) -> Dict[int, int]:
+        """Return a dictionary mapping to atom mappings to atom indices"""
+        if not self._atom_mappings:
+            self._atom_mappings = {
+                atom.GetAtomMapNum(): atom.GetIdx()
+                for atom in self.mapped_mol.GetAtoms()
+                if atom.GetAtomMapNum()
+            }
+        return self._atom_mappings
+
+    def _init_tracking(self):
+        self.tracked_atom_indices = dict(self.mapping_to_index)
+        for idx, atom in enumerate(self.mapped_mol.GetAtoms()):
+            atom.SetAtomMapNum(idx + 1)
+        self._atom_mappings = {}
+
+    def _update_tracked_atoms(self) -> None:
+        if self.parent is None:
+            return
+
+        if not self.parent.tracked_atom_indices:
+            return
+
+        parent2child_map = {
+            atom_index: self.mapping_to_index.get(mapping_index)
+            for mapping_index, atom_index in self.parent.mapping_to_index.items()
+        }
+
+        self.tracked_atom_indices = {
+            tracked_index: parent2child_map[parent_index]  # type: ignore
+            for tracked_index, parent_index in self.parent.tracked_atom_indices.items()
+        }
 
 
 class UniqueMolecule(Molecule):

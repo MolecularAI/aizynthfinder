@@ -70,6 +70,11 @@ class MctsNode:
         self.is_expandable: bool = not self.state.is_terminal
         self._parent = parent
 
+        if owner is None:
+            self.created_at_iteration: Optional[int] = None
+        else:
+            self.created_at_iteration = self.tree.profiling["iterations"]
+
         self._children_values: List[float] = []
         self._children_priors: List[float] = []
         self._children_visitations: List[int] = []
@@ -274,13 +279,17 @@ class MctsNode:
 
         :return: the child
         """
-        scores = self._children_q() + self._children_u()
-        indices = np.where(scores == scores.max())[0]
-        index = np.random.choice(indices)
 
-        child = self._select_child(index)
-        if not child and max(self._children_values) > 0:
-            return self.promising_child()
+        def _score_and_select():
+            scores = self._children_q() + self._children_u()
+            indices = np.where(scores == scores.max())[0]
+            index = np.random.choice(indices)
+
+            return self._select_child(index)
+
+        child = None
+        while child is None and max(self._children_values) > 0:
+            child = _score_and_select()
 
         if not child:
             self._logger.debug(

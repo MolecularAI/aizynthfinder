@@ -3,28 +3,35 @@ import os
 import pytest
 import pandas as pd
 import numpy as np
-from scipy import sparse
 
-from aizynthfinder.training.utils import (
-    Config,
-    create_reactants_molecules,
-    reverse_template,
-    reaction_hash,
-    split_and_save_data,
-    smiles_to_fingerprint,
-    is_sanitizable,
-    reaction_to_fingerprints,
-)
-from aizynthfinder.training.keras_models import (
-    ExpansionModelSequence,
-    FilterModelSequence,
-)
-from aizynthfinder.training.make_false_products import (
-    strict_application,
-    random_application,
-    recommender_application,
-)
 from aizynthfinder.chem import Molecule
+
+try:
+    from scipy import sparse
+
+    from aizynthfinder.training.utils import (
+        Config,
+        create_reactants_molecules,
+        reverse_template,
+        reaction_hash,
+        split_and_save_data,
+        smiles_to_fingerprint,
+        is_sanitizable,
+        reaction_to_fingerprints,
+    )
+    from aizynthfinder.training.keras_models import (
+        ExpansionModelSequence,
+        FilterModelSequence,
+    )
+    from aizynthfinder.training.make_false_products import (
+        strict_application,
+        random_application,
+        recommender_application,
+    )
+except ImportError:
+    SUPPORT_TRAINING = False
+else:
+    SUPPORT_TRAINING = True
 
 
 @pytest.fixture
@@ -60,6 +67,7 @@ def expansion_model_sequence(mocker, default_config):
     return ExpansionModelSequence(default_config, "training")
 
 
+@pytest.mark.xfail(condition=not SUPPORT_TRAINING, reason="Dependencies not installed")
 def test_empty_config(default_config, write_yaml):
     filename = write_yaml({})
 
@@ -68,6 +76,7 @@ def test_empty_config(default_config, write_yaml):
     assert config._config == default_config._config
 
 
+@pytest.mark.xfail(condition=not SUPPORT_TRAINING, reason="Dependencies not installed")
 def test_update_single_setting(default_config, write_yaml):
     filename = write_yaml({"fingerprint_len": 10})
 
@@ -77,6 +86,7 @@ def test_update_single_setting(default_config, write_yaml):
     assert config["template_occurrence"] == default_config["template_occurrence"]
 
 
+@pytest.mark.xfail(condition=not SUPPORT_TRAINING, reason="Dependencies not installed")
 def test_update_nested_setting(default_config, write_yaml):
     filename = write_yaml(
         {"split_size": {"training": 0.8, "testing": 0.1, "validation": 0.1}}
@@ -90,6 +100,7 @@ def test_update_nested_setting(default_config, write_yaml):
     assert config["split_size"]["validation"] == 0.1
 
 
+@pytest.mark.xfail(condition=not SUPPORT_TRAINING, reason="Dependencies not installed")
 def test_update_invalid_setting(default_config, write_yaml):
     filename = write_yaml(
         {"fingerprint_len": {"training": 0.8, "testing": 0.1, "validation": 0.1}}
@@ -100,6 +111,7 @@ def test_update_invalid_setting(default_config, write_yaml):
     assert config["fingerprint_len"] == default_config["fingerprint_len"]
 
 
+@pytest.mark.xfail(condition=not SUPPORT_TRAINING, reason="Dependencies not installed")
 def test_config_filename(default_config):
 
     filename = default_config.filename("raw_library")
@@ -111,6 +123,7 @@ def test_config_filename(default_config):
     assert filename.endswith("something")
 
 
+@pytest.mark.xfail(condition=not SUPPORT_TRAINING, reason="Dependencies not installed")
 def test_split_and_save_data_frame(tmpdir, default_config):
     default_config["output_path"] = str(tmpdir)
     default_config["file_prefix"] = "dummy"
@@ -141,6 +154,7 @@ def test_split_and_save_data_frame(tmpdir, default_config):
     assert len(data_read) == 5
 
 
+@pytest.mark.xfail(condition=not SUPPORT_TRAINING, reason="Dependencies not installed")
 def test_split_and_save_data_ndarray(tmpdir, default_config):
     default_config["output_path"] = str(tmpdir)
     default_config["file_prefix"] = "dummy"
@@ -171,6 +185,7 @@ def test_split_and_save_data_ndarray(tmpdir, default_config):
     assert len(data_read) == 5
 
 
+@pytest.mark.xfail(condition=not SUPPORT_TRAINING, reason="Dependencies not installed")
 def test_split_and_save_data_sparse(default_config, tmpdir):
     default_config["output_path"] = str(tmpdir)
     default_config["file_prefix"] = "dummy"
@@ -201,6 +216,7 @@ def test_split_and_save_data_sparse(default_config, tmpdir):
     assert data_read.shape[0] == 5
 
 
+@pytest.mark.xfail(condition=not SUPPORT_TRAINING, reason="Dependencies not installed")
 def test_smiles_to_fingerprint(default_config):
     default_config["fingerprint_len"] = 10
 
@@ -209,6 +225,7 @@ def test_smiles_to_fingerprint(default_config):
     assert sum(fingerprint) == 1
 
 
+@pytest.mark.xfail(condition=not SUPPORT_TRAINING, reason="Dependencies not installed")
 def test_is_sanitizable():
 
     flag = is_sanitizable(("O"))
@@ -218,6 +235,7 @@ def test_is_sanitizable():
     assert not flag
 
 
+@pytest.mark.xfail(condition=not SUPPORT_TRAINING, reason="Dependencies not installed")
 def test_reaction_to_fingerprint(default_config):
     default_config["fingerprint_len"] = 10
     product_smiles = "[Cl:1][c:2]1[c:3]([C:4](=[O:5])[C:12]([F:11])([F:13])[F:14])[cH:6][c:7]([F:10])[cH:8][cH:9]1"  # noqa
@@ -230,12 +248,14 @@ def test_reaction_to_fingerprint(default_config):
     assert list(fingerprint) == [-1, -1, -1, 0, -1, 0, 0, -1, 0, -1]
 
 
+@pytest.mark.xfail(condition=not SUPPORT_TRAINING, reason="Dependencies not installed")
 def test_expansion_model_sequence_loading(expansion_model_sequence):
 
     assert expansion_model_sequence.input_dim == 10
     assert expansion_model_sequence.output_dim == 100
 
 
+@pytest.mark.xfail(condition=not SUPPORT_TRAINING, reason="Dependencies not installed")
 def test_expansion_model_sequence_slicing(expansion_model_sequence, default_config):
     seq = expansion_model_sequence
 
@@ -247,11 +267,13 @@ def test_expansion_model_sequence_slicing(expansion_model_sequence, default_conf
     assert ybatch.shape[1] == expansion_model_sequence.output_dim
 
 
+@pytest.mark.xfail(condition=not SUPPORT_TRAINING, reason="Dependencies not installed")
 def test_filter_model_sequence_loading(filter_model_sequence):
 
     assert filter_model_sequence.input_dim == 10
 
 
+@pytest.mark.xfail(condition=not SUPPORT_TRAINING, reason="Dependencies not installed")
 def test_filter_model_sequence_slicing(filter_model_sequence, default_config):
     seq = filter_model_sequence
 
@@ -264,6 +286,7 @@ def test_filter_model_sequence_slicing(filter_model_sequence, default_config):
     assert xbatch[1].shape[1] == filter_model_sequence.input_dim
 
 
+@pytest.mark.xfail(condition=not SUPPORT_TRAINING, reason="Dependencies not installed")
 def test_reactants_molecules():
     reactants_str = "C[O:5][C:4](=O)[c:3]1[c:2]([Cl:1])[cH:9][cH:8][c:7]([F:10])[cH:6]1.C[Si](C)(C)[C:12]([F:11])([F:13])[F:14].COCCOC.Cl.[Cs+].[F-]"  # noqa
 
@@ -277,6 +300,7 @@ def test_reactants_molecules():
     assert mols[1].smiles == "C[Si](C)(C)[C:12]([F:11])([F:13])[F:14]"
 
 
+@pytest.mark.xfail(condition=not SUPPORT_TRAINING, reason="Dependencies not installed")
 def test_reverse_template():
     retro_template = "([C:2]-[C:3](=[O;D1;H0:4])-[N;H0;D3;+0:5](-[CH3;D1;+0:1])-[c:6])>>(I-[CH3;D1;+0:1]).([C:2]-[C:3](=[O;D1;H0:4])-[NH;D2;+0:5]-[c:6])"  # noqa
     expected = "(I-[CH3;D1;+0:1]).([C:2]-[C:3](=[O;D1;H0:4])-[NH;D2;+0:5]-[c:6])>>([C:2]-[C:3](=[O;D1;H0:4])-[N;H0;D3;+0:5](-[CH3;D1;+0:1])-[c:6])"  # noqa
@@ -284,6 +308,7 @@ def test_reverse_template():
     assert reverse_template(retro_template) == expected
 
 
+@pytest.mark.xfail(condition=not SUPPORT_TRAINING, reason="Dependencies not installed")
 def test_reaction_hash():
     reactants_str = "C[O:5][C:4](=O)[c:3]1[c:2]([Cl:1])[cH:9][cH:8][c:7]([F:10])[cH:6]1.C[Si](C)(C)[C:12]([F:11])([F:13])[F:14].COCCOC.Cl.[Cs+].[F-].[Na+].[OH-]"  # noqa
     product = Molecule(
@@ -316,6 +341,7 @@ def library_data(shared_datadir, default_config):
     return library, default_config
 
 
+@pytest.mark.xfail(condition=not SUPPORT_TRAINING, reason="Dependencies not installed")
 def test_strict_application(library_data):
     library, config = library_data
     errors = []
@@ -336,6 +362,7 @@ def test_strict_application(library_data):
         next(gen)
 
 
+@pytest.mark.xfail(condition=not SUPPORT_TRAINING, reason="Dependencies not installed")
 def test_random_application(library_data):
     library, config = library_data
     errors = []
@@ -357,6 +384,7 @@ def test_random_application(library_data):
         next(gen)
 
 
+@pytest.mark.xfail(condition=not SUPPORT_TRAINING, reason="Dependencies not installed")
 def test_recommender_application(library_data, mocker):
     mocked_load_model = mocker.patch(
         "aizynthfinder.training.make_false_products.load_keras_model"

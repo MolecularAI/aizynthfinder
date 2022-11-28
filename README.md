@@ -18,7 +18,7 @@ Before you begin, ensure you have met the following requirements:
 
 * Linux, Windows or macOS platforms are supported - as long as the dependencies are supported on these platforms.
 
-* You have installed [anaconda](https://www.anaconda.com/) or [miniconda](https://docs.conda.io/en/latest/miniconda.html) with python 3.6 - 3.9
+* You have installed [anaconda](https://www.anaconda.com/) or [miniconda](https://docs.conda.io/en/latest/miniconda.html) with python 3.8 - 3.9
 
 The tool has been developed on a Linux platform, but the software has been tested on Windows 10 and macOS Catalina.
 
@@ -29,15 +29,16 @@ The tool has been developed on a Linux platform, but the software has been teste
 
 First time, execute the following command in a console or an Anaconda prompt
 
-    conda env create -f https://raw.githubusercontent.com/MolecularAI/aizynthfinder/master/env-users.yml
+    conda create "python>=3.8,<3.10" -n aizynth-env
     
-And if you want to update the environment
-
-    conda env update -n aizynth-env -f https://raw.githubusercontent.com/MolecularAI/aizynthfinder/master/env-users.yml
-    
-The package is now installed in a new conda environment, that you need to activate each time you want to use it
+To install, activate the environment and install the package using pypi
 
     conda activate aizynth-env
+    python -m pip install aizynthfinder[all]
+
+for a smaller package, without all the functionality, you can also type
+
+    python -m pip install aizynthfinder
 
 ### For developers
 
@@ -47,34 +48,9 @@ Then execute the following commands in the root of the repository
 
     conda env create -f env-dev.yml
     conda activate aizynth-dev
-    poetry install
+    poetry install -E all
     
 the `aizynthfinder` package is now installed in editable mode.
-
-### Troubleshooting
-
-If the above simple instructions does not work, here are the more detailed instructions. You might have to modify conda channels or similar if the dependencies fails to install on your OS.
-
-First, install these conda packages
-
-    conda install -c conda-forge "rdkit=>2019.09.1" -y
-    conda install graphviz -y
-
-Secondly, install the ``aizynthfinder`` package
-
-    python -m pip install https://github.com/MolecularAI/aizynthfinder/archive/v3.4.0.tar.gz
-
-
-if you want to install the latest version
-
-or, if you have cloned this repository
- 
-    conda install poetry
-    python poetry
-
-
-> Note on the graphviz installation: this package does not depend on any third-party python interfaces to graphviz but instead calls the `dot` executable directly. If the executable is not in the `$PATH` environmental variable, the generation of route images will not work. If unable to install it properly with the default conda channel, try using `-c anaconda`.
-
 
 ## Usage
 
@@ -148,6 +124,7 @@ Please use ``black`` package for formatting, and follow ``pep8`` style guide.
 * [@SGenheden](https://www.github.com/SGenheden)
 * [@EBjerrum](https://www.github.com/EBjerrum)
 * [@A-Thakkar](https://www.github.com/A-Thakkar)
+* [@benteb](https://www.github.com/benteb)
 
 The contributors have limited time for support questions, but please do not hesitate to submit an issue (see above).
 

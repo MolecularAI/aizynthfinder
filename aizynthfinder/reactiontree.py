@@ -8,7 +8,13 @@ from typing import TYPE_CHECKING
 
 import networkx as nx
 from networkx.algorithms.traversal.depth_first_search import dfs_tree
-from route_distances.route_distances import route_distances_calculator
+
+try:
+    from route_distances.route_distances import route_distances_calculator
+except ImportError:
+    SUPPORT_DISTANCES = False
+else:
+    SUPPORT_DISTANCES = True
 
 from aizynthfinder.chem import (
     Molecule,
@@ -16,7 +22,7 @@ from aizynthfinder.chem import (
     FixedRetroReaction,
     none_molecule,
 )
-from aizynthfinder.utils.image import make_graphviz_image
+from aizynthfinder.utils.image import RouteImageFactory
 
 
 if TYPE_CHECKING:
@@ -28,6 +34,7 @@ if TYPE_CHECKING:
         Iterable,
         Any,
         Dict,
+        Optional,
     )
     from aizynthfinder.chem import RetroReaction
 
@@ -43,12 +50,14 @@ class ReactionTree:
     :ivar graph: the bipartite graph
     :ivar is_solved: if all of the leaf nodes are in stock
     :ivar root: the root of the tree
+    :ivar created_at_iteration: iteration the reaction tree was created
     """
 
     def __init__(self) -> None:
         self.graph = nx.DiGraph()
         self.root = none_molecule()
         self.is_solved: bool = False
+        self.created_at_iteration: Optional[int] = None
 
     @classmethod
     def from_dict(cls, tree_dict: StrDict) -> "ReactionTree":
@@ -66,6 +75,14 @@ class ReactionTree:
         :returns: the reaction tree
         """
         return ReactionTreeFromDict(tree_dict).tree
+
+    @property
+    def metadata(self) -> StrDict:
+        """Return a dicitionary with route metadata"""
+        return {
+            "created_at_iteration": self.created_at_iteration,
+            "is_solved": self.is_solved,
+        }
 
     def depth(self, node: Union[UniqueMolecule, FixedRetroReaction]) -> int:
         """
@@ -87,6 +104,11 @@ class ReactionTree:
         :param content: determine what part of the tree to include in the calculation
         :return: the distance between the routes
         """
+        if not SUPPORT_DISTANCES:
+            raise ValueError(
+                "Distance calculations are not supported by this installation."
+                " Please install aizynthfinder with extras dependencies."
+            )
         calculator = route_distances_calculator("ted", content=content)
         distances = calculator([self.to_dict(), other.to_dict()])
         return distances[0, 1]
@@ -177,13 +199,13 @@ class ReactionTree:
             if node is not self.root and self.graph[node]:
                 yield create_subtree(node)
 
-    def to_dict(self) -> StrDict:
+    def to_dict(self, include_metadata=False) -> StrDict:
         """
         Returns the reaction tree as a dictionary in a pre-defined format.
-
+        :param include_metadata: if True include metadata
         :return: the reaction tree
         """
-        return self._build_dict(self.root)
+        return self._build_dict(self.root, include_metadata=include_metadata)
 
     def to_image(
         self,
@@ -193,56 +215,36 @@ class ReactionTree:
         """
         Return a pictorial representation of the route
 
-        :raises ValueError: if image could not be produced
         :param in_stock_colors: the colors around molecules, defaults to {True: "green", False: "orange"}
         :param show_all: if True, also show nodes that are marked as hidden
         :return: the image of the route
         """
-
-        def show(node_):
-            return not self.graph.nodes[node_].get("hide", False)
-
-        in_stock_colors = in_stock_colors or {True: "green", False: "orange"}
-        molecules = []
-        frame_colors = []
-        mols = sorted(
-            self.molecules(),
-            key=lambda mol: (
-                self.depth(mol),
-                mol.weight,
-            ),
+        factory = RouteImageFactory(
+            self.to_dict(), in_stock_colors=in_stock_colors, show_all=show_all
         )
-        for node in mols:
-            if not show_all and not show(node):
-                continue
-            molecules.append(node)
-            frame_colors.append(in_stock_colors[self.in_stock(node)])
+        return factory.image
 
-        reactions = [node for node in self.reactions() if show_all or show(node)]
-        edges = [
-            (node1, node2)
-            for node1, node2 in self.graph.edges()
-            if show_all or (show(node1) and show(node2))
-        ]
-
-        try:
-            return make_graphviz_image(molecules, reactions, edges, frame_colors)
-        except FileNotFoundError as err:
-            raise ValueError(str(err))
-
-    def to_json(self) -> str:
+    def to_json(self, include_metadata=False) -> str:
         """
         Returns the reaction tree as a JSON string in a pre-defined format.
 
         :return: the reaction tree
         """
-        return json.dumps(self.to_dict(), sort_keys=False, indent=2)
+        return json.dumps(
+            self.to_dict(include_metadata=include_metadata), sort_keys=False, indent=2
+        )
 
     def _build_dict(
-        self, node: Union[UniqueMolecule, FixedRetroReaction], dict_: StrDict = None
+        self,
+        node: Union[UniqueMolecule, FixedRetroReaction],
+        dict_: StrDict = None,
+        include_metadata=False,
     ) -> StrDict:
         if dict_ is None:
             dict_ = {}
+
+        if node is self.root and include_metadata:
+            dict_["route_metadata"] = self.metadata
 
         dict_["type"] = "mol" if isinstance(node, Molecule) else "reaction"
         dict_["hide"] = self.graph.nodes[node].get("hide", False)
@@ -333,10 +335,13 @@ class ReactionTreeLoader(abc.ABC):
     def _unique_reaction(self, reaction: RetroReaction) -> FixedRetroReaction:
         id_ = id(reaction)
         if id_ not in self._unique_reactions:
+            metadata = dict(reaction.metadata)
+            if ":" in reaction.mapped_reaction_smiles():
+                metadata["mapped_reaction_smiles"] = reaction.mapped_reaction_smiles()
             self._unique_reactions[id_] = FixedRetroReaction(
                 self._unique_mol(reaction.mol),
                 smiles=reaction.smiles,
-                metadata=reaction.metadata,
+                metadata=metadata,
             )
         return self._unique_reactions[id_]
 
@@ -345,6 +350,10 @@ class ReactionTreeFromDict(ReactionTreeLoader):
     """Creates a reaction tree object from a dictionary"""
 
     def _load(self, tree_dict: StrDict) -> None:  # type: ignore
+        if tree_dict.get("route_metadata"):
+            self.tree.created_at_iteration = tree_dict["route_metadata"].get(
+                "created_at_iteration"
+            )
         self._parse_tree_dict(tree_dict)
 
     def _parse_tree_dict(self, tree_dict: StrDict, ncalls: int = 0) -> UniqueMolecule:

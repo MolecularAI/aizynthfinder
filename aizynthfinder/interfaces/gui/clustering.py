@@ -3,12 +3,19 @@
 from __future__ import annotations
 from typing import TYPE_CHECKING
 
-import matplotlib.pylab as plt
 import numpy as np
 from ipywidgets import Output, Label, BoundedIntText, Button, HBox, Tab
 from IPython.display import display
-from scipy.cluster.hierarchy import dendrogram
-from route_distances.clustering import ClusteringHelper
+
+try:
+    import matplotlib.pylab as plt
+    from scipy.cluster.hierarchy import dendrogram
+    from route_distances.clustering import ClusteringHelper
+except ImportError:
+    raise ImportError(
+        "Clustering is not supported by this installation."
+        " Please install aizynthfinder with extras dependencies."
+    )
 
 
 if TYPE_CHECKING:

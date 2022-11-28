@@ -52,6 +52,25 @@ def test_load_expansion_policy(default_config, setup_template_expansion_policy):
         expansion_policy.load(5)
 
 
+def test_load_expansion_policy_templates_from_csv(
+    default_config, mock_keras_model, tmpdir
+):
+    templates_filename = str(tmpdir / "temp.csv")
+
+    with open(templates_filename, "w") as fileobj:
+        fileobj.write("template_index\ttemplate\tmetadata\n")
+        fileobj.write("0\tAAA\tmetadata1\n")
+        fileobj.write("1\tBBB\tmetadata2\n")
+        fileobj.write("2\tCCC\tmetadata3\n")
+
+    strategy = TemplateBasedExpansionStrategy(
+        "default", default_config, source="dummy.hdf5", templatefile=templates_filename
+    )
+
+    assert len(strategy.templates) == 3
+    assert list(strategy.templates.columns) == ["template", "metadata"]
+
+
 def test_load_expansion_policy_from_config_files(
     default_config, mock_keras_model, create_dummy_templates
 ):

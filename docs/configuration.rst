@@ -66,7 +66,7 @@ A more detailed configuration file is shown below
 
 The (expansion) policy models are specified using two files
     * a checkpoint files from Keras in hdf5 format,
-    * a HDF5 file containing templates. 
+    * a HDF5 or a CSV file containing templates. 
 
 The filter policy model is specified using a single checkpoint file from Keras in hdf5 format. Any additional
 filters can be specified using the classname, and a tag as seen above using ``reactants_count`` with the flag
@@ -75,8 +75,12 @@ filters can be specified using the classname, and a tag as seen above using ``re
 The template file should be readable by ``pandas`` using  the ``table`` key and the ``retro_template`` column. 
 A policy can then be selected using the provided key, like ``my_policy`` in the above example. 
 
-The stock files should be HDF5 files with the ``table`` key an the ``inchi_key`` column. The column
-should contain pre-computed inchi keys of the molecules. 
+The stock files can be 
+     * HDF5 files with the ``table`` key an the ``inchi_key`` column. 
+     * A CSV file with a ``inchi_key`` column
+     * A text file a single column
+
+In all cases, the column should contain pre-computed inchi keys of the molecules.
 The stocks can then be selected using the provided key, like ``stock1`` or ``stock2`` in the above example.
 
 The values in the ``properties`` sections are optional, and if missing, default values are provided.
@@ -101,4 +105,19 @@ filter_cutoff             0.05           the cut-off for the quick-filter policy
 prune_cycles_in_search    True           prevents the MCTS from creating cycles by recreating previously seen molecules when it is expanded
 additive_expansion        False          If true, reactions from all selected expansion policies will be appended, otherwise only the first non-empty expansion will be used
 search_algorithm          mcts           The search algorithm. Can be set to `package.module.ClassName` to use a custom search method
+use_rdchiral              True           If true, will apply templates with RDChiral, otherwise RDKit will be used
+use_remote_models         False          If true, will try to connect to remote Tensorflow servers
+post_processing           N/A              post-processing specifications
+========================= ============== ===========
+
+
+The ``post_processing`` property is a dictionary with the following settings
+
+========================= ============== ===========
+Setting                   Default value  Description
+========================= ============== ===========
+min_routes                5              the minumum number of routes to extract if ``all_routes`` is not set
+max_routes                25             the maximum number of routes to extract if ``all_routes`` is not set
+all_routes                False          if True, will extract all solved routes
+route_distance_model      N/A            if set will load the quick route distance model from this checkpoint file
 ========================= ============== ===========
