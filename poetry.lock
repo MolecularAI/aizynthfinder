@@ -584,7 +584,7 @@ python-versions = ">=3.7"
 
 [[package]]
 name = "fsspec"
-version = "2022.11.0"
+version = "2023.1.0"
 description = "File-system specification"
 category = "main"
 optional = true
@@ -1236,11 +1236,11 @@ python-versions = "*"
 
 [[package]]
 name = "more-itertools"
-version = "8.14.0"
+version = "9.1.0"
 description = "More routines for operating on iterables, beyond itertools"
 category = "main"
 optional = false
-python-versions = ">=3.5"
+python-versions = ">=3.7"
 
 [[package]]
 name = "multidict"
@@ -2874,7 +2874,7 @@ all = ["grpcio", "tensorflow-serving-api", "pymongo", "route-distances", "scipy"
 [metadata]
 lock-version = "1.1"
 python-versions = ">=3.8,<3.10"
-content-hash = "49af842e15db0730537b57a34b88b01a638116aa34b3de3e35a8fceb4f9f8ba7"
+content-hash = "7c39163a396535f076ac4a0008f459c75691a16eba6f6387ced1925b3aa1e2d1"
 
 [metadata.files]
 absl-py = []
