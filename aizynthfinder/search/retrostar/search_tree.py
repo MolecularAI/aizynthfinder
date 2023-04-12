@@ -1,22 +1,23 @@
 """ Module containing a class that holds the tree search
 """
 from __future__ import annotations
+
 import json
 from typing import TYPE_CHECKING
 
 import numpy as np
 
-from aizynthfinder.search.retrostar.nodes import MoleculeNode
-from aizynthfinder.utils.logging import logger
-from aizynthfinder.search.andor_trees import AndOrSearchTreeBase, SplitAndOrTree
 from aizynthfinder.chem.serialization import MoleculeDeserializer, MoleculeSerializer
+from aizynthfinder.search.andor_trees import AndOrSearchTreeBase, SplitAndOrTree
+from aizynthfinder.search.retrostar.nodes import MoleculeNode
 from aizynthfinder.utils.exceptions import RejectionException
+from aizynthfinder.utils.logging import logger
 
 if TYPE_CHECKING:
+    from aizynthfinder.chem import RetroReaction
     from aizynthfinder.context.config import Configuration
     from aizynthfinder.reactiontree import ReactionTree
-    from aizynthfinder.chem import RetroReaction
-    from aizynthfinder.utils.type_utils import Optional, Sequence, List
+    from aizynthfinder.utils.type_utils import List, Optional, Sequence
 
 
 class SearchTree(AndOrSearchTreeBase):

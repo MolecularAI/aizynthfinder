@@ -1,32 +1,27 @@
 """ Module containing classes used to score the reaction routes.
 """
 from __future__ import annotations
+
 from typing import TYPE_CHECKING
 
-from aizynthfinder.search.mcts import MctsNode
-from aizynthfinder.reactiontree import ReactionTree
 from aizynthfinder.context.collection import ContextCollection
-from aizynthfinder.context.scoring.scorers import __name__ as scorers_module
 from aizynthfinder.context.scoring.scorers import (
+    AverageTemplateOccurrenceScorer,
+    NumberOfPrecursorsInStockScorer,
+    NumberOfPrecursorsScorer,
+    NumberOfReactionsScorer,
     Scorer,
     StateScorer,
-    NumberOfReactionsScorer,
-    NumberOfPrecursorsScorer,
-    NumberOfPrecursorsInStockScorer,
-    AverageTemplateOccurrenceScorer,
 )
+from aizynthfinder.context.scoring.scorers import __name__ as scorers_module
+from aizynthfinder.reactiontree import ReactionTree
+from aizynthfinder.search.mcts import MctsNode
 from aizynthfinder.utils.exceptions import ScorerException
 from aizynthfinder.utils.loading import load_dynamic_class
 
 if TYPE_CHECKING:
-    from aizynthfinder.utils.type_utils import (
-        Union,
-        List,
-        Any,
-        Sequence,
-        TypeVar,
-    )
     from aizynthfinder.context.config import Configuration
+    from aizynthfinder.utils.type_utils import Any, List, Sequence, TypeVar, Union
 
     _Scoreable = TypeVar("_Scoreable", MctsNode, ReactionTree)
     _Scoreables = Sequence[_Scoreable]

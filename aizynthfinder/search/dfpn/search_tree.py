@@ -1,19 +1,19 @@
 """ Module containing a class that holds the tree search
 """
 from __future__ import annotations
+
 from typing import TYPE_CHECKING
 
+from aizynthfinder.reactiontree import ReactionTree
+from aizynthfinder.search.andor_trees import AndOrSearchTreeBase, SplitAndOrTree
 from aizynthfinder.search.dfpn.nodes import MoleculeNode, ReactionNode
 from aizynthfinder.utils.logging import logger
-from aizynthfinder.search.andor_trees import AndOrSearchTreeBase, SplitAndOrTree
-from aizynthfinder.reactiontree import ReactionTree
-
 
 if TYPE_CHECKING:
-    from aizynthfinder.search.andor_trees import TreeNodeMixin
-    from aizynthfinder.context.config import Configuration
     from aizynthfinder.chem import RetroReaction
-    from aizynthfinder.utils.type_utils import Optional, Sequence, List, Union
+    from aizynthfinder.context.config import Configuration
+    from aizynthfinder.search.andor_trees import TreeNodeMixin
+    from aizynthfinder.utils.type_utils import List, Optional, Sequence, Union
 
 
 class SearchTree(AndOrSearchTreeBase):

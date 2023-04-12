@@ -1,32 +1,32 @@
 """ Module containing classes and routines for the GUI interface
 """
-import tempfile
-import signal
-import subprocess
-import os
 import argparse
 import logging
+import os
+import signal
+import subprocess
+import tempfile
 from typing import TYPE_CHECKING
 
 import ipywidgets as widgets
 import jupytext
+from IPython.display import HTML, display
 from ipywidgets import (
-    HBox,
-    Label,
-    VBox,
-    Text,
-    Output,
-    Checkbox,
-    IntText,
-    FloatText,
-    Button,
-    Dropdown,
-    BoundedIntText,
     BoundedFloatText,
+    BoundedIntText,
+    Button,
+    Checkbox,
+    Dropdown,
+    FloatText,
+    HBox,
+    IntText,
+    Label,
+    Output,
     SelectMultiple,
+    Text,
+    VBox,
 )
 from rdkit import Chem
-from IPython.display import display, HTML
 
 from aizynthfinder.aizynthfinder import AiZynthFinder
 from aizynthfinder.utils.logging import setup_logger

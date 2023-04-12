@@ -1,21 +1,22 @@
 """ Module containing classes that interfaces different stocks query classes
 """
 from __future__ import annotations
+
 import os
 from typing import TYPE_CHECKING
 
 import pandas as pd
 
 from aizynthfinder.chem import Molecule
-from aizynthfinder.utils.mongo import get_mongo_client
 from aizynthfinder.utils.exceptions import StockException
+from aizynthfinder.utils.mongo import get_mongo_client
 
 if TYPE_CHECKING:
-    from pymongo.database import Database as MongoDatabase
     from pymongo.collection import Collection as MongoCollection
+    from pymongo.database import Database as MongoDatabase
 
     # pylint: disable=ungrouped-imports
-    from aizynthfinder.utils.type_utils import Set, Optional
+    from aizynthfinder.utils.type_utils import Optional, Set
 
 
 # pylint: disable=no-self-use

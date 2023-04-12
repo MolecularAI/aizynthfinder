@@ -1,14 +1,15 @@
 """ Module containing helper classes and routines for serialization.
 """
 from __future__ import annotations
+
 from typing import TYPE_CHECKING
 
 import aizynthfinder.chem
 from aizynthfinder.utils.loading import load_dynamic_class
 
 if TYPE_CHECKING:
-    from aizynthfinder.utils.type_utils import Optional, Sequence, Dict, Any, StrDict
     from aizynthfinder.chem import RetroReaction
+    from aizynthfinder.utils.type_utils import Any, Dict, Optional, Sequence, StrDict
 
 
 class MoleculeSerializer:

@@ -1,32 +1,33 @@
 """ Module containing classes that interfaces neural network policies
 """
 from __future__ import annotations
+
 from typing import TYPE_CHECKING
 
-from aizynthfinder.utils.loading import load_dynamic_class
-from aizynthfinder.utils.exceptions import PolicyException
 from aizynthfinder.context.collection import ContextCollection
 from aizynthfinder.context.policy.expansion_strategies import (
     ExpansionStrategy,
     TemplateBasedExpansionStrategy,
 )
-from aizynthfinder.context.policy.filter_strategies import (
-    FilterStrategy,
-    QuickKerasFilter,
-    FILTER_STRATEGY_ALIAS,
-)
 from aizynthfinder.context.policy.expansion_strategies import (
     __name__ as expansion_strategy_module,
 )
 from aizynthfinder.context.policy.filter_strategies import (
+    FILTER_STRATEGY_ALIAS,
+    FilterStrategy,
+    QuickKerasFilter,
+)
+from aizynthfinder.context.policy.filter_strategies import (
     __name__ as filter_strategy_module,
 )
+from aizynthfinder.utils.exceptions import PolicyException
+from aizynthfinder.utils.loading import load_dynamic_class
 
 if TYPE_CHECKING:
-    from aizynthfinder.utils.type_utils import Any, Sequence, List, Tuple
-    from aizynthfinder.context.config import Configuration
     from aizynthfinder.chem import TreeMolecule
     from aizynthfinder.chem.reaction import RetroReaction
+    from aizynthfinder.context.config import Configuration
+    from aizynthfinder.utils.type_utils import Any, List, Sequence, Tuple
 
 
 class ExpansionPolicy(ContextCollection):

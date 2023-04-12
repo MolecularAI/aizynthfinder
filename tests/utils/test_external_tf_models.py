@@ -1,12 +1,11 @@
-import pytest
 import numpy as np
-import tensorflow as tf
+import pytest
 
 import aizynthfinder.utils.models as models
 from aizynthfinder.utils.models import (
-    ExternalModelViaREST,
-    ExternalModelViaGRPC,
     SUPPORT_EXTERNAL_APIS,
+    ExternalModelViaGRPC,
+    ExternalModelViaREST,
 )
 
 
@@ -138,9 +137,12 @@ def test_setup_tf_grpc_model(setup_grpc_mock):
 
 
 @pytest.mark.xfail(
-    condition=not SUPPORT_EXTERNAL_APIS, reason="API packages not installed"
+    condition=not SUPPORT_EXTERNAL_APIS,
+    reason="Tensorflow and API packages not installed",
 )
 def test_predict_tf_grpc_model(setup_grpc_mock):
+    import tensorflow as tf
+
     setup_grpc_mock({"output": tf.make_tensor_proto(tf.constant([0.0, 1.0]))})
     model = ExternalModelViaGRPC("dummy")
 

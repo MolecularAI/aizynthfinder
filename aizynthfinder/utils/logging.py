@@ -15,14 +15,6 @@ from rdkit import RDLogger
 
 from aizynthfinder.utils.paths import data_path
 
-# Suppress tensforflow logging
-os.environ["TF_CPP_MIN_LOG_LEVEL"] = "2"
-
-import tensorflow  # noqa
-
-tf_logger = tensorflow.get_logger()
-tf_logger.setLevel(logging.WARNING)
-
 # Suppress RDKit errors due to incomplete template (e.g. aromatic non-ring atoms)
 rd_logger = RDLogger.logger()
 rd_logger.setLevel(RDLogger.CRITICAL)

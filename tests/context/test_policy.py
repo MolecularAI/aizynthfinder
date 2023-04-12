@@ -1,17 +1,17 @@
-import pytest
 import numpy as np
+import pytest
 
 from aizynthfinder.chem import (
-    TreeMolecule,
     SmilesBasedRetroReaction,
     TemplatedRetroReaction,
+    TreeMolecule,
 )
 from aizynthfinder.context.policy import (
-    TemplateBasedExpansionStrategy,
     QuickKerasFilter,
     ReactantsCountFilter,
+    TemplateBasedExpansionStrategy,
 )
-from aizynthfinder.utils.exceptions import RejectionException, PolicyException
+from aizynthfinder.utils.exceptions import PolicyException, RejectionException
 
 
 def test_create_templated_expansion_strategy_wo_kwargs():
@@ -22,23 +22,22 @@ def test_create_templated_expansion_strategy_wo_kwargs():
 
 
 def test_load_templated_expansion_policy(
-    default_config, setup_template_expansion_policy, mocker
+    default_config, setup_template_expansion_policy
 ):
-    strategy, mocked_keras_model = setup_template_expansion_policy()
-    mocked_keras_model.assert_called_once_with("dummy.hdf5", custom_objects=mocker.ANY)
+    strategy, mocked_onnx_model = setup_template_expansion_policy()
+    mocked_onnx_model.assert_called_once()
     assert len(strategy.templates) == 3
 
 
 def test_load_invalid_templated_expansion_policy(
-    default_config, create_dummy_templates, mock_keras_model
+    default_config, create_dummy_templates, mock_onnx_model
 ):
-    templates_filename = create_dummy_templates(3)
-    mock_keras_model.return_value.output = np.zeros((2, 2))
+    templates_filename = create_dummy_templates(4)
     with pytest.raises(PolicyException):
         TemplateBasedExpansionStrategy(
             "policy1",
             default_config,
-            source="dummy.hdf5",
+            source="dummy.onnx",
             templatefile=templates_filename,
         )
 
@@ -53,7 +52,7 @@ def test_load_expansion_policy(default_config, setup_template_expansion_policy):
 
 
 def test_load_expansion_policy_templates_from_csv(
-    default_config, mock_keras_model, tmpdir
+    default_config, mock_onnx_model, tmpdir
 ):
     templates_filename = str(tmpdir / "temp.csv")
 
@@ -64,7 +63,7 @@ def test_load_expansion_policy_templates_from_csv(
         fileobj.write("2\tCCC\tmetadata3\n")
 
     strategy = TemplateBasedExpansionStrategy(
-        "default", default_config, source="dummy.hdf5", templatefile=templates_filename
+        "default", default_config, source="dummy.onnx", templatefile=templates_filename
     )
 
     assert len(strategy.templates) == 3
@@ -72,15 +71,15 @@ def test_load_expansion_policy_templates_from_csv(
 
 
 def test_load_expansion_policy_from_config_files(
-    default_config, mock_keras_model, create_dummy_templates
+    default_config, mock_onnx_model, create_dummy_templates
 ):
     template_filename = create_dummy_templates(3)
     expansion_policy = default_config.expansion_policy
     expansion_policy.load_from_config(
         **{
             "files": {
-                "policy1": ["dummy1", template_filename],
-                "policy2": ["dummy1", template_filename],
+                "policy1": ["dummy1.onnx", template_filename],
+                "policy2": ["dummy1.onnx", template_filename],
             }
         }
     )
@@ -91,17 +90,17 @@ def test_load_expansion_policy_from_config_files(
 
 
 def test_load_expansion_policy_from_config_custom(
-    default_config, mock_keras_model, create_dummy_templates
+    default_config, mock_onnx_model, create_dummy_templates
 ):
     template_filename = create_dummy_templates(3)
     expansion_policy = default_config.expansion_policy
     expansion_policy.load_from_config(
         **{
             "TemplateBasedExpansionStrategy": {
-                "policy1": {"source": "dummy1", "templatefile": template_filename}
+                "policy1": {"source": "dummy1.onnx", "templatefile": template_filename}
             },
             "aizynthfinder.context.policy.TemplateBasedExpansionStrategy": {
-                "policy2": {"source": "dummy1", "templatefile": template_filename}
+                "policy2": {"source": "dummy1.onnx", "templatefile": template_filename}
             },
         }
     )
@@ -214,23 +213,23 @@ def test_create_quick_filter_strategy_wo_kwargs():
         _ = QuickKerasFilter("dummy", None)
 
 
-def test_load_filter_policy(default_config, mock_keras_model, mocker):
-    strategy = QuickKerasFilter("policy1", default_config, source="dummy.hdf5")
+def test_load_filter_policy(default_config, mock_onnx_model):
+    strategy = QuickKerasFilter("policy1", default_config, source="dummy.onnx")
     default_config.filter_policy.load(strategy)
 
-    mock_keras_model.assert_called_once_with("dummy.hdf5", custom_objects=mocker.ANY)
+    mock_onnx_model.assert_called_once()
 
     with pytest.raises(PolicyException):
         default_config.filter_policy.load(5.0)
 
 
-def test_load_filter_policy_from_config_files(default_config, mock_keras_model):
+def test_load_filter_policy_from_config_files(default_config, mock_onnx_model):
     filter_policy = default_config.filter_policy
     filter_policy.load_from_config(
         **{
             "files": {
-                "policy1": "dummy1",
-                "policy2": "dummy1",
+                "policy1": "dummy1.onnx",
+                "policy2": "dummy1.onnx",
             }
         }
     )
@@ -238,21 +237,21 @@ def test_load_filter_policy_from_config_files(default_config, mock_keras_model):
     assert "policy2" in filter_policy.items
 
 
-def test_load_filter_policy_from_config_custom(default_config, mock_keras_model):
+def test_load_filter_policy_from_config_custom(default_config, mock_onnx_model):
     filter_policy = default_config.filter_policy
     filter_policy.load_from_config(
         **{
-            "QuickKerasFilter": {"policy1": {"source": "dummy1"}},
-            "feasibility": {"policy2": {"source": "dummy1"}},
+            "QuickKerasFilter": {"policy1": {"source": "dummy1.onnx"}},
+            "feasibility": {"policy2": {"source": "dummy1.onnx"}},
         }
     )
     assert "policy1" in filter_policy.items
     assert "policy2" in filter_policy.items
 
 
-def test_filter_rejection(default_config, mock_keras_model):
+def test_filter_rejection(default_config, mock_onnx_model):
     filter_policy = default_config.filter_policy
-    filter_policy.load_from_config(**{"files": {"policy1": "dummy1"}})
+    filter_policy.load_from_config(**{"files": {"policy1": "dummy1.onnx"}})
     mol = TreeMolecule(
         parent=None, smiles="CN1CCC(C(=O)c2cccc(NC(=O)c3ccc(F)cc3)c2F)CC1"
     )
@@ -272,12 +271,15 @@ def test_filter_rejection(default_config, mock_keras_model):
     filter_policy(reaction)
 
 
-def test_skip_filter_rejection(default_config, mock_keras_model):
+def test_skip_filter_rejection(default_config, mock_onnx_model):
     filter_policy = default_config.filter_policy
     filter_policy.load_from_config(
         **{
             "QuickKerasFilter": {
-                "policy1": {"source": "dummy1", "exclude_from_policy": ["dummy"]}
+                "policy1": {
+                    "source": "dummy1.onnx",
+                    "exclude_from_policy": ["dummy.onnx"],
+                }
             },
         }
     )
@@ -297,7 +299,7 @@ def test_skip_filter_rejection(default_config, mock_keras_model):
     reaction = SmilesBasedRetroReaction(
         mol,
         reactants_str="CN1CCC(Cl)CC1.N#Cc1cccc(NC(=O)c2ccc(F)cc2)c1F.O",
-        metadata={"policy_name": "dummy"},
+        metadata={"policy_name": "dummy.onnx"},
     )
     assert filter_policy(reaction) is None
 

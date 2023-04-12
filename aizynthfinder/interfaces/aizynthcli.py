@@ -1,11 +1,12 @@
 """ Module containing classes and routines for the CLI
 """
 from __future__ import annotations
+
 import argparse
-import json
-import os
-import logging
 import importlib
+import json
+import logging
+import os
 import tempfile
 import time
 from collections import defaultdict
@@ -14,17 +15,25 @@ from typing import TYPE_CHECKING
 import pandas as pd
 
 from aizynthfinder.aizynthfinder import AiZynthFinder
+from aizynthfinder.chem import Molecule
 from aizynthfinder.utils.files import (
     cat_datafiles,
     save_datafile,
     split_file,
     start_processes,
 )
-from aizynthfinder.chem import Molecule
 from aizynthfinder.utils.logging import logger, setup_logger
 
 if TYPE_CHECKING:
-    from aizynthfinder.utils.type_utils import StrDict, Callable, List, Optional
+    from aizynthfinder.utils.type_utils import (
+        Any,
+        Callable,
+        Dict,
+        List,
+        Optional,
+        StrDict,
+        Union,
+    )
 
     _PostProcessingJob = Callable[[AiZynthFinder], StrDict]
 
@@ -106,6 +115,11 @@ def _get_arguments() -> argparse.Namespace:
         nargs="+",
         help="a number of modules that performs post-processing tasks",
     )
+    parser.add_argument(
+        "--checkpoint",
+        required=False,
+        help="the path to the checkpoint file",
+    )
     return parser.parse_args()
 
 
@@ -134,6 +148,25 @@ def _select_stocks(finder: AiZynthFinder, args: argparse.Namespace) -> None:
             finder.stock.load(module.stock, "custom_stock")  # type: ignore
             stocks.append("custom_stock")
     finder.stock.select(stocks or finder.stock.items)
+
+
+def _load_checkpoint(
+    checkpoint: str,
+) -> Dict[str, List[Any]]:
+    if not os.path.exists(checkpoint):
+        return defaultdict(list)
+    with open(checkpoint) as json_file:
+        checkpoint_data = [json.loads(line) for line in json_file]
+
+    checkpoint_results = defaultdict(list)
+    if checkpoint_data:
+        checkpoint_results["processed_smiles"] = [
+            data["processed_smiles"] for data in checkpoint_data
+        ]
+        for data in checkpoint_data:
+            for key, value in data["results"].items():
+                checkpoint_results[key].append(value)
+    return checkpoint_results
 
 
 def _process_single_smiles(
@@ -180,13 +213,27 @@ def _process_multi_smiles(
     do_clustering: bool,
     route_distance_model: Optional[str],
     post_processing: List[_PostProcessingJob],
+    checkpoint: Optional[str],
 ) -> None:
     output_name = output_name or "output.json.gz"
     with open(filename, "r") as fileobj:
         smiles = [line.strip() for line in fileobj.readlines()]
 
-    results = defaultdict(list)
+    checkpoint_data: StrDict = defaultdict(list)
+    if checkpoint:
+        checkpoint_data = _load_checkpoint(checkpoint)
+        start = len(checkpoint_data["processed_smiles"]) if checkpoint_data else 0
+        smiles = smiles[start:]
+
+    results: StrDict = defaultdict(list)
+    if checkpoint_data:
+        results = {
+            key: value
+            for key, value in checkpoint_data.items()
+            if key != "processed_smiles"
+        }
     for smi in smiles:
+        processed_results = {}
         finder.target_smiles = smi
         try:
             finder.prepare_tree()
@@ -204,15 +251,29 @@ def _process_multi_smiles(
                 finder, stats, detailed_results=True, model_path=route_distance_model
             )
         _do_post_processing(finder, stats, post_processing)
+
         for key, value in stats.items():
+            processed_results[key] = value
+        processed_results["stock_info"] = finder.stock_info()
+        processed_results["top_scores"] = ", ".join(
+            "%.4f" % score for score in finder.routes.scores
+        )
+        processed_results["trees"] = finder.routes.dict_with_extra(
+            include_metadata=True, include_scores=True
+        )
+
+        if checkpoint:
+            with open(checkpoint, "a") as checkpoint_file:
+                checkpoint_file.write(
+                    json.dumps({"processed_smiles": smi, "results": processed_results})
+                    + "\n"
+                )
+            logger().debug(
+                f"Results for processed smiles '{smi}' saved to {checkpoint}"
+            )
+
+        for key, value in processed_results.items():
             results[key].append(value)
-        results["stock_info"].append(finder.stock_info())
-        results["top_scores"].append(
-            ", ".join("%.4f" % score for score in finder.routes.scores)
-        )
-        results["trees"].append(
-            finder.routes.dict_with_extra(include_metadata=True, include_scores=True)
-        )
 
     data = pd.DataFrame.from_dict(results)
     save_datafile(data, output_name)
@@ -289,17 +350,25 @@ def main() -> None:
     _select_stocks(finder, args)
     post_processing = _load_postprocessing_jobs(args.post_processing)
     finder.expansion_policy.select(args.policy or finder.expansion_policy.items[0])
-    finder.filter_policy.select(args.filter)
+    if args.filter:
+        finder.filter_policy.select(args.filter)
+    else:
+        finder.filter_policy.select_all()
 
-    func = _process_multi_smiles if multi_smiles else _process_single_smiles
-    func(
+    params = [
         args.smiles,
         finder,
         args.output,
         args.cluster,
         args.route_distance_model,
         post_processing,
-    )
+        args.checkpoint,
+    ]
+    if multi_smiles:
+        _process_multi_smiles(*params)
+    else:
+        params = params[:-1]
+        _process_single_smiles(*params)
 
 
 if __name__ == "__main__":

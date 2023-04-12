@@ -1,27 +1,34 @@
-import sys
 import gzip
 import json
-import string
 import random
+import string
+import sys
+from typing import Dict, List
 
-import pytest
-import yaml
+import numpy as np
 import pandas as pd
+import pytest
+import pytest_mock
+import yaml
 
-from aizynthfinder.context.config import Configuration
-from aizynthfinder.chem import Molecule, TreeMolecule, TemplatedRetroReaction
-from aizynthfinder.search.mcts import MctsSearchTree
+from aizynthfinder.aizynthfinder import AiZynthFinder
 from aizynthfinder.analysis import TreeAnalysis
+from aizynthfinder.chem import (
+    Molecule,
+    SmilesBasedRetroReaction,
+    TemplatedRetroReaction,
+    TreeMolecule,
+)
+from aizynthfinder.chem.serialization import MoleculeDeserializer
+from aizynthfinder.context.config import Configuration
+from aizynthfinder.context.policy import ExpansionStrategy, FilterStrategy
 from aizynthfinder.search.andor_trees import (
     AndOrSearchTreeBase,
-    TreeNodeMixin,
     SplitAndOrTree,
+    TreeNodeMixin,
 )
-from aizynthfinder.context.policy import ExpansionStrategy, FilterStrategy
-from aizynthfinder.chem import SmilesBasedRetroReaction
+from aizynthfinder.search.mcts import MctsSearchTree
 from aizynthfinder.utils.exceptions import RejectionException
-from aizynthfinder.chem.serialization import MoleculeDeserializer
-from aizynthfinder.aizynthfinder import AiZynthFinder
 
 
 def pytest_addoption(parser):
@@ -280,6 +287,47 @@ def load_mcts_tree(default_config, shared_datadir):
         return MctsSearchTree.from_json(filename, config or default_config)
 
     return wrapper
+
+
+@pytest.fixture
+def mock_onnx_model(mocker: pytest_mock.MockerFixture):
+    class MockOnnxSessionOptions:
+        @property
+        def name(self) -> str:
+            return "mock_session"
+
+        @property
+        def shape(self) -> List[int]:
+            return [3, 3]
+
+        @property
+        def intra_op_num_threads(self) -> int:
+            return 1
+
+    class MockedOnnxModel:
+        @staticmethod
+        def get_inputs() -> List[MockOnnxSessionOptions]:
+            return [MockOnnxSessionOptions()]
+
+        @staticmethod
+        def get_outputs() -> List[MockOnnxSessionOptions]:
+            return [MockOnnxSessionOptions()]
+
+        @staticmethod
+        def run(
+            output_names: List[str], input_feed: Dict[str, np.ndarray]
+        ) -> List[np.ndarray]:
+            return [np.array([[0.2, 0.7, 0.1]])]
+
+    mocker.patch(
+        "aizynthfinder.utils.models.onnxruntime.SessionOptions",
+        return_value=MockOnnxSessionOptions,
+    )
+
+    return mocker.patch(
+        "aizynthfinder.utils.models.onnxruntime.InferenceSession",
+        return_value=MockedOnnxModel,
+    )
 
 
 @pytest.fixture

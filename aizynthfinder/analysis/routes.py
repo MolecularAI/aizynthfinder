@@ -1,6 +1,7 @@
 """ Module containing classes to store and manipulate collections of synthetic routes.
 """
 from __future__ import annotations
+
 from typing import TYPE_CHECKING
 
 import numpy as np
@@ -11,24 +12,21 @@ try:
 except ImportError:
     pass
 
-from aizynthfinder.analysis.utils import (
-    CombinedReactionTrees,
-    RouteSelectionArguments,
-)
-from aizynthfinder.reactiontree import SUPPORT_DISTANCES, ReactionTree
-from aizynthfinder.search.mcts import MctsSearchTree, MctsNode
 from aizynthfinder.analysis import TreeAnalysis
+from aizynthfinder.analysis.utils import CombinedReactionTrees, RouteSelectionArguments
+from aizynthfinder.reactiontree import SUPPORT_DISTANCES, ReactionTree
+from aizynthfinder.search.mcts import MctsNode, MctsSearchTree
 
 if TYPE_CHECKING:
+    from aizynthfinder.context.scoring import Scorer
     from aizynthfinder.utils.type_utils import (
-        StrDict,
-        PilImage,
-        Optional,
         Any,
         Dict,
+        Optional,
+        PilImage,
         Sequence,
+        StrDict,
     )
-    from aizynthfinder.context.scoring import Scorer
 
 
 class RouteCollection:

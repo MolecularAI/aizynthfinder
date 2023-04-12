@@ -1,22 +1,22 @@
 """Module containing routines to work with files and processes."""
 from __future__ import annotations
-import tempfile
+
+import gzip
+import json
 import subprocess
+import tempfile
 import time
 import warnings
-import json
-import gzip
 from pathlib import Path
 from typing import TYPE_CHECKING
 
-from deprecated import deprecated
-import more_itertools
 import pandas as pd
+from deprecated import deprecated
 
 from aizynthfinder.utils.logging import logger
 
 if TYPE_CHECKING:
-    from aizynthfinder.utils.type_utils import List, Sequence, Any, Callable, Union
+    from aizynthfinder.utils.type_utils import Any, Callable, List, Sequence, Union
 
 
 def read_datafile(filename: Union[str, Path]) -> pd.DataFrame:
@@ -86,7 +86,7 @@ def cat_datafiles(
             new_data = new_data[columns]
         data = pd.concat([data, new_data])
 
-    save_datafile(data.reset_index(), output_name)
+    save_datafile(data.reset_index(drop=True), output_name)
     if trees_name:
         if not trees_name.endswith(".gz"):
             trees_name += ".gz"
@@ -106,10 +106,14 @@ def split_file(filename: str, nparts: int) -> List[str]:
         lines = fileobj.read().splitlines()
 
     filenames = []
-    for chunk in more_itertools.divide(nparts, lines):
+    batch_size, remainder = divmod(len(lines), nparts)
+    stop = 0
+    for part in range(1, nparts + 1):
+        start = stop
+        stop += batch_size + 1 if part <= remainder else batch_size
         filenames.append(tempfile.mktemp())
         with open(filenames[-1], "w") as fileobj:
-            fileobj.write("\n".join(chunk))
+            fileobj.write("\n".join(lines[start:stop]))
     return filenames
 
 

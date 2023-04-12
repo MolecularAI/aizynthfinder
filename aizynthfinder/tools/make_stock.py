@@ -1,6 +1,7 @@
 """ Module containing classes and routines for making stock input to the tree search.
 """
 from __future__ import annotations
+
 import argparse
 import importlib
 from typing import TYPE_CHECKING
@@ -11,7 +12,7 @@ from aizynthfinder.chem import Molecule, MoleculeException
 from aizynthfinder.context.stock import MongoDbInchiKeyQuery
 
 if TYPE_CHECKING:
-    from aizynthfinder.utils.type_utils import List, Iterable
+    from aizynthfinder.utils.type_utils import Iterable, List
 
     _StrIterator = Iterable[str]
 
