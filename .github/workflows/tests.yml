@@ -16,7 +16,7 @@ jobs:
           wget https://repo.anaconda.com/miniconda/Miniconda3-latest-Linux-x86_64.sh |
               bash -s -- --batch
           conda env create -f env-dev.yml
-          conda run --name aizynth-dev poetry install -E all tf
+          conda run --name aizynth-dev poetry install -E all -E tf
           conda run --name aizynth-dev inv full-tests
       - name: Upload coverage to Codecov
         uses: codecov/codecov-action@v1
