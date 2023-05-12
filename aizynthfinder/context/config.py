@@ -1,7 +1,7 @@
 """ Module containing a class for encapsulating the settings of the tree search
 """
 from __future__ import annotations
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from typing import TYPE_CHECKING
 
 import yaml
@@ -57,7 +57,7 @@ class Configuration:  # pylint: disable=R0902
     prune_cycles_in_search: bool = True
     use_remote_models: bool = False
     search_algorithm: str = "mcts"
-    post_processing: _PostprocessingConfiguration = _PostprocessingConfiguration()
+    post_processing: _PostprocessingConfiguration = field(default_factory=_PostprocessingConfiguration)
     stock: Stock = None  # type: ignore
     expansion_policy: ExpansionPolicy = None  # type: ignore
     filter_policy: FilterPolicy = None  # type: ignore
