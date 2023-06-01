@@ -1,5 +1,28 @@
 # CHANGELOG
 
+## Version 3.7.0 2023-06-01 (2023-04-11)
+
+### Features
+
+- Environment variables can be loaded from YAML file.
+- Restart feature in AiZynth CLI.
+- Use ONNX models for expansion and filtering.
+- Default filter is now loaded automatically in AiZynth CLI.
+
+### Trivial changes
+
+- Using isort to sort the imports of packages.
+- Tensorflow is now an optional dependency.
+- more-itertools dependencies removed.
+
+### Breaking changes
+
+- training modules has now been removed.
+
+### Bug-fixes
+
+- Fixing an issue when concatenating JSON data files.
+
 ## Version 3.6.0 2022-11-28 (2022-11-25)
 
 ### Features
