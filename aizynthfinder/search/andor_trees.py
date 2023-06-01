@@ -1,19 +1,20 @@
 """ Module for base classes for AND/OR trees and some tree utility code """
 from __future__ import annotations
-import random
+
 import abc
+import random
 from typing import TYPE_CHECKING
 
 import networkx as nx
 
-from aizynthfinder.reactiontree import ReactionTree, ReactionTreeLoader
 from aizynthfinder.chem import UniqueMolecule
+from aizynthfinder.reactiontree import ReactionTree, ReactionTreeLoader
 
 if TYPE_CHECKING:
+    from aizynthfinder.chem import FixedRetroReaction
     from aizynthfinder.context.config import Configuration
     from aizynthfinder.context.stock import Stock
-    from aizynthfinder.chem import FixedRetroReaction
-    from aizynthfinder.utils.type_utils import StrDict, Any, List, Union, Optional
+    from aizynthfinder.utils.type_utils import Any, List, Optional, StrDict, Union
 
 
 class TreeNodeMixin:

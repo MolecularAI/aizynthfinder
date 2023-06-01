@@ -1,39 +1,47 @@
 """ Module containing classes and routines used in training of policies.
 """
 from __future__ import annotations
+
+import functools
 import os
 from typing import TYPE_CHECKING
 
 import numpy as np
-
-# pylint: disable=all
-from tensorflow.keras.layers import Dense, Dropout, Input, Dot
-from tensorflow.keras.models import Sequential, Model
-from tensorflow.keras.optimizers import Adam
-from tensorflow.keras.utils import Sequence
+from tensorflow.keras import regularizers
 from tensorflow.keras.callbacks import (
-    EarlyStopping,
     CSVLogger,
+    EarlyStopping,
     ModelCheckpoint,
     ReduceLROnPlateau,
 )
-from tensorflow.keras import regularizers
+
+# pylint: disable=all
+from tensorflow.keras.layers import Dense, Dot, Dropout, Input
+from tensorflow.keras.metrics import top_k_categorical_accuracy
+from tensorflow.keras.models import Model, Sequential
+from tensorflow.keras.optimizers import Adam
+from tensorflow.keras.utils import Sequence
 
 # pylint: enable=all
 try:
-    from sklearn.utils import shuffle
     from scipy import sparse
+    from sklearn.utils import shuffle
 except ImportError:
     raise ImportError(
         "Training is not supported by this installation."
         " Please install aizynthfinder with extras dependencies."
     )
 
-from aizynthfinder.utils.models import top10_acc, top50_acc
-
 if TYPE_CHECKING:
-    from aizynthfinder.utils.type_utils import Tuple, List, Any
     from aizynthfinder.training.utils import Config
+    from aizynthfinder.utils.type_utils import Any, List, Tuple
+
+
+top10_acc = functools.partial(top_k_categorical_accuracy, k=10)
+top10_acc.__name__ = "top10_acc"  # type: ignore
+
+top50_acc = functools.partial(top_k_categorical_accuracy, k=50)
+top50_acc.__name__ = "top50_acc"  # type: ignore
 
 
 class _InMemorySequence(Sequence):  # pylint: disable=W0223

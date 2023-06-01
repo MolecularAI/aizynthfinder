@@ -2,22 +2,22 @@
 """
 from aizynthfinder.chem.mol import (
     Molecule,
+    MoleculeException,
     TreeMolecule,
     UniqueMolecule,
-    MoleculeException,
     none_molecule,
 )
 from aizynthfinder.chem.reaction import (
+    FixedRetroReaction,
     Reaction,
     RetroReaction,
-    TemplatedRetroReaction,
     SmilesBasedRetroReaction,
-    FixedRetroReaction,
+    TemplatedRetroReaction,
     hash_reactions,
 )
 from aizynthfinder.chem.serialization import (
-    MoleculeSerializer,
     MoleculeDeserializer,
-    serialize_action,
+    MoleculeSerializer,
     deserialize_action,
+    serialize_action,
 )

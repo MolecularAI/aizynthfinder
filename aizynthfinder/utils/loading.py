@@ -1,5 +1,6 @@
 """ Module containing routine to dynamically load a class from a specification """
 from __future__ import annotations
+
 import importlib
 from typing import TYPE_CHECKING
 

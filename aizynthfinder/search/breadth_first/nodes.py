@@ -1,25 +1,21 @@
 """ Module containing a classes representation various tree nodes
 """
 from __future__ import annotations
+
 from typing import TYPE_CHECKING
 
 from aizynthfinder.chem import TreeMolecule
-from aizynthfinder.search.andor_trees import TreeNodeMixin
 from aizynthfinder.chem.serialization import deserialize_action, serialize_action
+from aizynthfinder.search.andor_trees import TreeNodeMixin
 
 if TYPE_CHECKING:
-    from aizynthfinder.context.config import Configuration
+    from aizynthfinder.chem import RetroReaction
     from aizynthfinder.chem.serialization import (
         MoleculeDeserializer,
         MoleculeSerializer,
     )
-    from aizynthfinder.utils.type_utils import (
-        StrDict,
-        Sequence,
-        Set,
-        List,
-    )
-    from aizynthfinder.chem import RetroReaction
+    from aizynthfinder.context.config import Configuration
+    from aizynthfinder.utils.type_utils import List, Sequence, Set, StrDict
 
 
 class MoleculeNode(TreeNodeMixin):

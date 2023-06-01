@@ -1,6 +1,7 @@
 """ Module contain a class that encapsulate the state of search tree node.
 """
 from __future__ import annotations
+
 import os
 from typing import TYPE_CHECKING
 
@@ -10,12 +11,9 @@ from rdkit.Chem import Draw
 from aizynthfinder.chem import TreeMolecule
 
 if TYPE_CHECKING:
-    from aizynthfinder.utils.type_utils import StrDict, Any, List, Optional, Sequence
-    from aizynthfinder.chem import (
-        MoleculeDeserializer,
-        MoleculeSerializer,
-    )
+    from aizynthfinder.chem import MoleculeDeserializer, MoleculeSerializer
     from aizynthfinder.context.config import Configuration
+    from aizynthfinder.utils.type_utils import Any, List, Optional, Sequence, StrDict
 
 os.environ["PYTHONHASHSEED"] = "42"
 

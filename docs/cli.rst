@@ -10,7 +10,7 @@ In its simplest form, you type
     aizynthcli --config config_local.yml --smiles smiles.txt
 
 where `config_local.yml` contains configurations such as paths to policy models and stocks (see :doc:`here <configuration>`)
-and `smiles.txt` is a simple text file with SMILES (one on each row). 
+and `smiles.txt` is a simple text file with SMILES (one on each row).
 
 
 To find out what other arguments are available use the ``-h`` flag.
@@ -28,21 +28,24 @@ By default:
 
   * `All` stocks are selected if no stock is specified
   * `First` expansion policy is selected if not expansion policy is specified
-  * `No` filter policy is selected if it is not specified on the command-line
+  * `All` filter policies are selected if it is not specified on the command-line
 
 Analysing output
 ----------------
 
 
-The results from the ``aizynthcli`` tool when supplying multiple SMILES is an JSON or HDF5 file that can be read as a pandas dataframe. 
+The results from the ``aizynthcli`` tool when supplying multiple SMILES is an JSON or HDF5 file that can be read as a pandas dataframe.
 It will be called `output.json.gz` by default.
+
+A `checkpoint.json.gz` will also be generated if a checkpoint file path is provided as input when calling the ``aizynthcli`` tool. The
+checkpoint data will contain the processed smiles with their corresponding results in each line of the file.
 
 .. code-block::
 
   import pandas as pd
   data = pd.read_json("output.json.gz", orient="table")
 
-it will contain statistics about the tree search and the top-ranked routes (as JSONs) for each target compund, see below.
+it will contain statistics about the tree search and the top-ranked routes (as JSONs) for each target compound, see below.
 
 When a single SMILES is provided to the tool, the statistics will be written to the terminal, and the top-ranked routes to
 a JSON file (`trees.json` by default).
@@ -64,7 +67,7 @@ This is an example of how to create images of the top-ranked routes for the firs
         imagefile = f"route{itree:03d}.png"
         ReactionTree.from_dict(tree).to_image().save(imagefile)
 
-The images will be called `route000.png`, `route001.png` etc. 
+The images will be called `route000.png`, `route001.png` etc.
 
 
 Specification of output

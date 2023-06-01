@@ -1,21 +1,22 @@
 """ Module containing classes that interfaces different stock classes
 """
 from __future__ import annotations
+
 import copy
 from collections import defaultdict
 from typing import TYPE_CHECKING
 
 from aizynthfinder.chem import Molecule
 from aizynthfinder.context.collection import ContextCollection
-from aizynthfinder.utils.exceptions import StockException
-from aizynthfinder.utils.loading import load_dynamic_class
 from aizynthfinder.context.stock.queries import (
     InMemoryInchiKeyQuery,
     MongoDbInchiKeyQuery,
 )
+from aizynthfinder.utils.exceptions import StockException
+from aizynthfinder.utils.loading import load_dynamic_class
 
 if TYPE_CHECKING:
-    from aizynthfinder.utils.type_utils import StrDict, Set, Union, Any, List
+    from aizynthfinder.utils.type_utils import Any, List, Set, StrDict, Union
 
 
 class Stock(ContextCollection):

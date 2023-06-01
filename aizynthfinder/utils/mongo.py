@@ -1,7 +1,7 @@
 """ Module containing routines to obtain a MongoClient instance
 """
-from urllib.parse import urlencode
 from typing import Optional
+from urllib.parse import urlencode
 
 try:
     from pymongo import MongoClient

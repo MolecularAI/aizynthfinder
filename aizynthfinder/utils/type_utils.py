@@ -1,19 +1,13 @@
 """ Module containing all types and type imports
 """
 # pylint: disable=unused-import
-from typing import (
-    Any,
-    Callable,  # noqa
-    Dict,
-    List,  # noqa
-    Iterable,  # noqa
-    Optional,
-    Sequence,  # noqa
-    Set,  # noqa
-    Tuple,
-    TypeVar,  # noqa
-    Union,
-)
+from typing import Callable  # noqa
+from typing import Iterable  # noqa
+from typing import List  # noqa
+from typing import Sequence  # noqa
+from typing import Set  # noqa
+from typing import TypeVar  # noqa
+from typing import Any, Dict, Optional, Tuple, Union
 
 from PIL.Image import Image
 from rdkit import Chem

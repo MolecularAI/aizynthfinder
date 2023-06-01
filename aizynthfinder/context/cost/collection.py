@@ -1,19 +1,18 @@
 """ Module containing classes to compute the molecule cost in some search algorithms
 """
 from __future__ import annotations
+
 from typing import TYPE_CHECKING
 
 from aizynthfinder.context.collection import ContextCollection
-from aizynthfinder.utils.loading import load_dynamic_class
-from aizynthfinder.utils.exceptions import CostException
 from aizynthfinder.context.cost.costs import MoleculeCostCalculator, ZeroMoleculeCost
-from aizynthfinder.context.cost.costs import (
-    __name__ as costs_module,
-)
+from aizynthfinder.context.cost.costs import __name__ as costs_module
+from aizynthfinder.utils.exceptions import CostException
+from aizynthfinder.utils.loading import load_dynamic_class
 
 if TYPE_CHECKING:
-    from aizynthfinder.utils.type_utils import Dict, Any
     from aizynthfinder.chem import Molecule
+    from aizynthfinder.utils.type_utils import Any, Dict
 
 
 class MoleculeCost(ContextCollection):

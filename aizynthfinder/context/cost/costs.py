@@ -1,13 +1,13 @@
 """ Module containing classes that implements different cost calculators
 """
 from __future__ import annotations
+
 import abc
 from typing import TYPE_CHECKING
 
-
 if TYPE_CHECKING:
-    from aizynthfinder.context.config import Configuration
     from aizynthfinder.chem import Molecule
+    from aizynthfinder.context.config import Configuration
 
 
 class MoleculeCostCalculator(abc.ABC):

@@ -10,10 +10,13 @@ def build_docs(context):
 
 @task
 def full_tests(context):
-    cmd = "pytest --black --mccabe " \
-          "--cov aizynthfinder --cov-branch --cov-report html:coverage --cov-report xml " \
-          "tests/"
+    cmd = (
+        "pytest --black --mccabe "
+        "--cov aizynthfinder --cov-branch --cov-report html:coverage --cov-report xml "
+        "tests/"
+    )
     context.run(cmd)
+
 
 @task
 def run_mypy(context):
@@ -23,6 +26,9 @@ def run_mypy(context):
 @task
 def run_linting(context):
     print("Running mypy...")
-    context.run("mypy --ignore-missing-imports --show-error-codes aizynthfinder")
+    context.run("mypy --install-types", pty=True)
+    context.run(
+        "mypy --ignore-missing-imports --show-error-codes --implicit-optional aizynthfinder"
+    )
     print("Running pylint...")
     context.run("pylint aizynthfinder")

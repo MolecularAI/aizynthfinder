@@ -1,33 +1,29 @@
 """ Module containing classes to perform analysis of the tree search results.
 """
 from __future__ import annotations
+
 from collections import defaultdict
 from typing import TYPE_CHECKING
 
-from aizynthfinder.chem import (
-    FixedRetroReaction,
-    hash_reactions,
-)
-from aizynthfinder.context.scoring import (
-    StateScorer,
-)
 from aizynthfinder.analysis.utils import RouteSelectionArguments
+from aizynthfinder.chem import FixedRetroReaction, hash_reactions
+from aizynthfinder.context.scoring import StateScorer
 from aizynthfinder.reactiontree import ReactionTree
-from aizynthfinder.search.mcts import MctsSearchTree, MctsNode
 from aizynthfinder.search.andor_trees import AndOrSearchTreeBase
+from aizynthfinder.search.mcts import MctsNode, MctsSearchTree
 
 if TYPE_CHECKING:
+    from aizynthfinder.chem import RetroReaction
+    from aizynthfinder.context.scoring import Scorer
     from aizynthfinder.utils.type_utils import (
-        StrDict,
-        Union,
-        Tuple,
         Any,
         Iterable,
-        Sequence,
         List,
+        Sequence,
+        StrDict,
+        Tuple,
+        Union,
     )
-    from aizynthfinder.context.scoring import Scorer
-    from aizynthfinder.chem import RetroReaction
 
 
 class TreeAnalysis:

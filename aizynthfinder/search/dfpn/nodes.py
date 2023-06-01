@@ -1,6 +1,7 @@
 """ Module containing a classes representation various tree nodes
 """
 from __future__ import annotations
+
 from typing import TYPE_CHECKING
 
 import numpy as np
@@ -8,12 +9,11 @@ import numpy as np
 from aizynthfinder.chem import TreeMolecule
 from aizynthfinder.search.andor_trees import TreeNodeMixin
 
-
 if TYPE_CHECKING:
-    from aizynthfinder.context.config import Configuration
-    from aizynthfinder.utils.type_utils import StrDict, Sequence, Set, List, Optional
     from aizynthfinder.chem import RetroReaction
+    from aizynthfinder.context.config import Configuration
     from aizynthfinder.search.dfpn import SearchTree
+    from aizynthfinder.utils.type_utils import List, Optional, Sequence, Set, StrDict
 
 BIG_INT = int(1e10)
 

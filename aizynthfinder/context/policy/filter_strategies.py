@@ -1,22 +1,22 @@
 """ Module containing classes that implements different filter policy strategies
 """
 from __future__ import annotations
+
 import abc
 from typing import TYPE_CHECKING
 
 import numpy as np
 
-from aizynthfinder.utils.models import load_model
-from aizynthfinder.utils.logging import logger
+from aizynthfinder.chem import TemplatedRetroReaction
 from aizynthfinder.context.policy.utils import _make_fingerprint
 from aizynthfinder.utils.exceptions import PolicyException, RejectionException
-from aizynthfinder.chem import TemplatedRetroReaction
-
+from aizynthfinder.utils.logging import logger
+from aizynthfinder.utils.models import load_model
 
 if TYPE_CHECKING:
-    from aizynthfinder.utils.type_utils import Any, List, Tuple
-    from aizynthfinder.context.config import Configuration
     from aizynthfinder.chem.reaction import RetroReaction
+    from aizynthfinder.context.config import Configuration
+    from aizynthfinder.utils.type_utils import Any, List, Tuple
 
 
 class FilterStrategy(abc.ABC):

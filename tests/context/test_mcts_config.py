@@ -1,7 +1,10 @@
+import os
+from unittest import mock
+
 import pytest
 
-from aizynthfinder.context.config import Configuration
 from aizynthfinder.aizynthfinder import AiZynthFinder
+from aizynthfinder.context.config import Configuration
 
 
 def test_load_empty_dict(default_config):
@@ -99,10 +102,10 @@ def test_load_stock(write_yaml, create_dummy_stock1):
     assert config.stock.items == ["test"]
 
 
-def test_load_policy(write_yaml, create_dummy_templates, mock_keras_model):
+def test_load_policy(write_yaml, create_dummy_templates, mock_onnx_model):
     templates_filename = create_dummy_templates(3)
     filename = write_yaml(
-        {"policy": {"files": {"test": ["dummy", templates_filename]}}}
+        {"policy": {"files": {"test": ["dummy.onnx", templates_filename]}}}
     )
 
     config = Configuration.from_file(filename)
@@ -110,8 +113,8 @@ def test_load_policy(write_yaml, create_dummy_templates, mock_keras_model):
     assert config.expansion_policy.items == ["test"]
 
 
-def test_load_filter_policy(write_yaml, mock_keras_model):
-    filename = write_yaml({"filter": {"files": {"test": "dummy"}}})
+def test_load_filter_policy(write_yaml, mock_onnx_model):
+    filename = write_yaml({"filter": {"files": {"test": "dummy.onnx"}}})
 
     config = Configuration.from_file(filename)
 
@@ -232,6 +235,40 @@ def test_load_scorer_from_module_spec(write_yaml):
     config = Configuration.from_file(filename)
 
     assert "sum of prices" in config.scorers.items
+
+
+@mock.patch.dict(
+    os.environ,
+    {"CUTOFF_NUMBER": "300", "C": "1.9"},
+)
+def test_load_yaml_with_environ(write_yaml):
+    filename = write_yaml(
+        {
+            "properties": {
+                "cutoff_number": "${CUTOFF_NUMBER}",
+                "post_processing": {"all_routes": True},
+            },
+            "policy": {"properties": {"C": "${C}"}},
+            "finder": {"properties": {"cutoff_number": "${CUTOFF_NUMBER}"}},
+        }
+    )
+    config = Configuration.from_file(filename)
+
+    assert config.cutoff_number == 300
+    assert config.C == 1.9
+
+
+@mock.patch.dict(os.environ, {"CUTOFF_NUMBER": "300"})
+def test_load_yaml_with_environ_raises_error(write_yaml):
+    filename = write_yaml(
+        {
+            "properties": {"cutoff_number": "${CUTOFF}"},
+            "policy": {"properties": {"C": 1.9}},
+            "finder": {"properties": {"time_limit": 300}},
+        }
+    )
+    with pytest.raises(ValueError, match="'CUTOFF' not in environment variables"):
+        Configuration.from_file(filename)
 
 
 def test_init_search_yaml(write_yaml):

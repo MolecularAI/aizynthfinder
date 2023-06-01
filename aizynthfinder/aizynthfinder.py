@@ -1,38 +1,40 @@
 """ Module containing a class that is the main interface the retrosynthesis tool.
 """
 from __future__ import annotations
+
 import time
 from collections import defaultdict
 from typing import TYPE_CHECKING
 
 from tqdm import tqdm
 
-# This must be imported first to setup logging for rdkit, tensorflow etc
-from aizynthfinder.utils.logging import logger
-from aizynthfinder.utils.loading import load_dynamic_class
-from aizynthfinder.context.config import Configuration
-from aizynthfinder.search.mcts import MctsSearchTree
-from aizynthfinder.reactiontree import ReactionTreeFromExpansion
 from aizynthfinder.analysis import (
-    TreeAnalysis,
     RouteCollection,
     RouteSelectionArguments,
+    TreeAnalysis,
 )
-from aizynthfinder.chem import Molecule, TreeMolecule, FixedRetroReaction
+from aizynthfinder.chem import FixedRetroReaction, Molecule, TreeMolecule
+from aizynthfinder.context.config import Configuration
+from aizynthfinder.reactiontree import ReactionTreeFromExpansion
 from aizynthfinder.search.andor_trees import AndOrSearchTreeBase
+from aizynthfinder.search.mcts import MctsSearchTree
 from aizynthfinder.utils.exceptions import MoleculeException
+from aizynthfinder.utils.loading import load_dynamic_class
+
+# This must be imported first to setup logging for rdkit, tensorflow etc
+from aizynthfinder.utils.logging import logger
 
 if TYPE_CHECKING:
-    from aizynthfinder.utils.type_utils import (
-        StrDict,
-        Optional,
-        Union,
-        Callable,
-        List,
-        Tuple,
-        Dict,
-    )
     from aizynthfinder.chem import RetroReaction
+    from aizynthfinder.utils.type_utils import (
+        Callable,
+        Dict,
+        List,
+        Optional,
+        StrDict,
+        Tuple,
+        Union,
+    )
 
 
 class AiZynthFinder:
@@ -230,7 +232,7 @@ class AiZynthFinder:
         self.search_stats["time"] = time_past
         return time_past
 
-    def _setup_search_tree(self):
+    def _setup_search_tree(self) -> None:
         self._logger.debug("Defining tree root: %s" % self.target_smiles)
         if self.config.search_algorithm.lower() == "mcts":
             self.tree = MctsSearchTree(
@@ -238,9 +240,7 @@ class AiZynthFinder:
             )
         else:
             cls = load_dynamic_class(self.config.search_algorithm)
-            self.tree: AndOrSearchTreeBase = cls(
-                root_smiles=self.target_smiles, config=self.config
-            )
+            self.tree = cls(root_smiles=self.target_smiles, config=self.config)
 
 
 class AiZynthExpander:

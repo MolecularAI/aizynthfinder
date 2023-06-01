@@ -1,13 +1,14 @@
 """ Module containing Retro* cost model """
 from __future__ import annotations
-from typing import TYPE_CHECKING
+
 import pickle
+from typing import TYPE_CHECKING
 
 import numpy as np
 
 if TYPE_CHECKING:
-    from aizynthfinder.utils.type_utils import Tuple, List
     from aizynthfinder.chem import Molecule
+    from aizynthfinder.utils.type_utils import List, Tuple
 
 
 class RetroStarCost:
