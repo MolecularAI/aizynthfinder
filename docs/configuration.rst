@@ -2,14 +2,14 @@
 Configuration file
 ===================
 
-The configuration file that is to be provided to the interfaces 
-specify file paths to policy models and stocks, in addition to 
-detailed parameters of the tree search. 
+The configuration file that is to be provided to the interfaces
+specify file paths to policy models and stocks, in addition to
+detailed parameters of the tree search.
 
 Simple usage
 ------------
 
-Let say you have a 
+Let's say you have a
 
     * A trained Keras expansion model that is called `full_uspto_model.hdf5`
     * A library of unique templates called `full_uspto_templates.hdf5`
@@ -20,7 +20,7 @@ Let say you have a
 
 (this could have been created by the ``smiles2stock`` tool, see :doc:`here <stocks>`)
 
-then to use them in the tree search, create a file called `config.yml` that has the following content 
+then to use them in the tree search, create a file called `config.yml` that has the following content
 
 .. code-block:: yaml
 
@@ -66,24 +66,34 @@ A more detailed configuration file is shown below
 
 The (expansion) policy models are specified using two files
     * a checkpoint files from Keras in hdf5 format,
-    * a HDF5 or a CSV file containing templates. 
+    * a HDF5 or a CSV file containing templates.
 
 The filter policy model is specified using a single checkpoint file from Keras in hdf5 format. Any additional
 filters can be specified using the classname, and a tag as seen above using ``reactants_count`` with the flag
 ``filter_tag``.
-    
-The template file should be readable by ``pandas`` using  the ``table`` key and the ``retro_template`` column. 
-A policy can then be selected using the provided key, like ``my_policy`` in the above example. 
 
-The stock files can be 
-     * HDF5 files with the ``table`` key an the ``inchi_key`` column. 
+The template file should be readable by ``pandas`` using  the ``table`` key and the ``retro_template`` column.
+A policy can then be selected using the provided key, like ``my_policy`` in the above example.
+
+The stock files can be
+     * HDF5 files with the ``table`` key an the ``inchi_key`` column.
      * A CSV file with a ``inchi_key`` column
      * A text file a single column
 
 In all cases, the column should contain pre-computed inchi keys of the molecules.
 The stocks can then be selected using the provided key, like ``stock1`` or ``stock2`` in the above example.
 
-The values in the ``properties`` sections are optional, and if missing, default values are provided.
+The values in the ``properties`` sections are optional, and if missing, default values are provided. These
+values can also be taken from environment variables. An example of this can be seen as below:
+
+.. code-block:: yaml
+
+    properties:
+      iteration_limit: ${ITERATION_LIMIT}
+      C: ${C}
+      cutoff_cumulative: ${CUTOFF_CUMULATIVE}
+      cutoff_number: ${CUTOFF_NUMBER}
+      max_transforms: ${MAX_TRANSFORMS}
 
 These are the available properties:
 
@@ -91,7 +101,7 @@ These are the available properties:
 Property                  Default value  Description
 ========================= ============== ===========
 C                         1.4            The C value used to balance exploitation and exploration in the upper confidence bound score of the nodes.
-cutoff_cumulative         0.995          The accumulative probability of the suggested templates is capped at this value. All other templates above this threshold are discarded. 
+cutoff_cumulative         0.995          The accumulative probability of the suggested templates is capped at this value. All other templates above this threshold are discarded.
 cutoff_number             50             The maximum number of templates that will be returned from the expansion policy.
 max_transforms            6              The maximum depth of the search tree
 default_prior             0.5            The prior that is used if policy-provided priors are not used

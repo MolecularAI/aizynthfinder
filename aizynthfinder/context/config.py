@@ -1,20 +1,22 @@
 """ Module containing a class for encapsulating the settings of the tree search
 """
 from __future__ import annotations
+
+import os
+import re
 from dataclasses import dataclass, field
 from typing import TYPE_CHECKING
 
 import yaml
 
-from aizynthfinder.utils.logging import logger
-from aizynthfinder.context.policy import ExpansionPolicy, FilterPolicy
-from aizynthfinder.context.stock import Stock
-from aizynthfinder.context.scoring import ScorerCollection
 from aizynthfinder.context.cost import MoleculeCost
-
+from aizynthfinder.context.policy import ExpansionPolicy, FilterPolicy
+from aizynthfinder.context.scoring import ScorerCollection
+from aizynthfinder.context.stock import Stock
+from aizynthfinder.utils.logging import logger
 
 if TYPE_CHECKING:
-    from aizynthfinder.utils.type_utils import StrDict, Any, Dict, Union, Optional
+    from aizynthfinder.utils.type_utils import Any, Dict, Optional, StrDict, Union
 
 
 @dataclass
@@ -107,12 +109,23 @@ class Configuration:  # pylint: disable=R0902
         Loads a configuration from a yaml file.
         The parameters not set in the yaml file are taken from the default values.
         The policies and stocks specified in the yaml file are directly loaded.
+        The parameters in the yaml file may also contain environment variables as
+        values.
 
         :param filename: the path to a yaml file
         :return: a Configuration object with settings from the yaml file
+        :raises:
+            ValueError: if parameter's value expects an environment variable that
+                does not exist in the current environment
         """
         with open(filename, "r") as fileobj:
-            _config = yaml.load(fileobj.read(), Loader=yaml.SafeLoader)
+            txt = fileobj.read()
+        environ_var = re.findall(r"\$\{.+?\}", txt)
+        for item in environ_var:
+            if item[2:-1] not in os.environ:
+                raise ValueError(f"'{item[2:-1]}' not in environment variables")
+            txt = txt.replace(item, os.environ[item[2:-1]])
+        _config = yaml.load(txt, Loader=yaml.SafeLoader)
         return Configuration.from_dict(_config)
 
     @property

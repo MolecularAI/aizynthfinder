@@ -1,16 +1,17 @@
 """ Module containing a GUI extension for clustering
 """
 from __future__ import annotations
+
 from typing import TYPE_CHECKING
 
 import numpy as np
-from ipywidgets import Output, Label, BoundedIntText, Button, HBox, Tab
 from IPython.display import display
+from ipywidgets import BoundedIntText, Button, HBox, Label, Output, Tab
 
 try:
     import matplotlib.pylab as plt
-    from scipy.cluster.hierarchy import dendrogram
     from route_distances.clustering import ClusteringHelper
+    from scipy.cluster.hierarchy import dendrogram
 except ImportError:
     raise ImportError(
         "Clustering is not supported by this installation."

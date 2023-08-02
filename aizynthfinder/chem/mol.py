@@ -1,6 +1,7 @@
 """ Module containing classes to deal with Molecules - mostly wrappers around rdkit routines.
 """
 from __future__ import annotations
+
 from typing import TYPE_CHECKING
 
 import numpy as np
@@ -9,17 +10,16 @@ from rdkit.Chem import AllChem, Descriptors
 
 from aizynthfinder.utils.exceptions import MoleculeException
 
-
 if TYPE_CHECKING:
     from aizynthfinder.utils.type_utils import (
+        Callable,
         Dict,
+        List,
         Optional,
-        Union,
-        Tuple,
         RdMol,
         Sequence,
-        List,
-        Callable,
+        Tuple,
+        Union,
     )
 
 

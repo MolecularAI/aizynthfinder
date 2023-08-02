@@ -1,6 +1,7 @@
 """ Module containing classes that implements different expansion policy strategies
 """
 from __future__ import annotations
+
 import abc
 from typing import TYPE_CHECKING
 
@@ -8,16 +9,16 @@ import numpy as np
 import pandas as pd
 
 from aizynthfinder.chem import TemplatedRetroReaction
-from aizynthfinder.utils.models import load_model
-from aizynthfinder.utils.logging import logger
 from aizynthfinder.context.policy.utils import _make_fingerprint
 from aizynthfinder.utils.exceptions import PolicyException
+from aizynthfinder.utils.logging import logger
+from aizynthfinder.utils.models import load_model
 
 if TYPE_CHECKING:
-    from aizynthfinder.utils.type_utils import Any, Sequence, List, Tuple
-    from aizynthfinder.context.config import Configuration
     from aizynthfinder.chem import TreeMolecule
     from aizynthfinder.chem.reaction import RetroReaction
+    from aizynthfinder.context.config import Configuration
+    from aizynthfinder.utils.type_utils import Any, List, Sequence, Tuple
 
 
 class ExpansionStrategy(abc.ABC):

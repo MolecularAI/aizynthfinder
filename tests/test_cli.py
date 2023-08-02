@@ -1,31 +1,22 @@
-import os
 import glob
+import json
+import os
 import sys
+from typing import Dict, List
 
 import pandas as pd
-import yaml
 import pytest
+import yaml
 
+from aizynthfinder.analysis import RouteCollection
+from aizynthfinder.chem import MoleculeException
 from aizynthfinder.interfaces import AiZynthApp
 from aizynthfinder.interfaces.aizynthapp import main as app_main
 from aizynthfinder.interfaces.aizynthcli import main as cli_main
-from aizynthfinder.tools.make_stock import main as make_stock_main
+from aizynthfinder.reactiontree import ReactionTree
 from aizynthfinder.tools.cat_output import main as cat_main
 from aizynthfinder.tools.download_public_data import main as download_main
-from aizynthfinder.chem import MoleculeException
-from aizynthfinder.analysis import RouteCollection
-from aizynthfinder.reactiontree import ReactionTree
-
-try:
-    from aizynthfinder.training.utils import Config
-    from aizynthfinder.training.preprocess_expansion import main as expansion_main
-    from aizynthfinder.training.preprocess_recommender import main as recommender_main
-    from aizynthfinder.training.preprocess_filter import main as filter_main
-    from aizynthfinder.training.make_false_products import main as make_false_main
-except ImportError:
-    SUPPORT_TRAINING = False
-else:
-    SUPPORT_TRAINING = True
+from aizynthfinder.tools.make_stock import main as make_stock_main
 
 try:
     from aizynthfinder.interfaces.gui import ClusteringGui
@@ -62,6 +53,72 @@ def test_create_clustering_gui(mocker, load_reaction_tree):
     ClusteringGui(collection)
 
     display_patch.assert_called()
+
+
+@pytest.fixture
+def expected_checkpoint_output() -> List[Dict]:
+    checkpoint = [
+        {
+            "processed_smiles": "c1ccccc1",
+            "results": {
+                "a": 1,
+                "b": 2,
+                "is_solved": True,
+                "stock_info": 1,
+                "top_scores": "",
+                "trees": 3,
+            },
+        },
+        {
+            "processed_smiles": "Cc1ccccc1",
+            "results": {
+                "a": 1,
+                "b": 2,
+                "is_solved": True,
+                "stock_info": 1,
+                "top_scores": "",
+                "trees": 3,
+            },
+        },
+        {
+            "processed_smiles": "c1ccccc1",
+            "results": {
+                "a": 1,
+                "b": 2,
+                "is_solved": True,
+                "stock_info": 1,
+                "top_scores": "",
+                "trees": 3,
+            },
+        },
+        {
+            "processed_smiles": "CCO",
+            "results": {
+                "a": 1,
+                "b": 2,
+                "is_solved": True,
+                "stock_info": 1,
+                "top_scores": "",
+                "trees": 3,
+            },
+        },
+    ]
+    return checkpoint
+
+
+@pytest.fixture
+def multi_smiles_with_checkpoint_results() -> pd.DataFrame:
+    results = pd.DataFrame(
+        {
+            "a": [1, 1, 1, 1],
+            "b": [2, 2, 2, 2],
+            "is_solved": [True, True, True, True],
+            "stock_info": [1, 1, 1, 1],
+            "top_scores": ["", "", "", ""],
+            "trees": [3, 3, 3, 3],
+        },
+    )
+    return results
 
 
 def test_app_main_no_output(mocker, tmpdir, add_cli_arguments):
@@ -101,6 +158,8 @@ def test_cli_single_smiles(mocker, add_cli_arguments, tmpdir, capsys):
     cli_main()
 
     finder_patch.assert_called_with(configfile="config_local.yml")
+    finder_patch.return_value.expansion_policy.select.assert_called_once()
+    finder_patch.return_value.filter_policy.select_all.assert_called_once()
     json_patch.assert_called_once()
     output = capsys.readouterr()
     assert f"Trees saved to {output_name}" in output.out
@@ -153,6 +212,88 @@ def test_cli_multiple_smiles(
     output = capsys.readouterr()
     assert output.out.count("Done with") == 4
     assert f"Output saved to {output_name}" in output.out
+
+
+def test_cli_multiple_smiles_with_empty_checkpoint(
+    mocker,
+    add_cli_arguments,
+    tmpdir,
+    shared_datadir,
+    create_dummy_smiles_source,
+    expected_checkpoint_output,
+    multi_smiles_with_checkpoint_results,
+):
+    finder_patch = mocker.patch("aizynthfinder.interfaces.aizynthcli.AiZynthFinder")
+    finder_patch.return_value.extract_statistics.return_value = {
+        "a": 1,
+        "b": 2,
+        "is_solved": True,
+    }
+    finder_patch.return_value.tree_search.return_value = 1.5
+    finder_patch.return_value.stock_info.return_value = 1
+    finder_patch.return_value.trees.return_value = 2
+    finder_patch.return_value.routes.dict_with_extra.return_value = 3
+
+    smiles_input = create_dummy_smiles_source("txt")
+    output_name = str(tmpdir / "data.json.gz")
+    checkpoint = str(tmpdir / "checkpoint.json.gz")
+    add_cli_arguments(
+        f"--smiles {smiles_input} --config config_local.yml "
+        f"--output {output_name} --checkpoint {checkpoint}"
+    )
+
+    cli_main()
+
+    with open(checkpoint) as json_file:
+        checkpoint_output = [json.loads(line) for line in json_file]
+    results_output = pd.read_json(output_name, orient="table")
+
+    assert checkpoint_output == expected_checkpoint_output
+    pd.testing.assert_frame_equal(results_output, multi_smiles_with_checkpoint_results)
+
+
+def test_cli_multiple_smiles_with_checkpoint(
+    mocker,
+    add_cli_arguments,
+    tmpdir,
+    shared_datadir,
+    create_dummy_smiles_source,
+    expected_checkpoint_output,
+    multi_smiles_with_checkpoint_results,
+):
+    finder_patch = mocker.patch("aizynthfinder.interfaces.aizynthcli.AiZynthFinder")
+    finder_patch.return_value.extract_statistics.return_value = {
+        "a": 1,
+        "b": 2,
+        "is_solved": True,
+    }
+    finder_patch.return_value.tree_search.return_value = 1.5
+    finder_patch.return_value.stock_info.return_value = 1
+    finder_patch.return_value.trees.return_value = 2
+    finder_patch.return_value.routes.dict_with_extra.return_value = 3
+
+    smiles_input = create_dummy_smiles_source("txt")
+    output_name = str(tmpdir / "data.json.gz")
+    checkpoint = str(tmpdir / "checkpoint.json.gz")
+
+    with open(shared_datadir / "input_checkpoint.json.gz", "r") as from_file, open(
+        checkpoint, "w"
+    ) as to:
+        to.write(from_file.read())
+
+    add_cli_arguments(
+        f"--smiles {smiles_input} --config config_local.yml "
+        f"--output {output_name} --checkpoint {checkpoint}"
+    )
+
+    cli_main()
+
+    with open(checkpoint) as json_file:
+        checkpoint_output = [json.loads(line) for line in json_file]
+    results_output = pd.read_json(output_name, orient="table")
+
+    assert checkpoint_output == expected_checkpoint_output
+    pd.testing.assert_frame_equal(results_output, multi_smiles_with_checkpoint_results)
 
 
 def test_cli_multiple_smiles_unsanitizable(
@@ -242,363 +383,17 @@ def test_cat_main(tmpdir, add_cli_arguments, create_dummy_stock1, create_dummy_s
     assert len(data) == 4
 
 
-@pytest.mark.xfail(condition=not SUPPORT_TRAINING, reason="dependencies not installed")
-def test_preprocess_expansion(write_yaml, shared_datadir, add_cli_arguments):
-    config_path = write_yaml(
-        {
-            "file_prefix": str(shared_datadir / "dummy"),
-            "split_size": {"training": 0.6, "testing": 0.2, "validation": 0.2},
-        }
-    )
-
-    expansion_main([config_path])
-
-    with open(shared_datadir / "dummy_template_library.csv", "r") as fileobj:
-        lines = fileobj.read().splitlines()
-    assert len(lines) == 10
-
-    with open(shared_datadir / "dummy_training.csv", "r") as fileobj:
-        lines = fileobj.read().splitlines()
-    assert len(lines) == 6
-
-    with open(shared_datadir / "dummy_testing.csv", "r") as fileobj:
-        lines = fileobj.read().splitlines()
-    assert len(lines) == 2
-
-    with open(shared_datadir / "dummy_validation.csv", "r") as fileobj:
-        lines = fileobj.read().splitlines()
-    assert len(lines) == 2
-
-    data = pd.read_hdf(shared_datadir / "dummy_unique_templates.hdf5", "table")
-    config = Config(config_path)
-    assert len(data) == 2
-    assert "retro_template" in data.columns
-    assert "library_occurrence" in data.columns
-    for column in config["metadata_headers"]:
-        assert column in data.columns
-
-
-@pytest.mark.xfail(condition=not SUPPORT_TRAINING, reason="dependencies not installed")
-def test_preprocess_expansion_no_class(write_yaml, shared_datadir, add_cli_arguments):
-    config_path = write_yaml(
-        {
-            "library_headers": [
-                "index",
-                "ID",
-                "reaction_hash",
-                "reactants",
-                "products",
-                "retro_template",
-                "template_hash",
-            ],
-            "metadata_headers": ["template_hash"],
-            "file_prefix": str(shared_datadir / "dummy_noclass"),
-            "split_size": {"training": 0.6, "testing": 0.2, "validation": 0.2},
-        }
-    )
-
-    expansion_main([config_path])
-
-    with open(shared_datadir / "dummy_noclass_template_library.csv", "r") as fileobj:
-        lines = fileobj.read().splitlines()
-    assert len(lines) == 10
-
-    with open(shared_datadir / "dummy_noclass_training.csv", "r") as fileobj:
-        lines = fileobj.read().splitlines()
-    assert len(lines) == 6
-
-    with open(shared_datadir / "dummy_noclass_testing.csv", "r") as fileobj:
-        lines = fileobj.read().splitlines()
-    assert len(lines) == 2
-
-    with open(shared_datadir / "dummy_noclass_validation.csv", "r") as fileobj:
-        lines = fileobj.read().splitlines()
-    assert len(lines) == 2
-
-    data = pd.read_hdf(shared_datadir / "dummy_noclass_unique_templates.hdf5", "table")
-    config = Config(config_path)
-    assert len(data) == 2
-    assert "retro_template" in data.columns
-    assert "library_occurrence" in data.columns
-    for column in config["metadata_headers"]:
-        assert column in data.columns
-
-
-@pytest.mark.xfail(condition=not SUPPORT_TRAINING, reason="dependencies not installed")
-def test_preprocess_expansion_csv_headers(write_yaml, shared_datadir):
-    config_path = write_yaml(
-        {
-            "file_prefix": str(shared_datadir / "dummy2"),
-            "split_size": {"training": 0.6, "testing": 0.2, "validation": 0.2},
-            "column_map": {
-                "reaction_hash": "PseudoHash",
-            },
-            "in_csv_headers": True,
-            "reaction_smiles_column": "RSMI",
-        }
-    )
-
-    expansion_main([config_path])
-
-    with open(shared_datadir / "dummy2_template_library.csv", "r") as fileobj:
-        lines = fileobj.read().splitlines()
-    assert len(lines) == 11
-
-    with open(shared_datadir / "dummy2_training.csv", "r") as fileobj:
-        lines = fileobj.read().splitlines()
-    assert len(lines) == 7
-
-    with open(shared_datadir / "dummy2_testing.csv", "r") as fileobj:
-        lines = fileobj.read().splitlines()
-    assert len(lines) == 3
-
-    with open(shared_datadir / "dummy2_validation.csv", "r") as fileobj:
-        lines = fileobj.read().splitlines()
-    assert len(lines) == 3
-
-    data = pd.read_hdf(shared_datadir / "dummy2_unique_templates.hdf5", "table")
-    config = Config(config_path)
-    assert len(data) == 2
-    assert "retro_template" in data.columns
-    assert "library_occurrence" in data.columns
-    for column in config["metadata_headers"]:
-        assert column in data.columns
-
-
-@pytest.mark.xfail(condition=not SUPPORT_TRAINING, reason="dependencies not installed")
-def test_preprocess_expansion_bad_product(
-    write_yaml, shared_datadir, add_cli_arguments
+def test_cat_main_json(
+    tmpdir, add_cli_arguments, create_dummy_stock1, create_dummy_stock2
 ):
-    config_path = write_yaml(
-        {
-            "file_prefix": str(shared_datadir / "dummy_sani"),
-            "split_size": {"training": 0.6, "testing": 0.2, "validation": 0.2},
-        }
-    )
+    filename = str(tmpdir / "output.json.gz")
+    inputs = [create_dummy_stock1("hdf5"), create_dummy_stock2]
+    add_cli_arguments(f"--files {inputs[0]} {inputs[1]} --output {filename}")
 
-    with pytest.raises(MoleculeException):
-        expansion_main([config_path])
+    cat_main()
 
-
-@pytest.mark.xfail(condition=not SUPPORT_TRAINING, reason="dependencies not installed")
-def test_preprocess_expansion_skip_bad_product(
-    write_yaml, shared_datadir, add_cli_arguments
-):
-    config_path = write_yaml(
-        {
-            "file_prefix": str(shared_datadir / "dummy_sani"),
-            "split_size": {"training": 0.6, "testing": 0.2, "validation": 0.2},
-            "remove_unsanitizable_products": True,
-        }
-    )
-
-    expansion_main([config_path])
-
-    with open(shared_datadir / "dummy_sani_template_library.csv", "r") as fileobj:
-        lines = fileobj.read().splitlines()
-    assert len(lines) == 10
-
-
-@pytest.mark.xfail(condition=not SUPPORT_TRAINING, reason="dependencies not installed")
-def test_preprocess_recommender(write_yaml, shared_datadir, add_cli_arguments):
-    config_path = write_yaml(
-        {
-            "file_prefix": str(shared_datadir / "dummy"),
-            "split_size": {"training": 0.6, "testing": 0.2, "validation": 0.2},
-        }
-    )
-
-    expansion_main([config_path])
-
-    with open(shared_datadir / "dummy_template_library.csv", "r") as fileobj:
-        lines = fileobj.read().splitlines()
-    assert len(lines) == 10
-
-    os.remove(shared_datadir / "dummy_training.csv")
-    os.remove(shared_datadir / "dummy_testing.csv")
-    os.remove(shared_datadir / "dummy_validation.csv")
-    os.remove(shared_datadir / "dummy_unique_templates.hdf5")
-
-    recommender_main([config_path])
-
-    with open(shared_datadir / "dummy_training.csv", "r") as fileobj:
-        lines = fileobj.read().splitlines()
-    assert len(lines) == 6
-
-    with open(shared_datadir / "dummy_testing.csv", "r") as fileobj:
-        lines = fileobj.read().splitlines()
-    assert len(lines) == 2
-
-    with open(shared_datadir / "dummy_validation.csv", "r") as fileobj:
-        lines = fileobj.read().splitlines()
-    assert len(lines) == 2
-
-    data = pd.read_hdf(shared_datadir / "dummy_unique_templates.hdf5", "table")
-    assert len(data) == 2
-
-
-@pytest.mark.xfail(condition=not SUPPORT_TRAINING, reason="dependencies not installed")
-def test_preprocess_recommender_csv_headers(
-    write_yaml, shared_datadir, add_cli_arguments
-):
-    config_path = write_yaml(
-        {
-            "file_prefix": str(shared_datadir / "dummy2"),
-            "split_size": {"training": 0.6, "testing": 0.2, "validation": 0.2},
-            "column_map": {
-                "reaction_hash": "PseudoHash",
-            },
-            "in_csv_headers": True,
-            "reaction_smiles_column": "RSMI",
-        }
-    )
-
-    expansion_main([config_path])
-
-    with open(shared_datadir / "dummy2_template_library.csv", "r") as fileobj:
-        lines = fileobj.read().splitlines()
-    assert len(lines) == 11
-
-    os.remove(shared_datadir / "dummy2_training.csv")
-    os.remove(shared_datadir / "dummy2_testing.csv")
-    os.remove(shared_datadir / "dummy2_validation.csv")
-    os.remove(shared_datadir / "dummy2_unique_templates.hdf5")
-
-    recommender_main([config_path])
-
-    with open(shared_datadir / "dummy2_training.csv", "r") as fileobj:
-        lines = fileobj.read().splitlines()
-    assert len(lines) == 7
-
-    with open(shared_datadir / "dummy2_testing.csv", "r") as fileobj:
-        lines = fileobj.read().splitlines()
-    assert len(lines) == 3
-
-    with open(shared_datadir / "dummy2_validation.csv", "r") as fileobj:
-        lines = fileobj.read().splitlines()
-    assert len(lines) == 3
-
-    data = pd.read_hdf(shared_datadir / "dummy2_unique_templates.hdf5", "table")
-    assert len(data) == 2
-
-
-@pytest.mark.xfail(condition=not SUPPORT_TRAINING, reason="dependencies not installed")
-def test_preprocess_filter(write_yaml, shared_datadir, add_cli_arguments):
-    def duplicate_file(filename):
-        with open(shared_datadir / filename, "r") as fileobj:
-            lines = fileobj.read().splitlines()
-        lines = lines + lines
-        with open(shared_datadir / filename, "w") as fileobj:
-            fileobj.write("\n".join(lines))
-
-    config_path = write_yaml(
-        {
-            "file_prefix": str(shared_datadir / "make_false"),
-            "split_size": {"training": 0.6, "testing": 0.2, "validation": 0.2},
-            "library_headers": [
-                "index",
-                "reaction_hash",
-                "reactants",
-                "products",
-                "retro_template",
-                "template_hash",
-                "template_code",
-            ],
-        }
-    )
-
-    make_false_main([config_path, "strict"])
-
-    duplicate_file("make_false_template_library_false.csv")
-    duplicate_file("make_false_template_library.csv")
-
-    filter_main([config_path])
-
-    with open(shared_datadir / "make_false_training.csv", "r") as fileobj:
-        lines = fileobj.read().splitlines()
-    assert len(lines) == 6
-
-    with open(shared_datadir / "make_false_testing.csv", "r") as fileobj:
-        lines = fileobj.read().splitlines()
-    assert len(lines) == 2
-
-    with open(shared_datadir / "make_false_validation.csv", "r") as fileobj:
-        lines = fileobj.read().splitlines()
-    assert len(lines) == 2
-
-
-@pytest.mark.xfail(condition=not SUPPORT_TRAINING, reason="dependencies not installed")
-def test_preprocess_filter_csv_headers(write_yaml, shared_datadir, add_cli_arguments):
-    def duplicate_file(filename):
-        with open(shared_datadir / filename, "r") as fileobj:
-            lines = fileobj.read().splitlines()
-        lines = lines + lines[1:]
-        with open(shared_datadir / filename, "w") as fileobj:
-            fileobj.write("\n".join(lines))
-
-    config_path = write_yaml(
-        {
-            "file_prefix": str(shared_datadir / "make_false2"),
-            "split_size": {"training": 0.6, "testing": 0.2, "validation": 0.2},
-            "library_headers": [
-                "index",
-                "reaction_hash",
-                "reactants",
-                "products",
-                "retro_template",
-                "template_hash",
-                "template_code",
-            ],
-            "column_map": {
-                "reaction_hash": "PseudoHash",
-            },
-            "in_csv_headers": True,
-            "reaction_smiles_column": "RSMI",
-            "csv_sep": "\t",
-        }
-    )
-
-    make_false_main([config_path, "strict"])
-
-    duplicate_file("make_false2_template_library_false.csv")
-    duplicate_file("make_false2_template_library.csv")
-
-    filter_main([config_path])
-    with open(shared_datadir / "make_false2_training.csv", "r") as fileobj:
-        lines = fileobj.read().splitlines()
-    assert len(lines) == 7
-
-    with open(shared_datadir / "make_false2_testing.csv", "r") as fileobj:
-        lines = fileobj.read().splitlines()
-    assert len(lines) == 3
-
-    with open(shared_datadir / "make_false2_validation.csv", "r") as fileobj:
-        lines = fileobj.read().splitlines()
-    assert len(lines) == 3
-
-
-@pytest.mark.xfail(condition=not SUPPORT_TRAINING, reason="dependencies not installed")
-def test_make_false_products(write_yaml, shared_datadir, add_cli_arguments):
-    config_path = write_yaml(
-        {
-            "file_prefix": str(shared_datadir / "make_false"),
-            "library_headers": [
-                "index",
-                "reaction_hash",
-                "reactants",
-                "products",
-                "retro_template",
-                "template_hash",
-                "template_code",
-            ],
-        }
-    )
-
-    make_false_main([config_path, "strict"])
-
-    with open(shared_datadir / "make_false_template_library_false.csv", "r") as fileobj:
-        lines = fileobj.read().splitlines()
-    assert len(lines) == 2
+    data = pd.read_json(filename, orient="table")
+    assert len(data) == 4
 
 
 def test_download_public_data(tmpdir, mocker, add_cli_arguments):

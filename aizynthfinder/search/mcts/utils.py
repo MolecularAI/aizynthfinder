@@ -1,13 +1,14 @@
 """ Module containing utility routines for MCTS. This is not part of public interface """
 from __future__ import annotations
+
 from typing import TYPE_CHECKING
 
 from aizynthfinder.reactiontree import ReactionTreeLoader
 
 if TYPE_CHECKING:
-    from aizynthfinder.utils.type_utils import Tuple, List, Optional
-    from aizynthfinder.search.mcts import MctsNode
     from aizynthfinder.chem import RetroReaction
+    from aizynthfinder.search.mcts import MctsNode
+    from aizynthfinder.utils.type_utils import List, Optional, Tuple
 
 
 class ReactionTreeFromSuperNode(ReactionTreeLoader):

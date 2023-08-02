@@ -1,17 +1,18 @@
 """ Module containing a class that holds the tree search
 """
 from __future__ import annotations
+
 import json
 from typing import TYPE_CHECKING
 
 import networkx as nx
 
+from aizynthfinder.chem import MoleculeDeserializer, MoleculeSerializer
 from aizynthfinder.search.mcts.node import MctsNode
-from aizynthfinder.chem import MoleculeSerializer, MoleculeDeserializer
 
 if TYPE_CHECKING:
-    from aizynthfinder.utils.type_utils import Optional, List
     from aizynthfinder.context.config import Configuration
+    from aizynthfinder.utils.type_utils import List, Optional
 
 
 class MctsSearchTree:

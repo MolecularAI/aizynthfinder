@@ -1,19 +1,20 @@
 """ This module contains a collection of routines to produce pretty images
 """
 from __future__ import annotations
-import sys
-import io
-import subprocess
-import os
-import tempfile
+
 import atexit
+import io
+import os
 import shutil
+import subprocess
+import sys
+import tempfile
 from typing import TYPE_CHECKING
 
 from jinja2 import Template
 from PIL import Image, ImageDraw
-from rdkit.Chem import Draw
 from rdkit import Chem
+from rdkit.Chem import Draw
 
 from aizynthfinder.chem import Molecule
 from aizynthfinder.utils.paths import data_path
@@ -21,23 +22,20 @@ from aizynthfinder.utils.paths import data_path
 if TYPE_CHECKING:
     import networkx as nx
 
+    from aizynthfinder.chem import FixedRetroReaction, RetroReaction, UniqueMolecule
+
     # pylint: disable=ungrouped-imports
     from aizynthfinder.utils.type_utils import (
-        Tuple,
         Any,
         Dict,
-        Union,
-        Sequence,
-        PilImage,
-        PilColor,
-        List,
         FrameColors,
+        List,
+        PilColor,
+        PilImage,
+        Sequence,
         StrDict,
-    )
-    from aizynthfinder.chem import (
-        UniqueMolecule,
-        RetroReaction,
-        FixedRetroReaction,
+        Tuple,
+        Union,
     )
 
 IMAGE_FOLDER = tempfile.mkdtemp()

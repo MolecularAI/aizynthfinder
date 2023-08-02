@@ -1,31 +1,31 @@
 """ Module containing a class that represents a node in the search tree.
 """
 from __future__ import annotations
-from typing import TYPE_CHECKING
+
 import random
+from typing import TYPE_CHECKING
 
 import numpy as np
 
-from aizynthfinder.chem import TreeMolecule
+from aizynthfinder.chem import TreeMolecule, deserialize_action, serialize_action
 from aizynthfinder.search.mcts.state import MctsState
 from aizynthfinder.search.mcts.utils import ReactionTreeFromSuperNode, route_to_node
-from aizynthfinder.utils.logging import logger
 from aizynthfinder.utils.exceptions import (
     NodeUnexpectedBehaviourException,
     RejectionException,
 )
-from aizynthfinder.chem import serialize_action, deserialize_action
+from aizynthfinder.utils.logging import logger
 
 if TYPE_CHECKING:
-    from aizynthfinder.utils.type_utils import StrDict, List, Optional, Tuple
     from aizynthfinder.chem import (
         MoleculeDeserializer,
         MoleculeSerializer,
+        RetroReaction,
     )
     from aizynthfinder.context.config import Configuration
-    from aizynthfinder.search.mcts.search import MctsSearchTree
-    from aizynthfinder.chem import RetroReaction
     from aizynthfinder.reactiontree import ReactionTree
+    from aizynthfinder.search.mcts.search import MctsSearchTree
+    from aizynthfinder.utils.type_utils import List, Optional, StrDict, Tuple
 
 
 class MctsNode:

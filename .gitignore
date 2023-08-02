@@ -143,3 +143,4 @@ coverage/
 # Files created by the tool
 smiles.txt
 config_local.yml
+devtools/seldon-output-*/

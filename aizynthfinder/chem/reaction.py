@@ -1,35 +1,36 @@
 """ Module containing classes to deal with Reactions.
 """
 from __future__ import annotations
-import hashlib
+
 import abc
+import hashlib
 from functools import partial
 from typing import TYPE_CHECKING
 
 import numpy as np
-from rdkit import Chem
-from rdkit.Chem import AllChem
-from rdkit.Chem.rdchem import ChiralType, BondDir, BondStereo
 from rdchiral import main as rdc
 from rdchiral.bonds import get_atoms_across_double_bonds
 from rdchiral.initialization import BondDirOpposite
+from rdkit import Chem
+from rdkit.Chem import AllChem
+from rdkit.Chem.rdchem import BondDir, BondStereo, ChiralType
 
+from aizynthfinder.chem.mol import Molecule, MoleculeException, TreeMolecule
 from aizynthfinder.utils.logging import logger
-from aizynthfinder.chem.mol import MoleculeException, Molecule, TreeMolecule
 
 if TYPE_CHECKING:
-    from aizynthfinder.utils.type_utils import (
-        Optional,
-        Union,
-        Tuple,
-        List,
-        RdReaction,
-        StrDict,
-        Iterable,
-        Any,
-        Set,
-    )
     from aizynthfinder.chem.mol import UniqueMolecule
+    from aizynthfinder.utils.type_utils import (
+        Any,
+        Iterable,
+        List,
+        Optional,
+        RdReaction,
+        Set,
+        StrDict,
+        Tuple,
+        Union,
+    )
 
 
 class _ReactionInterfaceMixin:

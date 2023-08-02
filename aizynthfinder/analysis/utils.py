@@ -3,27 +3,19 @@ Helper routines and class for the `aizynthfinder.analysis` package.
 To avoid clutter in that package, larger utility algorithms are placed herein.
 """
 from __future__ import annotations
-from dataclasses import dataclass
+
 from collections import defaultdict
+from dataclasses import dataclass
 from typing import TYPE_CHECKING
 
 import networkx as nx
 
-from aizynthfinder.chem import (
-    Molecule,
-    UniqueMolecule,
-    FixedRetroReaction,
-)
-from aizynthfinder.utils.image import make_visjs_page
+from aizynthfinder.chem import FixedRetroReaction, Molecule, UniqueMolecule
 from aizynthfinder.reactiontree import ReactionTree
+from aizynthfinder.utils.image import make_visjs_page
 
 if TYPE_CHECKING:
-    from aizynthfinder.utils.type_utils import (
-        Sequence,
-        Tuple,
-        StrDict,
-        FrameColors,
-    )
+    from aizynthfinder.utils.type_utils import FrameColors, Sequence, StrDict, Tuple
 
 
 @dataclass

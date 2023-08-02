@@ -7,5 +7,4 @@ dependencies:
   - git
   - pip>=20.0
   - pip:
-    - https://github.com/MolecularAI/aizynthfinder/archive/v3.6.0.tar.gz
-    
+    - https://github.com/MolecularAI/aizynthfinder/archive/v3.7.0.tar.gz 

@@ -1,34 +1,38 @@
 """ Module routines for creating negative data for the training for filter policies
 """
 from __future__ import annotations
-import random
+
 import argparse
+import random
 from typing import TYPE_CHECKING
 
 import pandas as pd
 import tqdm
 
+# pylint: disable=all
+from tensorflow.keras.models import load_model as load_keras_model
+
+# pylint: enable=all
 import aizynthfinder.utils.logging  # pylint: disable=unused-import
-from aizynthfinder.chem import Molecule, Reaction, MoleculeException
+from aizynthfinder.chem import Molecule, MoleculeException, Reaction
 from aizynthfinder.training.utils import (
     Config,
     create_reactants_molecules,
-    reverse_template,
-    reaction_hash,
     reactants_to_fingerprint,
+    reaction_hash,
+    reverse_template,
     split_reaction_smiles,
 )
-from aizynthfinder.utils.models import CUSTOM_OBJECTS, load_keras_model
 
 if TYPE_CHECKING:
     from aizynthfinder.utils.type_utils import (
-        Iterable,
-        Optional,
-        Tuple,
         Any,
         Callable,
+        Iterable,
         List,
+        Optional,
         Sequence,
+        Tuple,
     )
 
     _DfGenerator = Iterable[Optional[pd.DataFrame]]
@@ -67,9 +71,7 @@ def recommender_application(library: pd.DataFrame, config: Config, _) -> _DfGene
     :yield: a new DataFrame with a false reaction for each row if a match could be found, otherwise None
     """
 
-    model = load_keras_model(
-        config["negative_data"]["recommender_model"], custom_objects=CUSTOM_OBJECTS
-    )
+    model = load_keras_model(config["negative_data"]["recommender_model"])
     topn = config["negative_data"]["recommender_topn"]
 
     def prediction_sampler(row):

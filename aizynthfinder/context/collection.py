@@ -1,14 +1,14 @@
 """ Module containing a class that is the base class for all collection classes (stock, policies, scorers)
 """
 from __future__ import annotations
+
 import abc
 from typing import TYPE_CHECKING
 
 from aizynthfinder.utils.logging import logger
 
 if TYPE_CHECKING:
-    from aizynthfinder.utils.type_utils import StrDict
-    from aizynthfinder.utils.type_utils import Any, List, Union
+    from aizynthfinder.utils.type_utils import Any, List, StrDict, Union
 
 
 class ContextCollection(abc.ABC):
@@ -34,7 +34,7 @@ class ContextCollection(abc.ABC):
     _single_selection = False
     _collection_name = "collection"
 
-    def __init__(self):
+    def __init__(self) -> None:
         self._items: StrDict = {}
         self._selection: List[str] = []
         self._logger = logger()

@@ -1,28 +1,22 @@
 """ Module containing classes used to score the reaction routes.
 """
 from __future__ import annotations
+
 import abc
 from collections import defaultdict
 from collections.abc import Sequence as SequenceAbc
 from typing import TYPE_CHECKING
 
-from aizynthfinder.search.mcts import MctsNode
-from aizynthfinder.reactiontree import ReactionTree
-from aizynthfinder.search.mcts import MctsState
 from aizynthfinder.chem import TreeMolecule
 from aizynthfinder.context.stock import StockException
+from aizynthfinder.reactiontree import ReactionTree
+from aizynthfinder.search.mcts import MctsNode, MctsState
 from aizynthfinder.utils.exceptions import ScorerException
 
 if TYPE_CHECKING:
-    from aizynthfinder.utils.type_utils import (
-        Union,
-        Tuple,
-        Sequence,
-        Iterable,
-        TypeVar,
-    )
+    from aizynthfinder.chem import FixedRetroReaction, Molecule, RetroReaction
     from aizynthfinder.context.config import Configuration
-    from aizynthfinder.chem import Molecule, RetroReaction, FixedRetroReaction
+    from aizynthfinder.utils.type_utils import Iterable, Sequence, Tuple, TypeVar, Union
 
     _Scoreable = TypeVar("_Scoreable", MctsNode, ReactionTree)
     _Scoreables = Sequence[_Scoreable]

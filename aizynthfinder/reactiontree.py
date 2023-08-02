@@ -1,9 +1,10 @@
 """ Module containing the implementation of a reaction tree or route and factory classes to make such trees """
 from __future__ import annotations
-import operator
-import json
+
 import abc
 import hashlib
+import json
+import operator
 from typing import TYPE_CHECKING
 
 import networkx as nx
@@ -17,26 +18,25 @@ else:
     SUPPORT_DISTANCES = True
 
 from aizynthfinder.chem import (
+    FixedRetroReaction,
     Molecule,
     UniqueMolecule,
-    FixedRetroReaction,
     none_molecule,
 )
 from aizynthfinder.utils.image import RouteImageFactory
 
-
 if TYPE_CHECKING:
+    from aizynthfinder.chem import RetroReaction
     from aizynthfinder.utils.type_utils import (
-        StrDict,
-        PilImage,
-        FrameColors,
-        Union,
-        Iterable,
         Any,
         Dict,
+        FrameColors,
+        Iterable,
         Optional,
+        PilImage,
+        StrDict,
+        Union,
     )
-    from aizynthfinder.chem import RetroReaction
 
 
 class ReactionTree:

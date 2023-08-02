@@ -1,12 +1,15 @@
-import pytest
+from typing import Dict, List
+
 import numpy as np
 import pandas as pd
+import pytest
+import pytest_mock
 
 from aizynthfinder.context.policy import TemplateBasedExpansionStrategy
 from aizynthfinder.context.stock import (
     MongoDbInchiKeyQuery,
-    StockQueryMixin,
     StockException,
+    StockQueryMixin,
 )
 
 
@@ -52,37 +55,6 @@ def make_stock_query():
 
 
 @pytest.fixture
-def mock_keras_model(mocker):
-    class MockedKerasModel(mocker.MagicMock):
-        @property
-        def input(self):
-            pass
-
-        @property
-        def output(self):
-            pass
-
-        def predict(self, *_):
-            pass
-
-    mocker.patch.object(
-        MockedKerasModel, "input", mocker.PropertyMock(return_value=np.zeros((3, 3)))
-    )
-    mocker.patch.object(
-        MockedKerasModel, "output", mocker.PropertyMock(return_value=np.zeros((3, 3)))
-    )
-    mocker.patch.object(
-        MockedKerasModel,
-        "predict",
-        mocker.MagicMock(return_value=np.array([[0.2, 0.7, 0.1]])),
-    )
-
-    return mocker.patch(
-        "aizynthfinder.utils.models.load_keras_model", return_value=MockedKerasModel
-    )
-
-
-@pytest.fixture
 def mocked_mongo_db_query(mocker):
     mocked_client = mocker.patch("aizynthfinder.context.stock.queries.get_mongo_client")
 
@@ -94,7 +66,7 @@ def mocked_mongo_db_query(mocker):
 
 @pytest.fixture
 def setup_template_expansion_policy(
-    default_config, create_dummy_templates, mock_keras_model, create_templates_file
+    default_config, create_dummy_templates, create_templates_file, mock_onnx_model
 ):
     def wrapper(key="policy1", templates=None):
         if templates is None:
@@ -103,10 +75,10 @@ def setup_template_expansion_policy(
             templates_filename = create_templates_file(templates)
 
         strategy = TemplateBasedExpansionStrategy(
-            key, default_config, source="dummy.hdf5", templatefile=templates_filename
+            key, default_config, source="dummy.onnx", templatefile=templates_filename
         )
 
-        return strategy, mock_keras_model
+        return strategy, mock_onnx_model
 
     return wrapper
 
