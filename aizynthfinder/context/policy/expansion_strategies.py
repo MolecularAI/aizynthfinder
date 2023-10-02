@@ -40,7 +40,7 @@ class ExpansionStrategy(abc.ABC):
 
     _required_kwargs: List[str] = []
 
-    def __init__(self, key: str, config: Configuration, **kwargs: str) -> None:
+    def __init__(self, key, config, **kwargs):
         if any(name not in kwargs for name in self._required_kwargs):
             raise PolicyException(
                 f"A {self.__class__.__name__} class needs to be initiated "
@@ -80,7 +80,7 @@ class TemplateBasedExpansionStrategy(ExpansionStrategy):
 
     _required_kwargs = ["source", "templatefile"]
 
-    def __init__(self, key: str, config: Configuration, **kwargs: str) -> None:
+    def __init__(self, key, config, **kwargs):
         super().__init__(key, config, **kwargs)
 
         source = kwargs["source"]
