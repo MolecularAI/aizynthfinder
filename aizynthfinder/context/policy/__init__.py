@@ -2,6 +2,7 @@
 """
 from aizynthfinder.context.policy.expansion_strategies import (
     ExpansionStrategy,
+    MultiExpansionStrategy,
     TemplateBasedExpansionStrategy,
 )
 from aizynthfinder.context.policy.filter_strategies import (

@@ -50,7 +50,6 @@ class MoleculeSerializer:
         if isinstance(mol, aizynthfinder.chem.TreeMolecule):
             dict_["parent"] = self[mol.parent]
             dict_["transform"] = mol.transform
-            dict_["tracked_atom_indices"] = mol.tracked_atom_indices
             if not mol.parent:
                 dict_["smiles"] = mol.original_smiles
             else:
@@ -106,15 +105,10 @@ class MoleculeDeserializer:
             cls = spec["class"]
             if "parent" in spec:
                 spec["parent"] = self[spec["parent"]]
-            tracked_atom_indices = None
-            if "tracked_atom_indices" in spec:
-                tracked_atom_indices = spec.pop("tracked_atom_indices")
 
             kwargs = dict(spec)
             del kwargs["class"]
             self._objects[id_] = getattr(aizynthfinder.chem, cls)(**kwargs)
-            if tracked_atom_indices is not None:
-                self._objects[id_].tracked_atom_indices = tracked_atom_indices
 
 
 def serialize_action(

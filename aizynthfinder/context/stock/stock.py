@@ -10,13 +10,24 @@ from aizynthfinder.chem import Molecule
 from aizynthfinder.context.collection import ContextCollection
 from aizynthfinder.context.stock.queries import (
     InMemoryInchiKeyQuery,
-    MongoDbInchiKeyQuery,
+    MolbloomFilterQuery,
+    STOCK_QUERY_ALIAS,
+    StockQueryMixin,
 )
+from aizynthfinder.context.stock.queries import __name__ as queries_module
 from aizynthfinder.utils.exceptions import StockException
 from aizynthfinder.utils.loading import load_dynamic_class
 
 if TYPE_CHECKING:
-    from aizynthfinder.utils.type_utils import Any, List, Set, StrDict, Union
+    from aizynthfinder.utils.type_utils import (
+        Any,
+        Dict,
+        List,
+        Optional,
+        Set,
+        StrDict,
+        Union,
+    )
 
 
 class Stock(ContextCollection):
@@ -128,63 +139,67 @@ class Stock(ContextCollection):
         """
         self._exclude.add(mol.inchi_key)
 
-    def load(self, source: Union[str, Any], key: str) -> None:  # type: ignore
+    def load(self, source: StockQueryMixin, key: str) -> None:  # type: ignore
         """
-        Load a stock.
+        Add a pre-initialized stock query object to the stock
 
-        If `source` is a string, it is taken as a path to a filename and the
-        stock is loaded as an `InMemoryInchiKeyQuery` object.
-
-        If `source` is not a string, it is taken as a custom object that
-        implements the `__contains__` and `__len__` methods for querying.
-
-        :param source: the source of the sock
+        :param source: the item to add
         :param key: The key that will be used to select the stock
         """
-        src_str = str(source)
-        if "object at 0x" in src_str:
-            src_str = source.__class__.__name__
-        self._logger.info(f"Loading stock from {src_str} to {key}")
+        if not isinstance(source, StockQueryMixin):
+            raise StockException(
+                "Only objects of classes inherited from StockQueryMixin can be added"
+            )
 
-        if isinstance(source, str):
-            source = InMemoryInchiKeyQuery(source)
+        self._logger.info(f"Loading stock from {source.__class__.__name__} to {key}")
         self._items[key] = source
 
     def load_from_config(self, **config: Any) -> None:
         """
-        Load stocks from a configuration
+        Load one or more stock queries from a configuration
 
-        The key can be "files" in case stocks are loaded from a file
-        The key can be "mongodb" in case a ``MongoDbInchiKeyQuery`` object is instantiated
-        The key can be "stop_criteria" in case the config is given to the `set_stop_criteria` method
-        The key can point to a custom stock class, e.g. ``mypackage.mymodule.MyStock``
-        in case this stock object is instantiated
+        The key can be "stop_criteria" in case the config is given to the
+        `set_stop_criteria` method
+
+        The format should be
+        key:
+            type: name of the stock class or custom_package.custom_model.CustomClass
+            path: path to the stock file
+            other settings or params
+        or
+        key: path_to_model
 
         :param config: the configuration
         """
-        known_keys = ["files", "mongodb", "stop_criteria"]
         if "stop_criteria" in config:
             self.set_stop_criteria(config["stop_criteria"])
 
-        for key, stockfile in config.get("files", {}).items():
-            self.load(stockfile, key)
-
-        if "mongodb" in config:
-            query_obj = MongoDbInchiKeyQuery(**(config["mongodb"] or {}))
-            self.load(query_obj, "mongodb_stock")
-
-        # Load stocks specifying a module and class, e.g. package.module.MyQueryClass
-        for name, stock_config in config.items():
-            if name in known_keys or name.find(".") == -1:
+        for key, stock_config in config.items():
+            if key == "stop_criteria":
                 continue
 
-            try:
-                query_cls = load_dynamic_class(name)
-            except ValueError as err:
-                self._logger.warning(str(err))
+            if not isinstance(stock_config, dict):
+                kwargs = {"path": stock_config}
+                if stock_config.endswith(".bloom"):
+                    cls: Any = MolbloomFilterQuery
+                else:
+                    cls = InMemoryInchiKeyQuery
             else:
-                query_obj = query_cls(**(stock_config or {}))
-                self.load(query_obj, query_cls.__name__)
+                if "type" not in stock_config or stock_config["type"] == "inchiset":
+                    cls = InMemoryInchiKeyQuery
+                else:
+                    stock_query = STOCK_QUERY_ALIAS.get(
+                        stock_config["type"], stock_config["type"]
+                    )
+                    cls = load_dynamic_class(
+                        stock_query, queries_module, StockException
+                    )
+                kwargs = dict(stock_config)
+
+            if "type" in kwargs:
+                del kwargs["type"]
+            obj = cls(**kwargs)
+            self.load(obj, key)
 
     def price(self, mol: Molecule) -> float:
         """
@@ -216,7 +231,7 @@ class Stock(ContextCollection):
         except (TypeError, ValueError):  # In case len is not possible to compute
             pass
 
-    def set_stop_criteria(self, criteria: dict = None) -> None:
+    def set_stop_criteria(self, criteria: Optional[Dict] = None) -> None:
         """
         Set criteria that stop the search
 

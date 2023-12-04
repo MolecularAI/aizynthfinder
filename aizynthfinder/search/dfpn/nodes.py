@@ -100,7 +100,7 @@ class MoleculeNode(_SuperNode):
         mol: TreeMolecule,
         config: Configuration,
         owner: SearchTree,
-        parent: ReactionNode = None,
+        parent: Optional[ReactionNode] = None,
     ) -> None:
         super().__init__()
 
@@ -112,7 +112,7 @@ class MoleculeNode(_SuperNode):
         self.tree = owner
 
         # Makes it unexpandable if we have reached maximum depth
-        self.expandable = self.mol.transform <= self._config.max_transforms
+        self.expandable = self.mol.transform < self._config.search.max_transforms
 
         if self.in_stock:
             self.expandable = False

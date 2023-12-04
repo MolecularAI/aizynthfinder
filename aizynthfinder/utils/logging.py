@@ -14,6 +14,7 @@ except ImportError:
 from rdkit import RDLogger
 
 from aizynthfinder.utils.paths import data_path
+from aizynthfinder.utils.type_utils import Optional
 
 # Suppress RDKit errors due to incomplete template (e.g. aromatic non-ring atoms)
 rd_logger = RDLogger.logger()
@@ -29,7 +30,9 @@ def logger() -> logging.Logger:
     return logging.getLogger("aizynthfinder")
 
 
-def setup_logger(console_level: int, file_level: int = None) -> logging.Logger:
+def setup_logger(
+    console_level: int, file_level: Optional[int] = None
+) -> logging.Logger:
     """
     Setup the logger that should be used by all classes
 

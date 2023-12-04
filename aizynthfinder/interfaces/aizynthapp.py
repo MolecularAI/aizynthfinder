@@ -12,12 +12,10 @@ import ipywidgets as widgets
 import jupytext
 from IPython.display import HTML, display
 from ipywidgets import (
-    BoundedFloatText,
     BoundedIntText,
     Button,
     Checkbox,
     Dropdown,
-    FloatText,
     HBox,
     IntText,
     Label,
@@ -68,7 +66,7 @@ class AiZynthApp:
         """
         Create the widgets and display the GUI.
         This is typically done on instantiation, but this method
-        if for more advanced uses.
+        is for more advanced uses.
         """
         self._create_input_widgets()
         self._create_search_widgets()
@@ -138,14 +136,25 @@ class AiZynthApp:
         )
 
         max_time_box = self._make_slider_input("time_limit", "Time (min)", 1, 120)
-        self._input["time_limit"].value = self.finder.config.time_limit / 60
+        self._input["time_limit"].value = self.finder.config.search.time_limit / 60
         max_iter_box = self._make_slider_input(
             "iteration_limit", "Max Iterations", 100, 2000
         )
-        self._input["iteration_limit"].value = self.finder.config.iteration_limit
+        self._input["iteration_limit"].value = self.finder.config.search.iteration_limit
         self._input["return_first"] = widgets.Checkbox(
-            value=self.finder.config.return_first,
+            value=self.finder.config.search.return_first,
             description="Return first solved route",
+        )
+        self._input["max_transforms"] = BoundedIntText(
+            description="Max tree depth",
+            min=1,
+            max=20,
+            value=self.finder.config.search.max_transforms,
+            style={"description_width": "initial"},
+        )
+        self._input["exclude_target_from_stock"] = widgets.Checkbox(
+            value=self.finder.config.search.exclude_target_from_stock,
+            description="Exclude target from stock",
         )
         vbox = VBox(
             [
@@ -154,60 +163,12 @@ class AiZynthApp:
                 max_time_box,
                 max_iter_box,
                 self._input["return_first"],
-            ]
-        )
-        box_options = HBox([box_stocks, vbox])
-
-        self._input["C"] = FloatText(description="C", value=self.finder.config.C)
-        self._input["max_transforms"] = BoundedIntText(
-            description="Max steps for substrates",
-            min=1,
-            max=20,
-            value=self.finder.config.max_transforms,
-            style={"description_width": "initial"},
-        )
-        self._input["cutoff_cumulative"] = BoundedFloatText(
-            description="Policy cutoff cumulative",
-            min=0,
-            max=1,
-            value=self.finder.config.cutoff_cumulative,
-            style={"description_width": "initial"},
-        )
-        self._input["cutoff_number"] = BoundedIntText(
-            description="Policy cutoff number",
-            min=1,
-            max=1000,
-            value=self.finder.config.cutoff_number,
-            style={"description_width": "initial"},
-        )
-        self._input["filter_cutoff"] = BoundedFloatText(
-            description="Filter cutoff",
-            min=0,
-            max=1,
-            value=self.finder.config.filter_cutoff,
-            style={"description_width": "initial"},
-        )
-        self._input["exclude_target_from_stock"] = widgets.Checkbox(
-            value=self.finder.config.exclude_target_from_stock,
-            description="Exclude target from stock",
-        )
-        box_advanced = VBox(
-            [
-                self._input["C"],
                 self._input["max_transforms"],
-                self._input["cutoff_cumulative"],
-                self._input["cutoff_number"],
-                self._input["filter_cutoff"],
                 self._input["exclude_target_from_stock"],
             ]
         )
-
-        children = [box_options, box_advanced]
-        tab = widgets.Tab()
-        tab.children = children
-        tab.set_title(0, "Options")
-        tab.set_title(1, "Advanced")
-        display(tab)
+        box_options = HBox([box_stocks, vbox])
+        display(box_options)
 
     def _create_route_widgets(self) -> None:
         self._input["scorer"] = widgets.Dropdown(
@@ -318,19 +279,18 @@ class AiZynthApp:
                 self.finder.filter_policy.deselect()
             else:
                 self.finder.filter_policy.select(self._input["filter"].value)
-            self.finder.config.properties = {
-                "C": self._input["C"].value,
-                "max_transforms": self._input["max_transforms"].value,
-                "cutoff_cumulative": self._input["cutoff_cumulative"].value,
-                "cutoff_number": int(self._input["cutoff_number"].value),
-                "return_first": self._input["return_first"].value,
-                "time_limit": self._input["time_limit"].value * 60,
-                "iteration_limit": self._input["iteration_limit"].value,
-                "filter_cutoff": self._input["filter_cutoff"].value,
-                "exclude_target_from_stock": self._input[
-                    "exclude_target_from_stock"
-                ].value,
-            }
+
+            self.finder.config.search.max_transforms = self._input[
+                "max_transforms"
+            ].value
+            self.finder.config.search.return_first = self._input["return_first"].value
+            self.finder.config.search.time_limit = self._input["time_limit"].value * 60
+            self.finder.config.search.iteration_limit = self._input[
+                "iteration_limit"
+            ].value
+            self.finder.config.search.exclude_target_from_stock = self._input[
+                "exclude_target_from_stock"
+            ].value
 
             smiles = self._input["smiles"].value
             print("Setting target molecule with smiles: %s" % smiles)

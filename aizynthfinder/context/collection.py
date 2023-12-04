@@ -8,7 +8,7 @@ from typing import TYPE_CHECKING
 from aizynthfinder.utils.logging import logger
 
 if TYPE_CHECKING:
-    from aizynthfinder.utils.type_utils import Any, List, StrDict, Union
+    from aizynthfinder.utils.type_utils import Any, List, Optional, StrDict, Union
 
 
 class ContextCollection(abc.ABC):
@@ -72,7 +72,7 @@ class ContextCollection(abc.ABC):
     def selection(self, value: str) -> None:
         self.select(value)
 
-    def deselect(self, key: str = None) -> None:
+    def deselect(self, key: Optional[str] = None) -> None:
         """
         Deselect one or all items
 

@@ -16,7 +16,14 @@ from deprecated import deprecated
 from aizynthfinder.utils.logging import logger
 
 if TYPE_CHECKING:
-    from aizynthfinder.utils.type_utils import Any, Callable, List, Sequence, Union
+    from aizynthfinder.utils.type_utils import (
+        Any,
+        Callable,
+        List,
+        Optional,
+        Sequence,
+        Union,
+    )
 
 
 def read_datafile(filename: Union[str, Path]) -> pd.DataFrame:
@@ -50,14 +57,14 @@ def save_datafile(data: pd.DataFrame, filename: Union[str, Path]) -> None:
 
 @deprecated(version="4.0.0", reason="replaced by 'cat_datafiles'")
 def cat_hdf_files(
-    input_files: List[str], output_name: str, trees_name: str = None
+    input_files: List[str], output_name: str, trees_name: Optional[str] = None
 ) -> None:
     """Concatenate hdf5 or json datafiles"""
     cat_datafiles(input_files, output_name, trees_name)
 
 
 def cat_datafiles(
-    input_files: List[str], output_name: str, trees_name: str = None
+    input_files: List[str], output_name: str, trees_name: Optional[str] = None
 ) -> None:
     """
     Concatenate hdf5 or json datafiles

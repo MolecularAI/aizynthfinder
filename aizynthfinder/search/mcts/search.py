@@ -26,8 +26,9 @@ class MctsSearchTree:
     :param root_smiles: the root will be set to a node representing this molecule, defaults to None
     """
 
-    def __init__(self, config: Configuration, root_smiles: str = None) -> None:
-
+    def __init__(
+        self, config: Configuration, root_smiles: Optional[str] = None
+    ) -> None:
         self.profiling = {
             "expansion_calls": 0,
             "reactants_generations": 0,
@@ -42,6 +43,8 @@ class MctsSearchTree:
             self.root = None
         self.config = config
         self._graph: Optional[nx.DiGraph] = None
+        self.reward_scorer_name = config.search.algorithm_config["search_reward"]
+        self.reward_scorer = config.scorers[self.reward_scorer_name]
 
     @classmethod
     def from_json(cls, filename: str, config: Configuration) -> "MctsSearchTree":
@@ -119,15 +122,14 @@ class MctsSearchTree:
         self.profiling["iterations"] += 1
         leaf = self.select_leaf()
         leaf.expand()
-        rollout_child = None
         while not leaf.is_terminal():
             child = leaf.promising_child()
-            if not rollout_child:
-                rollout_child = child
             if child:
                 child.expand()
                 leaf = child
-        self.backpropagate(leaf, leaf.state.score)
+
+        state_score = self.reward_scorer(leaf)
+        self.backpropagate(leaf, state_score)
         return leaf.state.is_solved
 
     def select_leaf(self) -> MctsNode:

@@ -6,13 +6,21 @@ import argparse
 import importlib
 from typing import TYPE_CHECKING
 
+try:
+    import molbloom
+except ImportError:
+    HAS_MOLBLOOM = False
+else:
+    HAS_MOLBLOOM = True
+
 import pandas as pd
+from rdkit import Chem
 
 from aizynthfinder.chem import Molecule, MoleculeException
 from aizynthfinder.context.stock import MongoDbInchiKeyQuery
 
 if TYPE_CHECKING:
-    from aizynthfinder.utils.type_utils import Iterable, List
+    from aizynthfinder.utils.type_utils import Iterable, List, Optional
 
     _StrIterator = Iterable[str]
 
@@ -41,9 +49,15 @@ def _get_arguments() -> argparse.Namespace:
         help="the name of the output file or source tag",
     )
     parser.add_argument(
-        "--target", choices=["hdf5", "mongo"], help="type of output", default="hdf5"
+        "--target",
+        choices=["hdf5", "mongo", "molbloom", "molbloom-inchi"],
+        help="type of output",
+        default="hdf5",
     )
     parser.add_argument("--host", help="the host of the Mongo database")
+    parser.add_argument(
+        "--bloom_params", nargs=2, type=int, help="the parameters to the Bloom filter"
+    )
     return parser.parse_args()
 
 
@@ -104,8 +118,59 @@ def make_hdf5_stock(inchi_keys: _StrIterator, filename: str) -> None:
     print(f"Created HDF5 stock with {len(data)} unique compounds")
 
 
+def make_molbloom(
+    smiles_list: _StrIterator, filename: str, filter_size: int, approx_mols: int
+) -> None:
+    """
+    Put all the unique SMILES in a new bloom filter.
+
+    :params smiles_list: the SMILES
+    :params filename: the path to the saved filter
+    :params filter_size: the size of the filter in bits
+    :params approx_mols: approximately the number of compounds
+    """
+    filter_ = molbloom.CustomFilter(filter_size, approx_mols, "myfilter")
+    processed_smiles = set()
+    for smiles in smiles_list:
+        try:
+            smiles_can = Chem.CanonSmiles(smiles)
+        # pylint: disable=broad-except
+        except Exception:
+            print(
+                f"Failed to convert {smiles} to canonical SMILES.",
+                flush=True,
+            )
+            continue
+        if smiles_can in processed_smiles:
+            continue
+        filter_.add(smiles_can)
+        processed_smiles.add(smiles_can)
+    filter_.save(filename)
+    print(f"Created bloom stock with {len(processed_smiles)} unique compounds")
+
+
+def make_molbloom_inchi(
+    inchi_keys: _StrIterator, filename: str, filter_size: int, approx_mols: int
+) -> None:
+    """
+    Put all the unique InChI keys in a new bloom filter.
+
+    :params inchi_keys: the Inchi Keys
+    :params filename: the path to the saved filter
+    :params filter_size: the size of the filter in bits
+    :params approx_mols: approximately the number of compounds
+    """
+    filter_ = molbloom.CustomFilter(filter_size, approx_mols, "myfilter")
+    nadded = 0
+    for inchi_key in inchi_keys:
+        filter_.add(inchi_key)
+        nadded += 1
+    filter_.save(filename)
+    print(f"Created bloom stock with {nadded} unique compounds")
+
+
 def make_mongo_stock(
-    inchi_keys: _StrIterator, source_tag: str, host: str = None
+    inchi_keys: _StrIterator, source_tag: str, host: Optional[str] = None
 ) -> None:
     """
     Put all the inchi keys from the given iterable in Mongo database as
@@ -129,10 +194,22 @@ def main() -> None:
     else:
         smiles_gen = (smiles for smiles in extract_smiles_from_module(args.files))
 
+    if not HAS_MOLBLOOM and args.target.startswith("molbloom"):
+        raise ImportError(
+            "Cannot create this stock format because it seems like molbloom is not installed. "
+            "Please install aizynthfinder with extras dependencies."
+        )
+
+    if args.target == "molbloom":
+        make_molbloom(smiles_gen, args.output, *args.bloom_params)
+        return
+
     inchi_keys_gen = (inchi_key for inchi_key in _convert_smiles(smiles_gen))
 
     if args.target == "hdf5":
         make_hdf5_stock(inchi_keys_gen, args.output)
+    elif args.target == "molbloom-inchi":
+        make_molbloom_inchi(inchi_keys_gen, args.output, *args.bloom_params)
     else:
         make_mongo_stock(inchi_keys_gen, args.output, args.host)
 

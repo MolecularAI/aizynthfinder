@@ -42,7 +42,7 @@ def _do_clustering(
     finder: AiZynthFinder,
     results: StrDict,
     detailed_results: bool,
-    model_path: str = None,
+    model_path: Optional[str] = None,
 ) -> None:
     time0 = time.perf_counter_ns()
     if model_path:
@@ -186,9 +186,14 @@ def _process_single_smiles(
         return
     finder.tree_search(show_progress=True)
     finder.build_routes()
+    finder.routes.compute_scores(*finder.scorers.objects())
 
     with open(output_name, "w") as fileobj:
-        json.dump(finder.routes.dicts, fileobj, indent=2)
+        json.dump(
+            finder.routes.dict_with_extra(include_metadata=True, include_scores=True),
+            fileobj,
+            indent=2,
+        )
     logger().info(f"Trees saved to {output_name}")
 
     scores = ", ".join("%.4f" % score for score in finder.routes.scores)
@@ -242,6 +247,7 @@ def _process_multi_smiles(
             continue
         search_time = finder.tree_search()
         finder.build_routes()
+        finder.routes.compute_scores(*finder.scorers.objects())
         stats = finder.extract_statistics()
 
         solved_str = "is solved" if stats["is_solved"] else "is not solved"

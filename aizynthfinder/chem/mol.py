@@ -41,7 +41,10 @@ class Molecule:
     """
 
     def __init__(
-        self, rd_mol: RdMol = None, smiles: str = None, sanitize: bool = False
+        self,
+        rd_mol: Optional[RdMol] = None,
+        smiles: Optional[str] = None,
+        sanitize: bool = False,
     ) -> None:
         if not rd_mol and not smiles:
             raise MoleculeException(
@@ -148,19 +151,24 @@ class Molecule:
         """
         return self.inchi_key[:14] == other.inchi_key[:14]
 
-    def fingerprint(self, radius: int, nbits: int = 2048) -> np.ndarray:
+    def fingerprint(
+        self, radius: int, nbits: int = 2048, chiral: bool = False
+    ) -> np.ndarray:
         """
         Returns the Morgan fingerprint of the molecule
 
         :param radius: the radius of the fingerprint
         :param nbits: the length of the fingerprint
+        :param chiral: if True, include chirality information
         :return: the fingerprint
         """
         key = radius, nbits
 
         if key not in self._fingerprints:
             self.sanitize()
-            bitvect = AllChem.GetMorganFingerprintAsBitVect(self.rd_mol, *key)
+            bitvect = AllChem.GetMorganFingerprintAsBitVect(
+                self.rd_mol, *key, useChirality=chiral
+            )
             array = np.zeros((1,))
             DataStructs.ConvertToNumpyArray(bitvect, array)
             self._fingerprints[key] = array
@@ -187,7 +195,7 @@ class Molecule:
         """
         return UniqueMolecule(rd_mol=self.rd_mol)
 
-    def remove_atom_mapping(self, exceptions: Sequence[int] = None) -> None:
+    def remove_atom_mapping(self, exceptions: Optional[Sequence[int]] = None) -> None:
         """
         Remove all mappings of the atoms and update the smiles
 
@@ -247,7 +255,6 @@ class TreeMolecule(Molecule):
     :ivar original_smiles: the SMILES as passed when instantiating the class
     :ivar parent: parent molecule
     :ivar transform: a numerical number corresponding to the depth in the tree
-    :ivar tracked_atom_indices: tracked atom indices and what indices they correspond to in this molecule
 
     :param parent: a TreeMolecule object that is the parent
     :param transform: the transform value, defaults to None
@@ -262,11 +269,11 @@ class TreeMolecule(Molecule):
     def __init__(
         self,
         parent: Optional["TreeMolecule"],
-        transform: int = None,
-        rd_mol: RdMol = None,
-        smiles: str = None,
+        transform: Optional[int] = None,
+        rd_mol: Optional[RdMol] = None,
+        smiles: Optional[str] = None,
         sanitize: bool = False,
-        mapping_update_callback: Callable[["TreeMolecule"], None] = None,
+        mapping_update_callback: Optional[Callable[["TreeMolecule"], None]] = None,
     ) -> None:
         super().__init__(rd_mol=rd_mol, smiles=smiles, sanitize=sanitize)
         self.parent = parent
@@ -276,10 +283,10 @@ class TreeMolecule(Molecule):
             self.transform = transform or 0
 
         self.original_smiles = smiles
-        self.tracked_atom_indices: Dict[int, Optional[int]] = {}
         self.mapped_mol = Chem.Mol(self.rd_mol)
+        self._atom_bonds: List[Tuple[int, int]] = []
         if not self.parent:
-            self._init_tracking()
+            self._set_atom_mappings()
         elif mapping_update_callback is not None:
             mapping_update_callback(self)
 
@@ -288,7 +295,6 @@ class TreeMolecule(Molecule):
 
         if self.parent:
             self.remove_atom_mapping()
-            self._update_tracked_atoms()
 
     @property
     def mapping_to_index(self) -> Dict[int, int]:
@@ -301,28 +307,33 @@ class TreeMolecule(Molecule):
             }
         return self._atom_mappings
 
-    def _init_tracking(self):
-        self.tracked_atom_indices = dict(self.mapping_to_index)
-        for idx, atom in enumerate(self.mapped_mol.GetAtoms()):
-            atom.SetAtomMapNum(idx + 1)
+    @property
+    def mapped_atom_bonds(self) -> List[Tuple[int, int]]:
+        """Return a list of atom bonds as tuples on the mapped atom indices"""
+        bonds = []
+        for bond in self.mapped_mol.GetBonds():
+            bonds.append((bond.GetBeginAtom().GetIdx(), bond.GetEndAtom().GetIdx()))
+
+        self._atom_bonds = [
+            (self.index_to_mapping[atom_index1], self.index_to_mapping[atom_index2])
+            for atom_index1, atom_index2 in bonds
+        ]
+        return self._atom_bonds
+
+    def _set_atom_mappings(self) -> None:
+        atom_mappings = [
+            atom.GetAtomMapNum()
+            for atom in self.mapped_mol.GetAtoms()
+            if atom.GetAtomMapNum() != 0
+        ]
+
+        mapper = max(atom_mappings) + 1 if atom_mappings else 1
         self._atom_mappings = {}
-
-    def _update_tracked_atoms(self) -> None:
-        if self.parent is None:
-            return
-
-        if not self.parent.tracked_atom_indices:
-            return
-
-        parent2child_map = {
-            atom_index: self.mapping_to_index.get(mapping_index)
-            for mapping_index, atom_index in self.parent.mapping_to_index.items()
-        }
-
-        self.tracked_atom_indices = {
-            tracked_index: parent2child_map[parent_index]  # type: ignore
-            for tracked_index, parent_index in self.parent.tracked_atom_indices.items()
-        }
+        for atom_index, atom in enumerate(self.mapped_mol.GetAtoms()):
+            if atom.GetAtomMapNum() == 0:
+                atom.SetAtomMapNum(mapper)
+                mapper += 1
+            self._atom_mappings[atom.GetAtomMapNum()] = atom_index
 
 
 class UniqueMolecule(Molecule):
@@ -337,7 +348,10 @@ class UniqueMolecule(Molecule):
     """
 
     def __init__(
-        self, rd_mol: RdMol = None, smiles: str = None, sanitize: bool = False
+        self,
+        rd_mol: Optional[RdMol] = None,
+        smiles: Optional[str] = None,
+        sanitize: bool = False,
     ) -> None:
         super().__init__(rd_mol=rd_mol, smiles=smiles, sanitize=sanitize)
 

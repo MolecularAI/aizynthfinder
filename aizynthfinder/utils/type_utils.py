@@ -11,6 +11,7 @@ from typing import Any, Dict, Optional, Tuple, Union
 
 from PIL.Image import Image
 from rdkit import Chem
+from rdkit.Chem import rdChemReactions
 from rdkit.DataStructs.cDataStructs import ExplicitBitVect
 
 StrDict = Dict[str, Any]

@@ -9,6 +9,7 @@ import numpy as np
 from aizynthfinder.chem import TreeMolecule
 from aizynthfinder.chem.serialization import deserialize_action, serialize_action
 from aizynthfinder.search.andor_trees import TreeNodeMixin
+from aizynthfinder.search.retrostar.cost import MoleculeCost
 
 if TYPE_CHECKING:
     from aizynthfinder.chem import RetroReaction
@@ -17,7 +18,7 @@ if TYPE_CHECKING:
         MoleculeSerializer,
     )
     from aizynthfinder.context.config import Configuration
-    from aizynthfinder.utils.type_utils import List, Sequence, Set, StrDict
+    from aizynthfinder.utils.type_utils import List, Optional, Sequence, Set, StrDict
 
 
 class MoleculeNode(TreeNodeMixin):
@@ -38,11 +39,16 @@ class MoleculeNode(TreeNodeMixin):
     """
 
     def __init__(
-        self, mol: TreeMolecule, config: Configuration, parent: ReactionNode = None
+        self,
+        mol: TreeMolecule,
+        config: Configuration,
+        molecule_cost: MoleculeCost,
+        parent: Optional[ReactionNode] = None,
     ) -> None:
         self.mol = mol
         self._config = config
-        self.cost = config.molecule_cost(mol)
+        self.molecule_cost = molecule_cost
+        self.cost = self.molecule_cost(mol)
         self.value = self.cost
         self.in_stock = mol in config.stock
         self.parent = parent
@@ -50,14 +56,16 @@ class MoleculeNode(TreeNodeMixin):
         self._children: List[ReactionNode] = []
         self.solved = self.in_stock
         # Makes it unexpandable if we have reached maximum depth
-        self.expandable = self.mol.transform <= self._config.max_transforms
+        self.expandable = self.mol.transform < self._config.search.max_transforms
 
         if self.in_stock:
             self.expandable = False
             self.value = 0
 
     @classmethod
-    def create_root(cls, smiles: str, config: Configuration) -> "MoleculeNode":
+    def create_root(
+        cls, smiles: str, config: Configuration, molecule_cost: MoleculeCost
+    ) -> "MoleculeNode":
         """
         Create a root node for a tree using a SMILES.
 
@@ -66,7 +74,7 @@ class MoleculeNode(TreeNodeMixin):
         :return: the created node
         """
         mol = TreeMolecule(parent=None, transform=0, smiles=smiles)
-        return MoleculeNode(mol=mol, config=config)
+        return MoleculeNode(mol=mol, config=config, molecule_cost=molecule_cost)
 
     @classmethod
     def from_dict(
@@ -74,7 +82,8 @@ class MoleculeNode(TreeNodeMixin):
         dict_: StrDict,
         config: Configuration,
         molecules: MoleculeDeserializer,
-        parent: ReactionNode = None,
+        molecule_cost: MoleculeCost,
+        parent: Optional[ReactionNode] = None,
     ) -> "MoleculeNode":
         """
         Create a new node from a dictionary, i.e. deserialization
@@ -86,11 +95,14 @@ class MoleculeNode(TreeNodeMixin):
         :return: a deserialized node
         """
         mol = molecules.get_tree_molecules([dict_["mol"]])[0]
-        node = MoleculeNode(mol, config, parent)
+        node = MoleculeNode(mol, config, molecule_cost, parent)
+        node.molecule_cost = molecule_cost
         for attr in ["cost", "expandable", "value"]:
             setattr(node, attr, dict_[attr])
         node.children = [
-            ReactionNode.from_dict(child, config, molecules, parent=node)
+            ReactionNode.from_dict(
+                child, config, molecules, node.molecule_cost, parent=node
+            )
             for child in dict_["children"]
         ]
         return node
@@ -138,7 +150,10 @@ class MoleculeNode(TreeNodeMixin):
                 return []
 
         rxn_node = ReactionNode.create_stub(
-            cost=cost, reaction=reaction, parent=self, config=self._config
+            cost=cost,
+            reaction=reaction,
+            parent=self,
+            config=self._config,
         )
         self._children.append(rxn_node)
 
@@ -258,7 +273,10 @@ class ReactionNode(TreeNodeMixin):
         node = cls(cost, reaction, parent)
         reactants = reaction.reactants[reaction.index]
         node.children = [
-            MoleculeNode(mol=mol, config=config, parent=node) for mol in reactants
+            MoleculeNode(
+                mol=mol, config=config, molecule_cost=parent.molecule_cost, parent=node
+            )
+            for mol in reactants
         ]
         node.solved = all(child.solved for child in node.children)
         # rn(R|T)
@@ -273,6 +291,7 @@ class ReactionNode(TreeNodeMixin):
         dict_: StrDict,
         config: Configuration,
         molecules: MoleculeDeserializer,
+        molecule_cost: MoleculeCost,
         parent: MoleculeNode,
     ) -> ReactionNode:
         """
@@ -289,7 +308,7 @@ class ReactionNode(TreeNodeMixin):
         for attr in ["cost", "value", "target_value"]:
             setattr(node, attr, dict_[attr])
         node.children = [
-            MoleculeNode.from_dict(child, config, molecules, parent=node)
+            MoleculeNode.from_dict(child, config, molecules, molecule_cost, parent=node)
             for child in dict_["children"]
         ]
         node.solved = all(child.solved for child in node.children)
@@ -322,7 +341,7 @@ class ReactionNode(TreeNodeMixin):
         dict_["children"] = [child.serialize(molecule_store) for child in self.children]
         return dict_
 
-    def update(self, value: float, from_mol: TreeMolecule = None) -> None:
+    def update(self, value: float, from_mol: Optional[TreeMolecule] = None) -> None:
         """
         Update the node as part of the update algorithm,
         calling the `update()` method of its parent
@@ -339,7 +358,7 @@ class ReactionNode(TreeNodeMixin):
 
         self.parent.update(self.solved)
 
-    def _propagate(self, value: float, exclude: TreeMolecule = None) -> None:
+    def _propagate(self, value: float, exclude: Optional[TreeMolecule] = None) -> None:
         if not exclude:
             self.target_value += value
 

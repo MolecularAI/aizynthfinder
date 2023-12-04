@@ -7,6 +7,13 @@ from typing import TYPE_CHECKING
 
 import pandas as pd
 
+try:
+    import molbloom
+except ImportError:
+    HAS_MOLBLOOM = False
+else:
+    HAS_MOLBLOOM = True
+
 from aizynthfinder.chem import Molecule
 from aizynthfinder.utils.exceptions import StockException
 from aizynthfinder.utils.mongo import get_mongo_client
@@ -16,7 +23,7 @@ if TYPE_CHECKING:
     from pymongo.database import Database as MongoDatabase
 
     # pylint: disable=ungrouped-imports
-    from aizynthfinder.utils.type_utils import Optional, Set
+    from aizynthfinder.utils.type_utils import Optional, Set, StrDict
 
 
 # pylint: disable=no-self-use
@@ -86,24 +93,58 @@ class InMemoryInchiKeyQuery(StockQueryMixin):
         * A Pandas dataframe in HDF5 or CSV format
         * A text file with an inchi key on each row
 
-    The pandas dataframe must have a column "inchi_key" with InChIkeys.
+    The dataframe must have a column with InChIkeys that by default is "inchi_key".
     The HDF5 file must have a dataset called "table".
 
-    :parameter filename: the path to the file with inchi-keys
+    If the source is a dataframe, then optionally it can contain prices and this
+    columns can be specified with the "price_column" argument.
+
+    :parameter path: the path to the file with inchi-keys
+    :parameter inchi_key_col: the name of the column of the InChI keys
+    :paramater price_col: the name of the column with the optional prices
     """
 
-    def __init__(self, filename: str) -> None:
-        ext = os.path.splitext(filename)[1]
-        if ext in [".h5", ".hdf5"]:
-            stock = pd.read_hdf(filename, key="table")  # type: ignore
-            inchis = stock.inchi_key.values  # type: ignore
-        elif ext == ".csv":
-            stock = pd.read_csv(filename)
-            inchis = stock.inchi_key.values
-        else:
-            with open(filename, "r") as fileobj:
+    def __init__(
+        self,
+        path: str,
+        inchi_key_col: str = "inchi_key",
+        price_col: Optional[str] = None,
+    ) -> None:
+        ext = os.path.splitext(path)[1]
+        if ext not in [".h5", ".hdf5", ".csv"]:
+            with open(path, "r") as fileobj:
                 inchis = fileobj.read().splitlines()
+            self._stock_inchikeys = set(inchis)
+            self._price_dict: StrDict = {}
+            return
+
+        if ext in [".h5", ".hdf5"]:
+            stock_df: pd.DataFrame = pd.read_hdf(path, key="table")
+        elif ext == ".csv":
+            stock_df = pd.read_csv(
+                path,
+                usecols=[inchi_key_col, price_col] if price_col else [inchi_key_col],
+            )
+        inchis = stock_df[inchi_key_col].values
         self._stock_inchikeys = set(inchis)
+
+        if price_col is None:
+            self._price_dict = {}
+            return
+
+        if len(stock_df) != len(self._stock_inchikeys):
+            raise StockException(
+                "InChI keys in stock df are expected to be unique, currently they are not"
+            )
+        if stock_df[price_col].isnull().sum() != 0:
+            raise StockException(
+                "null values found in the price column, please drop/impute them first"
+            )
+        if stock_df[price_col].min() < 0:
+            raise StockException(
+                f"expected non-negative prices, the min in the current file {path} is {stock_df[price_col].min()} "
+            )
+        self._price_dict = dict(zip(stock_df[inchi_key_col], stock_df[price_col]))
 
     def __contains__(self, mol: Molecule) -> bool:
         return mol.inchi_key in self._stock_inchikeys
@@ -115,6 +156,15 @@ class InMemoryInchiKeyQuery(StockQueryMixin):
     def stock_inchikeys(self) -> Set[str]:
         """Return the InChiKeys in this stock"""
         return self._stock_inchikeys
+
+    def price(self, mol: Molecule) -> float:
+        if not self._price_dict:
+            raise StockException(
+                "no prices created, check the path type and if price column is supplied"
+            )
+        if mol in self:
+            return self._price_dict[mol.inchi_key]
+        raise StockException(f"no price info available for {mol.smiles}")
 
 
 class MongoDbInchiKeyQuery(StockQueryMixin):
@@ -136,7 +186,7 @@ class MongoDbInchiKeyQuery(StockQueryMixin):
 
     def __init__(
         self,
-        host: str = None,
+        host: Optional[str] = None,
         database: str = "stock_db",
         collection: str = "molecules",
     ) -> None:
@@ -168,3 +218,34 @@ class MongoDbInchiKeyQuery(StockQueryMixin):
             item["source"] for item in self.molecules.find({"inchi_key": mol.inchi_key})
         ]
         return ",".join(sources)
+
+
+class MolbloomFilterQuery(StockQueryMixin):
+    """
+    A stock query class that is based on an a molbloom filter
+    for SMILES strings or InChI keys
+
+    :parameter path: the path to the saved bloom filter
+    :parameter smiles_based: if True will use SMILES for lookup instead of InChI keys
+    """
+
+    def __init__(self, path: str, smiles_based: bool = False) -> None:
+        if not HAS_MOLBLOOM:
+            raise ImportError(
+                "Cannot use this stock query class because it seems like molbloom is not installed. "
+                "Please install aizynthfinder with extras dependencies."
+            )
+        self._filter = molbloom.BloomFilter(path)
+        self._smiles_based = smiles_based
+
+    def __contains__(self, mol: Molecule) -> bool:
+        if self._smiles_based:
+            return mol.smiles in self._filter
+        return mol.inchi_key in self._filter
+
+
+STOCK_QUERY_ALIAS = {
+    "inchiset": "InMemoryInchiKeyQuery",
+    "mongodb": "MongoDbInchiKeyQuery",
+    "bloom": "MolbloomFilterQuery",
+}

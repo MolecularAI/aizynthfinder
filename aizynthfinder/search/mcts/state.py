@@ -5,7 +5,6 @@ from __future__ import annotations
 import os
 from typing import TYPE_CHECKING
 
-import numpy as np
 from rdkit.Chem import Draw
 
 from aizynthfinder.chem import TreeMolecule
@@ -35,6 +34,7 @@ class MctsState:
     :ivar is_solved: is true if all molecules are in stock:
     :ivar max_transforms: the maximum of the transforms of the molecule
     :ivar is_terminal: is true if the all molecules are in stock or if the maximum transforms has been reached
+    :ivar expandables_hash: an hash string computed on the expandable molecules
 
     :param mols: the molecules of the state
     :param config: settings of the tree search algorithm
@@ -51,13 +51,14 @@ class MctsState:
         self.is_solved = all(self.in_stock_list)
         self.max_transforms = max(mol.transform for mol in self.mols)
         self.is_terminal = (
-            self.max_transforms > config.max_transforms
+            self.max_transforms > config.search.max_transforms
         ) or self.is_solved
-        self._score: Optional[float] = None
 
         inchis = [mol.inchi_key for mol in self.mols]
-        inchis.sort()
-        self._hash = hash(tuple(inchis))
+        self._hash = hash(tuple(sorted(inchis)))
+
+        inchis = [mol.inchi_key for mol in self.expandable_mols]
+        self.expandables_hash = hash(tuple(sorted(inchis)))
 
     def __hash__(self) -> int:
         return self._hash
@@ -69,12 +70,11 @@ class MctsState:
 
     def __str__(self) -> str:
         """A string representation of the state (for print(state))"""
-        string = "%s\n%s\n%s\n%s\nScore: %0.3F Solved: %s" % (
+        string = "%s\n%s\n%s\n%s\n Solved: %s" % (
             str([mol.smiles for mol in self.mols]),
             str([mol.transform for mol in self.mols]),
             str([mol.parent.smiles if mol.parent else "-" for mol in self.mols]),
             str(self.in_stock_list),
-            self.score,
             self.is_solved,
         )
         return string
@@ -97,18 +97,6 @@ class MctsState:
         """
         mols = molecules.get_tree_molecules(dict_["mols"])
         return MctsState(mols, config)
-
-    @property
-    def score(self) -> float:
-        """
-        Returns the score of the state
-
-        :return: the score
-        :rtype: float
-        """
-        if not self._score:
-            self._score = self._calc_score()
-        return self._score
 
     @property
     def stock_availability(self) -> List[str]:
@@ -149,31 +137,3 @@ class MctsState:
         legends = self.stock_availability
         mols = [mol.rd_mol for mol in self.mols]
         return Draw.MolsToGridImage(mols, molsPerRow=ncolumns, legends=legends)
-
-    def _calc_score(self) -> float:
-        # How many is in stock (number between 0 and 1)
-        num_in_stock = np.sum(self.in_stock_list)
-        # This fraction in stock, makes the algorithm artificially add stock compounds by cyclic addition/removal
-        fraction_in_stock = num_in_stock / len(self.mols)
-
-        # Max_transforms should be low
-        max_transforms = self.max_transforms
-        # Squash function, 1 to 0, 0.5 around 4.
-        max_transforms_score = self._squash_function(max_transforms, -1, 0, 4)
-
-        # NB weights should sum to 1, to ensure that all
-        score4 = 0.95 * fraction_in_stock + 0.05 * max_transforms_score
-        return float(score4)
-
-    @staticmethod
-    def _squash_function(
-        val: float, slope: float, yoffset: float, xoffset: float
-    ) -> float:
-        """Squash function loosely adapted from a sigmoid function with parameters
-        to modify and offset the shape
-
-        :param val: the sign of the function, if the function goes from 1 to 0 or from 0 to 1
-        :param slope: the slope of the midpoint
-        :param xoffset: the offset of the midpoint along the x-axis
-        :param yoffset: the offset of the curve along the y-axis"""
-        return 1 / (1 + np.exp(slope * -(val - xoffset))) - yoffset

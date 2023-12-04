@@ -19,8 +19,8 @@ _CLIENT = None
 def get_mongo_client(
     host: str = "localhost",
     port: int = 27017,
-    user: str = None,
-    password: str = None,
+    user: Optional[str] = None,
+    password: Optional[str] = None,
     tls_certs_path: str = "",
 ) -> Optional[MongoClient]:
     """

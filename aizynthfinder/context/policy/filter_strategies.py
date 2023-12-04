@@ -66,21 +66,28 @@ class QuickKerasFilter(FilterStrategy):
     """
     Filter quick-filter trained on artificial negative data
 
+    :ivar use_remote_models: a boolean to connect to remote TensorFlow servers. Defaults
+        to False.
+    :ivar filter_cutoff: the cut-off value
+
     :param key: the key or label
     :param config: the configuration of the tree search
-    :param source: the source of the policy model
+    :param model: the source of the policy model
     """
 
-    _required_kwargs: List[str] = ["source"]
+    _required_kwargs: List[str] = ["model"]
 
     def __init__(self, key: str, config: Configuration, **kwargs: Any) -> None:
         super().__init__(key, config, **kwargs)
-        source = kwargs["source"]
+        source = kwargs["model"]
+        # self.settings = self._config.filter_settings
         self._logger.info(f"Loading filter policy model from {source} to {key}")
-        self.model = load_model(source, key, self._config.use_remote_models)
+        self.use_remote_models: bool = bool(kwargs.get("use_remote_models", False))
+        self.model = load_model(source, key, self.use_remote_models)
         self._prod_fp_name = kwargs.get("prod_fp_name", "input_1")
         self._rxn_fp_name = kwargs.get("rxn_fp_name", "input_2")
         self._exclude_from_policy: List[str] = kwargs.get("exclude_from_policy", [])
+        self.filter_cutoff: float = float(kwargs.get("filter_cutoff", 0.05))
 
     def apply(self, reaction: RetroReaction) -> None:
         if reaction.metadata.get("policy_name", "") in self._exclude_from_policy:
@@ -102,7 +109,7 @@ class QuickKerasFilter(FilterStrategy):
             return False, 0.0
 
         prob = self._predict(reaction)
-        feasible = prob >= self._config.filter_cutoff
+        feasible = prob >= self.filter_cutoff
         return feasible, prob
 
     def _predict(self, reaction: RetroReaction) -> float:
