@@ -1,7 +1,16 @@
-# aizynthfinder
+# AiZynthFinder
 
-aizynthfinder is a tool for retrosynthetic planning. The default algorithm is based on a Monte Carlo tree search that recursively breaks down a molecule to purchasable precursors. The tree search is guided by a policy that suggests possible precursors by utilizing a neural network trained on a library of known reaction templates. This setup is completely customizable as the tool
+[![License](https://img.shields.io/github/license/MolecularAI/aizynthfinder)](https://github.com/MolecularAI/aizynthfinder/blob/master/LICENSE)
+[![Tests](https://github.com/MolecularAI/aizynthfinder/workflows/tests/badge.svg)](https://github.com/MolecularAI/aizynthfinder/actions?workflow=tests)
+[![codecov](https://codecov.io/gh/MolecularAI/aizynthfinder/branch/master/graph/badge.svg)](https://codecov.io/gh/MolecularAI/aizynthfinder)
+[![Code style: black](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/python/black) 
+[![version](https://img.shields.io/github/v/release/MolecularAI/aizynthfinder)](https://github.com/MolecularAI/aizynthfinder/releases)
+[![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/MolecularAI/aizynthfinder/blob/master/contrib/notebook.ipynb)
+
+AiZynthFinder is a tool for retrosynthetic planning. The default algorithm is based on a Monte Carlo tree search that recursively breaks down a molecule to purchasable precursors. The tree search is guided by a policy that suggests possible precursors by utilizing a neural network trained on a library of known reaction templates. This setup is completely customizable as the tool
 supports multiple search algorithms and expansion policies.
+
+An introduction video can be found here: [https://youtu.be/r9Dsxm-mcgA](https://youtu.be/r9Dsxm-mcgA)
 
 ## Prerequisites
 
@@ -35,7 +44,7 @@ as interfaces to the algorithm:
     aizynthapp --config config_local.yml
 
 
-Consult the documentation [here](https://pages.scp.astrazeneca.net/mai/aizynthfinder/doc/)
+Consult the documentation [here](https://molecularai.github.io/aizynthfinder/)
 for more information.
 
 To use tool you need
@@ -44,7 +53,14 @@ To use tool you need
     2. A trained expansion policy network
     3. A trained filter policy network (optional)
     
-These files are available on SCP.
+Such files can be downloaded from [figshare](https://figshare.com/articles/AiZynthFinder_a_fast_robust_and_flexible_open-source_software_for_retrosynthetic_planning/12334577) and [here](https://figshare.com/articles/dataset/A_quick_policy_to_filter_reactions_based_on_feasibility_in_AI-guided_retrosynthetic_planning/13280507) or they can be downloaded automatically using
+
+```
+download_public_data my_folder
+```
+
+where ``my_folder`` is the folder that you want download to.
+This will create a ``config.yml`` file that you can use with either ``aizynthcli`` or ``aizynthapp``.
 
 ## Development
 
@@ -56,7 +72,7 @@ Run the tests using:
 
     pytest -v
 
-The full command run on Jenkins is available through an `invoke` command
+The full command run on the CI server is available through an `invoke` command
 
     invoke full-tests
     
@@ -88,11 +104,12 @@ Please use ``black`` package for formatting, and follow ``pep8`` style guide.
 
 ## Contributors
 
-* Samuel Genheden
-* Lakshidaa Saigiridharan
+* [@SGenheden](https://www.github.com/SGenheden)
+* [@lakshidaa](https://github.com/Lakshidaa)
 * Helen Lai
-* Esben Bjerrum
-* Amol Thakkar
+* [@EBjerrum](https://www.github.com/EBjerrum)
+* [@A-Thakkar](https://www.github.com/A-Thakkar)
+* [@benteb](https://www.github.com/benteb)
 
 The contributors have limited time for support questions, but please do not hesitate to submit an issue (see above).
 
