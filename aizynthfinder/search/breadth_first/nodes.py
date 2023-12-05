@@ -15,7 +15,7 @@ if TYPE_CHECKING:
         MoleculeSerializer,
     )
     from aizynthfinder.context.config import Configuration
-    from aizynthfinder.utils.type_utils import List, Sequence, Set, StrDict
+    from aizynthfinder.utils.type_utils import List, Optional, Sequence, Set, StrDict
 
 
 class MoleculeNode(TreeNodeMixin):
@@ -33,7 +33,10 @@ class MoleculeNode(TreeNodeMixin):
     """
 
     def __init__(
-        self, mol: TreeMolecule, config: Configuration, parent: ReactionNode = None
+        self,
+        mol: TreeMolecule,
+        config: Configuration,
+        parent: Optional[ReactionNode] = None,
     ) -> None:
         self.mol = mol
         self._config = config
@@ -42,7 +45,7 @@ class MoleculeNode(TreeNodeMixin):
 
         self._children: List[ReactionNode] = []
         # Makes it unexpandable if we have reached maximum depth
-        self.expandable = self.mol.transform <= self._config.max_transforms
+        self.expandable = self.mol.transform < self._config.search.max_transforms
 
         if self.in_stock:
             self.expandable = False
@@ -65,7 +68,7 @@ class MoleculeNode(TreeNodeMixin):
         dict_: StrDict,
         config: Configuration,
         molecules: MoleculeDeserializer,
-        parent: ReactionNode = None,
+        parent: Optional[ReactionNode] = None,
     ) -> "MoleculeNode":
         """
         Create a new node from a dictionary, i.e. deserialization

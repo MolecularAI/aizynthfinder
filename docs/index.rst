@@ -73,7 +73,6 @@ whereas if the SMILEs is provided on the command-line it is printed directly to 
     stocks
     scoring
     howto
-    training    
     aizynthfinder
     sequences
     relationships

@@ -15,7 +15,13 @@ from aizynthfinder.reactiontree import ReactionTree
 from aizynthfinder.utils.image import make_visjs_page
 
 if TYPE_CHECKING:
-    from aizynthfinder.utils.type_utils import FrameColors, Sequence, StrDict, Tuple
+    from aizynthfinder.utils.type_utils import (
+        FrameColors,
+        Optional,
+        Sequence,
+        StrDict,
+        Tuple,
+    )
 
 
 @dataclass
@@ -69,7 +75,7 @@ class CombinedReactionTrees:
     def to_visjs_page(
         self,
         filename: str,
-        in_stock_colors: FrameColors = None,
+        in_stock_colors: Optional[FrameColors] = None,
     ) -> None:
         """
         Create a visualization of the combined reaction tree using the vis.js network library.
@@ -93,7 +99,6 @@ class CombinedReactionTrees:
         base_node: UniqueMolecule,
         rt_node_spec: Sequence[Tuple[UniqueMolecule, nx.DiGraph]],
     ) -> None:
-
         reaction_groups = defaultdict(list)
         # Group the reactions from the nodes at this level based on the reaction smiles
         for node, graph in rt_node_spec:

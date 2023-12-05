@@ -6,8 +6,6 @@ import atexit
 import io
 import os
 import shutil
-import subprocess
-import sys
 import tempfile
 from typing import TYPE_CHECKING
 
@@ -205,69 +203,6 @@ def save_molecule_images(
         image_obj.save(image_filepath)
         spec[molecule] = image_filepath
     return spec
-
-
-def make_graphviz_image(
-    molecules: Union[Sequence[Molecule], Sequence[UniqueMolecule]],
-    reactions: Union[Sequence[RetroReaction], Sequence[FixedRetroReaction]],
-    edges: Sequence[Tuple[Any, Any]],
-    frame_colors: Sequence[PilColor],
-    reaction_shapes: Sequence[str] = None,
-    use_splines: bool = True,
-) -> PilImage:
-    """
-    Create an image of a bipartite graph of molecules and reactions
-    using the dot program of graphviz
-
-    :param molecules: the molecules nodes
-    :param reactions: the reaction nodes
-    :param edges: the edges of the graph
-    :param frame_colors: the color of the frame around each image
-    :param reaction_shapes: optional specification of shapes for each reaction
-    :param use_splines: if True tries to use splines to connect nodes in image
-    :raises FileNotFoundError: if the image could not be produced
-    :return: the create image
-    """
-
-    def _create_image(use_splines):
-        txt = template.render(
-            molecules=mol_spec,
-            reactions=rxn_spec,
-            edges=edges,
-            use_splines=use_splines,
-        )
-        _, input_name = tempfile.mkstemp(suffix=".dot")
-        with open(input_name, "w") as this_fileobj:
-            this_fileobj.write(txt)
-
-        _, output_img2 = tempfile.mkstemp(suffix=".png")
-        ext = ".bat" if sys.platform.startswith("win") else ""
-        subprocess.call([f"dot{ext}", "-T", "png", f"-o{output_img2}", input_name])
-        if not os.path.exists(output_img2) or os.path.getsize(output_img2) == 0:
-            raise FileNotFoundError(
-                "Could not produce graph with layout - check that 'dot' command is in path"
-            )
-        return output_img2
-
-    mol_spec = save_molecule_images(molecules, frame_colors)
-    reaction_shapes = reaction_shapes or ["circle"] * len(reactions)
-    rxn_spec = zip(reactions, reaction_shapes)
-
-    template_filepath = os.path.join(data_path(), "templates", "reaction_tree.dot")
-    with open(template_filepath, "r") as fileobj:
-        template = Template(fileobj.read())
-    template.globals["id"] = id  # type: ignore
-
-    if not use_splines:
-        output_img = _create_image(use_splines=False)
-        return Image.open(output_img)
-
-    try:
-        output_img = _create_image(use_splines=True)
-    except FileNotFoundError:
-        output_img = _create_image(use_splines=False)
-
-    return Image.open(output_img)
 
 
 def make_visjs_page(

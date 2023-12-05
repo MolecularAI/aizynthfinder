@@ -59,7 +59,7 @@ class MctsNode:
         state: MctsState,
         owner: MctsSearchTree,
         config: Configuration,
-        parent: MctsNode = None,
+        parent: Optional[MctsNode] = None,
     ):
         self._state = state
         self._config = config
@@ -85,6 +85,10 @@ class MctsNode:
         if parent:
             self.blacklist = self.blacklist.union(parent.blacklist)
 
+        if self._algo_config["mcts_grouping"]:
+            self._degeneracy_check = self._algo_config["mcts_grouping"].lower()
+        else:
+            self._degeneracy_check = "none"
         self._logger = logger()
 
     def __getitem__(self, node: "MctsNode") -> StrDict:
@@ -119,7 +123,7 @@ class MctsNode:
         tree: MctsSearchTree,
         config: Configuration,
         molecules: MoleculeDeserializer,
-        parent: "MctsNode" = None,
+        parent: Optional["MctsNode"] = None,
     ) -> "MctsNode":
         """
         Create a new node from a dictionary, i.e. deserialization
@@ -175,6 +179,11 @@ class MctsNode:
         """Return the underlying state of the node"""
         return self._state
 
+    @property
+    def _algo_config(self) -> StrDict:
+        """Just a convinient, shorter name of this"""
+        return self._config.search.algorithm_config
+
     def actions_to(self) -> List[RetroReaction]:
         """
         Returns the actions leading to this node
@@ -220,6 +229,9 @@ class MctsNode:
         Expansion is the process of creating the children of the node,
         without instantiating a child object. The actions and priors are
         taken from the policy network.
+
+        If immediate instantiation is marked for some policies, however, the
+        children nodes will be instantiated.
         """
         if self.is_expanded:
             msg = f"Oh no! This node is already expanded. id={id(self)}"
@@ -231,19 +243,25 @@ class MctsNode:
 
         self.is_expanded = True
 
+        cache_molecules = []
+        if self.parent:
+            for child in self.parent.children:
+                if child is not self:
+                    cache_molecules.extend(child.state.expandable_mols)
+
         # Calculate the possible actions, fill the child_info lists
         # Actions by default only assumes 1 set of reactants
         (
             self._children_actions,
             self._children_priors,
-        ) = self._expansion_policy(self.state.expandable_mols)
+        ) = self._expansion_policy(self.state.expandable_mols, cache_molecules)
         nactions = len(self._children_actions)
         self._children_visitations = [1] * nactions
         self._children = [None] * nactions
-        if self._config.use_prior:
+        if self._algo_config["use_prior"]:
             self._children_values = list(self._children_priors)
         else:
-            self._children_values = [self._config.default_prior] * nactions
+            self._children_values = [self._algo_config["default_prior"]] * nactions
 
         if nactions == 0:  # Reverse the expansion if it did not produce any children
             self.is_expandable = False
@@ -251,6 +269,19 @@ class MctsNode:
 
         if self.tree:
             self.tree.profiling["expansion_calls"] += 1
+
+        if not self._algo_config["immediate_instantiation"]:
+            return
+        # Instantiate all children actions created by the marked policy,
+        # a new list of actions will be iterated over, because it can grow due
+        # to instantiation
+        for child_idx, action in enumerate(self._children_actions[:nactions]):
+            policy_name = action.metadata.get("policy_name")
+            if (
+                policy_name
+                and policy_name in self._algo_config["immediate_instantiation"]
+            ):
+                self._instantiate_child(child_idx)
 
     def is_terminal(self) -> bool:
         """
@@ -351,14 +382,22 @@ class MctsNode:
     def _children_u(self) -> np.ndarray:
         total_visits = np.log(np.sum(self._children_visitations))
         child_visits = np.array(self._children_visitations)
-        return self._config.C * np.sqrt(2 * total_visits / child_visits)
+        return self._algo_config["C"] * np.sqrt(2 * total_visits / child_visits)
 
     def _create_children_nodes(
         self, states: List[MctsState], child_idx: int
-    ) -> List[Optional["MctsNode"]]:
+    ) -> List["MctsNode"]:
         new_nodes = []
         first_child_idx = child_idx
         for state_index, state in enumerate(states):
+            if self._generated_degeneracy(state, first_child_idx):
+                # Only need to disable first new child,
+                # if the action generated more states, we will just not generate
+                # a child for that state
+                if state_index == 0:
+                    self._children_values[child_idx] = -1e6
+                continue
+
             # If there's more than one outcome, the lists need be expanded
             if state_index > 0:
                 child_idx = self._expand_children_lists(first_child_idx, state_index)
@@ -366,10 +405,11 @@ class MctsNode:
             if self._filter_child_reaction(self._children_actions[child_idx]):
                 self._children_values[child_idx] = -1e6
             else:
-                self._children[child_idx] = MctsNode(
+                new_node = MctsNode(
                     state=state, owner=self.tree, config=self._config, parent=self
                 )
-                new_nodes.append(self._children[child_idx])
+                self._children[child_idx] = new_node
+                new_nodes.append(new_node)
         return new_nodes
 
     def _expand_children_lists(self, old_index: int, action_index: int) -> int:
@@ -398,8 +438,86 @@ class MctsNode:
             return True
         return False
 
+    def _generated_degeneracy(self, new_state: MctsState, child_idx: int) -> bool:
+        """
+        Check if a new MCTS state is equal to another MCTS state of a children
+        node.
+
+        The check can be "partial" in which the equality is based only on the expandable molecules,
+        or "full" in which the equality is based on all molecules in the state.
+
+        The comparison will not be made on unexpanded children nodes
+        or terminal children nodes.
+
+        The metadata of the degenerate action will be added to the metadata
+        of the previously created equal state.
+        """
+
+        def equal_states(query_state):
+            if self._degeneracy_check == "partial":
+                return query_state.expandables_hash == new_state.expandables_hash
+            return query_state == new_state
+
+        if self._degeneracy_check not in ["partial", "full"]:
+            return False
+        previous_action = None
+        for child, action in zip(self._children, self._children_actions):
+            if (
+                child is not None
+                and not child.is_terminal()
+                and equal_states(child.state)
+            ):
+                previous_action = action
+                break
+
+        if previous_action is None:
+            return False
+
+        # No need to copy the metadata because it will be the same
+        if previous_action is self._children_actions[child_idx]:
+            return True
+
+        metadata_copy = dict(self._children_actions[child_idx].metadata)
+        if "additional_actions" not in previous_action.metadata:
+            previous_action.metadata["additional_actions"] = []
+        previous_action.metadata["additional_actions"].append(metadata_copy)
+        return True
+
+    def _instantiate_child(self, child_idx: int) -> List["MctsNode"]:
+        """
+        Instantiate the children node
+
+        The algorithm is:
+        * Apply the reaction associated with the child
+        * If the application of the action failed, set value to -1e6 and return None
+        * Create a new state array, one new state for each of the reaction outcomes
+        * Create new child nodes
+            - If a filter policy is available and the reaction outcome is unlikely
+              set value of child to -1e6
+         * Return all new nodes
+        """
+        if self._children[child_idx] is not None:
+            raise NodeUnexpectedBehaviourException("Node already instantiated")
+
+        reaction = self._children_actions[child_idx]
+        if reaction.unqueried:
+            if self.tree:
+                self.tree.profiling["reactants_generations"] += 1
+            _ = reaction.reactants
+
+        if not self._check_child_reaction(reaction):
+            self._children_values[child_idx] = -1e6
+            return []
+
+        keep_mols = [mol for mol in self.state.mols if mol is not reaction.mol]
+        new_states = [
+            MctsState(keep_mols + list(reactants), self._config)
+            for reactants in reaction.reactants
+        ]
+        return self._create_children_nodes(new_states, child_idx)
+
     def _regenerated_blacklisted(self, reaction: RetroReaction) -> bool:
-        if not self._config.prune_cycles_in_search:
+        if not self._algo_config["prune_cycles_in_search"]:
             return False
         for reactants in reaction.reactants:
             for mol in reactants:
@@ -411,36 +529,13 @@ class MctsNode:
         """
         Selecting a child node implies instantiating the children nodes
 
-        The algorithm is:
-        * If the child has already been instantiated, return immediately
-        * Apply the reaction associated with the child
-        * If the application of the action failed, set value to -1e6 and return None
-        * Create a new state array, one new state for each of the reaction outcomes
-        * Create new child nodes
-            - If a filter policy is available and the reaction outcome is unlikely
-              set value of child to -1e6
-        * Select a random node of the feasible ones to return
+        If the child has already been instantiated, return immediately
+        Otherwise, select a random node of the feasible ones to return
         """
         if self._children[child_idx]:
             return self._children[child_idx]
 
-        reaction = self._children_actions[child_idx]
-        if reaction.unqueried:
-            if self.tree:
-                self.tree.profiling["reactants_generations"] += 1
-            _ = reaction.reactants
-
-        if not self._check_child_reaction(reaction):
-            self._children_values[child_idx] = -1e6
-            return None
-
-        keep_mols = [mol for mol in self.state.mols if mol is not reaction.mol]
-        new_states = [
-            MctsState(keep_mols + list(reactants), self._config)
-            for reactants in reaction.reactants
-        ]
-        new_nodes = self._create_children_nodes(new_states, child_idx)
-
+        new_nodes = self._instantiate_child(child_idx)
         if new_nodes:
             return random.choice(new_nodes)
         return None

@@ -34,7 +34,9 @@ class TreeNodeMixin:
 class AndOrSearchTreeBase(abc.ABC):
     """A base class for a search tree based on an AND/OR structure"""
 
-    def __init__(self, config: Configuration, root_smiles: str = None) -> None:
+    def __init__(
+        self, config: Configuration, root_smiles: Optional[str] = None
+    ) -> None:
         self.config = config
         self._root_smiles = root_smiles
 
@@ -141,7 +143,7 @@ class SplitAndOrTree:
 class _AndOrTrace(nx.DiGraph):
     """Helper class for the SplitAndOrTree class."""
 
-    def __init__(self, root: TreeNodeMixin = None) -> None:
+    def __init__(self, root: Optional[TreeNodeMixin] = None) -> None:
         super().__init__()
         self.root = root
         self._first_reaction: Optional[TreeNodeMixin] = None

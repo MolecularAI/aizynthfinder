@@ -44,7 +44,7 @@ def test_one_expansion_with_finder(setup_aizynthfinder):
     finder = setup_aizynthfinder(lookup, child1_smi)
 
     # Test first with return_first
-    finder.config.return_first = True
+    finder.config.search.return_first = True
     finder.tree_search()
 
     nodes = finder.tree.mol_nodes
@@ -55,8 +55,8 @@ def test_one_expansion_with_finder(setup_aizynthfinder):
     assert finder.search_stats["returned_first"]
 
     # then test with iteration limit
-    finder.config.return_first = False
-    finder.config.iteration_limit = 45
+    finder.config.search.return_first = False
+    finder.config.search.iteration_limit = 45
     finder.prepare_tree()
     finder.tree_search()
 

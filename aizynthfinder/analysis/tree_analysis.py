@@ -19,6 +19,7 @@ if TYPE_CHECKING:
         Any,
         Iterable,
         List,
+        Optional,
         Sequence,
         StrDict,
         Tuple,
@@ -41,7 +42,7 @@ class TreeAnalysis:
     def __init__(
         self,
         search_tree: Union[MctsSearchTree, AndOrSearchTreeBase],
-        scorer: Scorer = None,
+        scorer: Optional[Scorer] = None,
     ) -> None:
         self.search_tree = search_tree
         if scorer is None:
@@ -65,7 +66,7 @@ class TreeAnalysis:
         return sorted_routes[0]
 
     def sort(
-        self, selection: RouteSelectionArguments = None
+        self, selection: Optional[RouteSelectionArguments] = None
     ) -> Tuple[Union[Sequence[MctsNode], Sequence[ReactionTree]], Sequence[float]]:
         """
         Sort and select the nodes or routes in the search tree.

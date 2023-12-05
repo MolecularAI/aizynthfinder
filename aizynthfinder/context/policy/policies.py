@@ -27,7 +27,7 @@ if TYPE_CHECKING:
     from aizynthfinder.chem import TreeMolecule
     from aizynthfinder.chem.reaction import RetroReaction
     from aizynthfinder.context.config import Configuration
-    from aizynthfinder.utils.type_utils import Any, List, Sequence, Tuple
+    from aizynthfinder.utils.type_utils import Any, Dict, List, Sequence, Tuple
 
 
 class ExpansionPolicy(ContextCollection):
@@ -46,17 +46,23 @@ class ExpansionPolicy(ContextCollection):
         self._config = config
 
     def __call__(
-        self, molecules: Sequence[TreeMolecule]
+        self,
+        molecules: Sequence[TreeMolecule],
+        cache_molecules: Sequence[TreeMolecule] = None,
     ) -> Tuple[List[RetroReaction], List[float]]:
-        return self.get_actions(molecules)
+        return self.get_actions(molecules, cache_molecules)
 
     def get_actions(
-        self, molecules: Sequence[TreeMolecule]
+        self,
+        molecules: Sequence[TreeMolecule],
+        cache_molecules: Sequence[TreeMolecule] = None,
     ) -> Tuple[List[RetroReaction], List[float]]:
         """
         Get all the probable actions of a set of molecules, using the selected policies
 
         :param molecules: the molecules to consider
+        :param cache_molecules: additional molecules that potentially are sent to
+                                  the expansion model but for which predictions are not returned
         :return: the actions and the priors of those actions
         :raises: PolicyException: if the policy isn't selected
         """
@@ -66,11 +72,11 @@ class ExpansionPolicy(ContextCollection):
         all_possible_actions = []
         all_priors = []
         for name in self.selection:
-            possible_actions, priors = self[name].get_actions(molecules)
+            possible_actions, priors = self[name].get_actions(
+                molecules, cache_molecules
+            )
             all_possible_actions.extend(possible_actions)
             all_priors.extend(priors)
-            if not self._config.additive_expansion and all_possible_actions:
-                break
         return all_possible_actions, all_priors
 
     def load(self, source: ExpansionStrategy) -> None:  # type: ignore
@@ -90,41 +96,48 @@ class ExpansionPolicy(ContextCollection):
         Load one or more expansion policy from a configuration
 
         The format should be
-        files:
-            key:
-                - path_to_model
-                - path_to_templates
+        key:
+            type: name of the expansion class or custom_package.custom_model.CustomClass
+            model: path_to_model
+            template: path_to_templates
+            other settings or params
         or
-        template-based:
-            key:
-                - path_to_model
-                - path_to_templates
-        or
-        custom_package.custom_model.CustomClass:
-            key:
-                param1: value1
-                param2: value2
+        key:
+            - path_to_model
+            - path_to_templates
 
         :param config: the configuration
         """
-        files_spec = config.get("files", config.get("template-based", {}))
-        for key, policy_spec in files_spec.items():
-            modelfile, templatefile = policy_spec
-            strategy = TemplateBasedExpansionStrategy(
-                key, self._config, source=modelfile, templatefile=templatefile
-            )
-            self.load(strategy)
+        for key, strategy_config in config.items():
+            if not isinstance(strategy_config, dict):
+                model, template = strategy_config
+                kwargs = {"model": model, "template": template}
+                cls = TemplateBasedExpansionStrategy
+            else:
+                if (
+                    "type" not in strategy_config
+                    or strategy_config["type"] == "template-based"
+                ):
+                    cls = TemplateBasedExpansionStrategy
+                else:
+                    cls = load_dynamic_class(
+                        strategy_config["type"],
+                        expansion_strategy_module,
+                        PolicyException,
+                    )
+                kwargs = dict(strategy_config)
 
-        # Load policies specifying a module and class, e.g. package.module.MyStrategyClass
-        for strategy_spec, strategy_config in config.items():
-            if strategy_spec in ["files", "template-based"]:
-                continue
-            cls = load_dynamic_class(
-                strategy_spec, expansion_strategy_module, PolicyException
-            )
-            for key, policy_spec in strategy_config.items():
-                obj = cls(key, self._config, **(policy_spec or {}))
-                self.load(obj)
+            if "type" in kwargs:
+                del kwargs["type"]
+            obj = cls(key, self._config, **kwargs)
+            self.load(obj)
+
+    def reset_cache(self) -> None:
+        """
+        Reset the cache on all loaded policies
+        """
+        for policy in self._items.values():
+            policy.reset_cache()
 
 
 class FilterPolicy(ContextCollection):
@@ -176,32 +189,36 @@ class FilterPolicy(ContextCollection):
         Load one or more filter policy from a configuration
 
         The format should be
-        files:
-            key: path_to_model
+        key:
+            type: name of the filter class or custom_package.custom_model.CustomClass
+            model: path_to_model
+            other settings or params
         or
-        quick-filter:
-            key: path_to_model
-        or
-        custom_package.custom_model.CustomClass:
-            key:
-                param1: value1
-                param2: value2
+        key: path_to_model
 
         :param config: the configuration
         """
-        files_spec = config.get("files", config.get("quick-filter", {}))
-        for key, modelfile in files_spec.items():
-            strategy = QuickKerasFilter(key, self._config, source=modelfile)
-            self.load(strategy)
+        for key, strategy_config in config.items():
+            if not isinstance(strategy_config, dict):
+                model = strategy_config
+                kwargs = {"model": model}
+                cls = QuickKerasFilter
+            else:
+                if (
+                    "type" not in strategy_config
+                    or strategy_config["type"] == "quick-filter"
+                ):
+                    cls = QuickKerasFilter
+                else:
+                    strategy_spec = FILTER_STRATEGY_ALIAS.get(
+                        strategy_config["type"], strategy_config["type"]
+                    )
+                    cls = load_dynamic_class(
+                        strategy_spec, filter_strategy_module, PolicyException
+                    )
+                kwargs = dict(strategy_config)
 
-        # Load policies specifying a module and class, e.g. package.module.MyStrategyClass
-        for strategy_spec, strategy_config in config.items():
-            if strategy_spec in ["files", "quick-filter"]:
-                continue
-            strategy_spec2 = FILTER_STRATEGY_ALIAS.get(strategy_spec, strategy_spec)
-            cls = load_dynamic_class(
-                strategy_spec2, filter_strategy_module, PolicyException
-            )
-            for key, policy_spec in strategy_config.items():
-                obj = cls(key, self._config, **(policy_spec or {}))
-                self.load(obj)
+            if "type" in kwargs:
+                del kwargs["type"]
+            obj = cls(key, self._config, **kwargs)
+            self.load(obj)

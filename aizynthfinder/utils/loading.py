@@ -5,11 +5,13 @@ import importlib
 from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
-    from typing import Any
+    from typing import Any, Optional
 
 
 def load_dynamic_class(
-    name_spec: str, default_module: str = None, exception_cls: Any = ValueError
+    name_spec: str,
+    default_module: Optional[str] = None,
+    exception_cls: Any = ValueError,
 ) -> Any:
     """
     Load an object from a dynamic specification.

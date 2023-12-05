@@ -9,6 +9,7 @@ import numpy as np
 
 from aizynthfinder.chem.serialization import MoleculeDeserializer, MoleculeSerializer
 from aizynthfinder.search.andor_trees import AndOrSearchTreeBase, SplitAndOrTree
+from aizynthfinder.search.retrostar.cost import MoleculeCost
 from aizynthfinder.search.retrostar.nodes import MoleculeNode
 from aizynthfinder.utils.exceptions import RejectionException
 from aizynthfinder.utils.logging import logger
@@ -31,14 +32,17 @@ class SearchTree(AndOrSearchTreeBase):
     :param root_smiles: the root will be set to a node representing this molecule, defaults to None
     """
 
-    def __init__(self, config: Configuration, root_smiles: str = None) -> None:
+    def __init__(
+        self, config: Configuration, root_smiles: Optional[str] = None
+    ) -> None:
         super().__init__(config, root_smiles)
         self._mol_nodes: List[MoleculeNode] = []
         self._logger = logger()
+        self.molecule_cost = MoleculeCost(config)
 
         if root_smiles:
             self.root: Optional[MoleculeNode] = MoleculeNode.create_root(
-                root_smiles, config
+                root_smiles, config, self.molecule_cost
             )
             self._mol_nodes.append(self.root)
         else:
@@ -71,7 +75,9 @@ class SearchTree(AndOrSearchTreeBase):
         with open(filename, "r") as fileobj:
             dict_ = json.load(fileobj)
         mol_deser = MoleculeDeserializer(dict_["molecules"])
-        tree.root = MoleculeNode.from_dict(dict_["tree"], config, mol_deser)
+        tree.root = MoleculeNode.from_dict(
+            dict_["tree"], config, mol_deser, tree.molecule_cost
+        )
         tree._mol_nodes.append(tree.root)  # pylint: disable=protected-access
         for child in tree.root.children:
             _find_mol_nodes(child)

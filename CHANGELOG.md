@@ -1,5 +1,41 @@
 # CHANGELOG
 
+## Version 4.0.0 2023-11-30
+
+### Features
+
+- `Configuration` now supports a `rescale_prior` property which rescales the priors in `TemplateBasedExpansionStrategy`.
+- Functionality of `ScorerCollection` has been extended.
+- Pricing is now supported in `InMemoryInchiKeyQuery`.
+- Reward scorer has been added to Configuration scorers as `search_reward` item.
+- `MaxTransformScorerer` and `FractionInStockScorer` have been created to separate scores in `StateScorer`.
+- Reaction routes are scored with all reward scorers after the search is complete.
+- `StockAvailabilityScorer` and `ReactionClassMembershipScorer` have been added to the scorers.
+- Atom mapping existing in target molecule can be inherited.
+- A caching feature has been add to the expansion strategies.
+- Degenerate states can now be grouped in the MCTS algorithm.
+- `ChemformerBasedExpansionStrategy` and `ModelZooExpansionStrategy` can be found under plugins and used as additional expansion strategies.
+- Support for the stereocenter model has been added with to support chiral fingerprints for molecules and reactions.
+- The `Configuration` format has been entirely revamped to a more easy-to-use format.
+- A `MolbloomFilterQuery` has been created as a stock query class.
+
+### Trivial changes
+
+- Python version requirements have been updated to versions 3.9 - 3.11.
+- `MoleculeCost` has been moved from aizynthfinder.context.cost.collection to the Retro* package.
+
+### Deprecations
+
+- Graphviz has been removed from aizynthfinder.utils.image.
+- `Reaction` class has been removed from aizynthfinder.chem.reaction.
+- aizynthfinder.context.cost package has been removed.
+
+### Bug-fixes
+
+- Fixed an issue with `max_transforms` to ensure only the given number of maximum depth is considered.
+- Pinned Jupyter notebook version to ^6.5.3 to avoid errors when displaying widgets.
+- Rollout child has been removed from the MCTS search algorithm.
+
 ## Version 3.7.0 2023-06-01 (2023-04-11)
 
 ### Features

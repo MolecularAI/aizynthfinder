@@ -9,7 +9,6 @@ from aizynthfinder.chem.mol import (
 )
 from aizynthfinder.chem.reaction import (
     FixedRetroReaction,
-    Reaction,
     RetroReaction,
     SmilesBasedRetroReaction,
     TemplatedRetroReaction,

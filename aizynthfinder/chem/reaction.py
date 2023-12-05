@@ -15,7 +15,11 @@ from rdkit import Chem
 from rdkit.Chem import AllChem
 from rdkit.Chem.rdchem import BondDir, BondStereo, ChiralType
 
-from aizynthfinder.chem.mol import Molecule, MoleculeException, TreeMolecule
+from aizynthfinder.chem.mol import (
+    Molecule,
+    MoleculeException,
+    TreeMolecule,
+)
 from aizynthfinder.utils.logging import logger
 
 if TYPE_CHECKING:
@@ -40,19 +44,22 @@ class _ReactionInterfaceMixin:
     The methods `_products_getter` and `_reactants_getter` needs to be implemented by subclasses
     """
 
-    def fingerprint(self, radius: int, nbits: int = None) -> np.ndarray:
+    def fingerprint(
+        self, radius: int, nbits: Optional[int] = None, chiral: bool = False
+    ) -> np.ndarray:
         """
         Returns a difference fingerprint
 
         :param radius: the radius of the fingerprint
         :param nbits: the length of the fingerprint. If not given it will use RDKit default, defaults to None
+        :param chiral: if True, include chirality information
         :return: the fingerprint
         """
         product_fp = sum(
-            mol.fingerprint(radius, nbits) for mol in self._products_getter()  # type: ignore
+            mol.fingerprint(radius, nbits, chiral) for mol in self._products_getter()  # type: ignore
         )
         reactants_fp = sum(
-            mol.fingerprint(radius, nbits) for mol in self._reactants_getter()  # type: ignore
+            mol.fingerprint(radius, nbits, chiral) for mol in self._reactants_getter()  # type: ignore
         )
         return reactants_fp - product_fp  # type: ignore
 
@@ -98,107 +105,6 @@ class _ReactionInterfaceMixin:
         return "%s>>%s" % (reactants, products)
 
 
-class Reaction(_ReactionInterfaceMixin):
-    """
-    An abstraction of a reaction. Encapsulate an RDKit reaction object and
-    functions that can be applied to such a reaction.
-
-    :ivar mols: the Molecule objects that this reaction are applied to
-    :ivar smarts: the SMARTS representation of the reaction
-    :ivar index: a unique index of this reaction,
-                 to count for the fact that a reaction can produce more than one outcome
-    :ivar metadata: meta data associated with the reaction
-
-    :param mols: the molecules
-    :param smarts: the SMARTS fragment
-    :param index: the index, defaults to 0
-    :param metadata: some meta data
-    """
-
-    def __init__(
-        self,
-        mols: List[Molecule],
-        smarts: str,
-        index: int = 0,
-        metadata: StrDict = None,
-    ) -> None:
-        self.mols = mols
-        self.smarts = smarts
-        self.index = index
-        self.metadata: StrDict = metadata or {}
-        self._products: Optional[Tuple[Tuple[Molecule, ...], ...]] = None
-        self._rd_reaction: Optional[RdReaction] = None
-        self._smiles: Optional[str] = None
-
-    @property
-    def products(self) -> Tuple[Tuple[Molecule, ...], ...]:
-        """
-        Returns the product molecules.
-        Apply the reaction if necessary.
-
-        :return: the products of the reaction
-        """
-        if not self._products:
-            self.apply()
-            assert self._products is not None
-        return self._products
-
-    @property
-    def rd_reaction(self) -> RdReaction:
-        """
-        The reaction as a RDkit reaction object
-
-        :return: the reaction object
-        """
-        if not self._rd_reaction:
-            self._rd_reaction = AllChem.ReactionFromSmarts(self.smarts)
-        return self._rd_reaction
-
-    @property
-    def smiles(self) -> str:
-        """
-        The reaction as a SMILES
-
-        :return: the SMILES
-        """
-        if self._smiles is None:
-            try:
-                self._smiles = AllChem.ReactionToSmiles(self.rd_reaction)
-            except ValueError:
-                self._smiles = ""  # noqa
-        return self._smiles
-
-    def apply(self) -> Tuple[Tuple[Molecule, ...], ...]:
-        """
-        Apply a reactions smarts to list of reactant and return the products
-
-        Will try to sanitize the reactants, and if that fails it will not return that molecule
-
-        :return: the products of the reaction
-        """
-        num_rectantant_templates = self.rd_reaction.GetNumReactantTemplates()
-        reactants = tuple(mol.rd_mol for mol in self.mols[:num_rectantant_templates])
-        products_list = self.rd_reaction.RunReactants(reactants)
-
-        outcomes = []
-        for products in products_list:
-            try:
-                mols = tuple(Molecule(rd_mol=mol, sanitize=True) for mol in products)
-            except MoleculeException:
-                pass
-            else:
-                outcomes.append(mols)
-        self._products = tuple(outcomes)
-
-        return self._products
-
-    def _products_getter(self) -> Tuple[Molecule, ...]:
-        return self.products[self.index]
-
-    def _reactants_getter(self) -> List[Molecule]:
-        return self.mols
-
-
 class RetroReaction(abc.ABC, _ReactionInterfaceMixin):
     """
     A retrosynthesis reaction. Only a single molecule is the reactant.
@@ -220,7 +126,11 @@ class RetroReaction(abc.ABC, _ReactionInterfaceMixin):
     _required_kwargs: List[str] = []
 
     def __init__(
-        self, mol: TreeMolecule, index: int = 0, metadata: StrDict = None, **kwargs: Any
+        self,
+        mol: TreeMolecule,
+        index: int = 0,
+        metadata: Optional[StrDict] = None,
+        **kwargs: Any,
     ) -> None:
         if any(name not in kwargs for name in self._required_kwargs):
             raise KeyError(
@@ -287,7 +197,7 @@ class RetroReaction(abc.ABC, _ReactionInterfaceMixin):
         """
         return self._reactants is None
 
-    def copy(self, index: int = None) -> "RetroReaction":
+    def copy(self, index: Optional[int] = None) -> "RetroReaction":
         """
         Shallow copy of this instance.
 
@@ -296,7 +206,9 @@ class RetroReaction(abc.ABC, _ReactionInterfaceMixin):
         """
         # pylint: disable=protected-access
         index = index if index is not None else self.index
-        new_reaction = self.__class__(self.mol, index, self.metadata, **self._kwargs)
+        new_reaction = self.__class__(
+            self.mol, index, dict(self.metadata), **self._kwargs
+        )
         new_reaction._reactants = tuple(mol_list for mol_list in self._reactants or [])
         new_reaction._smiles = self._smiles
         return new_reaction
@@ -363,7 +275,11 @@ class TemplatedRetroReaction(RetroReaction):
     _required_kwargs = ["smarts"]
 
     def __init__(
-        self, mol: TreeMolecule, index: int = 0, metadata: StrDict = None, **kwargs: Any
+        self,
+        mol: TreeMolecule,
+        index: int = 0,
+        metadata: Optional[StrDict] = None,
+        **kwargs: Any,
     ):
         super().__init__(mol, index, metadata, **kwargs)
         self.smarts: str = kwargs["smarts"]
@@ -381,16 +297,6 @@ class TemplatedRetroReaction(RetroReaction):
         if self._rd_reaction is None:
             self._rd_reaction = AllChem.ReactionFromSmarts(self.smarts)
         return self._rd_reaction
-
-    def forward_reaction(self) -> Reaction:
-        """
-        Create the forward reaction corresponding to the SMARTS and reactants of this reaction
-
-        :return: the forward reaction
-        """
-        fwd_smarts = ">>".join(self.smarts.split(">>")[::-1])
-        mols = [Molecule(rd_mol=mol.rd_mol) for mol in self.reactants[self.index]]
-        return Reaction(mols=mols, smarts=fwd_smarts)
 
     def to_dict(self) -> StrDict:
         dict_ = super().to_dict()
@@ -517,7 +423,11 @@ class SmilesBasedRetroReaction(RetroReaction):
     _required_kwargs = ["reactants_str"]
 
     def __init__(
-        self, mol: TreeMolecule, index: int = 0, metadata: StrDict = None, **kwargs: Any
+        self,
+        mol: TreeMolecule,
+        index: int = 0,
+        metadata: Optional[StrDict] = None,
+        **kwargs: Any,
     ):
         super().__init__(mol, index, metadata, **kwargs)
         self.reactants_str: str = kwargs["reactants_str"]
@@ -605,7 +515,10 @@ class FixedRetroReaction(_ReactionInterfaceMixin):
     """
 
     def __init__(
-        self, mol: UniqueMolecule, smiles: str = "", metadata: StrDict = None
+        self,
+        mol: UniqueMolecule,
+        smiles: str = "",
+        metadata: Optional[StrDict] = None,
     ) -> None:
         self.mol = mol
         self.smiles = smiles
@@ -622,6 +535,27 @@ class FixedRetroReaction(_ReactionInterfaceMixin):
         new_reaction.reactants = tuple(mol_list for mol_list in self.reactants)
         return new_reaction
 
+    def to_smiles_based_retroreaction(self) -> SmilesBasedRetroReaction:
+        """
+        Convert a FixedRetroReaction to a SmilesBasedRetroReaction.
+
+        :return: the SmilesBasedRetroReaction.
+        """
+        if self.metadata and "mapped_reaction_smiles" in self.metadata.keys():
+            mapped_reaction_smiles = self.metadata["mapped_reaction_smiles"]
+        else:
+            mapped_reaction_smiles = self.reaction_smiles()
+
+        mapped_reaction_smiles = mapped_reaction_smiles.split(">>")
+        product = mapped_reaction_smiles[0]
+        reactants = mapped_reaction_smiles[1]
+
+        return SmilesBasedRetroReaction(
+            mol=TreeMolecule(smiles=product, parent=None),
+            mapped_prod_smiles=product,
+            reactants_str=reactants,
+        )
+
     def _products_getter(self) -> Tuple[UniqueMolecule, ...]:
         return self.reactants[0]
 
@@ -630,9 +564,7 @@ class FixedRetroReaction(_ReactionInterfaceMixin):
 
 
 def hash_reactions(
-    reactions: Union[
-        Iterable[Reaction], Iterable[RetroReaction], Iterable[FixedRetroReaction]
-    ],
+    reactions: Union[Iterable[RetroReaction], Iterable[FixedRetroReaction]],
     sort: bool = True,
 ) -> str:
     """
@@ -692,7 +624,7 @@ class _RdChiralProductWrapper:
 
         # Pre-list chiral double bonds (for copying back into outcomes/matching)
         self.bond_dirs_by_mapnum = {}
-        for (i, j, b) in self.bonds_by_mapnum:
+        for i, j, b in self.bonds_by_mapnum:
             if b.GetBondDir() != BondDir.NONE:
                 self.bond_dirs_by_mapnum[(i, j)] = b.GetBondDir()
                 self.bond_dirs_by_mapnum[(j, i)] = BondDirOpposite[b.GetBondDir()]

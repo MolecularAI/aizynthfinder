@@ -359,7 +359,11 @@ def test_cli_smiles_argument_incorrect(
 
 
 def test_make_stock_from_plain_file(
-    create_dummy_smiles_source, tmpdir, add_cli_arguments, default_config
+    create_dummy_smiles_source,
+    tmpdir,
+    add_cli_arguments,
+    default_config,
+    setup_stock_with_query,
 ):
     output_name = str(tmpdir / "temp.hdf5")
     filename = create_dummy_smiles_source("txt")
@@ -367,7 +371,7 @@ def test_make_stock_from_plain_file(
 
     make_stock_main()
 
-    default_config.stock.load(filename, "stock1")
+    default_config.stock.load(setup_stock_with_query(filename), "stock1")
     default_config.stock.select(["stock1"])
     assert len(default_config.stock) == 3
 
@@ -414,8 +418,8 @@ def test_download_public_data(tmpdir, mocker, add_cli_arguments):
     assert os.path.exists(tmpdir / "config.yml")
     with open(tmpdir / "config.yml", "r") as fileobj:
         config = yaml.load(fileobj.read(), Loader=yaml.SafeLoader)
-    policies = config.get("policy", {}).get("files", {})
+    policies = config.get("expansion", {})
     assert "uspto" in policies
     assert len(policies["uspto"]) == 2
-    stocks = config.get("stock", {}).get("files", {})
+    stocks = config.get("stock", {})
     assert "zinc" in stocks

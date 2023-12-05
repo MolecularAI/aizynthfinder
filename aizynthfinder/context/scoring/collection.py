@@ -59,8 +59,14 @@ class ScorerCollection(ContextCollection):
     def __init__(self, config: Configuration) -> None:
         super().__init__()
         self._config = config
+        self.create_default_scorers()
+
+    def create_default_scorers(self) -> None:
+        """
+        Setup the scores that only need the config as their input.
+        """
         for cls in _SIMPLE_SCORERS:
-            self.load(cls(config))
+            self.load(cls(self._config))
 
     def load(self, scorer: Scorer) -> None:  # type: ignore
         """
@@ -96,6 +102,26 @@ class ScorerCollection(ContextCollection):
             self._logger.info(f"Loaded scorer: '{repr(obj)}'{config_str}")
             self._items[repr(obj)] = obj
 
+    def make_subset(self, subset_names: List[str]) -> "ScorerCollection":
+        """
+        Make a new scorer collection by taking a subset of this
+        collection. The scorer instances will be shared between
+        the collections
+
+        :param subset_names: the scorers to copy over
+        :returns: the newly formed collection
+        """
+        new_collection = ScorerCollection(self._config)
+        for name in new_collection.names():
+            del new_collection[name]
+        for name in subset_names:
+            try:
+                scorer = self._items[name]
+            except KeyError:
+                raise ScorerException(f"Unable to find '{name}' in parent collection")
+            new_collection.load(scorer)
+        return new_collection
+
     def names(self) -> List[str]:
         """Return a list of the names of all the loaded scorers"""
         return self.items
@@ -103,3 +129,42 @@ class ScorerCollection(ContextCollection):
     def objects(self) -> List[Scorer]:
         """Return a list of all the loaded scorer objects"""
         return list(self._items.values())
+
+    def score_vector(self, item: _Scoreable) -> Sequence[float]:
+        """
+        For the given item, score it with all selected scorers
+        and return a vector
+
+        :param item: the item to be scored
+        :returns: the vector with the scores
+        """
+        if not self.selection:
+            return []
+        return [self[scorer](item) for scorer in self.selection]
+
+    def weighted_score(self, item: _Scoreable, weights: Sequence[float]) -> float:
+        """
+        For the given item, score it with all selected scorers
+        and return a weighted sum of all the scores.
+
+        If weights is not the same length as the number of scorers
+        an exception is raised.
+
+        If no scorers are selected this will raise an exception
+
+        :param item: the item to be scored
+        :param weights: the weights of the scorers
+        :returns: the weighted sum
+        """
+        if not self.selection:
+            raise ScorerException(
+                "No scorers are selected so cannot compute weighted sum"
+            )
+
+        if len(weights) != len(self.selection):
+            raise ScorerException(
+                "The number of weights given does not agree with the number of scorers"
+            )
+        return sum(
+            weight * score for weight, score in zip(weights, self.score_vector(item))
+        )

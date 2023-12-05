@@ -7,7 +7,6 @@ import sys
 import requests
 import tqdm
 
-
 FILES_TO_DOWNLOAD = {
     "policy_model": {
         "filename": "uspto_model.hdf5",
@@ -47,20 +46,17 @@ FILES_TO_DOWNLOAD = {
     },
 }
 
-YAML_TEMPLATE = """policy:
-  files:
-    uspto:
-      - {}
-      - {}
-    ringbreaker:
-      - {}
-      - {}     
+YAML_TEMPLATE = """expansion:
+  uspto:
+    - {}
+    - {}
+  ringbreaker:
+    - {}
+    - {}     
 filter:
-  files:
-    uspto: {}
+  uspto: {}
 stock:
-  files:
-    zinc: {}
+  zinc: {}
 """
 
 

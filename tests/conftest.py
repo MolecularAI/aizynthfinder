@@ -22,6 +22,7 @@ from aizynthfinder.chem import (
 from aizynthfinder.chem.serialization import MoleculeDeserializer
 from aizynthfinder.context.config import Configuration
 from aizynthfinder.context.policy import ExpansionStrategy, FilterStrategy
+from aizynthfinder.context.stock import InMemoryInchiKeyQuery
 from aizynthfinder.search.andor_trees import (
     AndOrSearchTreeBase,
     SplitAndOrTree,
@@ -96,6 +97,7 @@ def create_dummy_stock1(tmpdir):
             "name": ["benzene", "toluene"],
             "CAS ID": ["71-43-2", "108-88-3"],
             "inchi_key": ["UHOVQNZJYSORNB-UHFFFAOYSA-N", "YXFVVABEGXRONW-UHFFFAOYSA-N"],
+            "price": [5.0, 10.0],
         }
     )
 
@@ -105,7 +107,7 @@ def create_dummy_stock1(tmpdir):
             data.to_hdf(filename, "table")
         elif format_ == "csv":
             filename = str(tmpdir / "stock1.csv")
-            data["inchi_key"].to_csv(filename, index=False)
+            data.to_csv(filename, index=False)
         else:
             filename = str(tmpdir / "stock1.txt")
             with open(filename, "w") as fileobj:
@@ -186,15 +188,20 @@ def get_branched_expansion():
 
 
 @pytest.fixture
-def get_expansion_strategy(default_config):
+def get_expansion_strategy(default_config):  # noqa
+    # McCabe identifies this as too complex, we will ignore it
     class LookupExpansionStrategy(ExpansionStrategy):
         _required_kwargs = ["lookup"]
 
         def __init__(self, key, config, **kwargs):
             super().__init__(key, config, **kwargs)
             self.lookup = kwargs["lookup"]
+            self.cache = set()
 
-        def get_actions(self, molecules):
+        def get_actions(self, molecules, cache_molecules=None):
+            cache_molecules = cache_molecules or []
+            for mol in molecules + cache_molecules:
+                self.cache.add(mol.inchi_key)
             possible_actions = []
             priors = []
             for mol in molecules:
@@ -203,11 +210,20 @@ def get_expansion_strategy(default_config):
                 expansion_options = self.lookup[mol.smiles]
                 if isinstance(expansion_options, dict):
                     expansion_options = [expansion_options]
-                possible_actions.extend(
-                    SmilesBasedRetroReaction(mol, reactants_str=item["smiles"])
-                    for item in expansion_options
-                )
-                priors.extend(item["prior"] for item in expansion_options)
+                for item in expansion_options:
+                    if "smiles" in item:
+                        possible_actions.append(
+                            SmilesBasedRetroReaction(
+                                mol,
+                                reactants_str=item["smiles"],
+                                metadata={"policy_name": "simple_expansion"},
+                            )
+                        )
+                    if "smarts" in item:
+                        possible_actions.append(
+                            TemplatedRetroReaction(mol, smarts=item["smarts"])
+                        )
+                    priors.append(item["prior"])
             return possible_actions, priors
 
     def wrapper(lookup, config=None):
@@ -224,19 +240,20 @@ def get_filter_strategy(default_config):
         def __init__(self, key, config, **kwargs):
             super().__init__(key, config, **kwargs)
             self.lookup = kwargs["lookup"]
+            self.filter_cutoff: float = kwargs.get("filter_cutoff", 0.05)
 
         def apply(self, reaction):
             prob = self.lookup.get(reaction.smiles)
             if prob is None:
                 return
-            if prob < self._config.filter_cutoff:
+            if prob < self.filter_cutoff:
                 raise RejectionException(f"Reject {reaction} with prob {prob}")
 
         def feasibility(self, reaction):
             prob = self.lookup.get(reaction.smiles)
             if prob is None:
                 return False, 0.0
-            return prob < self._config.filter_cutoff, prob
+            return prob < self.filter_cutoff, prob
 
     def wrapper(lookup, config=None):
         return LookupFilterStrategy("dummy", config or default_config, lookup=lookup)
@@ -332,8 +349,8 @@ def mock_onnx_model(mocker: pytest_mock.MockerFixture):
 
 @pytest.fixture
 def setup_aizynthfinder(setup_policies, setup_stock):
-    def wrapper(expansions, stock):
-        finder = AiZynthFinder()
+    def wrapper(expansions, stock, config_dict=None):
+        finder = AiZynthFinder(configdict=config_dict)
         root_smi = list(expansions.keys())[0]
         setup_policies(expansions, config=finder.config)
         setup_stock(finder.config, *stock)
@@ -494,6 +511,16 @@ def setup_linear_reaction_tree(setup_linear_mcts):
 
 
 @pytest.fixture
+def setup_mocked_model(mocker: pytest_mock.MockerFixture):
+    biases = [np.zeros(10), np.zeros(1)]
+    weights = [np.ones([10, 10]), np.ones([10, 1])]
+
+    mocker.patch("builtins.open")
+    mocked_pickle_load = mocker.patch("aizynthfinder.search.retrostar.cost.pickle.load")
+    mocked_pickle_load.return_value = weights, biases
+
+
+@pytest.fixture
 def setup_policies(default_config, get_filter_strategy, get_expansion_strategy):
     def wrapper(expansions, filters=None, config=None):
         config = config or default_config
@@ -511,7 +538,7 @@ def setup_policies(default_config, get_filter_strategy, get_expansion_strategy):
 
 
 @pytest.fixture
-def setup_stock(default_config, tmpdir):
+def setup_stock(default_config, setup_stock_with_query, tmpdir):
     """
     Fixture for setting up stock of inchi keys in a textfile.
     Will return a function that should be called with any number of Molecule objects as arguments
@@ -525,8 +552,20 @@ def setup_stock(default_config, tmpdir):
         filename = str(tmpdir / "stock.txt")
         with open(filename, "w") as fileobj:
             fileobj.write("\n".join([mol.inchi_key for mol in molecules]))
-        config.stock.load(filename, "stock")
+        config.stock.load(setup_stock_with_query(filename), "stock")
         config.stock.select("stock")
+
+    return wrapper
+
+
+@pytest.fixture
+def setup_stock_with_query(default_config, create_dummy_stock1):
+    stock = default_config.stock
+
+    def wrapper(query=None):
+        query = query if query is not None else create_dummy_stock1("hdf5")
+        stock_query = InMemoryInchiKeyQuery(query)
+        return stock_query
 
     return wrapper
 

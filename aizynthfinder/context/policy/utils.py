@@ -13,7 +13,7 @@ if TYPE_CHECKING:
 
 
 def _make_fingerprint(
-    obj: Union[TreeMolecule, RetroReaction], model: Any
+    obj: Union[TreeMolecule, RetroReaction], model: Any, chiral: bool = False
 ) -> np.ndarray:
-    fingerprint = obj.fingerprint(radius=2, nbits=len(model))
+    fingerprint = obj.fingerprint(radius=2, nbits=len(model), chiral=chiral)
     return fingerprint.reshape([1, len(model)])

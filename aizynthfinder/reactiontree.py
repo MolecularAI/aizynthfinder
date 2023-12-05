@@ -209,7 +209,7 @@ class ReactionTree:
 
     def to_image(
         self,
-        in_stock_colors: FrameColors = None,
+        in_stock_colors: Optional[FrameColors] = None,
         show_all: bool = True,
     ) -> PilImage:
         """
@@ -237,7 +237,7 @@ class ReactionTree:
     def _build_dict(
         self,
         node: Union[UniqueMolecule, FixedRetroReaction],
-        dict_: StrDict = None,
+        dict_: Optional[StrDict] = None,
         include_metadata=False,
     ) -> StrDict:
         if dict_ is None:

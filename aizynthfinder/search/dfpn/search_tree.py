@@ -31,7 +31,9 @@ class SearchTree(AndOrSearchTreeBase):
     :param root_smiles: the root will be set to a node representing this molecule, defaults to None
     """
 
-    def __init__(self, config: Configuration, root_smiles: str = None) -> None:
+    def __init__(
+        self, config: Configuration, root_smiles: Optional[str] = None
+    ) -> None:
         super().__init__(config, root_smiles)
         self._mol_nodes: List[MoleculeNode] = []
         self._logger = logger()

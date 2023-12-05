@@ -88,3 +88,13 @@ def test_remove_atom_mapping():
     mol.remove_atom_mapping()
 
     assert not mol.has_atom_mapping()
+
+
+def test_chiral_fingerprint():
+    mol1 = Molecule(smiles="C[C@@H](C(=O)O)N")
+    mol2 = Molecule(smiles="C[C@@H](C(=O)O)N")
+
+    fp1 = mol1.fingerprint(radius=2, chiral=False)
+    fp2 = mol2.fingerprint(radius=2, chiral=True)
+
+    assert fp1.tolist() != fp2.tolist()

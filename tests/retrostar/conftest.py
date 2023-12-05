@@ -3,6 +3,7 @@ import numpy as np
 
 
 from aizynthfinder.search.retrostar.search_tree import SearchTree
+from aizynthfinder.search.retrostar.cost import MoleculeCost
 from aizynthfinder.search.retrostar.nodes import MoleculeNode
 from aizynthfinder.aizynthfinder import AiZynthFinder
 
@@ -15,22 +16,12 @@ def setup_aizynthfinder(setup_policies, setup_stock):
         setup_policies(expansions, config=finder.config)
         setup_stock(finder.config, *stock)
         finder.target_smiles = root_smi
-        finder.config.search_algorithm = (
+        finder.config.search.algorithm = (
             "aizynthfinder.search.retrostar.search_tree.SearchTree"
         )
         return finder
 
     return wrapper
-
-
-@pytest.fixture
-def setup_mocked_model(mocker):
-    biases = [np.zeros(10), np.zeros(1)]
-    weights = [np.ones([10, 10]), np.ones([10, 1])]
-
-    mocker.patch("builtins.open")
-    mocked_pickle_load = mocker.patch("aizynthfinder.search.retrostar.cost.pickle.load")
-    mocked_pickle_load.return_value = weights, biases
 
 
 @pytest.fixture
@@ -54,6 +45,8 @@ def setup_search_tree(default_config, setup_policies, setup_stock):
 @pytest.fixture
 def setup_star_root(default_config):
     def wrapper(smiles):
-        return MoleculeNode.create_root(smiles, config=default_config)
+        return MoleculeNode.create_root(
+            smiles, config=default_config, molecule_cost=MoleculeCost(default_config)
+        )
 
     return wrapper

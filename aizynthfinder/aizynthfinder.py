@@ -15,6 +15,7 @@ from aizynthfinder.analysis import (
 )
 from aizynthfinder.chem import FixedRetroReaction, Molecule, TreeMolecule
 from aizynthfinder.context.config import Configuration
+from aizynthfinder.context.scoring import CombinedScorer
 from aizynthfinder.reactiontree import ReactionTreeFromExpansion
 from aizynthfinder.search.andor_trees import AndOrSearchTreeBase
 from aizynthfinder.search.mcts import MctsSearchTree
@@ -60,7 +61,9 @@ class AiZynthFinder:
     :param configdict: the config as a dictionary source, defaults to None
     """
 
-    def __init__(self, configfile: str = None, configdict: StrDict = None) -> None:
+    def __init__(
+        self, configfile: Optional[str] = None, configdict: Optional[StrDict] = None
+    ) -> None:
         self._logger = logger()
 
         if configfile:
@@ -102,7 +105,9 @@ class AiZynthFinder:
         self._target_mol = mol
 
     def build_routes(
-        self, selection: RouteSelectionArguments = None, scorer: str = "state score"
+        self,
+        selection: Optional[RouteSelectionArguments] = None,
+        scorer: Optional[str] = None,
     ) -> None:
         """
         Build reaction routes
@@ -114,10 +119,15 @@ class AiZynthFinder:
         :param scorer: a reference to the object used to score the nodes
         :raises ValueError: if the search tree not initialized
         """
+
+        scorer = scorer or self.config.post_processing.route_scorer
+
         if not self.tree:
             raise ValueError("Search tree not initialized")
 
-        self.analysis = TreeAnalysis(self.tree, scorer=self.scorers[scorer])
+        _scorer = self.scorers[scorer]
+
+        self.analysis = TreeAnalysis(self.tree, scorer=_scorer)
         config_selection = RouteSelectionArguments(
             nmin=self.config.post_processing.min_routes,
             nmax=self.config.post_processing.max_routes,
@@ -157,13 +167,17 @@ class AiZynthFinder:
             raise ValueError("Target molecule unsanitizable")
 
         self.stock.reset_exclusion_list()
-        if self.config.exclude_target_from_stock and self.target_mol in self.stock:
+        if (
+            self.config.search.exclude_target_from_stock
+            and self.target_mol in self.stock
+        ):
             self.stock.exclude(self.target_mol)
             self._logger.debug("Excluding the target compound from the stock")
 
         self._setup_search_tree()
         self.analysis = None
         self.routes = RouteCollection([])
+        self.expansion_policy.reset_cache()
 
     def stock_info(self) -> StrDict:
         """
@@ -202,9 +216,12 @@ class AiZynthFinder:
         time_past = time.time() - time0
 
         if show_progress:
-            pbar = tqdm(total=self.config.iteration_limit, leave=False)
+            pbar = tqdm(total=self.config.search.iteration_limit, leave=False)
 
-        while time_past < self.config.time_limit and i <= self.config.iteration_limit:
+        while (
+            time_past < self.config.search.time_limit
+            and i <= self.config.search.iteration_limit
+        ):
             if show_progress:
                 pbar.update(1)
             self.search_stats["iterations"] += 1
@@ -218,7 +235,7 @@ class AiZynthFinder:
                 self.search_stats["first_solution_time"] = time.time() - time0
                 self.search_stats["first_solution_iteration"] = i
 
-            if self.config.return_first and is_solved:
+            if self.config.search.return_first and is_solved:
                 self._logger.debug("Found first solved route")
                 self.search_stats["returned_first"] = True
                 break
@@ -234,12 +251,12 @@ class AiZynthFinder:
 
     def _setup_search_tree(self) -> None:
         self._logger.debug("Defining tree root: %s" % self.target_smiles)
-        if self.config.search_algorithm.lower() == "mcts":
+        if self.config.search.algorithm.lower() == "mcts":
             self.tree = MctsSearchTree(
                 root_smiles=self.target_smiles, config=self.config
             )
         else:
-            cls = load_dynamic_class(self.config.search_algorithm)
+            cls = load_dynamic_class(self.config.search.algorithm)
             self.tree = cls(root_smiles=self.target_smiles, config=self.config)
 
 
@@ -260,7 +277,9 @@ class AiZynthExpander:
     :param configdict: the config as a dictionary source, defaults to None
     """
 
-    def __init__(self, configfile: str = None, configdict: StrDict = None) -> None:
+    def __init__(
+        self, configfile: Optional[str] = None, configdict: Optional[StrDict] = None
+    ) -> None:
         self._logger = logger()
 
         if configfile:
@@ -278,7 +297,7 @@ class AiZynthExpander:
         self,
         smiles: str,
         return_n: int = 5,
-        filter_func: Callable[[RetroReaction], bool] = None,
+        filter_func: Optional[Callable[[RetroReaction], bool]] = None,
     ) -> List[Tuple[FixedRetroReaction, ...]]:
         """
         Do the expansion of the given molecule returning a list of
