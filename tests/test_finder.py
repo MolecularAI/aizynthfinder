@@ -1,5 +1,7 @@
 import logging
 
+import pandas as pd
+import pytest
 from aizynthfinder.aizynthfinder import AiZynthFinder
 
 
@@ -51,7 +53,7 @@ def test_one_expansion(setup_aizynthfinder):
     finder = setup_aizynthfinder(lookup, child1_smi)
 
     # Test first with return_first
-    finder.config.return_first = True
+    finder.config.search.return_first = True
     finder.tree_search()
 
     nodes = list(finder.tree.graph())
@@ -64,8 +66,8 @@ def test_one_expansion(setup_aizynthfinder):
     assert finder.search_stats["returned_first"]
 
     # then test with iteration limit
-    finder.config.return_first = False
-    finder.config.iteration_limit = 45
+    finder.config.search.return_first = False
+    finder.config.search.iteration_limit = 45
     finder.prepare_tree()
     finder.tree_search()
 
@@ -91,7 +93,7 @@ def test_two_expansions(setup_aizynthfinder):
         child1_smi[1]: {"smiles": ".".join(child2_smi), "prior": 1.0},
     }
     finder = setup_aizynthfinder(lookup, [child1_smi[0], child1_smi[2]] + child2_smi)
-    finder.config.return_first = True
+    finder.config.search.return_first = True
 
     finder.tree_search()
 
@@ -147,6 +149,21 @@ def test_two_expansions_two_children(setup_aizynthfinder):
     assert state_smiles(nodes[4].state) == [child2_smi[0]] + grandchild_smi
     assert finder.search_stats["iterations"] == 100
 
+    # then test with immediate expansion
+    finder.config.search.algorithm_config["immediate_instantiation"] = [
+        "simple_expansion"
+    ]
+    finder.prepare_tree()
+    finder.tree_search()
+
+    nodes = list(finder.tree.graph())
+    assert len(nodes) == 5
+    assert nodes[0].created_at_iteration == 0
+    assert nodes[1].created_at_iteration == 1
+    assert nodes[2].created_at_iteration == 1
+    assert nodes[3].created_at_iteration == 1
+    assert nodes[4].created_at_iteration == 2
+
 
 def test_three_expansions(setup_aizynthfinder):
     """
@@ -172,7 +189,7 @@ def test_three_expansions(setup_aizynthfinder):
     finder = setup_aizynthfinder(
         lookup, [child1_smi[0], child1_smi[2], child2_smi[0]] + child3_smi
     )
-    finder.config.return_first = True
+    finder.config.search.return_first = True
 
     finder.tree_search()
 
@@ -209,9 +226,9 @@ def test_three_expansions_not_solved(setup_aizynthfinder):
         child2_smi[1]: {"smiles": child3_smi[0], "prior": 1.0},
     }
     finder = setup_aizynthfinder(lookup, [child1_smi[0], child1_smi[2], child2_smi[0]])
-    finder.config.return_first = True
-    finder.config.max_transforms = 2
-    finder.config.iteration_limit = 15
+    finder.config.search.return_first = True
+    finder.config.search.max_transforms = 2
+    finder.config.search.iteration_limit = 15
 
     finder.tree_search()
 
@@ -253,8 +270,8 @@ def test_two_expansions_no_expandable_root(setup_aizynthfinder):
         },
     }
     finder = setup_aizynthfinder(lookup, [child1_smi[0], child1_smi[2]])
-    finder.config.return_first = True
-    finder.config.iteration_limit = 10
+    finder.config.search.return_first = True
+    finder.config.search.iteration_limit = 10
 
     finder.tree_search()
 
@@ -303,7 +320,7 @@ def test_two_expansions_no_reactants_first_child(setup_aizynthfinder):
     finder = setup_aizynthfinder(
         lookup, [child1_smi[0], child1_smi[2]] + grandchild1_smi
     )
-    finder.config.return_first = True
+    finder.config.search.return_first = True
 
     finder.tree_search()
 
@@ -362,7 +379,7 @@ def test_three_expansions_no_reactants_first_child(setup_aizynthfinder):
     finder = setup_aizynthfinder(
         lookup, [child1_smi[0], child1_smi[2], grandchild1_smi[0]] + grandchild2_smi
     )
-    finder.config.return_first = True
+    finder.config.search.return_first = True
 
     finder.tree_search()
 
@@ -421,7 +438,7 @@ def test_three_expansions_no_reactants_second_level(setup_aizynthfinder):
     finder = setup_aizynthfinder(
         lookup, [child1_smi[0], child1_smi[2], grandchild1_smi[0]] + grandchild2_smi
     )
-    finder.config.return_first = True
+    finder.config.search.return_first = True
 
     finder.tree_search()
 
@@ -479,7 +496,7 @@ def test_two_expansions_no_reactants_second_child(setup_aizynthfinder):
     finder = setup_aizynthfinder(
         lookup, [child1_smi[0], child1_smi[2]] + grandchild1_smi
     )
-    finder.config.iteration_limit = 10
+    finder.config.search.iteration_limit = 10
 
     finder.tree_search()
 
@@ -514,7 +531,7 @@ def test_two_expansions_cyclic(setup_aizynthfinder):
         },
     }
     finder = setup_aizynthfinder(lookup, [])
-    finder.config.iteration_limit = 1
+    finder.config.search.iteration_limit = 1
 
     finder.tree_search()
 
@@ -546,8 +563,8 @@ def test_two_expansions_prune_cyclic(setup_aizynthfinder):
         },
     }
     finder = setup_aizynthfinder(lookup, [])
-    finder.config.iteration_limit = 1
-    finder.config.prune_cycles_in_search = False
+    finder.config.search.iteration_limit = 1
+    finder.config.search.algorithm_config["prune_cycles_in_search"] = False
 
     finder.tree_search()
 
@@ -587,7 +604,7 @@ def test_two_expansions_two_children_one_filtered(setup_aizynthfinder, caplog):
     finder.filter_policy[finder.filter_policy.selection[0]].lookup = {
         f"{root_smi}>>{'.'.join(child2_smi)}": 0.2
     }
-    finder.config.iteration_limit = 10
+    finder.config.search.iteration_limit = 10
 
     with caplog.at_level(logging.DEBUG):
         finder.tree_search()
@@ -607,7 +624,7 @@ def test_two_expansions_two_children_one_filtered(setup_aizynthfinder, caplog):
     assert finder.search_stats["iterations"] == 10
 
     # Now raise the filter threshold to remove child 2, grandchild 2
-    finder.config.filter_cutoff = 0.5
+    finder.config.filter_policy["dummy"].filter_cutoff = 0.5
     finder.target_smiles = finder.target_smiles  # Trigger re-set
 
     with caplog.at_level(logging.DEBUG):
@@ -634,6 +651,7 @@ def test_stock_info(setup_aizynthfinder):
 
     # Test first with return_first
     finder.config.return_first = True
+    finder.config.scorers.create_default_scorers()
     finder.tree_search()
 
     assert finder.stock_info() == {}
@@ -643,3 +661,103 @@ def test_stock_info(setup_aizynthfinder):
     expected = {smi: ["stock"] for smi in child1_smi}
     expected[root_smi] = []
     assert finder.stock_info() == expected
+
+
+def test_two_expansions_two_children_full_redundant_expansion(setup_aizynthfinder):
+    """
+    Test the building of this tree:
+                root
+            /           \
+        child 1        (child 2)
+            |             |
+        grandchild 1   (grandchild 2)
+    """
+    root_smi = "CN1CCC(C(=O)c2cccc(NC(=O)c3ccc(F)cc3)c2F)CC1"
+    child_smi = ["CN1CCC(Cl)CC1", "N#Cc1cccc(NC(=O)c2ccc(F)cc2)c1F", "O"]
+    grandchild_smi = ["N#Cc1cccc(N)c1F", "O=C(Cl)c1ccc(F)cc1"]
+    lookup = {
+        root_smi: [
+            {"smiles": ".".join(child_smi), "prior": 0.7},
+            {"smiles": ".".join(child_smi), "prior": 0.3},
+        ],
+        child_smi[1]: {"smiles": ".".join(grandchild_smi), "prior": 0.7},
+        child_smi[1]: {"smiles": ".".join(grandchild_smi), "prior": 0.7},
+    }
+    finder = setup_aizynthfinder(lookup, [child_smi[0], child_smi[2]] + grandchild_smi)
+
+    finder.config.search.algorithm_config["mcts_grouping"] = "full"
+    finder.tree_search()
+
+    nodes = list(finder.tree.graph())
+    assert len(nodes) == 3
+
+    assert state_smiles(nodes[0].state) == [root_smi]
+    assert state_smiles(nodes[1].state) == child_smi
+    assert state_smiles(nodes[2].state) == [child_smi[0], child_smi[2]] + grandchild_smi
+    assert "additional_actions" in nodes[0].children_view()["actions"][0].metadata
+    additional_expansions = (
+        nodes[0].children_view()["actions"][0].metadata["additional_actions"]
+    )
+    assert len(additional_expansions) == 1
+    assert additional_expansions[0] == {"policy_name": "simple_expansion"}
+    assert finder.search_stats["iterations"] == 100
+
+    # Switch to partial degeneracy grouping
+
+    finder.config.mcts_grouping = "partial"
+    finder.tree_search()
+
+    nodes = list(finder.tree.graph())
+    assert len(nodes) == 3
+
+
+def test_two_expansions_two_children_partial_redundant_expansion(setup_aizynthfinder):
+    """
+    Test the building of this tree:
+                root
+            /           \
+        child 1        (child 2)
+            |             |
+        grandchild 1   (grandchild 2)
+    """
+    root_smi = "CN1CCC(C(=O)c2cccc(NC(=O)c3ccc(F)cc3)c2F)CC1"
+    child_smi = ["CN1CCC(Cl)CC1", "N#Cc1cccc(NC(=O)c2ccc(F)cc2)c1F", "O"]
+    child2_smi = ["CN1CCC(Cl)CC1", "N#Cc1cccc(NC(=O)c2ccc(F)cc2)c1F"]
+    grandchild_smi = ["N#Cc1cccc(N)c1F", "O=C(Cl)c1ccc(F)cc1"]
+    lookup = {
+        root_smi: [
+            {"smiles": ".".join(child_smi), "prior": 0.7},
+            {"smiles": ".".join(child2_smi), "prior": 0.3},
+        ],
+        child_smi[1]: {"smiles": ".".join(grandchild_smi), "prior": 0.7},
+        child_smi[1]: {"smiles": ".".join(grandchild_smi), "prior": 0.7},
+    }
+    finder = setup_aizynthfinder(lookup, [child_smi[0], child_smi[2]] + grandchild_smi)
+
+    # First run with full degeneracy grouping
+
+    finder.config.search.algorithm_config["mcts_grouping"] = "full"
+    finder.tree_search()
+
+    nodes = list(finder.tree.graph())
+    assert len(nodes) == 5
+
+    # Then turn to partial
+
+    finder.config.search.algorithm_config["mcts_grouping"] = "Partial"
+    finder.target_smiles = finder.target_smiles  # Trigger re-set
+    finder.tree_search()
+
+    nodes = list(finder.tree.graph())
+    assert len(nodes) == 3
+
+    assert state_smiles(nodes[0].state) == [root_smi]
+    assert state_smiles(nodes[1].state) == child_smi
+    assert state_smiles(nodes[2].state) == [child_smi[0], child_smi[2]] + grandchild_smi
+    assert "additional_actions" in nodes[0].children_view()["actions"][0].metadata
+    additional_expansions = (
+        nodes[0].children_view()["actions"][0].metadata["additional_actions"]
+    )
+    assert len(additional_expansions) == 1
+    assert additional_expansions[0] == {"policy_name": "simple_expansion"}
+    assert finder.search_stats["iterations"] == 100

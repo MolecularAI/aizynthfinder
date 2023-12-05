@@ -2,7 +2,10 @@ def test_root_state_properties(generate_root):
     root = generate_root("CCCCOc1ccc(CC(=O)N(C)O)cc1")
     root2 = generate_root("CCCCOc1ccc(CC(=O)N(C)O)cc1")
 
-    assert round(root.state.score, 4) == 0.0491
+    search_reward = root._config.search.algorithm_config["search_reward"]
+    scorer = root._config.scorers[search_reward]
+
+    assert round(scorer(root), 4) == 0.0491
     assert root.state.stock_availability == ["Not in stock"]
     assert hash(root.state) == hash(root2.state)
     assert root.created_at_iteration is None
@@ -33,6 +36,24 @@ def test_expand_root_with_default_priors(setup_mcts_search, set_default_prior):
     assert view["values"] == [0.01, 0.01, 0.01]
     assert view["visitations"] == [1, 1, 1]
     assert view["objects"] == [None, None, None]
+
+
+def test_expand_root_immediate_instantiation(setup_mcts_search, default_config):
+    root, _, _ = setup_mcts_search
+    default_config.search.algorithm_config["immediate_instantiation"] = [
+        "simple_expansion"
+    ]
+
+    root.expand()
+
+    view = root.children_view()
+    assert len(view["actions"]) == 3
+    assert view["priors"] == [0.7, 0.5, 0.3]
+    assert view["values"] == [0.7, 0.5, -1e6]
+    assert view["visitations"] == [1, 1, 1]
+    assert view["objects"][0] is not None
+    assert view["objects"][1] is not None
+    assert view["objects"][2] is None
 
 
 def test_expand_when_solved(setup_mcts_search, setup_stock):

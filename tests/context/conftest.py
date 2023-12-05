@@ -75,22 +75,9 @@ def setup_template_expansion_policy(
             templates_filename = create_templates_file(templates)
 
         strategy = TemplateBasedExpansionStrategy(
-            key, default_config, source="dummy.onnx", templatefile=templates_filename
+            key, default_config, model="dummy.onnx", template=templates_filename
         )
 
         return strategy, mock_onnx_model
-
-    return wrapper
-
-
-@pytest.fixture
-def setup_stock_with_query(default_config, create_dummy_stock1):
-    stock = default_config.stock
-
-    def wrapper(query=None):
-        query = query if query is not None else create_dummy_stock1("hdf5")
-        stock.load(query, "stock1")
-        stock.select(["stock1"])
-        return stock
 
     return wrapper

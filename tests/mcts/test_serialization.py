@@ -8,6 +8,8 @@ from aizynthfinder.search.mcts import MctsSearchTree
 def test_serialize_deserialize_state(default_config):
     mol = TreeMolecule(parent=None, smiles="CCC", transform=1)
     state0 = MctsState([mol], default_config)
+    node0 = MctsNode(state=state0, owner=None, config=default_config)
+
     serializer = MoleculeSerializer()
 
     state_serialized = state0.serialize(serializer)
@@ -17,11 +19,15 @@ def test_serialize_deserialize_state(default_config):
 
     deserializer = MoleculeDeserializer(serializer.store)
     state1 = MctsState.from_dict(state_serialized, default_config, deserializer)
+    node1 = MctsNode(state=state1, owner=None, config=default_config)
+
+    search_reward = default_config.search.algorithm_config["search_reward"]
+    scorer = default_config.scorers[search_reward]
 
     assert len(state1.mols) == 1
     assert state1.mols[0] == state0.mols[0]
     assert state1.in_stock_list == state0.in_stock_list
-    assert state1.score == state0.score
+    assert scorer(node1) == scorer(node0)
 
 
 def test_serialize_node(setup_mcts_search):

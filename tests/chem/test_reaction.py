@@ -1,34 +1,11 @@
 from aizynthfinder.chem import (
-    Molecule,
-    UniqueMolecule,
-    TreeMolecule,
-    Reaction,
-    TemplatedRetroReaction,
     FixedRetroReaction,
     SmilesBasedRetroReaction,
+    TemplatedRetroReaction,
+    TreeMolecule,
+    UniqueMolecule,
     hash_reactions,
-    MoleculeException,
 )
-from aizynthfinder.reactiontree import ReactionTree
-
-
-def test_fwd_reaction():
-    mol1 = Molecule(smiles="CC(=O)O", sanitize=True)
-    mol2 = Molecule(smiles="NC", sanitize=True)
-    reaction = Reaction(
-        mols=[mol1, mol2], smarts="[C:1](=[O:2])-[OD1].[N!H0:3]>>[C:1](=[O:2])[N:3]"
-    )
-
-    products = reaction.apply()
-
-    assert len(products) == 1
-    assert len(products[0]) == 1
-    assert products[0][0].smiles == "CNC(C)=O"
-    assert reaction.reaction_smiles() == "CC(=O)O.CN>>CNC(C)=O"
-    assert (
-        reaction.hash_key()
-        == "48430f9760af903f4b846a5f13f0b41ede99be0df93b0b58b581ad4b"
-    )
 
 
 def test_retro_reaction(get_action):
@@ -83,13 +60,12 @@ def test_retro_reaction_with_rdkit(get_action):
 def test_retro_reaction_fingerprint(get_action):
     reaction = get_action()
 
-    fp = reaction.fingerprint(2, 10)
+    fingerprint = reaction.fingerprint(2, 10)
 
-    assert list(fp) == [0, -1, 0, -1, -1, 0, -1, -1, 0, 0]
+    assert list(fingerprint) == [0, -1, 0, -1, -1, 0, -1, -1, 0, 0]
 
 
 def test_retro_reaction_copy(get_action):
-    mol = TreeMolecule(parent=None, smiles="CCCCOc1ccc(CC(=O)N(C)O)cc1")
     reaction = get_action()
     _ = reaction.reactants
 
@@ -157,9 +133,50 @@ def test_set_reactants_list_of_list():
     assert rxn.reactants == ((reactant1, reactant2),)
 
 
+def test_fixed_retroreaction_to_smiles_based_retroreaction():
+    smiles = (
+        "[CH3:4][NH:3][C:2]([CH3:5])=[O:1]>>[CH3:6][NH2:5].[CH3:4][C:2]([OH:1])=[O:3]"
+    )
+    mol = UniqueMolecule(smiles="CNC(C)=O")
+    reactant1 = UniqueMolecule(smiles="CN")
+    reactant2 = UniqueMolecule(smiles="CC(=O)O")
+
+    rxn = FixedRetroReaction(mol, metadata={"mapped_reaction_smiles": smiles})
+    rxn.reactants = ((reactant1, reactant2),)
+    smiles_based_retroreaction = rxn.to_smiles_based_retroreaction()
+
+    assert isinstance(smiles_based_retroreaction, SmilesBasedRetroReaction)
+    assert smiles_based_retroreaction.mol.smiles == "[CH3:4][NH:3][C:2]([CH3:5])=[O:1]"
+    assert smiles_based_retroreaction.reactants[0][0].smiles == "CN"
+    assert smiles_based_retroreaction.reactants[0][1].smiles == "CC(=O)O"
+    assert (
+        smiles_based_retroreaction.mapped_reaction_smiles()
+        == "[O:1]=[C:2]([NH:3][CH3:4])[CH3:5]>>[NH2:5][CH3:6].[OH:1][C:2](=[O:3])[CH3:4]"
+    )
+
+
+def test_fixed_retroreaction_to_smiles_based_retroreaction_no_metadata():
+    mol = UniqueMolecule(smiles="CNC(C)=O")
+    reactant1 = UniqueMolecule(smiles="CN")
+    reactant2 = UniqueMolecule(smiles="CC(=O)O")
+
+    rxn = FixedRetroReaction(mol)
+    rxn.reactants = ((reactant1, reactant2),)
+    smiles_based_retroreaction = rxn.to_smiles_based_retroreaction()
+
+    assert isinstance(smiles_based_retroreaction, SmilesBasedRetroReaction)
+    assert smiles_based_retroreaction.mol.smiles == "CNC(C)=O"
+    assert smiles_based_retroreaction.reactants[0][0].smiles == "CN"
+    assert smiles_based_retroreaction.reactants[0][1].smiles == "CC(=O)O"
+    assert (
+        smiles_based_retroreaction.mapped_reaction_smiles()
+        == "[CH3:1][NH:2][C:3]([CH3:4])=[O:5]>>[CH3:6][NH2:7].[CH3:8][C:9](=[O:10])[OH:11]"
+    )
+
+
 def test_reaction_hash(setup_linear_reaction_tree):
-    rt = setup_linear_reaction_tree()
-    reactions = list(rt.reactions())[:4]
+    reaction_tree = setup_linear_reaction_tree()
+    reactions = list(reaction_tree.reactions())[:4]
 
     hash_ = hash_reactions(reactions)
 
@@ -170,44 +187,56 @@ def test_reaction_hash(setup_linear_reaction_tree):
     assert hash_ == "567c23da4673b8b2519aeafda9b26ae949ad3e24f570968ee5f80878"
 
 
-def test_create_atom_tracking():
-    mol = TreeMolecule(smiles="[C:1][N:2]C(C)=O", parent=None)
+def test_mapped_atom_bonds():
+    mol = TreeMolecule(smiles="[CH3:1][NH:2][C:3](C)=[O:4]", parent=None)
+    reaction = SmilesBasedRetroReaction(
+        mol,
+        mapped_prod_smiles="[CH3:1][NH:2][C:3](C)=[O:4]",
+        reactants_str="C[C:3](=[O:4])O.[CH3:1][NH:2]",
+    )
 
-    assert mol.tracked_atom_indices == {1: 0, 2: 1}
-
-
-def test_inherit_atom_tracking():
-    mol = TreeMolecule(smiles="[C:1][N:2]C(C)=O", parent=None, sanitize=True)
-    reaction = SmilesBasedRetroReaction(mol, reactants_str="[C:1]C(=O)O.C[N:2]")
-
-    assert reaction.reactants[0][0].tracked_atom_indices == {1: 0, 2: None}
-    assert reaction.reactants[0][1].tracked_atom_indices == {1: None, 2: 1}
+    assert reaction.reactants[0][0].mapped_atom_bonds == [(6, 3), (3, 4), (3, 7)]
+    assert reaction.reactants[0][1].mapped_atom_bonds == [(1, 2)]
 
 
-def test_inherit_atom_tracking_rdchiral():
-    smi = "CCCCOc1ccc(C[C:1](=O)[N:2](C)O)cc1"
+def test_mapped_atom_bonds_rdchiral():
+    smi = "CC(C)C[C:1](=O)[N:2](C)O"
     mol = TreeMolecule(smiles=smi, parent=None)
     smarts = (
         "([#8:4]-[N;H0;D3;+0:5](-[C;D1;H3:6])-[C;H0;D3;+0:1](-[C:2])=[O;D1;H0:3])"
         ">>(Cl-[C;H0;D3;+0:1](-[C:2])=[O;D1;H0:3]).([#8:4]-[NH;D2;+0:5]-[C;D1;H3:6])"
     )
-    rxn = TemplatedRetroReaction(mol, smarts=smarts)
+    reaction = TemplatedRetroReaction(mol, smarts=smarts)
 
-    assert rxn.reactants[0][0].tracked_atom_indices == {1: 10, 2: None}
-    assert rxn.reactants[0][1].tracked_atom_indices == {1: None, 2: 0}
+    assert reaction.reactants[0][0].mapped_atom_bonds == [
+        (1, 6),
+        (6, 4),
+        (4, 3),
+        (4, 5),
+        (1, 7),
+        (1, 10),
+    ]
+    assert reaction.reactants[0][1].mapped_atom_bonds == [(2, 8), (2, 9)]
 
 
-def test_inherit_atom_tracking_rdkit():
-    smi = "CCCCOc1ccc(C[C:1](=O)[N:2](C)O)cc1"
+def test_mapped_atom_bonds_rdkit():
+    smi = "CC(C)C[C:1](=O)[N:2](C)O"
     mol = TreeMolecule(smiles=smi, parent=None)
     smarts = (
         "([#8:4]-[N;H0;D3;+0:5](-[C;D1;H3:6])-[C;H0;D3;+0:1](-[C:2])=[O;D1;H0:3])"
         ">>(Cl-[C;H0;D3;+0:1](-[C:2])=[O;D1;H0:3]).([#8:4]-[NH;D2;+0:5]-[C;D1;H3:6])"
     )
-    rxn = TemplatedRetroReaction(mol, smarts=smarts, use_rdchiral=False)
+    reaction = TemplatedRetroReaction(mol, smarts=smarts, use_rdchiral=False)
 
-    assert rxn.reactants[0][0].tracked_atom_indices == {1: 1, 2: None}
-    assert rxn.reactants[0][1].tracked_atom_indices == {1: None, 2: 1}
+    assert reaction.reactants[0][0].mapped_atom_bonds == [
+        (10, 1),
+        (1, 6),
+        (1, 7),
+        (4, 6),
+        (3, 4),
+        (4, 5),
+    ]
+    assert reaction.reactants[0][1].mapped_atom_bonds == [(9, 2), (2, 8)]
 
 
 def test_inherit_atom_tracking_rdchiral_growing():

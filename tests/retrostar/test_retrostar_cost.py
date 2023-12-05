@@ -1,25 +1,45 @@
-import numpy as np
-
 import pytest
 
-from aizynthfinder.context.cost import MoleculeCost
-from aizynthfinder.search.retrostar.cost import RetroStarCost
 from aizynthfinder.chem import Molecule
+from aizynthfinder.search.retrostar.cost import (
+    MoleculeCost,
+    RetroStarCost,
+    ZeroMoleculeCost,
+)
 
 
 def test_retrostar_cost(setup_mocked_model):
     mol = Molecule(smiles="CCCC")
 
     cost = RetroStarCost(model_path="dummy", fingerprint_length=10, dropout_rate=0.0)
-    assert pytest.approx(cost(mol), abs=0.001) == 30
+    assert pytest.approx(cost.calculate(mol), abs=0.001) == 30
 
 
-def test_load_cost_from_config(setup_mocked_model):
-    cost = MoleculeCost()
+def test_zero_molecule_cost():
+    mol = Molecule(smiles="CCCC")
 
-    dict_ = {
-        "aizynthfinder.search.retrostar.cost.RetroStarCost": {"model_path": "dummy"}
+    cost = ZeroMoleculeCost().calculate(mol)
+    assert cost == 0.0
+
+
+def test_molecule_cost_zero(default_config):
+    default_config.search.algorithm_config["molecule_cost"] = {
+        "cost": "ZeroMoleculeCost"
     }
-    cost.load_from_config(**dict_)
+    mol = Molecule(smiles="CCCC")
 
-    assert len(cost) == 2
+    molecule_cost = MoleculeCost(default_config)(mol)
+    assert molecule_cost == 0.0
+
+
+def test_molecule_cost_retrostar(default_config, setup_mocked_model):
+    default_config.search.algorithm_config["molecule_cost"] = {
+        "cost": "aizynthfinder.search.retrostar.cost.RetroStarCost",
+        "model_path": "dummy",
+        "fingerprint_length": 10,
+        "dropout_rate": 0.0,
+    }
+    mol = Molecule(smiles="CCCC")
+
+    molecule_cost = MoleculeCost(default_config)(mol)
+    assert pytest.approx(molecule_cost, abs=0.001) == 30

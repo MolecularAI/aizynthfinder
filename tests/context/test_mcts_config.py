@@ -5,6 +5,7 @@ import pytest
 
 from aizynthfinder.aizynthfinder import AiZynthFinder
 from aizynthfinder.context.config import Configuration
+from aizynthfinder.context.stock import StockException
 
 
 def test_load_empty_dict(default_config):
@@ -24,78 +25,81 @@ def test_load_empty_file(default_config, write_yaml):
 def test_load_from_file(write_yaml):
     filename = write_yaml(
         {
-            "properties": {
-                "cutoff_number": 300,
-                "post_processing": {"all_routes": True},
+            "search": {
+                "algorithm": "mcts",
+                "algorithm_config": {
+                    "C": 1.9,
+                    "default_prior": 0.9,
+                    "use_prior": False,
+                },
+                "max_transforms": 6,
+                "time_limit": 200,
+                "break_bonds_operator": "OR",
             },
-            "policy": {"properties": {"C": 1.9, "time_limit": 200}},
-            "finder": {"properties": {"time_limit": 300}},
         }
     )
 
     config = Configuration.from_file(filename)
 
-    assert config.cutoff_number == 300
-    assert config.C == 1.9
-    assert config.time_limit == 200
-    assert config.post_processing.all_routes
+    assert config.search.algorithm == "mcts"
+    assert config.search.time_limit == 200
+
+    assert config.search.algorithm_config == {
+        "C": 1.9,
+        "default_prior": 0.9,
+        "use_prior": False,
+        "prune_cycles_in_search": True,
+        "search_reward": "state score",
+        "immediate_instantiation": (),
+        "mcts_grouping": None,
+    }
 
 
 def test_load_from_dict_invalid_property(write_yaml):
     dict_ = {
-        "properties": {"dummy": 300},
-        "policy": {"properties": {"C": 1.9}},
-        "finder": {"properties": {"time_limit": 300}},
+        "search": {"dummy": 300, "algorithm": "mcts"},
     }
-    with pytest.raises(AttributeError):
+    with pytest.raises(AttributeError, match="Could not find attribute to set: dummy"):
         Configuration.from_dict(dict_)
 
 
-def test_get_properties(default_config):
+def test_update_search(default_config):
     config = default_config
 
-    props = config.properties
+    assert config.search.algorithm_config["C"] != 2.0
+    assert config.search.time_limit != 300
+    assert config.search.max_transforms == 6
 
-    # Just check a few properties
-    assert props["C"] == 1.4
-    assert props["time_limit"] == 120
-    assert props["max_transforms"] == 6
-    assert "post_processing" not in props
-
-
-def test_update_properties(default_config):
-    config = default_config
-
-    assert config.C != 2.0
-    assert config.time_limit != 300
-    assert config.max_transforms == 6
-
-    config.properties = {"C": 2.0, "time_limit": 300, "max_transforms": None}
-
-    assert config.C == 2.0
-    assert config.time_limit == 300
-    assert config.max_transforms == 6
+    config = config.from_dict(
+        {
+            "search": {
+                "algorithm_config": {"C": 2.0},
+                "time_limit": 300,
+                "max_transforms": None,
+            }
+        }
+    )
+    assert config.search.algorithm_config["C"] == 2.0
+    assert config.search.time_limit == 300
+    assert config.search.max_transforms == 6
 
     with pytest.raises(AttributeError):
-        config.properties = {
-            "C": 2.0,
-            "time_limit": 300,
-            "max_transforms": None,
-            "dummy": 2,
-        }
-
-    with pytest.raises(ValueError):
-        config.properties = {
-            "C": 2.0,
-            "time_limit": 300,
-            "max_transforms": None,
-            "post_processing": {"all_routes": True},
-        }
+        config = config.from_dict(
+            {
+                "search": {
+                    "time_limit": 300,
+                    "max_transforms": None,
+                    "dummy": 2,
+                }
+            }
+        )
 
 
 def test_load_stock(write_yaml, create_dummy_stock1):
     stock_filename = create_dummy_stock1("hdf5")
-    filename = write_yaml({"stock": {"files": {"test": stock_filename}}})
+    filename = write_yaml(
+        {"stock": {"buyables": {"type": "inchiset", "path": stock_filename}}}
+    )
 
     config = Configuration.from_file(filename)
 
@@ -105,20 +109,57 @@ def test_load_stock(write_yaml, create_dummy_stock1):
 def test_load_policy(write_yaml, create_dummy_templates, mock_onnx_model):
     templates_filename = create_dummy_templates(3)
     filename = write_yaml(
-        {"policy": {"files": {"test": ["dummy.onnx", templates_filename]}}}
+        {
+            "expansion": {
+                "uspto": {
+                    "type": "template-based",
+                    "model": "dummy.onnx",
+                    "template": templates_filename,
+                    "cutoff_number": 75,
+                },
+                "full": ["dummy.onnx", templates_filename],
+            }
+        }
     )
 
     config = Configuration.from_file(filename)
 
-    assert config.expansion_policy.items == ["test"]
+    assert config.expansion_policy.items == ["full", "uspto"]
 
 
 def test_load_filter_policy(write_yaml, mock_onnx_model):
-    filename = write_yaml({"filter": {"files": {"test": "dummy.onnx"}}})
+    filename = write_yaml(
+        {
+            "filter": {
+                "uspto": {
+                    "type": "quick-filter",
+                    "model": "dummy.onnx",
+                    "exclude_from_policy": ["rc"],
+                },
+                "full": "dummy.onnx",
+            }
+        }
+    )
 
     config = Configuration.from_file(filename)
 
-    assert config.filter_policy.items == ["test"]
+    assert config.filter_policy.items == ["full", "uspto"]
+
+
+def test_load_stock(write_yaml, create_dummy_stock1):
+    stock_filename = create_dummy_stock1("hdf5")
+    filename = write_yaml(
+        {
+            "stock": {
+                "buyables": {"type": "inchiset", "path": stock_filename},
+                "emolecules": stock_filename,
+            }
+        }
+    )
+
+    config = Configuration.from_file(filename)
+
+    assert config.stock.items == ["buyables", "emolecules"]
 
 
 def test_load_stop_criteria(write_yaml):
@@ -136,7 +177,7 @@ def test_load_stop_criteria(write_yaml):
 
 def test_load_default_mongodb(write_yaml, mocker):
     mocked_client = mocker.patch("aizynthfinder.context.stock.queries.get_mongo_client")
-    filename = write_yaml({"stock": {"mongodb": {}}})
+    filename = write_yaml({"stock": {"mongodb_stock": {"type": "mongodb"}}})
 
     config = Configuration.from_file(filename)
 
@@ -149,7 +190,8 @@ def test_load_specific_mongodb(write_yaml, mocker):
     filename = write_yaml(
         {
             "stock": {
-                "mongodb": {
+                "mongodb_stock": {
+                    "type": "mongodb",
                     "host": "myhost",
                     "database": "mydatabase",
                     "collection": "mycollection",
@@ -173,8 +215,9 @@ def test_load_external_stock(write_yaml, create_dummy_stock1):
     filename = write_yaml(
         {
             "stock": {
-                "aizynthfinder.context.stock.stock.InMemoryInchiKeyQuery": {
-                    "filename": stock_filename
+                "inchi": {
+                    "type": "aizynthfinder.context.stock.stock.InMemoryInchiKeyQuery",
+                    "path": stock_filename,
                 }
             }
         }
@@ -182,7 +225,7 @@ def test_load_external_stock(write_yaml, create_dummy_stock1):
 
     config = Configuration.from_file(filename)
 
-    assert config.stock.items == ["InMemoryInchiKeyQuery"]
+    assert config.stock.items == ["inchi"]
 
 
 def test_load_external_stock_incorrect_module(write_yaml, create_dummy_stock1):
@@ -190,16 +233,16 @@ def test_load_external_stock_incorrect_module(write_yaml, create_dummy_stock1):
     filename = write_yaml(
         {
             "stock": {
-                "aizynthfinder.context.stocks.stock.InMemoryInchiKeyQuery": {
-                    "filename": stock_filename
+                "inchi": {
+                    "type": "aizynthfinder.context.stocks.stock.InMemoryInchiKeyQuery",
+                    "path": stock_filename,
                 }
             }
         }
     )
 
-    config = Configuration.from_file(filename)
-
-    assert config.stock.items == []
+    with pytest.raises(StockException):
+        config = Configuration.from_file(filename)
 
 
 def test_load_external_stock_incorrect_class(write_yaml, create_dummy_stock1):
@@ -207,16 +250,16 @@ def test_load_external_stock_incorrect_class(write_yaml, create_dummy_stock1):
     filename = write_yaml(
         {
             "stock": {
-                "aizynthfinder.context.stock.InnMemoryInchiKeyQuery": {
-                    "filename": stock_filename
+                "inchi": {
+                    "type": "aizynthfinder.context.stock.InnMemoryInchiKeyQuery",
+                    "path": stock_filename,
                 }
             }
         }
     )
 
-    config = Configuration.from_file(filename)
-
-    assert config.stock.items == []
+    with pytest.raises(StockException):
+        config = Configuration.from_file(filename)
 
 
 def test_load_scorer_from_context_module(write_yaml):
@@ -239,81 +282,137 @@ def test_load_scorer_from_module_spec(write_yaml):
 
 @mock.patch.dict(
     os.environ,
-    {"CUTOFF_NUMBER": "300", "C": "1.9"},
+    {"ITERATION_LIMIT": "300", "C": "1.9"},
 )
 def test_load_yaml_with_environ(write_yaml):
     filename = write_yaml(
         {
-            "properties": {
-                "cutoff_number": "${CUTOFF_NUMBER}",
-                "post_processing": {"all_routes": True},
+            "search": {
+                "algorithm_config": {"C": "${C}"},
+                "iteration_limit": "${ITERATION_LIMIT}",
             },
-            "policy": {"properties": {"C": "${C}"}},
-            "finder": {"properties": {"cutoff_number": "${CUTOFF_NUMBER}"}},
         }
     )
     config = Configuration.from_file(filename)
 
-    assert config.cutoff_number == 300
-    assert config.C == 1.9
+    assert config.search.iteration_limit == 300
+    assert config.search.algorithm_config["C"] == 1.9
 
 
-@mock.patch.dict(os.environ, {"CUTOFF_NUMBER": "300"})
+@mock.patch.dict(os.environ, {"ITERATION_LIMIT": "300"})
 def test_load_yaml_with_environ_raises_error(write_yaml):
     filename = write_yaml(
         {
-            "properties": {"cutoff_number": "${CUTOFF}"},
-            "policy": {"properties": {"C": 1.9}},
-            "finder": {"properties": {"time_limit": 300}},
+            "search": {
+                "algorithm_config": {"C": 1.9},
+                "iteration_limit": "${ITERATION}",
+            },
         }
     )
-    with pytest.raises(ValueError, match="'CUTOFF' not in environment variables"):
+    with pytest.raises(ValueError, match="'ITERATION' not in environment variables"):
         Configuration.from_file(filename)
 
 
-def test_init_search_yaml(write_yaml):
+def test_load_algorithm_config(write_yaml):
+    filename = write_yaml({"search": {"algorithm_config": {"C": 1.9}}})
+
+    config = Configuration.from_file(filename)
+
+    expected_keys = [
+        "C",
+        "default_prior",
+        "use_prior",
+        "prune_cycles_in_search",
+        "search_reward",
+        "immediate_instantiation",
+        "mcts_grouping",
+    ]
+    for key in expected_keys:
+        assert key in config.search.algorithm_config, f"{key} not in config"
+    assert config.search.algorithm_config["C"] == 1.9
+
+
+def test_load_algorithm_config_failure(write_yaml):
+    filename = write_yaml({"search": {"algorithm_config": 5.5}})
+
+    with pytest.raises(ValueError, match="algorithm_config"):
+        Configuration.from_file(filename)
+
+
+def test_init_search_yaml(write_yaml, create_dummy_templates, mock_onnx_model):
+    templates_filename = create_dummy_templates(3)
     filename = write_yaml(
         {
-            "properties": {"cutoff_number": 300},
-            "policy": {"properties": {"C": 1.9}},
-            "finder": {"properties": {"time_limit": 300}},
+            "expansion": {
+                "policy1": {
+                    "type": "template-based",
+                    "model": "dummy.onnx",
+                    "template": templates_filename,
+                    "cutoff_number": 300,
+                }
+            },
+            "search": {"time_limit": 300},
         }
     )
 
     finder = AiZynthFinder(filename)
 
-    assert finder.config.cutoff_number == 300
-    assert finder.config.C == 1.9
-    assert finder.config.time_limit == 300
+    assert finder.config.expansion_policy["policy1"].cutoff_number == 300
+    assert finder.config.search.time_limit == 300
 
 
-def test_init_search_dict():
+def test_init_search_dict(create_dummy_templates, mock_onnx_model):
+    templates_filename = create_dummy_templates(3)
     dict_ = {
-        "properties": {"cutoff_number": 300},
-        "policy": {"properties": {"C": 1.9}},
-        "finder": {"properties": {"time_limit": 300}},
+        "expansion": {
+            "policy1": {
+                "type": "template-based",
+                "model": "dummy.onnx",
+                "template": templates_filename,
+                "cutoff_number": 300,
+            }
+        },
+        "search": {"time_limit": 300},
     }
 
     finder = AiZynthFinder(configdict=dict_)
 
-    assert finder.config.cutoff_number == 300
-    assert finder.config.C == 1.9
-    assert finder.config.time_limit == 300
+    assert finder.config.expansion_policy["policy1"].cutoff_number == 300
+    assert finder.config.search.time_limit == 300
 
 
-def test_init_search_yaml_dict(write_yaml):
-    filename = write_yaml({"properties": {"cutoff_number": 300}})
+def test_init_search_yaml_dict(write_yaml, create_dummy_templates, mock_onnx_model):
+    templates_filename = create_dummy_templates(3)
+    filename = write_yaml(
+        {
+            "expansion": {
+                "policy1": {
+                    "type": "template-based",
+                    "model": "dummy.onnx",
+                    "template": templates_filename,
+                    "cutoff_number": 300,
+                }
+            },
+            "search": {"time_limit": 300},
+        }
+    )
     dict_ = {
-        "properties": {"cutoff_number": 100},
+        "expansion": {
+            "policy1": {
+                "type": "template-based",
+                "model": "dummy.onnx",
+                "template": templates_filename,
+                "cutoff_number": 100,
+            }
+        },
     }
 
     finder = AiZynthFinder(filename, configdict=dict_)
 
-    assert finder.config.cutoff_number == 300
+    assert finder.config.expansion_policy["policy1"].cutoff_number == 300
 
 
 def test_init_search_none(default_config):
-
     finder = AiZynthFinder()
 
     assert finder.config == default_config

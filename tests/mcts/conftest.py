@@ -18,13 +18,13 @@ def fresh_tree(default_config):
 
 @pytest.fixture
 def set_default_prior(default_config):
-    default_config.use_prior = False
+    default_config.search.algorithm_config["use_prior"] = False
 
     def wrapper(prior):
-        default_config.default_prior = prior
+        default_config.search.algorithm_config["default_prior"] = prior
 
     yield wrapper
-    default_config.use_prior = True
+    default_config.search.algorithm_config["use_prior"] = True
 
 
 @pytest.fixture

@@ -20,7 +20,7 @@ def new_image():
 
 
 @pytest.fixture
-def setup_graphviz_graph():
+def setup_graph():
     mol1 = TreeMolecule(smiles="CCCO", parent=None)
     reaction = TemplatedRetroReaction(mol=mol1, smarts="")
 
@@ -64,53 +64,11 @@ def test_save_molecule_images():
     assert len(os.listdir(image.IMAGE_FOLDER)) == nfiles + 2
 
 
-@pytest.mark.xfail(
-    condition=shutil.which("dot") is None, reason="graphviz is not installed"
-)
-def test_graphviz_usage(mocker, tmpdir, setup_graphviz_graph):
-    mkstemp_patch = mocker.patch("aizynthfinder.utils.image.tempfile.mkstemp")
-    files = [
-        (None, str(tmpdir / "graph1.dot")),
-        (None, str(tmpdir / "img2.png")),
-    ]
-    mkstemp_patch.side_effect = files
-    molecules, reactions, edges, frame_colors = setup_graphviz_graph
-
-    img = image.make_graphviz_image(molecules, reactions, edges, frame_colors)
-
-    assert img.height > 0
-    assert img.width > 0
-    for _, filename in files:
-        assert os.path.exists(filename)
-
-
-@pytest.mark.xfail(
-    condition=shutil.which("dot") is None, reason="graphviz is not installed"
-)
-def test_graphviz_usage_exception_dot(mocker, tmpdir, setup_graphviz_graph):
-    exists_patch = mocker.patch("aizynthfinder.utils.image.os.path.exists")
-    exists_patch.side_effect = [False, True]
-    molecules, reactions, edges, frame_colors = setup_graphviz_graph
-
-    img = image.make_graphviz_image(molecules, reactions, edges, frame_colors)
-    assert img.height > 0
-    assert img.width > 0
-
-
-def test_graphviz_usage_exception_dot_both(mocker, tmpdir, setup_graphviz_graph):
-    exists_patch = mocker.patch("aizynthfinder.utils.image.os.path.exists")
-    exists_patch.return_value = False
-    molecules, reactions, edges, frame_colors = setup_graphviz_graph
-
-    with pytest.raises(FileNotFoundError, match=".*'dot'.*"):
-        image.make_graphviz_image(molecules, reactions, edges, frame_colors)
-
-
-def test_visjs_page(mocker, tmpdir, setup_graphviz_graph):
+def test_visjs_page(mocker, tmpdir, setup_graph):
     mkdtemp_patch = mocker.patch("aizynthfinder.utils.image.tempfile.mkdtemp")
     mkdtemp_patch.return_value = str(tmpdir / "tmp")
     os.mkdir(tmpdir / "tmp")
-    molecules, reactions, edges, frame_colors = setup_graphviz_graph
+    molecules, reactions, edges, frame_colors = setup_graph
     filename = str(tmpdir / "arch.tar")
 
     image.make_visjs_page(filename, molecules, reactions, edges, frame_colors)

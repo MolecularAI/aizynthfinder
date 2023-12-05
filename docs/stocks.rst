@@ -17,10 +17,10 @@ By adding these lines to the configuration file, the Mongo database will be used
 .. code-block:: yaml
 
     stock:
-        mongodb:
-            host: user@myurl.com
-            database: database_name
-            collection: compounds
+        type: mongodb
+        host: user@myurl.com
+        database: database_name
+        collection: compounds
 
 
 If no options are provided to the ``mongodb_stock`` key, the host, database and collection are taken to be `localhost`, 
@@ -91,7 +91,7 @@ is known by the python interpreter.
 .. code-block::
 
     stock:
-        aizynthfinder.contrib.stocks.CriteriaStock
+        type: aizynthfinder.contrib.stocks.CriteriaStock
 
 
 can be used if the `aizynthfinder.contrib.stocks` is an existing sub-package and module.

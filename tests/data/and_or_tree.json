@@ -2242,869 +2242,745 @@
       "smiles": "CN1CCC(C(=O)c2cccc(NC(=O)c3ccc(F)cc3)c2F)CC1",
       "class": "TreeMolecule",
       "parent": null,
-      "transform": 0,
-      "tracked_atom_indices": {}
+      "transform": 0
     },
     "139643166203664": {
       "smiles": "[C:14](=[O:15])([c:16]1[cH:17][cH:18][c:19]([F:20])[cH:21][cH:22]1)[Cl:900]",
       "class": "TreeMolecule",
       "parent": 139643154371392,
-      "transform": 1,
-      "tracked_atom_indices": {}
+      "transform": 1
     },
     "139643171528960": {
       "smiles": "[CH3:1][N:2]1[CH2:3][CH2:4][CH:5]([C:6](=[O:7])[c:8]2[cH:9][cH:10][cH:11][c:12]([NH2:13])[c:23]2[F:24])[CH2:25][CH2:26]1",
       "class": "TreeMolecule",
       "parent": 139643154371392,
-      "transform": 1,
-      "tracked_atom_indices": {}
+      "transform": 1
     },
     "139643166201504": {
       "smiles": "[CH3:1][N:2]1[CH2:3][CH2:4][CH:5]([C:6](=[O:7])[c:8]2[cH:9][cH:10][cH:11][c:12]([N+:13](=[O:900])[O-:901])[c:23]2[F:24])[CH2:25][CH2:26]1",
       "class": "TreeMolecule",
       "parent": 139643171528960,
-      "transform": 2,
-      "tracked_atom_indices": {}
+      "transform": 2
     },
     "139643162454288": {
       "smiles": "[CH3:1][I:900]=[N+:13]([c:12]1[cH:11][cH:10][cH:9][c:8]([C:6]([CH:5]2[CH2:4][CH2:3][NH:2][CH2:26][CH2:25]2)=[O:7])[c:23]1[F:24])[O-:901]",
       "class": "TreeMolecule",
       "parent": 139643166201504,
-      "transform": 3,
-      "tracked_atom_indices": {}
+      "transform": 3
     },
     "139643162454624": {
       "smiles": "[CH3:1][N:2]1[CH2:3][CH2:4][CH:5]([CH:6]([OH:7])[c:8]2[cH:9][cH:10][cH:11][c:12]([N+:13](=[O:900])[O-:901])[c:23]2[F:24])[CH2:25][CH2:26]1",
       "class": "TreeMolecule",
       "parent": 139643166201504,
-      "transform": 3,
-      "tracked_atom_indices": {}
+      "transform": 3
     },
     "139643162455056": {
       "smiles": "[C:1]([N:2]1[CH2:3][CH2:4][CH:5]([C:6](=[O:7])[c:8]2[cH:9][cH:10][cH:11][c:12]([N+:13](=[O:900])[O-:901])[c:23]2[F:24])[CH2:25][CH2:26]1)([O:904][C:901]([CH3:900])([CH3:902])[CH3:903])=[O:905]",
       "class": "TreeMolecule",
       "parent": 139643166201504,
-      "transform": 3,
-      "tracked_atom_indices": {}
+      "transform": 3
     },
     "139643162454144": {
       "smiles": "[NH:2]1[CH2:3][CH2:4][CH:5]([C:6](=[O:7])[c:8]2[cH:9][cH:10][cH:11][c:12]([N+:13](=[O:900])[O-:901])[c:23]2[F:24])[CH2:25][CH2:26]1",
       "class": "TreeMolecule",
       "parent": 139643166201504,
-      "transform": 3,
-      "tracked_atom_indices": {}
+      "transform": 3
     },
     "139643162454048": {
       "smiles": "[C:1]([N:2]1[CH2:3][CH2:4][CH:5]([C:6](=[O:7])[c:8]2[cH:9][cH:10][cH:11][c:12]([N+:13](=[O:900])[O-:901])[c:23]2[F:24])[CH2:25][CH2:26]1)(=[O:900])[O:901][CH2:902][c:903]1[cH:904][cH:905][cH:906][cH:907][cH:908]1",
       "class": "TreeMolecule",
       "parent": 139643166201504,
-      "transform": 3,
-      "tracked_atom_indices": {}
+      "transform": 3
     },
     "139643162455488": {
       "smiles": "[CH3:1][N:2]1[CH2:3][CH2:4][CH:5]([C:6](=[O:7])[c:8]2[cH:9][cH:10][c:11]([Cl:900])[c:12]([N+:13](=[O:900])[O-:901])[c:23]2[F:24])[CH2:25][CH2:26]1",
       "class": "TreeMolecule",
       "parent": 139643166201504,
-      "transform": 3,
-      "tracked_atom_indices": {}
+      "transform": 3
     },
     "139643162455728": {
       "smiles": "[CH3:1][N:2]1[CH2:3][CH2:4][CH:5]([C:6](=[O:7])[c:8]2[cH:9][c:10]([Cl:900])[cH:11][c:12]([N+:13](=[O:900])[O-:901])[c:23]2[F:24])[CH2:25][CH2:26]1",
       "class": "TreeMolecule",
       "parent": 139643166201504,
-      "transform": 3,
-      "tracked_atom_indices": {}
+      "transform": 3
     },
     "139643162455968": {
       "smiles": "[CH3:1][N:2]1[CH2:3][CH2:4][CH:5]([C:6](=[O:7])[c:8]2[c:9]([Cl:900])[cH:10][cH:11][c:12]([N+:13](=[O:900])[O-:901])[c:23]2[F:24])[CH2:25][CH2:26]1",
       "class": "TreeMolecule",
       "parent": 139643166201504,
-      "transform": 3,
-      "tracked_atom_indices": {}
+      "transform": 3
     },
     "139643166201120": {
       "smiles": "[CH3:1][NH:2][CH2:3][CH2:4][CH:5]([C:6](=[O:7])[c:8]1[cH:9][cH:10][cH:11][c:12]([N+:13](=[O:900])[O-:901])[c:23]1[F:24])[CH2:25][CH2:26][Cl:900]",
       "class": "TreeMolecule",
       "parent": 139643166201504,
-      "transform": 3,
-      "tracked_atom_indices": {}
+      "transform": 3
     },
     "139643166202416": {
       "smiles": "[CH3:1][NH:2][CH2:26][CH2:25][CH:5]([CH2:4][CH2:3][Cl:900])[C:6](=[O:7])[c:8]1[cH:9][cH:10][cH:11][c:12]([N+:13](=[O:900])[O-:901])[c:23]1[F:24]",
       "class": "TreeMolecule",
       "parent": 139643166201504,
-      "transform": 3,
-      "tracked_atom_indices": {}
+      "transform": 3
     },
     "139643173163552": {
       "smiles": "[CH2:1]=[O:900]",
       "class": "TreeMolecule",
       "parent": 139643171528960,
-      "transform": 2,
-      "tracked_atom_indices": {}
+      "transform": 2
     },
     "139643173165280": {
       "smiles": "[NH:2]1[CH2:3][CH2:4][CH:5]([C:6](=[O:7])[c:8]2[cH:9][cH:10][cH:11][c:12]([NH2:13])[c:23]2[F:24])[CH2:25][CH2:26]1",
       "class": "TreeMolecule",
       "parent": 139643171528960,
-      "transform": 2,
-      "tracked_atom_indices": {}
+      "transform": 2
     },
     "139643162452464": {
       "smiles": "[N:2]1([C:905]([O:904][C:901]([CH3:900])([CH3:902])[CH3:903])=[O:906])[CH2:3][CH2:4][CH:5]([C:6](=[O:7])[c:8]2[cH:9][cH:10][cH:11][c:12]([NH2:13])[c:23]2[F:24])[CH2:25][CH2:26]1",
       "class": "TreeMolecule",
       "parent": 139643173165280,
-      "transform": 3,
-      "tracked_atom_indices": {}
+      "transform": 3
     },
     "139643166163824": {
       "smiles": "[N:2]1([C:905]([O:904][C:901]([CH3:900])([CH3:902])[CH3:903])=[O:906])[CH2:3][CH2:4][CH:5]([C:6](=[O:7])[c:8]2[cH:9][cH:10][cH:11][c:12]([N+:13](=[O:900])[O-:901])[c:23]2[F:24])[CH2:25][CH2:26]1",
       "class": "TreeMolecule",
       "parent": 139643162452464,
-      "transform": 4,
-      "tracked_atom_indices": {}
+      "transform": 4
     },
     "139643164870880": {
       "smiles": "[N:2]1([C:905]([O:904][C:901]([CH3:900])([CH3:902])[CH3:903])=[O:906])[CH2:3][CH2:4][CH:5]([C:6](=[O:7])[N:902]([O:901][CH3:900])[CH3:903])[CH2:25][CH2:26]1",
       "class": "TreeMolecule",
       "parent": 139643162452464,
-      "transform": 4,
-      "tracked_atom_indices": {}
+      "transform": 4
     },
     "139643164872128": {
       "smiles": "[cH:8]1[cH:9][cH:10][cH:11][c:12]([NH2:13])[c:23]1[F:24]",
       "class": "TreeMolecule",
       "parent": 139643162452464,
-      "transform": 4,
-      "tracked_atom_indices": {}
+      "transform": 4
     },
     "139643171738528": {
       "smiles": "[N:2]1([C:905]([O:904][C:901]([CH3:900])([CH3:902])[CH3:903])=[O:906])[CH2:3][CH2:4][CH:5]([C:6](=[O:7])[c:8]2[cH:9][cH:10][cH:11][c:12]([N:13]=[C:900]([c:901]3[cH:902][cH:903][cH:904][cH:905][cH:906]3)[c:907]3[cH:908][cH:909][cH:910][cH:911][cH:912]3)[c:23]2[F:24])[CH2:25][CH2:26]1",
       "class": "TreeMolecule",
       "parent": 139643162452464,
-      "transform": 4,
-      "tracked_atom_indices": {}
+      "transform": 4
     },
     "139643164872464": {
       "smiles": "[N:2]1([C:905]([O:904][C:901]([CH3:900])([CH3:902])[CH3:903])=[O:906])[CH2:3][CH2:4][CH:5]([C:6](=[O:7])[c:8]2[cH:9][cH:10][cH:11][c:12]([NH:13][C:905]([O:904][C:901]([CH3:900])([CH3:902])[CH3:903])=[O:906])[c:23]2[F:24])[CH2:25][CH2:26]1",
       "class": "TreeMolecule",
       "parent": 139643162452464,
-      "transform": 4,
-      "tracked_atom_indices": {}
+      "transform": 4
     },
     "139643171738432": {
       "smiles": "[N:2]1([C:905]([O:904][C:901]([CH3:900])([CH3:902])[CH3:903])=[O:906])[CH2:3][CH2:4][CH:5]([C:6](=[O:7])[c:8]2[cH:9][cH:10][cH:11][c:12]([NH:13][C:904]([C:901]([F:900])([F:902])[F:903])=[O:905])[c:23]2[F:24])[CH2:25][CH2:26]1",
       "class": "TreeMolecule",
       "parent": 139643162452464,
-      "transform": 4,
-      "tracked_atom_indices": {}
+      "transform": 4
     },
     "139643171739248": {
       "smiles": "[N:2]1([C:905]([O:904][C:901]([CH3:900])([CH3:902])[CH3:903])=[O:906])[CH2:3][CH2:4][CH:5]([C:6](=[O:7])[c:8]2[cH:9][cH:10][cH:11][c:12]([Br:900])[c:23]2[F:24])[CH2:25][CH2:26]1",
       "class": "TreeMolecule",
       "parent": 139643162452464,
-      "transform": 4,
-      "tracked_atom_indices": {}
+      "transform": 4
     },
     "139643171739344": {
       "smiles": "[N:2]1([C:905]([O:904][C:901]([CH3:900])([CH3:902])[CH3:903])=[O:906])[CH2:3][CH2:4][CH:5]([C:6](=[O:7])[c:8]2[c:9]([Cl:900])[cH:10][cH:11][c:12]([NH2:13])[c:23]2[F:24])[CH2:25][CH2:26]1",
       "class": "TreeMolecule",
       "parent": 139643162452464,
-      "transform": 4,
-      "tracked_atom_indices": {}
+      "transform": 4
     },
     "139643171739536": {
       "smiles": "[N:2]1([C:905]([O:904][C:901]([CH3:900])([CH3:902])[CH3:903])=[O:906])[CH2:3][CH2:4][CH:5]([C:6](=[O:7])[c:8]2[cH:9][cH:10][c:11]([Cl:900])[c:12]([NH2:13])[c:23]2[F:24])[CH2:25][CH2:26]1",
       "class": "TreeMolecule",
       "parent": 139643162452464,
-      "transform": 4,
-      "tracked_atom_indices": {}
+      "transform": 4
     },
     "139643171739632": {
       "smiles": "[N:2]1([C:905]([O:904][C:901]([CH3:900])([CH3:902])[CH3:903])=[O:906])[CH2:3][CH2:4][CH:5]([C:6](=[O:7])[c:8]2[cH:9][c:10]([Cl:900])[cH:11][c:12]([NH2:13])[c:23]2[F:24])[CH2:25][CH2:26]1",
       "class": "TreeMolecule",
       "parent": 139643162452464,
-      "transform": 4,
-      "tracked_atom_indices": {}
+      "transform": 4
     },
     "139643171738048": {
       "smiles": "[N:2]1([C:905]([O:904][C:901]([CH3:900])([CH3:902])[CH3:903])=[O:906])[CH2:3][CH2:4][CH:5]([C:6](=[O:7])[c:8]2[cH:9][cH:10][cH:11][c:12]([NH:13][C:901]([CH3:900])=[O:902])[c:23]2[F:24])[CH2:25][CH2:26]1",
       "class": "TreeMolecule",
       "parent": 139643162452464,
-      "transform": 4,
-      "tracked_atom_indices": {}
+      "transform": 4
     },
     "139643171740112": {
       "smiles": "[N:2]1([C:905]([O:904][C:901]([CH3:900])([CH3:902])[CH3:903])=[O:906])[CH2:3][CH2:4][CH:5]([C:6](=[O:7])[c:8]2[cH:9][cH:10][cH:11][c:12]([F:900])[c:23]2[F:24])[CH2:25][CH2:26]1",
       "class": "TreeMolecule",
       "parent": 139643162452464,
-      "transform": 4,
-      "tracked_atom_indices": {}
+      "transform": 4
     },
     "139643171740688": {
       "smiles": "[NH3:13]",
       "class": "TreeMolecule",
       "parent": 139643162452464,
-      "transform": 4,
-      "tracked_atom_indices": {}
+      "transform": 4
     },
     "139643171740400": {
       "smiles": "[N:2]1([C:905]([O:904][C:901]([CH3:900])([CH3:902])[CH3:903])=[O:906])[CH2:3][CH2:4][CH:5]([C:6](=[O:7])[c:8]2[cH:9][cH:10][cH:11][c:12]([NH:13][C:901](=[O:900])[O:902][CH2:903][c:904]3[cH:905][cH:906][cH:907][cH:908][cH:909]3)[c:23]2[F:24])[CH2:25][CH2:26]1",
       "class": "TreeMolecule",
       "parent": 139643162452464,
-      "transform": 4,
-      "tracked_atom_indices": {}
+      "transform": 4
     },
     "139643171741456": {
       "smiles": "[N:2]1([C:905]([O:904][C:901]([CH3:900])([CH3:902])[CH3:903])=[O:906])[CH2:3][CH2:4][CH:5]([C:6](=[O:7])[c:8]2[cH:9][cH:10][cH:11][c:12]([NH:13][C:904]([C:901]([CH3:900])([CH3:902])[CH3:903])=[O:905])[c:23]2[F:24])[CH2:25][CH2:26]1",
       "class": "TreeMolecule",
       "parent": 139643162452464,
-      "transform": 4,
-      "tracked_atom_indices": {}
+      "transform": 4
     },
     "139643171741024": {
       "smiles": "[N:2]1([C:905]([O:904][C:901]([CH3:900])([CH3:902])[CH3:903])=[O:906])[CH2:3][CH2:4][CH:5]([C:6](=[O:7])[c:8]2[cH:9][cH:10][cH:11][c:12]([N:13]([CH2:900][c:901]3[cH:902][cH:903][cH:904][cH:905][cH:906]3)[CH2:907][c:908]3[cH:909][cH:910][cH:911][cH:912][cH:913]3)[c:23]2[F:24])[CH2:25][CH2:26]1",
       "class": "TreeMolecule",
       "parent": 139643162452464,
-      "transform": 4,
-      "tracked_atom_indices": {}
+      "transform": 4
     },
     "139643171740928": {
       "smiles": "[N:2]1([C:905]([O:904][C:901]([CH3:900])([CH3:902])[CH3:903])=[O:906])[CH2:3][CH2:4][CH:5]([C:6](=[O:7])[c:8]2[cH:9][cH:10][cH:11][c:12]([C:901]([OH:900])=[O:902])[c:23]2[F:24])[CH2:25][CH2:26]1",
       "class": "TreeMolecule",
       "parent": 139643162452464,
-      "transform": 4,
-      "tracked_atom_indices": {}
+      "transform": 4
     },
     "139643171740640": {
       "smiles": "[N:2]1([C:905]([O:904][C:901]([CH3:900])([CH3:902])[CH3:903])=[O:906])[CH2:3][CH2:4][CH:5]([C:6](=[O:7])[c:8]2[cH:9][cH:10][cH:11][c:12]([NH:13][CH2:900][c:901]3[cH:902][cH:903][cH:904][cH:905][cH:906]3)[c:23]2[F:24])[CH2:25][CH2:26]1",
       "class": "TreeMolecule",
       "parent": 139643162452464,
-      "transform": 4,
-      "tracked_atom_indices": {}
+      "transform": 4
     },
     "139643171740880": {
       "smiles": "[N:2]1([C:905]([O:904][C:901]([CH3:900])([CH3:902])[CH3:903])=[O:906])[CH2:3][CH2:4][CH:5]([CH:6]([OH:7])[c:8]2[cH:9][cH:10][cH:11][c:12]([NH2:13])[c:23]2[F:24])[CH2:25][CH2:26]1",
       "class": "TreeMolecule",
       "parent": 139643162452464,
-      "transform": 4,
-      "tracked_atom_indices": {}
+      "transform": 4
     },
     "139643171740016": {
       "smiles": "[N:2]1([C:905]([O:904][C:901]([CH3:900])([CH3:902])[CH3:903])=[O:906])[CH2:3][CH2:4][CH:5]([C:6](=[O:7])[c:8]2[cH:9][cH:10][cH:11][c:12]([Cl:900])[c:23]2[F:24])[CH2:25][CH2:26]1",
       "class": "TreeMolecule",
       "parent": 139643162452464,
-      "transform": 4,
-      "tracked_atom_indices": {}
+      "transform": 4
     },
     "139643164869104": {
       "smiles": "[N:2]1([C:905]([O:904][C:901]([CH3:900])([CH3:902])[CH3:903])=[O:906])[CH2:3][CH2:4][CH:5]([C:6](=[O:7])[c:8]2[c:9]([Cl:900])[cH:10][cH:11][c:12]([N+:13](=[O:901])[O-:902])[c:23]2[F:24])[CH2:25][CH2:26]1",
       "class": "TreeMolecule",
       "parent": 139643162452464,
-      "transform": 4,
-      "tracked_atom_indices": {}
+      "transform": 4
     },
     "139643164869056": {
       "smiles": "[N:2]1([C:905]([O:904][C:901]([CH3:900])([CH3:902])[CH3:903])=[O:906])[CH2:3][CH2:4][CH:5]([C:6](=[O:7])[c:8]2[cH:9][c:10]([Cl:900])[cH:11][c:12]([N+:13](=[O:901])[O-:902])[c:23]2[F:24])[CH2:25][CH2:26]1",
       "class": "TreeMolecule",
       "parent": 139643162452464,
-      "transform": 4,
-      "tracked_atom_indices": {}
+      "transform": 4
     },
     "139643173070016": {
       "smiles": "[N:2]1([C:905]([O:904][C:901]([CH3:900])([CH3:902])[CH3:903])=[O:906])[CH2:3][CH2:4][CH:5]([C:6](=[O:7])[c:8]2[cH:9][c:10]([Cl:900])[c:11]([Cl:901])[c:12]([N+:13](=[O:902])[O-:903])[c:23]2[F:24])[CH2:25][CH2:26]1",
       "class": "TreeMolecule",
       "parent": 139643162452464,
-      "transform": 4,
-      "tracked_atom_indices": {}
+      "transform": 4
     },
     "139643171739392": {
       "smiles": "[N:2]1([C:905]([O:904][C:901]([CH3:900])([CH3:902])[CH3:903])=[O:906])[CH2:3][CH2:4][CH:5]([C:6](=[O:7])[c:8]2[cH:9][cH:10][cH:11][c:12]([Br:900])[c:23]2[F:24])[CH2:25][CH2:26]1",
       "class": "TreeMolecule",
       "parent": 139643162452464,
-      "transform": 4,
-      "tracked_atom_indices": {}
+      "transform": 4
     },
     "139643164870496": {
       "smiles": "[NH4+:13]",
       "class": "TreeMolecule",
       "parent": 139643162452464,
-      "transform": 4,
-      "tracked_atom_indices": {}
+      "transform": 4
     },
     "139643162692720": {
       "smiles": "[NH:2]1[CH2:3][CH2:4][CH:5]([C:6](=[O:7])[c:8]2[cH:9][cH:10][cH:11][c:12]([N+:13](=[O:900])[O-:901])[c:23]2[F:24])[CH2:25][CH2:26]1",
       "class": "TreeMolecule",
       "parent": 139643173165280,
-      "transform": 3,
-      "tracked_atom_indices": {}
+      "transform": 3
     },
     "139643162692240": {
       "smiles": "[N:2]1([CH2:900][c:901]2[cH:902][cH:903][cH:904][cH:905][cH:906]2)[CH2:3][CH2:4][CH:5]([C:6](=[O:7])[c:8]2[cH:9][cH:10][cH:11][c:12]([NH2:13])[c:23]2[F:24])[CH2:25][CH2:26]1",
       "class": "TreeMolecule",
       "parent": 139643173165280,
-      "transform": 3,
-      "tracked_atom_indices": {}
+      "transform": 3
     },
     "139643162690464": {
       "smiles": "[N:2]1([C:901](=[O:900])[O:902][CH2:903][c:904]2[cH:905][cH:906][cH:907][cH:908][cH:909]2)[CH2:3][CH2:4][CH:5]([C:6](=[O:7])[c:8]2[cH:9][cH:10][cH:11][c:12]([NH2:13])[c:23]2[F:24])[CH2:25][CH2:26]1",
       "class": "TreeMolecule",
       "parent": 139643173165280,
-      "transform": 3,
-      "tracked_atom_indices": {}
+      "transform": 3
     },
     "139643164991936": {
       "smiles": "[NH:2]1[CH2:3][CH2:4][CH:5]([C:6](=[O:7])[c:8]2[cH:9][cH:10][cH:11][c:12]([NH:13][C:905]([O:904][C:901]([CH3:900])([CH3:902])[CH3:903])=[O:906])[c:23]2[F:24])[CH2:25][CH2:26]1",
       "class": "TreeMolecule",
       "parent": 139643173165280,
-      "transform": 3,
-      "tracked_atom_indices": {}
+      "transform": 3
     },
     "139643162692624": {
       "smiles": "[N:2]1([C:901]([CH3:900])=[O:902])[CH2:3][CH2:4][CH:5]([C:6](=[O:7])[c:8]2[cH:9][cH:10][cH:11][c:12]([NH2:13])[c:23]2[F:24])[CH2:25][CH2:26]1",
       "class": "TreeMolecule",
       "parent": 139643173165280,
-      "transform": 3,
-      "tracked_atom_indices": {}
+      "transform": 3
     },
     "139643164991840": {
       "smiles": "[NH:2]1[CH2:3][CH2:4][CH:5]([C:6](=[O:7])[c:8]2[cH:9][cH:10][cH:11][c:12]([NH:13][C:901]([CH3:900])=[O:902])[c:23]2[F:24])[CH2:25][CH2:26]1",
       "class": "TreeMolecule",
       "parent": 139643173165280,
-      "transform": 3,
-      "tracked_atom_indices": {}
+      "transform": 3
     },
     "139643164991984": {
       "smiles": "[N:2]1([C:904]([C:901]([F:900])([F:902])[F:903])=[O:905])[CH2:3][CH2:4][CH:5]([C:6](=[O:7])[c:8]2[cH:9][cH:10][cH:11][c:12]([NH2:13])[c:23]2[F:24])[CH2:25][CH2:26]1",
       "class": "TreeMolecule",
       "parent": 139643173165280,
-      "transform": 3,
-      "tracked_atom_indices": {}
+      "transform": 3
     },
     "139643164993136": {
       "smiles": "[N:2]1([C:903]([O:902][CH2:901][CH3:900])=[O:904])[CH2:3][CH2:4][CH:5]([C:6](=[O:7])[c:8]2[cH:9][cH:10][cH:11][c:12]([NH2:13])[c:23]2[F:24])[CH2:25][CH2:26]1",
       "class": "TreeMolecule",
       "parent": 139643173165280,
-      "transform": 3,
-      "tracked_atom_indices": {}
+      "transform": 3
     },
     "139643164992800": {
       "smiles": "[NH:2]1[CH2:3][CH2:4][CH:5]([C:6](=[O:7])[c:8]2[cH:9][cH:10][cH:11][c:12]([NH:13][C:904]([C:901]([F:900])([F:902])[F:903])=[O:905])[c:23]2[F:24])[CH2:25][CH2:26]1",
       "class": "TreeMolecule",
       "parent": 139643173165280,
-      "transform": 3,
-      "tracked_atom_indices": {}
+      "transform": 3
     },
     "139643164992944": {
       "smiles": "[NH:2]1[CH2:3][CH2:4][CH:5]([C:6](=[O:7])[c:8]2[cH:9][cH:10][cH:11][c:12]([NH:13][CH:901]=[O:900])[c:23]2[F:24])[CH2:25][CH2:26]1",
       "class": "TreeMolecule",
       "parent": 139643173165280,
-      "transform": 3,
-      "tracked_atom_indices": {}
+      "transform": 3
     },
     "139643164993280": {
       "smiles": "[N:2]1([C:905]([O:904][C:901]([CH3:900])([CH3:902])[CH3:903])=[O:906])[CH2:3][CH2:4][CH:5]([C:6](=[O:7])[c:8]2[cH:9][cH:10][cH:11][c:12]([NH:13][C:912]([O:911][C:908]([CH3:907])([CH3:909])[CH3:910])=[O:913])[c:23]2[F:24])[CH2:25][CH2:26]1",
       "class": "TreeMolecule",
       "parent": 139643173165280,
-      "transform": 3,
-      "tracked_atom_indices": {}
+      "transform": 3
     },
     "139643164992848": {
       "smiles": "[NH:2]1[CH2:3][CH2:4][CH:5]([C:6](=[O:7])[c:8]2[cH:9][cH:10][cH:11][c:12]([NH:13][C:904]([C:901]([CH3:900])([CH3:902])[CH3:903])=[O:905])[c:23]2[F:24])[CH2:25][CH2:26]1",
       "class": "TreeMolecule",
       "parent": 139643173165280,
-      "transform": 3,
-      "tracked_atom_indices": {}
+      "transform": 3
     },
     "139643164994720": {
       "smiles": "[NH:2]1[CH2:3][CH2:4][CH:5]([C:6](=[O:7])[c:8]2[cH:9][c:10]([Cl:900])[cH:11][c:12]([NH2:13])[c:23]2[F:24])[CH2:25][CH2:26]1",
       "class": "TreeMolecule",
       "parent": 139643173165280,
-      "transform": 3,
-      "tracked_atom_indices": {}
+      "transform": 3
     },
     "139643164994864": {
       "smiles": "[NH:2]1[CH2:3][CH2:4][CH:5]([C:6](=[O:7])[c:8]2[c:9]([Cl:900])[cH:10][cH:11][c:12]([NH2:13])[c:23]2[F:24])[CH2:25][CH2:26]1",
       "class": "TreeMolecule",
       "parent": 139643173165280,
-      "transform": 3,
-      "tracked_atom_indices": {}
+      "transform": 3
     },
     "139643164992512": {
       "smiles": "[NH:2]1[CH2:3][CH2:4][CH:5]([C:6](=[O:7])[c:8]2[cH:9][cH:10][c:11]([Cl:900])[c:12]([NH2:13])[c:23]2[F:24])[CH2:25][CH2:26]1",
       "class": "TreeMolecule",
       "parent": 139643173165280,
-      "transform": 3,
-      "tracked_atom_indices": {}
+      "transform": 3
     },
     "139643164992080": {
       "smiles": "[NH:2]1[CH2:3][CH2:4][CH:5]([C:6](=[O:7])[c:8]2[cH:9][cH:10][cH:11][c:12]([C:901]([OH:900])=[O:902])[c:23]2[F:24])[CH2:25][CH2:26]1",
       "class": "TreeMolecule",
       "parent": 139643173165280,
-      "transform": 3,
-      "tracked_atom_indices": {}
+      "transform": 3
     },
     "139643164995392": {
       "smiles": "[NH3:13]",
       "class": "TreeMolecule",
       "parent": 139643173165280,
-      "transform": 3,
-      "tracked_atom_indices": {}
+      "transform": 3
     },
     "139643164995248": {
       "smiles": "[NH:2]1[CH2:3][CH2:4][CH:5]([C:6](=[O:7])[c:8]2[cH:9][cH:10][cH:11][c:12]([F:900])[c:23]2[F:24])[CH2:25][CH2:26]1",
       "class": "TreeMolecule",
       "parent": 139643173165280,
-      "transform": 3,
-      "tracked_atom_indices": {}
+      "transform": 3
     },
     "139643155805712": {
       "smiles": "[NH:2]1[CH2:3][CH2:4][CH:5]([C:6](=[O:7])[c:8]2[cH:9][cH:10][cH:11][c:12]([NH:13][C:901](=[O:900])[O:902][CH2:903][c:904]3[cH:905][cH:906][cH:907][cH:908][cH:909]3)[c:23]2[F:24])[CH2:25][CH2:26]1",
       "class": "TreeMolecule",
       "parent": 139643173165280,
-      "transform": 3,
-      "tracked_atom_indices": {}
+      "transform": 3
     },
     "139643164856432": {
       "smiles": "[N:2]1([C:905]([O:904][CH2:903][CH2:902][CH2:901][CH3:900])=[O:906])[CH2:3][CH2:4][CH:5]([C:6](=[O:7])[c:8]2[cH:9][cH:10][cH:11][c:12]([NH2:13])[c:23]2[F:24])[CH2:25][CH2:26]1",
       "class": "TreeMolecule",
       "parent": 139643173165280,
-      "transform": 3,
-      "tracked_atom_indices": {}
+      "transform": 3
     },
     "139643164857152": {
       "smiles": "[NH:2]1[CH2:3][CH2:4][CH:5]([C:6](=[O:7])[c:8]2[cH:9][cH:10][cH:11][cH:12][c:23]2[F:24])[CH2:25][CH2:26]1",
       "class": "TreeMolecule",
       "parent": 139643173165280,
-      "transform": 3,
-      "tracked_atom_indices": {}
+      "transform": 3
     },
     "139643164856960": {
       "smiles": "[N:2]1([C:901](=[O:900])[O-:902])[CH2:3][CH2:4][CH:5]([C:6](=[O:7])[c:8]2[cH:9][cH:10][cH:11][c:12]([NH2:13])[c:23]2[F:24])[CH2:25][CH2:26]1",
       "class": "TreeMolecule",
       "parent": 139643173165280,
-      "transform": 3,
-      "tracked_atom_indices": {}
+      "transform": 3
     },
     "139643164857104": {
       "smiles": "[N:2]1([C:901](=[O:900])[c:902]2[cH:903][cH:904][cH:905][cH:906][cH:907]2)[CH2:3][CH2:4][CH:5]([C:6](=[O:7])[c:8]2[cH:9][cH:10][cH:11][c:12]([NH2:13])[c:23]2[F:24])[CH2:25][CH2:26]1",
       "class": "TreeMolecule",
       "parent": 139643173165280,
-      "transform": 3,
-      "tracked_atom_indices": {}
+      "transform": 3
     },
     "139643164993712": {
       "smiles": "[NH:2]1[CH2:3][CH2:4][CH:5]([C:6](=[O:7])[c:8]2[cH:9][cH:10][cH:11][c:12]([NH:13][CH2:900][c:901]3[cH:902][cH:903][cH:904][cH:905][cH:906]3)[c:23]2[F:24])[CH2:25][CH2:26]1",
       "class": "TreeMolecule",
       "parent": 139643173165280,
-      "transform": 3,
-      "tracked_atom_indices": {}
+      "transform": 3
     },
     "139643164993664": {
       "smiles": "[NH:2]1[CH2:3][CH2:4][CH:5]([C:6](=[O:7])[c:8]2[cH:9][cH:10][cH:11][c:12]([N:13]=[C:900]([c:901]3[cH:902][cH:903][cH:904][cH:905][cH:906]3)[c:907]3[cH:908][cH:909][cH:910][cH:911][cH:912]3)[c:23]2[F:24])[CH2:25][CH2:26]1",
       "class": "TreeMolecule",
       "parent": 139643173165280,
-      "transform": 3,
-      "tracked_atom_indices": {}
+      "transform": 3
     },
     "139643164994192": {
       "smiles": "[n:2]1[cH:3][cH:4][c:5]([C:6](=[O:7])[c:8]2[cH:9][cH:10][cH:11][c:12]([NH2:13])[c:23]2[F:24])[cH:25][cH:26]1",
       "class": "TreeMolecule",
       "parent": 139643173165280,
-      "transform": 3,
-      "tracked_atom_indices": {}
+      "transform": 3
     },
     "139643166164976": {
       "smiles": "[NH:2]1[CH2:3][CH2:4][CH:5]([C:6](=[O:7])[c:8]2[cH:9][cH:10][cH:11][c:12]([NH2:13])[cH:23]2)[CH2:25][CH2:26]1",
       "class": "TreeMolecule",
       "parent": 139643173165280,
-      "transform": 3,
-      "tracked_atom_indices": {}
+      "transform": 3
     },
     "139643171531312": {
       "smiles": "[N:2]1([CH2:901][CH3:900])[CH2:3][CH2:4][CH:5]([C:6](=[O:7])[c:8]2[cH:9][cH:10][cH:11][c:12]([NH2:13])[c:23]2[F:24])[CH2:25][CH2:26]1",
       "class": "TreeMolecule",
       "parent": 139643173165280,
-      "transform": 3,
-      "tracked_atom_indices": {}
+      "transform": 3
     },
     "139643164994768": {
       "smiles": "[NH:2]1[CH2:3][CH2:4][CH:5]([C:6](=[O:7])[c:8]2[cH:9][cH:10][cH:11][c:12]([Cl:900])[c:23]2[F:24])[CH2:25][CH2:26]1",
       "class": "TreeMolecule",
       "parent": 139643173165280,
-      "transform": 3,
-      "tracked_atom_indices": {}
+      "transform": 3
     },
     "139643166164112": {
       "smiles": "[NH:2]1[CH2:3][CH2:4][CH:5]([C:6](=[O:7])[N:902]([O:901][CH3:900])[CH3:903])[CH2:25][CH2:26]1",
       "class": "TreeMolecule",
       "parent": 139643173165280,
-      "transform": 3,
-      "tracked_atom_indices": {}
+      "transform": 3
     },
     "139643166166464": {
       "smiles": "[cH:8]1[cH:9][cH:10][cH:11][c:12]([NH2:13])[c:23]1[F:24]",
       "class": "TreeMolecule",
       "parent": 139643173165280,
-      "transform": 3,
-      "tracked_atom_indices": {}
+      "transform": 3
     },
     "139643166164448": {
       "smiles": "[NH:2]1[CH2:3][CH2:4][CH:5]([C:6](=[O:7])[c:8]2[cH:9][cH:10][cH:11][c:12]([Br:900])[c:23]2[F:24])[CH2:25][CH2:26]1",
       "class": "TreeMolecule",
       "parent": 139643173165280,
-      "transform": 3,
-      "tracked_atom_indices": {}
+      "transform": 3
     },
     "139643166163392": {
       "smiles": "[N:2]1([c:909]2[n:908][c:907]([NH:906][CH2:905][c:904]3[cH:903][cH:902][c:901]([F:900])[cH:923][c:921]3[F:922])[c:912](-[c:913]3[cH:914][cH:915][c:916]([F:917])[cH:918][c:919]3[F:920])[cH:911][n:910]2)[CH2:3][CH2:4][CH:5]([C:6](=[O:7])[c:8]2[cH:9][cH:10][cH:11][c:12]([NH2:13])[c:23]2[F:24])[CH2:25][CH2:26]1",
       "class": "TreeMolecule",
       "parent": 139643173165280,
-      "transform": 3,
-      "tracked_atom_indices": {}
+      "transform": 3
     },
     "139643173069200": {
       "smiles": "[CH3:1][N:2]1[CH2:3][CH2:4][CH:5]([C:6](=[O:7])[c:8]2[cH:9][cH:10][cH:11][c:12]([NH:13][C:901]([CH3:900])=[O:902])[c:23]2[F:24])[CH2:25][CH2:26]1",
       "class": "TreeMolecule",
       "parent": 139643171528960,
-      "transform": 2,
-      "tracked_atom_indices": {}
+      "transform": 2
     },
     "139643173069008": {
       "smiles": "[CH3:1][N:2]1[CH2:3][CH2:4][CH:5]([C:6](=[O:7])[c:8]2[cH:9][cH:10][cH:11][c:12]([NH:13][C:905]([O:904][C:901]([CH3:900])([CH3:902])[CH3:903])=[O:906])[c:23]2[F:24])[CH2:25][CH2:26]1",
       "class": "TreeMolecule",
       "parent": 139643171528960,
-      "transform": 2,
-      "tracked_atom_indices": {}
+      "transform": 2
     },
     "139643173069440": {
       "smiles": "[CH3:1][N:2]1[CH2:3][CH2:4][CH:5]([C:6](=[O:7])[c:8]2[cH:9][cH:10][cH:11][c:12]([NH:13][C:904]([C:901]([F:900])([F:902])[F:903])=[O:905])[c:23]2[F:24])[CH2:25][CH2:26]1",
       "class": "TreeMolecule",
       "parent": 139643171528960,
-      "transform": 2,
-      "tracked_atom_indices": {}
+      "transform": 2
     },
     "139643173166960": {
       "smiles": "[CH3:1][N:2]1[CH2:3][CH2:4][CH:5]([C:6](=[O:7])[c:8]2[cH:9][cH:10][cH:11][c:12]([N:13]=[C:900]([c:901]3[cH:902][cH:903][cH:904][cH:905][cH:906]3)[c:907]3[cH:908][cH:909][cH:910][cH:911][cH:912]3)[c:23]2[F:24])[CH2:25][CH2:26]1",
       "class": "TreeMolecule",
       "parent": 139643171528960,
-      "transform": 2,
-      "tracked_atom_indices": {}
+      "transform": 2
     },
     "139643173069680": {
       "smiles": "[CH3:1][I:900]",
       "class": "TreeMolecule",
       "parent": 139643171528960,
-      "transform": 2,
-      "tracked_atom_indices": {}
+      "transform": 2
     },
     "139643173069968": {
       "smiles": "[NH:2]1[CH2:3][CH2:4][CH:5]([C:6](=[O:7])[c:8]2[cH:9][cH:10][cH:11][c:12]([NH2:13])[c:23]2[F:24])[CH2:25][CH2:26]1",
       "class": "TreeMolecule",
       "parent": 139643171528960,
-      "transform": 2,
-      "tracked_atom_indices": {}
+      "transform": 2
     },
     "139643173070400": {
       "smiles": "[CH3:1][N:2]1[CH2:3][CH2:4][CH:5]([C:6](=[O:7])[c:8]2[cH:9][cH:10][cH:11][c:12]([NH:13][C:904]([C:901]([CH3:900])([CH3:902])[CH3:903])=[O:905])[c:23]2[F:24])[CH2:25][CH2:26]1",
       "class": "TreeMolecule",
       "parent": 139643171528960,
-      "transform": 2,
-      "tracked_atom_indices": {}
+      "transform": 2
     },
     "139643173070880": {
       "smiles": "[CH3:1][N:2]1[CH2:3][CH2:4][CH:5]([C:6](=[O:7])[c:8]2[c:9]([Cl:900])[cH:10][cH:11][c:12]([NH2:13])[c:23]2[F:24])[CH2:25][CH2:26]1",
       "class": "TreeMolecule",
       "parent": 139643171528960,
-      "transform": 2,
-      "tracked_atom_indices": {}
+      "transform": 2
     },
     "139643173070832": {
       "smiles": "[CH3:1][N:2]1[CH2:3][CH2:4][CH:5]([C:6](=[O:7])[c:8]2[cH:9][cH:10][c:11]([Cl:900])[c:12]([NH2:13])[c:23]2[F:24])[CH2:25][CH2:26]1",
       "class": "TreeMolecule",
       "parent": 139643171528960,
-      "transform": 2,
-      "tracked_atom_indices": {}
+      "transform": 2
     },
     "139643173068960": {
       "smiles": "[CH3:1][N:2]1[CH2:3][CH2:4][CH:5]([C:6](=[O:7])[c:8]2[cH:9][c:10]([Cl:900])[cH:11][c:12]([NH2:13])[c:23]2[F:24])[CH2:25][CH2:26]1",
       "class": "TreeMolecule",
       "parent": 139643171528960,
-      "transform": 2,
-      "tracked_atom_indices": {}
+      "transform": 2
     },
     "139643173070448": {
       "smiles": "[C:6]([c:8]1[cH:9][cH:10][cH:11][c:12]([NH2:13])[c:23]1[F:24])#[N:901]",
       "class": "TreeMolecule",
       "parent": 139643171528960,
-      "transform": 2,
-      "tracked_atom_indices": {}
+      "transform": 2
     },
     "139643173070736": {
       "smiles": "[CH3:1][N:2]1[CH2:3][CH2:4][CH:5]([Cl:900])[CH2:25][CH2:26]1",
       "class": "TreeMolecule",
       "parent": 139643171528960,
-      "transform": 2,
-      "tracked_atom_indices": {}
+      "transform": 2
     },
     "139643173069632": {
       "smiles": "[OH2:7]",
       "class": "TreeMolecule",
       "parent": 139643171528960,
-      "transform": 2,
-      "tracked_atom_indices": {}
+      "transform": 2
     },
     "139643173071264": {
       "smiles": "[C:1]([N:2]1[CH2:3][CH2:4][CH:5]([C:6](=[O:7])[c:8]2[cH:9][cH:10][cH:11][c:12]([NH2:13])[c:23]2[F:24])[CH2:25][CH2:26]1)([O:904][C:901]([CH3:900])([CH3:902])[CH3:903])=[O:905]",
       "class": "TreeMolecule",
       "parent": 139643171528960,
-      "transform": 2,
-      "tracked_atom_indices": {}
+      "transform": 2
     },
     "139643173071600": {
       "smiles": "[CH3:1][N:2]1[CH2:3][CH2:4][CH:5]([C:6](=[O:7])[c:8]2[cH:9][cH:10][cH:11][c:12]([Cl:900])[c:23]2[F:24])[CH2:25][CH2:26]1",
       "class": "TreeMolecule",
       "parent": 139643171528960,
-      "transform": 2,
-      "tracked_atom_indices": {}
+      "transform": 2
     },
     "139643173072032": {
       "smiles": "[CH3:1][N:2]1[CH2:3][CH2:4][CH:5]([C:6](=[O:7])[c:8]2[cH:9][cH:10][cH:11][c:12]([NH:13][C:901](=[O:900])[O:902][CH2:903][c:904]3[cH:905][cH:906][cH:907][cH:908][cH:909]3)[c:23]2[F:24])[CH2:25][CH2:26]1",
       "class": "TreeMolecule",
       "parent": 139643171528960,
-      "transform": 2,
-      "tracked_atom_indices": {}
+      "transform": 2
     },
     "139643173070592": {
       "smiles": "[CH3:1][N:2]1[CH2:3][CH2:4][CH:5]([C:6](=[O:7])[c:8]2[cH:9][cH:10][cH:11][c:12]([Br:900])[c:23]2[F:24])[CH2:25][CH2:26]1",
       "class": "TreeMolecule",
       "parent": 139643171528960,
-      "transform": 2,
-      "tracked_atom_indices": {}
+      "transform": 2
     },
     "139643173070544": {
       "smiles": "[CH3:1][N:2]1[CH2:3][CH2:4][CH:5]([C:6](=[O:7])[N:902]([O:901][CH3:900])[CH3:903])[CH2:25][CH2:26]1",
       "class": "TreeMolecule",
       "parent": 139643171528960,
-      "transform": 2,
-      "tracked_atom_indices": {}
+      "transform": 2
     },
     "139643173070064": {
       "smiles": "[cH:8]1[cH:9][cH:10][cH:11][c:12]([NH2:13])[c:23]1[F:24]",
       "class": "TreeMolecule",
       "parent": 139643171528960,
-      "transform": 2,
-      "tracked_atom_indices": {}
+      "transform": 2
     },
     "139643173072272": {
       "smiles": "[CH3:1][N:2]1[CH2:3][CH2:4][CH:5]([C:6](=[O:7])[c:8]2[cH:9][cH:10][cH:11][c:12]([NH:13][CH2:900][c:901]3[cH:902][cH:903][cH:904][cH:905][cH:906]3)[c:23]2[F:24])[CH2:25][CH2:26]1",
       "class": "TreeMolecule",
       "parent": 139643171528960,
-      "transform": 2,
-      "tracked_atom_indices": {}
+      "transform": 2
     },
     "139643173072320": {
       "smiles": "[CH3:1][N:2]1[CH2:3][CH2:4][CH:5]([C:6](=[O:7])[c:8]2[cH:9][cH:10][cH:11][c:12]([C:901]([OH:900])=[O:902])[c:23]2[F:24])[CH2:25][CH2:26]1",
       "class": "TreeMolecule",
       "parent": 139643171528960,
-      "transform": 2,
-      "tracked_atom_indices": {}
+      "transform": 2
     },
     "139643172995808": {
       "smiles": "[CH3:1][N:2]1[CH2:3][CH2:4][CH:5]([C:6](=[O:7])[c:8]2[cH:9][cH:10][cH:11][c:12]([F:900])[c:23]2[F:24])[CH2:25][CH2:26]1",
       "class": "TreeMolecule",
       "parent": 139643171528960,
-      "transform": 2,
-      "tracked_atom_indices": {}
+      "transform": 2
     },
     "139643172995136": {
       "smiles": "[NH3:13]",
       "class": "TreeMolecule",
       "parent": 139643171528960,
-      "transform": 2,
-      "tracked_atom_indices": {}
+      "transform": 2
     },
     "139643173072224": {
       "smiles": "[NH:2]1[CH2:3][CH2:4][CH:5]([C:6](=[O:7])[c:8]2[cH:9][cH:10][cH:11][c:12]([NH2:13])[c:23]2[F:24])[CH2:25][CH2:26]1",
       "class": "TreeMolecule",
       "parent": 139643171528960,
-      "transform": 2,
-      "tracked_atom_indices": {}
+      "transform": 2
     },
     "139643172995568": {
       "smiles": "[CH3:1][N:2]1[CH2:3][CH2:4][CH:5]([C:6](=[O:7])[c:8]2[cH:9][cH:10][cH:11][c:12]([NH:13][CH:901]=[O:900])[c:23]2[F:24])[CH2:25][CH2:26]1",
       "class": "TreeMolecule",
       "parent": 139643171528960,
-      "transform": 2,
-      "tracked_atom_indices": {}
+      "transform": 2
     },
     "139643173071648": {
       "smiles": "[CH3:1][OH:900]",
       "class": "TreeMolecule",
       "parent": 139643171528960,
-      "transform": 2,
-      "tracked_atom_indices": {}
+      "transform": 2
     },
     "139643173071360": {
       "smiles": "[NH:2]1[CH2:3][CH2:4][CH:5]([C:6](=[O:7])[c:8]2[cH:9][cH:10][cH:11][c:12]([NH2:13])[c:23]2[F:24])[CH2:25][CH2:26]1",
       "class": "TreeMolecule",
       "parent": 139643171528960,
-      "transform": 2,
-      "tracked_atom_indices": {}
+      "transform": 2
     },
     "139643172995856": {
       "smiles": "[CH3:1][N:2]1[CH2:3][CH2:4][CH:5]([CH:6]([OH:7])[c:8]2[cH:9][cH:10][cH:11][c:12]([NH2:13])[c:23]2[F:24])[CH2:25][CH2:26]1",
       "class": "TreeMolecule",
       "parent": 139643171528960,
-      "transform": 2,
-      "tracked_atom_indices": {}
+      "transform": 2
     },
     "139643172995472": {
       "smiles": "[CH3:1][N:2]1[CH2:3][CH2:4][CH:5]([C:6](=[O:7])[c:8]2[cH:9][cH:10][cH:11][cH:12][c:23]2[F:24])[CH2:25][CH2:26]1",
       "class": "TreeMolecule",
       "parent": 139643171528960,
-      "transform": 2,
-      "tracked_atom_indices": {}
+      "transform": 2
     },
     "139643173164800": {
       "smiles": "[CH3:1][N:2]1[CH2:3][CH2:4][CH:5]([C:6](=[O:7])[Cl:900])[CH2:25][CH2:26]1",
       "class": "TreeMolecule",
       "parent": 139643171528960,
-      "transform": 2,
-      "tracked_atom_indices": {}
+      "transform": 2
     },
     "139643173164224": {
       "smiles": "[c:8]1([I:901])[cH:9][cH:10][cH:11][c:12]([NH2:13])[c:23]1[F:24]",
       "class": "TreeMolecule",
       "parent": 139643171528960,
-      "transform": 2,
-      "tracked_atom_indices": {}
+      "transform": 2
     },
     "139643173163312": {
       "smiles": "[CH3:1][N:2]1[CH2:3][CH2:4][CH:5]([C:6](=[O:7])[c:8]2[cH:9][c:10]([Cl:900])[c:11]([Cl:901])[c:12]([N+:13](=[O:902])[O-:903])[c:23]2[F:24])[CH2:25][CH2:26]1",
       "class": "TreeMolecule",
       "parent": 139643171528960,
-      "transform": 2,
-      "tracked_atom_indices": {}
+      "transform": 2
     },
     "139643173164848": {
       "smiles": "[CH3:1][N:2]1[CH2:3][CH2:4][CH:5]([C:6](=[O:7])[c:8]2[cH:9][cH:10][cH:11][c:12]([N:13]([CH2:900][c:901]3[cH:902][cH:903][cH:904][cH:905][cH:906]3)[CH2:907][c:908]3[cH:909][cH:910][cH:911][cH:912][cH:913]3)[c:23]2[F:24])[CH2:25][CH2:26]1",
       "class": "TreeMolecule",
       "parent": 139643171528960,
-      "transform": 2,
-      "tracked_atom_indices": {}
+      "transform": 2
     },
     "139643157042560": {
       "smiles": "[C:14](=[O:15])([c:16]1[cH:17][cH:18][c:19]([F:20])[cH:21][cH:22]1)[OH:900]",
       "class": "TreeMolecule",
       "parent": 139643154371392,
-      "transform": 1,
-      "tracked_atom_indices": {}
+      "transform": 1
     },
     "139643157043712": {
       "smiles": "[CH3:1][N:2]1[CH2:3][CH2:4][CH:5]([C:6](=[O:7])[c:8]2[cH:9][cH:10][cH:11][c:12]([NH2:13])[c:23]2[F:24])[CH2:25][CH2:26]1",
       "class": "TreeMolecule",
       "parent": 139643154371392,
-      "transform": 1,
-      "tracked_atom_indices": {}
+      "transform": 1
     },
     "139643166200256": {
       "smiles": "[CH2:1]=[O:900]",
       "class": "TreeMolecule",
       "parent": 139643154371392,
-      "transform": 1,
-      "tracked_atom_indices": {}
+      "transform": 1
     },
     "139643166201936": {
       "smiles": "[NH:2]1[CH2:3][CH2:4][CH:5]([C:6](=[O:7])[c:8]2[cH:9][cH:10][cH:11][c:12]([NH:13][C:14](=[O:15])[c:16]3[cH:17][cH:18][c:19]([F:20])[cH:21][cH:22]3)[c:23]2[F:24])[CH2:25][CH2:26]1",
       "class": "TreeMolecule",
       "parent": 139643154371392,
-      "transform": 1,
-      "tracked_atom_indices": {}
+      "transform": 1
     },
     "139643166202032": {
       "smiles": "[C:1]([N:2]1[CH2:3][CH2:4][CH:5]([C:6](=[O:7])[c:8]2[cH:9][cH:10][cH:11][c:12]([NH:13][C:14](=[O:15])[c:16]3[cH:17][cH:18][c:19]([F:20])[cH:21][cH:22]3)[c:23]2[F:24])[CH2:25][CH2:26]1)([O:904][C:901]([CH3:900])([CH3:902])[CH3:903])=[O:905]",
       "class": "TreeMolecule",
       "parent": 139643154371392,
-      "transform": 1,
-      "tracked_atom_indices": {}
+      "transform": 1
     },
     "139643166200736": {
       "smiles": "[CH3:1][I:900]",
       "class": "TreeMolecule",
       "parent": 139643154371392,
-      "transform": 1,
-      "tracked_atom_indices": {}
+      "transform": 1
     },
     "139643166203376": {
       "smiles": "[NH:2]1[CH2:3][CH2:4][CH:5]([C:6](=[O:7])[c:8]2[cH:9][cH:10][cH:11][c:12]([NH:13][C:14](=[O:15])[c:16]3[cH:17][cH:18][c:19]([F:20])[cH:21][cH:22]3)[c:23]2[F:24])[CH2:25][CH2:26]1",
       "class": "TreeMolecule",
       "parent": 139643154371392,
-      "transform": 1,
-      "tracked_atom_indices": {}
+      "transform": 1
     },
     "139643166200976": {
       "smiles": "[CH3:1][N:2]1[CH2:3][CH2:4][CH:5]([CH:6]([OH:7])[c:8]2[cH:9][cH:10][cH:11][c:12]([NH:13][C:14](=[O:15])[c:16]3[cH:17][cH:18][c:19]([F:20])[cH:21][cH:22]3)[c:23]2[F:24])[CH2:25][CH2:26]1",
       "class": "TreeMolecule",
       "parent": 139643154371392,
-      "transform": 1,
-      "tracked_atom_indices": {}
+      "transform": 1
     },
     "139643166200112": {
       "smiles": "[C:1]([N:2]1[CH2:3][CH2:4][CH:5]([C:6](=[O:7])[c:8]2[cH:9][cH:10][cH:11][c:12]([NH:13][C:14](=[O:15])[c:16]3[cH:17][cH:18][c:19]([F:20])[cH:21][cH:22]3)[c:23]2[F:24])[CH2:25][CH2:26]1)(=[O:900])[O:901][CH2:902][c:903]1[cH:904][cH:905][cH:906][cH:907][cH:908]1",
       "class": "TreeMolecule",
       "parent": 139643154371392,
-      "transform": 1,
-      "tracked_atom_indices": {}
+      "transform": 1
     },
     "139643166200352": {
       "smiles": "[C:6]([c:8]1[cH:9][cH:10][cH:11][c:12]([NH:13][C:14](=[O:15])[c:16]2[cH:17][cH:18][c:19]([F:20])[cH:21][cH:22]2)[c:23]1[F:24])#[N:901]",
       "class": "TreeMolecule",
       "parent": 139643154371392,
-      "transform": 1,
-      "tracked_atom_indices": {}
+      "transform": 1
     },
     "139643166202848": {
       "smiles": "[CH3:1][N:2]1[CH2:3][CH2:4][CH:5]([Cl:900])[CH2:25][CH2:26]1",
       "class": "TreeMolecule",
       "parent": 139643154371392,
-      "transform": 1,
-      "tracked_atom_indices": {}
+      "transform": 1
     },
     "139643166202608": {
       "smiles": "[OH2:7]",
       "class": "TreeMolecule",
       "parent": 139643154371392,
-      "transform": 1,
-      "tracked_atom_indices": {}
+      "transform": 1
     },
     "139643166201024": {
       "smiles": "[C:14](=[O:15])([c:16]1[cH:17][cH:18][c:19]([F:20])[cH:21][cH:22]1)[O:901][CH3:900]",
       "class": "TreeMolecule",
       "parent": 139643154371392,
-      "transform": 1,
-      "tracked_atom_indices": {}
+      "transform": 1
     },
     "139643166201744": {
       "smiles": "[CH3:1][N:2]1[CH2:3][CH2:4][CH:5]([C:6](=[O:7])[c:8]2[cH:9][cH:10][cH:11][c:12]([NH2:13])[c:23]2[F:24])[CH2:25][CH2:26]1",
       "class": "TreeMolecule",
       "parent": 139643154371392,
-      "transform": 1,
-      "tracked_atom_indices": {}
+      "transform": 1
     },
     "139643166202176": {
       "smiles": "[CH3:1][N:2]1[CH2:3][CH2:4][CH:5]([C:6](=[O:7])[N:903]([O:902][CH3:901])[CH3:904])[CH2:25][CH2:26]1",
       "class": "TreeMolecule",
       "parent": 139643154371392,
-      "transform": 1,
-      "tracked_atom_indices": {}
+      "transform": 1
     },
     "139643166201600": {
       "smiles": "[c:8]1([Br:900])[cH:9][cH:10][cH:11][c:12]([NH:13][C:14](=[O:15])[c:16]2[cH:17][cH:18][c:19]([F:20])[cH:21][cH:22]2)[c:23]1[F:24]",
       "class": "TreeMolecule",
       "parent": 139643154371392,
-      "transform": 1,
-      "tracked_atom_indices": {}
+      "transform": 1
     }
   }
 }

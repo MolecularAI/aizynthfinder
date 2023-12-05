@@ -96,7 +96,9 @@ def test_serialization_deserialization(
     dict_ = root.serialize(molecule_serializer)
 
     molecule_deserializer = MoleculeDeserializer(molecule_serializer.store)
-    node = MoleculeNode.from_dict(dict_, default_config, molecule_deserializer)
+    node = MoleculeNode.from_dict(
+        dict_, default_config, molecule_deserializer, root.molecule_cost
+    )
 
     assert node.mol == root.mol
     assert node.value == root.value
@@ -113,7 +115,7 @@ def test_serialization_deserialization(
         assert grandchild1.mol == grandchild2.mol
 
 
-def test_converstion_to_reaction_tree(
+def test_conversion_to_reaction_tree(
     setup_star_root, get_action, default_config, setup_stock
 ):
     root_smiles = "CCCCOc1ccc(CC(=O)N(C)O)cc1"
