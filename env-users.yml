@@ -7,4 +7,4 @@ dependencies:
   - git
   - pip>=20.0
   - pip:
-    - git+ssh://git@bitbucket.astrazeneca.net:7999/com/aizynthfinder.git
+    - https://github.com/MolecularAI/aizynthfinder/archive/v3.7.0.tar.gz 

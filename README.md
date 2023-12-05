@@ -24,6 +24,23 @@ The tool has been developed on a Linux platform, but the software has been teste
 
 ## Installation
 
+### For end-users
+
+First time, execute the following command in a console or an Anaconda prompt
+
+    conda create "python>=3.8,<3.10" -n aizynth-env
+
+To install, activate the environment and install the package using pypi
+
+    conda activate aizynth-env
+    python -m pip install aizynthfinder[all]
+
+for a smaller package, without all the functionality, you can also type
+
+    python -m pip install aizynthfinder
+
+### For developers
+
 First clone the repository using Git.
 
 Then execute the following commands in the root of the repository 
@@ -105,7 +122,7 @@ Please use ``black`` package for formatting, and follow ``pep8`` style guide.
 
 * [@SGenheden](https://www.github.com/SGenheden)
 * [@lakshidaa](https://github.com/Lakshidaa)
-* Helen Lai
+* [@helenlai](https://github.com/helenlai)
 * [@EBjerrum](https://www.github.com/EBjerrum)
 * [@A-Thakkar](https://www.github.com/A-Thakkar)
 * [@benteb](https://www.github.com/benteb)
