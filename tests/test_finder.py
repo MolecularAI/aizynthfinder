@@ -227,7 +227,7 @@ def test_three_expansions_not_solved(setup_aizynthfinder):
     }
     finder = setup_aizynthfinder(lookup, [child1_smi[0], child1_smi[2], child2_smi[0]])
     finder.config.search.return_first = True
-    finder.config.search.max_transforms = 2
+    finder.config.search.max_transforms = 3
     finder.config.search.iteration_limit = 15
 
     finder.tree_search()
@@ -569,7 +569,7 @@ def test_two_expansions_prune_cyclic(setup_aizynthfinder):
     finder.tree_search()
 
     nodes = list(finder.tree.graph())
-    assert len(nodes) == 8
+    assert len(nodes) == 7
     assert state_smiles(nodes[0].state) == [root_smi]
     assert state_smiles(nodes[1].state) == child1_smi
     assert state_smiles(nodes[2].state) == [root_smi]
