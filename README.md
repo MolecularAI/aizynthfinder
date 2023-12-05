@@ -44,10 +44,9 @@ as interfaces to the algorithm:
     aizynthapp --config config_local.yml
 
 
-Consult the documentation [here](https://molecularai.github.io/aizynthfinder/)
-for more information.
+Consult the documentation [here](https://molecularai.github.io/aizynthfinder/) for more information.
 
-To use tool you need
+To use the tool you need
 
     1. A stock file
     2. A trained expansion policy network
