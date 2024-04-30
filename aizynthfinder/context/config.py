@@ -17,7 +17,7 @@ if TYPE_CHECKING:
     from aizynthfinder.utils.type_utils import StrDict, Any, Dict, Union, Optional
 
 
-@dataclass
+@dataclass(frozen=True)
 class _PostprocessingConfiguration:
     min_routes: int = 5
     max_routes: int = 25
