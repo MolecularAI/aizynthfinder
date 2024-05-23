@@ -1,9 +1,12 @@
 import numpy as np
 import pytest
 from aizynthfinder.chem import Molecule, UniqueMolecule
+from aizynthfinder.context.config import Configuration
 from aizynthfinder.context.scoring import (
     AverageTemplateOccurrenceScorer,
+    BrokenBondsScorer,
     CombinedScorer,
+    DeltaSyntheticComplexityScorer,
     FractionInStockScorer,
     MaxTransformScorerer,
     NumberOfPrecursorsInStockScorer,
@@ -12,10 +15,12 @@ from aizynthfinder.context.scoring import (
     PriceSumScorer,
     ReactionClassMembershipScorer,
     RouteCostScorer,
+    RouteSimilarityScorer,
     ScorerCollection,
     ScorerException,
     StockAvailabilityScorer,
     StateScorer,
+    SUPPORT_DISTANCES,
 )
 from aizynthfinder.reactiontree import ReactionTree
 from aizynthfinder.search.mcts import MctsSearchTree
@@ -238,6 +243,34 @@ def test_stock_availability_scorer_tree(
     assert scorer(tree) == 0.025
 
 
+def test_stock_availability_scorer_tree_other_source_score(
+    default_config, load_reaction_tree, setup_stock
+):
+    # Setting up two stocks for this test
+    setup_stock(
+        default_config,
+        "NC1CCCC(C2C=CC=C2)C1",
+    )
+    config2 = Configuration()
+    setup_stock(
+        config2,
+        "c1ccccc1",
+    )
+    default_config.stock.load(config2.stock["stock"], "stock2")
+    default_config.stock.select(["stock", "stock2"])
+    tree = ReactionTree.from_dict(load_reaction_tree("linear_route_w_metadata.json"))
+    # Only specifying one stock explicitly
+    scorer = StockAvailabilityScorer(default_config, source_score={"stock": 0.5})
+
+    # 0.5*0.1*0.1 one in stock, one in unspecified stock, one not in stock
+    assert pytest.approx(scorer(tree)) == 0.005
+
+    scorer.other_source_score = 0.2
+
+    # 0.5*0.2*0.1 one in stock, one in unspecified stock, one not in stock
+    assert pytest.approx(scorer(tree)) == 0.01
+
+
 def test_create_scorer_collection(default_config):
     collection = ScorerCollection(default_config)
     collection.create_default_scorers()
@@ -368,42 +401,165 @@ def test_weighted_sum_score_no_selection(default_config, setup_branched_mcts):
         collection.weighted_score(node, weights=[0.0, 0.5, 1.0, 1.0, 0.0])
 
 
-def test_combined_scorer_node_default_weights(default_config, setup_branched_mcts):
-    _, node = setup_branched_mcts()
+def test_broken_bonds_scorer_node(default_config, setup_mcts_broken_bonds):
+    _, node = setup_mcts_broken_bonds()
 
-    combined_scorer = CombinedScorer(
-        default_config, ["state score", "number of reactions"]
-    )
+    default_config.search.break_bonds = [(1, 2)]
+    scorer = BrokenBondsScorer(default_config)(node)
+
+    assert scorer == 0.5
+
+
+def test_broken_bonds_scorer_node_unbroken(default_config, setup_mcts_broken_bonds):
+    _, node = setup_mcts_broken_bonds(broken=False)
+
+    default_config.search.break_bonds = [(1, 2)]
+    scorer = BrokenBondsScorer(default_config)(node)
+
+    assert scorer == 0.0
+
+
+def test_broken_bonds_or_operator_scorer_node_unbroken(
+    default_config, setup_mcts_broken_bonds
+):
+    _, node = setup_mcts_broken_bonds(broken=False)
+
+    default_config.search.break_bonds = [(1, 2)]
+    default_config.search.break_bonds_operator = "or"
+    scorer = BrokenBondsScorer(default_config)(node)
+
+    assert scorer == 0.0
+
+
+def test_broken_bonds_scorer_reaction_tree(default_config, setup_mcts_broken_bonds):
+    _, node = setup_mcts_broken_bonds()
+    reaction_tree = node.to_reaction_tree()
+
+    default_config.search.break_bonds = [(1, 2)]
+    scorer = BrokenBondsScorer(default_config)(reaction_tree)
+
+    assert round(scorer, 4) == 0.5
+
+
+def test_combined_scorer_node_default_weights(default_config, setup_mcts_broken_bonds):
+    default_config.search.break_bonds = [(1, 2)]
+    _, node = setup_mcts_broken_bonds(config=default_config)
+
+    combined_scorer = CombinedScorer(default_config, ["state score", "broken bonds"])
     score = combined_scorer(node)
 
-    assert repr(combined_scorer) == "state score + number of reactions"
-    assert round(score, 4) == 2.4933
+    assert repr(combined_scorer) == "state score + broken bonds"
+    assert round(score, 4) == 0.747
 
 
-def test_combined_scorer_node(default_config, setup_branched_mcts):
-    _, node = setup_branched_mcts()
+def test_combined_scorer_node(default_config, setup_mcts_broken_bonds):
+    default_config.search.break_bonds = [(1, 2)]
+    _, node = setup_mcts_broken_bonds(config=default_config)
 
     combined_scorer = CombinedScorer(
         default_config,
-        ["state score", "number of reactions"],
-        [0.75, 0.25],
+        ["state score", "broken bonds", "number of reactions"],
+        [0.48, 0.5, 0.02],
     )
     score = combined_scorer(node)
 
-    assert repr(combined_scorer) == "state score + number of reactions"
-    assert round(score, 4) == 1.7399
+    assert repr(combined_scorer) == "state score + broken bonds + number of reactions"
+    assert round(score, 4) == 0.7671
 
 
-def test_combined_scorer_reaction_tree(default_config, setup_branched_mcts):
-    _, node = setup_branched_mcts()
+def test_combined_scorer_reaction_tree(default_config, setup_mcts_broken_bonds):
+    default_config.search.break_bonds = [(1, 2)]
+    _, node = setup_mcts_broken_bonds(config=default_config)
     reaction_tree = node.to_reaction_tree()
 
     combined_scorer = CombinedScorer(
         default_config,
-        ["state score", "number of reactions"],
-        [0.75, 0.25],
+        ["state score", "broken bonds", "number of reactions"],
+        [0.48, 0.5, 0.02],
     )
     score = combined_scorer(reaction_tree)
 
-    assert repr(combined_scorer) == "state score + number of reactions"
-    assert round(score, 4) == 1.7399
+    assert repr(combined_scorer) == "state score + broken bonds + number of reactions"
+    assert round(score, 4) == 0.7671
+
+
+@pytest.mark.xfail(
+    condition=not SUPPORT_DISTANCES, reason="route_distance package not installed"
+)
+def test_route_similarity_no_ref_routes(
+    default_config, mocker, setup_branched_reaction_tree
+):
+    tree = setup_branched_reaction_tree()
+    mocker.patch("aizynthfinder.context.scoring.scorers.route_distances_calculator")
+
+    scorer = RouteSimilarityScorer(default_config, "", "dummy")
+
+    assert scorer(tree) == 1.0
+
+
+@pytest.mark.xfail(
+    condition=not SUPPORT_DISTANCES, reason="route_distance package not installed"
+)
+def test_route_similarity_self(default_config, mocker, setup_branched_reaction_tree):
+    tree = setup_branched_reaction_tree()
+    calc_patch = mocker.patch(
+        "aizynthfinder.context.scoring.scorers.route_distances_calculator"
+    )
+    calc_patch.return_value.return_value = np.asarray([[0.0, 0.0], [0.0, 0.0]])
+
+    scorer = RouteSimilarityScorer(default_config, "", "dummy")
+    scorer.routes = [tree]
+    scorer.n_routes = 1
+
+    assert pytest.approx(scorer(tree), abs=1e-2) == 0.0
+
+
+@pytest.mark.xfail(
+    condition=not SUPPORT_DISTANCES, reason="route_distance package not installed"
+)
+def test_route_similarity_self_self(
+    default_config, mocker, setup_branched_reaction_tree
+):
+    tree = setup_branched_reaction_tree()
+    calc_patch = mocker.patch(
+        "aizynthfinder.context.scoring.scorers.route_distances_calculator"
+    )
+    calc_patch.return_value.return_value = np.asarray(
+        [[10.0, 0.0, 0.0], [0.0, 0.0, 0.0], [10.0, 0.0, 0.0]]
+    )
+
+    scorer = RouteSimilarityScorer(default_config, "", "dummy")
+    scorer.routes = [tree, tree]
+    scorer.n_routes = 2
+
+    assert pytest.approx(scorer(tree), abs=1e-3) == 0.007
+
+    scorer.similarity = True
+
+    assert pytest.approx(scorer(tree), abs=1e-3) == 0.993
+
+    scorer.agg_func = np.max
+
+    assert pytest.approx(scorer(tree), abs=1e-2) == 0.5
+
+
+def test_delta_complexity_scorer_tree(
+    default_config, mocker, setup_branched_reaction_tree
+):
+    tree = setup_branched_reaction_tree()
+    calc_patch = mocker.patch("aizynthfinder.context.scoring.scorers.SCScore")
+    calc_patch.return_value.return_value = 1.0
+
+    scorer = DeltaSyntheticComplexityScorer(default_config, "dummy")
+
+    assert pytest.approx(scorer(tree), abs=1e-3) == 0.2727
+
+
+def test_delta_complexity_scorer_node(default_config, mocker, setup_branched_mcts):
+    _, node = setup_branched_mcts()
+    calc_patch = mocker.patch("aizynthfinder.context.scoring.scorers.SCScore")
+    calc_patch.return_value.return_value = 1.0
+
+    scorer = DeltaSyntheticComplexityScorer(default_config, "dummy")
+
+    assert pytest.approx(scorer(node), abs=1e-3) == 0.2727

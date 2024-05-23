@@ -8,6 +8,7 @@ from dataclasses import dataclass, field
 from typing import TYPE_CHECKING
 
 import yaml
+
 from aizynthfinder.context.policy import ExpansionPolicy, FilterPolicy
 from aizynthfinder.context.scoring import ScorerCollection
 from aizynthfinder.context.stock import Stock
@@ -23,7 +24,8 @@ class _PostprocessingConfiguration:
     max_routes: int = 25
     all_routes: bool = False
     route_distance_model: Optional[str] = None
-    route_scorer: str = "state score"
+    route_scorers: List[str] = field(default_factory=lambda: [])
+    scorer_weights: Optional[List[float]] = field(default_factory=lambda: None)
 
 
 @dataclass
@@ -35,9 +37,10 @@ class _SearchConfiguration:
             "default_prior": 0.5,
             "use_prior": True,
             "prune_cycles_in_search": True,
-            "search_reward": "state score",
+            "search_rewards": ["state score"],
             "immediate_instantiation": (),
             "mcts_grouping": None,
+            "search_rewards_weights": [],
         }
     )
     max_transforms: int = 6

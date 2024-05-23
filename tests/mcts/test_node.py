@@ -2,7 +2,7 @@ def test_root_state_properties(generate_root):
     root = generate_root("CCCCOc1ccc(CC(=O)N(C)O)cc1")
     root2 = generate_root("CCCCOc1ccc(CC(=O)N(C)O)cc1")
 
-    search_reward = root._config.search.algorithm_config["search_reward"]
+    search_reward = root._config.search.algorithm_config["search_rewards"][0]
     scorer = root._config.scorers[search_reward]
 
     assert round(scorer(root), 4) == 0.0491

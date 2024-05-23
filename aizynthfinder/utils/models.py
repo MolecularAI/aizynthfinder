@@ -332,7 +332,8 @@ class ExternalModelViaGRPC:
         tensors = {}
         for name, vec in inputs.items():
             size = int(self._sig_def["inputs"][name]["tensorShape"]["dim"][1]["size"])
-            tensors[name] = tf.make_tensor_proto(vec, dtype=np.float32, shape=(1, size))
+            assert size == vec.shape[1], "Incorrect shape for input"
+            tensors[name] = tf.make_tensor_proto(vec, dtype=np.float32, shape=vec.shape)
         return tensors
 
     @staticmethod

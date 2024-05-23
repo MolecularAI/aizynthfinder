@@ -97,12 +97,12 @@ def extract_smiles_from_module(files: List[str]) -> _StrIterator:
     module_name = files.pop(0)
     module = importlib.import_module(module_name)
     if not files:
-        for smiles in module.extract_smiles():  # type: ignore
+        for smiles in module.extract_smiles():  # type: ignore  # pylint: disable=R1737
             yield smiles
     else:
         for filename in files:
             print(f"Processing {filename}", flush=True)
-            for smiles in module.extract_smiles(filename):  # type: ignore
+            for smiles in module.extract_smiles(filename):  # type: ignore  # pylint: disable=R1737
                 yield smiles
 
 

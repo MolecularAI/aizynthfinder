@@ -48,5 +48,5 @@ def get_mongo_client(
         cred_str = f"{user}:{password}@" if password else ""
         uri = f"mongodb://{cred_str}{host}:{port}/?{urlencode(params)}"
         logger().debug(f"Connecting to MongoDB on {host}:{port}")
-        _CLIENT = MongoClient(uri)
+        _CLIENT = MongoClient(uri)  # pylint: disable=C0103
     return _CLIENT

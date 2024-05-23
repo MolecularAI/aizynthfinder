@@ -2,6 +2,7 @@
 """
 from __future__ import annotations
 
+import copy
 from typing import TYPE_CHECKING
 
 import numpy as np
@@ -12,12 +13,12 @@ try:
 except ImportError:
     pass
 
-from aizynthfinder.analysis import TreeAnalysis
 from aizynthfinder.analysis.utils import CombinedReactionTrees, RouteSelectionArguments
 from aizynthfinder.reactiontree import SUPPORT_DISTANCES, ReactionTree
 from aizynthfinder.search.mcts import MctsNode, MctsSearchTree
 
 if TYPE_CHECKING:
+    from aizynthfinder.analysis import TreeAnalysis
     from aizynthfinder.context.scoring import Scorer
     from aizynthfinder.utils.type_utils import (
         Any,
@@ -26,6 +27,7 @@ if TYPE_CHECKING:
         PilImage,
         Sequence,
         StrDict,
+        Union,
     )
 
 
@@ -64,11 +66,11 @@ class RouteCollection:
         self._update_route_dict(self.route_metadata, "route_metadata")
 
         self.nodes = self._unpack_kwarg_with_default("nodes", None, **kwargs)
-        self.scores = self._unpack_kwarg_with_default("scores", np.nan, **kwargs)
+        self.scores = self._unpack_kwarg_with_default("scores", dict, **kwargs)
         self.all_scores = self._unpack_kwarg_with_default("all_scores", dict, **kwargs)
 
         self._dicts: Optional[Sequence[StrDict]] = self._unpack_kwarg("dicts", **kwargs)
-        self._images: Optional[Sequence[PilImage]] = self._unpack_kwarg(
+        self._images: Optional[Sequence[Optional[PilImage]]] = self._unpack_kwarg(
             "images", **kwargs
         )
         self._jsons: Optional[Sequence[str]] = self._unpack_kwarg("jsons", **kwargs)
@@ -80,7 +82,9 @@ class RouteCollection:
 
     @classmethod
     def from_analysis(
-        cls, analysis: TreeAnalysis, selection: RouteSelectionArguments = None
+        cls,
+        analysis: TreeAnalysis,
+        selection: Optional[RouteSelectionArguments] = None,
     ) -> "RouteCollection":
         """
         Create a collection from a tree analysis.
@@ -90,8 +94,8 @@ class RouteCollection:
         :return: the created collection
         """
         items, scores = analysis.sort(selection)
-        all_scores = [{repr(analysis.scorer): score} for score in scores]
-        kwargs = {"scores": scores, "all_scores": all_scores}
+        all_scores = copy.deepcopy(scores)
+        kwargs: Dict[str, Any] = {"scores": scores, "all_scores": all_scores}
         if isinstance(analysis.search_tree, MctsSearchTree):
             kwargs["nodes"] = items
             reaction_trees = [
@@ -120,10 +124,11 @@ class RouteCollection:
         return self._dicts
 
     @property
-    def images(self) -> Sequence[PilImage]:
+    def images(self) -> Sequence[Optional[PilImage]]:
         """Returns a list of pictoral representation of the routes"""
         if self._images is None:
             self._images = self.make_images()
+        assert self._images is not None
         return self._images
 
     @property

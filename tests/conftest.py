@@ -30,6 +30,7 @@ from aizynthfinder.search.andor_trees import (
 )
 from aizynthfinder.search.mcts import MctsSearchTree
 from aizynthfinder.utils.exceptions import RejectionException
+from aizynthfinder.context.scoring import MaxTransformScorerer, FractionInStockScorer
 
 
 def pytest_addoption(parser):
@@ -506,6 +507,25 @@ def setup_linear_reaction_tree(setup_linear_mcts):
     def wrapper(exclude_from_stock=None):
         _, node = setup_linear_mcts(exclude_from_stock or [])
         return node.to_reaction_tree()
+
+    return wrapper
+
+
+@pytest.fixture
+def setup_mo_scorer():
+    def wrapper(config):
+        return [
+            FractionInStockScorer(config),
+            MaxTransformScorerer(
+                config,
+                scaler_params={
+                    "name": "squash",
+                    "slope": -1,
+                    "yoffset": 0,
+                    "xoffset": 4,
+                },
+            ),
+        ]
 
     return wrapper
 

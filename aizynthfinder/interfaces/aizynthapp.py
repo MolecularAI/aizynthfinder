@@ -27,6 +27,7 @@ from ipywidgets import (
 from rdkit import Chem
 
 from aizynthfinder.aizynthfinder import AiZynthFinder
+from aizynthfinder.interfaces.gui.utils import pareto_fronts_plot, route_display
 from aizynthfinder.utils.logging import setup_logger
 
 if TYPE_CHECKING:
@@ -53,7 +54,6 @@ class AiZynthApp:
     """
 
     def __init__(self, configfile: str, setup: bool = True) -> None:
-        # pylint: disable=used-before-assignment
         setup_logger(logging.INFO)
         self.finder = AiZynthFinder(configfile=configfile)
         self._input: StrDict = dict()
@@ -152,10 +152,24 @@ class AiZynthApp:
             value=self.finder.config.search.max_transforms,
             style={"description_width": "initial"},
         )
-        self._input["exclude_target_from_stock"] = widgets.Checkbox(
-            value=self.finder.config.search.exclude_target_from_stock,
-            description="Exclude target from stock",
+
+        rewards = self.finder.config.search.algorithm_config.get("search_rewards", [])
+        objective1 = rewards[0] if len(rewards) > 0 else "state score"
+        objective2 = rewards[1] if len(rewards) > 1 else "None"
+        self._input["reward1"] = widgets.Dropdown(
+            options=self.finder.scorers.names(),
+            description="MCTS reward 1:",
+            value=objective1,
+            style={"description_width": "initial"},
         )
+
+        self._input["reward2"] = widgets.Dropdown(
+            options=["None"] + self.finder.scorers.names(),
+            description="MCTS reward 2:",
+            value=objective2,
+            style={"description_width": "initial"},
+        )
+
         vbox = VBox(
             [
                 self._input["policy"],
@@ -164,7 +178,8 @@ class AiZynthApp:
                 max_iter_box,
                 self._input["return_first"],
                 self._input["max_transforms"],
-                self._input["exclude_target_from_stock"],
+                self._input["reward1"],
+                self._input["reward2"],
             ]
         )
         box_options = HBox([box_stocks, vbox])
@@ -176,13 +191,15 @@ class AiZynthApp:
             description="Reorder by:",
             style={"description_width": "initial"},
         )
+        self._input["scorer"].disabled = True
         self._input["scorer"].observe(self._on_change_scorer)
-        self._buttons["show_routes"] = Button(description="Show Reactions")
+        self._buttons["show_routes"] = Button(description="Show Routes")
         self._buttons["show_routes"].on_click(self._on_display_button_clicked)
         self._input["route"] = Dropdown(
             options=[],
             description="Routes: ",
         )
+        self._input["route"].disabled = True
         self._input["route"].observe(self._on_change_route_option)
         display(
             HBox(
@@ -194,6 +211,10 @@ class AiZynthApp:
             )
         )
 
+        self._output["pareto_fronts"] = widgets.Output(
+            layout={"border": "1px solid silver", "width": "99%", "overflow": "auto"}
+        )
+        display(self._output["pareto_fronts"])
         self._output["routes"] = widgets.Output(
             layout={"border": "1px solid silver", "width": "99%"}
         )
@@ -251,13 +272,22 @@ class AiZynthApp:
 
     def _on_display_button_clicked(self, _) -> None:
         self._toggle_button(False)
-        self.finder.build_routes()
+        rewards = self.finder.config.search.algorithm_config["search_rewards"]
+        self.finder.build_routes(scorer=rewards)
         self.finder.routes.make_images()
         self.finder.routes.compute_scores(*self.finder.scorers.objects())
         self._input["route"].options = [
             f"Option {i}" for i, _ in enumerate(self.finder.routes, 1)  # type: ignore
         ]
+
+        self._output["pareto_fronts"].clear_output()
+        if len(rewards) > 1:
+            with self._output["pareto_fronts"]:
+                pareto_fronts_plot(self.finder.routes)
+
         self._show_route(0)
+        self._input["scorer"].disabled = len(rewards) > 1
+        self._input["route"].disabled = False
         self._toggle_button(True)
 
     def _prepare_search(self) -> None:
@@ -288,12 +318,19 @@ class AiZynthApp:
             self.finder.config.search.iteration_limit = self._input[
                 "iteration_limit"
             ].value
-            self.finder.config.search.exclude_target_from_stock = self._input[
-                "exclude_target_from_stock"
-            ].value
+
+            rewards = [self._input["reward1"].value]
+            if self._input["reward2"].value != "None":
+                rewards.append(self._input["reward2"].value)
+            self.finder.config.search.algorithm_config["search_rewards"] = rewards
+            if self.finder.config.search.algorithm != "mcts":
+                print(
+                    "Only MCTS algorithm is supported in GUI interface. Resetting to MCTS"
+                )
+                self.finder.config.search.algorithm = "mcts"
 
             smiles = self._input["smiles"].value
-            print("Setting target molecule with smiles: %s" % smiles)
+            print(f"Setting target molecule with smiles: {smiles}")
             self.finder.target_smiles = smiles
             self.finder.prepare_tree()
 
@@ -304,29 +341,7 @@ class AiZynthApp:
             display(mol)
 
     def _show_route(self, index) -> None:
-        if (
-            index is None
-            or self.finder.routes is None
-            or index >= len(self.finder.routes)
-        ):
-            return
-
-        route = self.finder.routes[index]
-        state = route["node"].state
-        status = "Solved" if state.is_solved else "Not Solved"
-
-        self._output["routes"].clear_output()
-        with self._output["routes"]:
-            display(HTML("<H2>%s" % status))
-            table_content = "".join(
-                f"<tr><td>{name}</td><td>{score:.4f}</td></tr>"
-                for name, score in route["all_score"].items()
-            )
-            display(HTML(f"<table>{table_content}</table>"))
-            display(HTML("<H2>Compounds to Procure"))
-            display(state.to_image())
-            display(HTML("<H2>Steps"))
-            display(self.finder.routes[index]["image"])
+        route_display(index, self.finder.routes, self._output["routes"])
 
     def _toggle_button(self, on_) -> None:
         for button in self._buttons.values():

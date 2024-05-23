@@ -93,6 +93,25 @@ def test_availability_string(
     assert stock.availability_string(toluene) == "stock1"
 
 
+def test_availability_string_multi(
+    mocked_mongo_db_query,
+    default_config,
+    setup_stock_with_query,
+    create_dummy_stock1,
+):
+    _, query = mocked_mongo_db_query()
+    query.molecules.find.return_value = [{"source": "source1"}, {"source": "stock1"}]
+    query.molecules.count_documents.return_value = 1
+    stock = default_config.stock
+    stock.load(setup_stock_with_query(create_dummy_stock1("hdf5")), "stock1")
+    stock.load(query, "stock2")
+
+    stock.select(["stock1", "stock2"])
+
+    benzene = Molecule(smiles="c1ccccc1")
+    assert stock.availability_string(benzene) == "source1,stock1"
+
+
 def test_mol_in_stock(setup_stock_with_query):
     stock = setup_stock_with_query()
 

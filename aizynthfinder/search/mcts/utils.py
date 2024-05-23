@@ -30,7 +30,6 @@ class ReactionTreeFromSuperNode(ReactionTreeLoader):
             self._add_bipartite(child, action)
 
     def _add_bipartite(self, child: MctsNode, action: RetroReaction) -> None:
-
         reaction_obj = self._unique_reaction(action)
         self._add_node(reaction_obj, depth=2 * action.mol.transform + 1)
         self.tree.graph.add_edge(self._unique_mol(action.mol), reaction_obj)

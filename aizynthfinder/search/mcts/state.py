@@ -70,12 +70,11 @@ class MctsState:
 
     def __str__(self) -> str:
         """A string representation of the state (for print(state))"""
-        string = "%s\n%s\n%s\n%s\n Solved: %s" % (
-            str([mol.smiles for mol in self.mols]),
-            str([mol.transform for mol in self.mols]),
-            str([mol.parent.smiles if mol.parent else "-" for mol in self.mols]),
-            str(self.in_stock_list),
-            self.is_solved,
+        string = (
+            f"{str([mol.smiles for mol in self.mols])}\n"
+            + f"{str([mol.transform for mol in self.mols])}\n"
+            + f"{str([mol.parent.smiles if mol.parent else '-' for mol in self.mols])}\n"
+            + f"{str(self.in_stock_list)}\n Solved: {self.is_solved}"
         )
         return string
 

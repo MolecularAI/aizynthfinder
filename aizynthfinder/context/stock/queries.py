@@ -1,5 +1,6 @@
 """ Module containing classes that interfaces different stocks query classes
 """
+
 from __future__ import annotations
 
 import os
@@ -22,11 +23,9 @@ if TYPE_CHECKING:
     from pymongo.collection import Collection as MongoCollection
     from pymongo.database import Database as MongoDatabase
 
-    # pylint: disable=ungrouped-imports
     from aizynthfinder.utils.type_utils import Optional, Set, StrDict
 
 
-# pylint: disable=no-self-use
 class StockQueryMixin:
     """
     Mixin class for all query classes, providing a default interface
@@ -120,7 +119,7 @@ class InMemoryInchiKeyQuery(StockQueryMixin):
 
         if ext in [".h5", ".hdf5"]:
             stock_df: pd.DataFrame = pd.read_hdf(path, key="table")
-        elif ext == ".csv":
+        else:
             stock_df = pd.read_csv(
                 path,
                 usecols=[inchi_key_col, price_col] if price_col else [inchi_key_col],

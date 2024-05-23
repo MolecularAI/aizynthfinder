@@ -86,3 +86,50 @@ of routes specified by ``min_routes`` and ``max_routes``.
         max_routes: 10
         all_routes: True
 
+
+Running multi-objective (MO) MCTS with disconnection-aware Chemformer
+------------------
+Disconnection-aware retrosynthesis can be done with 1) MO-MCTS (state score + broken bonds score), 2) Chemformer or 3) both.
+
+First, you need to specify the bond constraints under search, see below.
+To run the MO-MCTS with the "broken bonds" score, add the "broken bonds" score to the list of search_rewards:
+
+.. code-block:: yaml
+
+  search:
+      break_bonds: [[1, 2], [3, 4]]
+      freeze_bonds: []
+      algorithm_config:
+        search_rewards: ["state score", "broken bonds"]
+
+To use the disconnection-aware Chemformer, you first need to add the `plugins` folder to the `PYTHONPATH`, e.g.
+
+    export PYTHONPATH=~/aizynthfinder/plugins/
+
+The script for starting a disconnection-aware Chemformer service is available at https://github.com/MolecularAI/Chemformer.
+The multi-expansion policy with template-based model and Chemformer is specified with:
+
+.. code-block:: yaml
+  expansion:
+    standard:
+      type: template-based
+      model: path/to/model
+      template: path/to/templates
+    chemformer_disconnect:
+      type: expansion_strategies.DisconnectionAwareExpansionStrategy
+      url: "http://localhost:8023/chemformer-disconnect-api/predict-disconnection"
+      n_beams: 5
+    multi_expansion:
+      type: aizynthfinder.context.policy.MultiExpansionStrategy
+      expansion_strategies: [chemformer_disconnect, standard]
+      additive_expansion: True
+      cutoff_number: 50
+
+
+To use MO-tree ranking and building, set:
+
+.. code-block:: yaml
+  post_processing:
+    route_scorers: ["state score", "broken bonds"]
+    
+Note: If post_processing.route_scorers is not specified, it will default to search.algorithm_config.search_rewards.

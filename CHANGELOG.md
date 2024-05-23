@@ -1,5 +1,32 @@
 # CHANGELOG
 
+## Version 4.3.0 2024-05-22
+
+### Features
+
+- Focussed bonds feature has been created to allow users to choose bonds to freeze and break.
+- Functionality has been added to run the broken bonds scorer with MCTS.
+- A disconnection-aware Chemformer expansion strategy has been introduced in the plugins.
+- Weights for single expansion policies can now be provided as input through the config file.
+- The priors returned from the multi-expansion strategy have been rescaled.
+- Functionality to mask reaction templates is now supported in the `TemplateBasedExpansionStrategy`.
+- The `TemplateBasedDirectExpansionStrategy` has been implemented to directly apply the template in the search process.
+- Added support for the C++ version of RDChiral.
+- The multi-objective MCTS core algorithm is now implemented within the MCTS search functionality.
+- A separate GUI component has been introduced for doing MO tree analysis. Additional functionalities have been added to GUI widgets to set two rewards/objectives to MCTS search. Pareto front is automatically plotted if MO-MCTS is run. Route re-ordering is automatically disabled for MO-MCTS.
+- Preprocessing of the tree search can now be done using `aizynthcli`.
+- `ReagentConnectAvailabilityQuery` can be used as an internal stock query class that uses the CAG client for querying reagent connect for availability.
+- The `StockAvailablityScorer` has been updated such that it takes and additional `other_source_score` parameter.
+- A `cutoff_number` parameter can be provided to the multi-expansion strategy to obtain only the top predictions.
+- A `BrokenBondsScorer` has been created for scoring nodes and reaction trees based on the breaking of atom bonds.
+- A `RouteSimilarityScorer` has been created for scoring based on an LSTM model for computing Tree Edit Distance to a set of reference routes.
+- A `DeltaSyntheticComplexityScorer` has been created for scoring nodes based on the delta-synthetic-complexity of the node and its parent 'horizon' steps up in the tree.
+
+### Bug-fixes
+
+- Fixed an issue of sending multiple fingerprints to the GPCR Tensorflow serving model.
+- `aizynthcli` has been fixed after updating with multi-objective analysis such that the tool accurately informs the user if a target is solved or not.
+
 ## Version 4.0.0 2023-11-30
 
 ### Features
@@ -283,7 +310,7 @@
 - Add tools to train filter policy
 - Add logic to prevent cycle forming in MCTS by rejecting creation of parent molecule when expanding
 - Introduce new `context` subpackage that contains the `config`, `stock`, `policy` and `scoring` modules
-- The `Stock`, `ExpansionPolicy`, `FilterPolicy` and `ScorerCollection` classes now has a common interface for selection and loading 
+- The `Stock`, `ExpansionPolicy`, `FilterPolicy` and `ScorerCollection` classes now has a common interface for selection and loading
 - Introduce possibility to remove unsantizable reactions from template library when training
 - Catch exceptions from RDChiral more gracefully
 

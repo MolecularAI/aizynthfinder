@@ -110,10 +110,10 @@ class Stock(ContextCollection):
             if mol not in self[key]:
                 continue
             try:
-                availability.append(self[key].availability_string(mol))
+                availability.extend(self[key].availability_string(mol).split(","))
             except (StockException, AttributeError):
                 availability.append(key)
-        return availability
+        return sorted(list(set(availability)))
 
     def availability_string(self, mol: Molecule) -> str:
         """

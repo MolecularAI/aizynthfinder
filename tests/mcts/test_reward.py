@@ -1,5 +1,9 @@
 from aizynthfinder.analysis import TreeAnalysis
-from aizynthfinder.context.scoring import StateScorer, NumberOfReactionsScorer
+from aizynthfinder.context.scoring import (
+    NumberOfReactionsScorer,
+    StateScorer,
+)
+from aizynthfinder.search.mcts import MctsSearchTree
 
 
 def test_reward_node(default_config, generate_root):
@@ -7,13 +11,13 @@ def test_reward_node(default_config, generate_root):
     search_reward_scorer = repr(StateScorer(config))
     post_process_reward_scorer = repr(NumberOfReactionsScorer())
 
-    config.search.algorithm_config["search_reward"] = search_reward_scorer
-    config.post_processing.route_scorer = post_process_reward_scorer
+    config.search.algorithm_config["search_rewards"] = [search_reward_scorer]
+    config.post_processing.route_scorers = [post_process_reward_scorer]
 
     node = generate_root("CCCCOc1ccc(CC(=O)N(C)O)cc1", config)
 
-    search_scorer = config.scorers[config.search.algorithm_config["search_reward"]]
-    route_scorer = config.scorers[config.post_processing.route_scorer]
+    search_scorer = config.scorers[config.search.algorithm_config["search_rewards"][0]]
+    route_scorer = config.scorers[config.post_processing.route_scorers[0]]
 
     assert round(search_scorer(node), 4) == 0.0491
     assert route_scorer(node) == 0
@@ -30,35 +34,32 @@ def test_default_postprocessing_reward(setup_aizynthfinder):
     config.search.return_first = True
 
     search_reward_scorer = repr(NumberOfReactionsScorer())
-    default_reward_scorer = repr(StateScorer(config))
+    state_scorer = repr(StateScorer(config))
 
-    config.search.algorithm_config["search_reward"] = search_reward_scorer
+    config.search.algorithm_config["search_rewards"] = [search_reward_scorer]
     finder.config = config
 
-    assert finder.config.post_processing.route_scorer == default_reward_scorer
+    assert len(finder.config.post_processing.route_scorers) == 0
 
     finder.tree_search()
     tree_analysis_search = TreeAnalysis(
         finder.tree, scorer=config.scorers[search_reward_scorer]
     )
-    tree_analysis_pp = TreeAnalysis(
-        finder.tree, scorer=config.scorers[default_reward_scorer]
-    )
+    tree_analysis_pp = TreeAnalysis(finder.tree, scorer=config.scorers[state_scorer])
 
     finder.build_routes()
-
-    assert finder.config.post_processing.route_scorer == default_reward_scorer
     assert finder.tree.reward_scorer_name == search_reward_scorer
 
     top_score_tree_analysis = tree_analysis_search.tree_statistics()["top_score"]
-    top_score_finder = finder.tree.reward_scorer(tree_analysis_search.best())
+    top_score_finder = finder.tree.compute_reward(tree_analysis_search.best())
 
     assert top_score_finder == top_score_tree_analysis
 
     top_score_tree_analysis = tree_analysis_pp.tree_statistics()["top_score"]
     top_score_finder = finder.analysis.tree_statistics()["top_score"]
 
-    assert top_score_finder == top_score_tree_analysis
+    # Finder used the search_reward_scorer and not state_scorer
+    assert top_score_finder != top_score_tree_analysis
 
 
 def test_custom_reward(setup_aizynthfinder):
@@ -76,11 +77,11 @@ def test_custom_reward(setup_aizynthfinder):
     search_reward_scorer = repr(StateScorer(config))
     post_process_reward_scorer = repr(NumberOfReactionsScorer())
 
-    config.search.algorithm_config["search_reward"] = search_reward_scorer
-    config.post_processing.route_scorer = post_process_reward_scorer
+    config.search.algorithm_config["search_rewards"] = [search_reward_scorer]
+    config.post_processing.route_scorers = [post_process_reward_scorer]
     finder.config = config
 
-    assert finder.config.post_processing.route_scorer == post_process_reward_scorer
+    assert finder.config.post_processing.route_scorers == [post_process_reward_scorer]
 
     finder.tree_search()
     tree_analysis_search = TreeAnalysis(
@@ -92,11 +93,11 @@ def test_custom_reward(setup_aizynthfinder):
 
     finder.build_routes()
 
-    assert finder.config.post_processing.route_scorer == post_process_reward_scorer
+    assert finder.config.post_processing.route_scorers == [post_process_reward_scorer]
     assert finder.tree.reward_scorer_name == search_reward_scorer
 
     top_score_tree_analysis = tree_analysis_search.tree_statistics()["top_score"]
-    top_score_finder = finder.tree.reward_scorer(tree_analysis_search.best())
+    top_score_finder = finder.tree.compute_reward(tree_analysis_search.best())
 
     assert top_score_finder == top_score_tree_analysis
 
@@ -104,3 +105,12 @@ def test_custom_reward(setup_aizynthfinder):
     top_score_finder = finder.analysis.tree_statistics()["top_score"]
 
     assert top_score_finder == top_score_tree_analysis
+
+
+def test_reward_node_backward_compatibility(default_config):
+    reward_scorer = repr(NumberOfReactionsScorer())
+    default_config.search.algorithm_config["search_reward"] = reward_scorer
+
+    tree = MctsSearchTree(config=default_config, root_smiles=None)
+
+    assert tree.reward_scorer_name == reward_scorer

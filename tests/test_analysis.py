@@ -17,11 +17,22 @@ def test_sort_nodes(setup_analysis):
     best_nodes, best_scores = analysis.sort()
 
     assert len(best_nodes) == 5
-    assert np.round(best_scores[0], 4) == 0.9940
+    assert np.round(best_scores[0]["state score"], 4) == 0.9940
 
     best_nodes, best_scores = analysis.sort(RouteSelectionArguments(nmin=0))
 
     assert len(best_nodes) == 0
+
+
+def test_sort_nodes_multiobjective(setup_analysis, default_config, setup_mo_scorer):
+    analysis, _ = setup_analysis(scorer=setup_mo_scorer(default_config))
+
+    best_nodes, best_scores = analysis.sort(RouteSelectionArguments(nmax=3))
+
+    assert len(best_nodes) == 3
+    assert np.round(best_scores[0]["fraction in stock"], 4) == 1.0
+    assert np.round(best_scores[1]["fraction in stock"], 4) == 0.5
+    assert np.round(best_scores[2]["fraction in stock"], 4) == 0.0
 
 
 def test_sort_nodes_nmax(setup_analysis):
@@ -38,7 +49,7 @@ def test_sort_nodes_return_all(setup_analysis):
     best_nodes, best_scores = analysis.sort(RouteSelectionArguments(return_all=True))
 
     assert len(best_nodes) == 1
-    assert np.round(best_scores[0], 4) == 0.9940
+    assert np.round(best_scores[0]["state score"], 4) == 0.9940
 
 
 def test_sort_nodes_scorer(setup_analysis):
@@ -47,7 +58,7 @@ def test_sort_nodes_scorer(setup_analysis):
     best_nodes, best_scores = analysis.sort()
 
     assert len(best_nodes) == 10
-    assert best_scores[0] == 2
+    assert best_scores[0]["number of reactions"] == 2
 
 
 def test_sort_routes(setup_analysis_andor_tree):
@@ -56,7 +67,7 @@ def test_sort_routes(setup_analysis_andor_tree):
     best_routes, best_scores = analysis.sort()
 
     assert len(best_routes) == 25
-    assert best_scores[0] == 1
+    assert best_scores[0]["number of reactions"] == 1
 
 
 def test_best_node(setup_analysis):
@@ -69,6 +80,15 @@ def test_best_route(setup_analysis_andor_tree):
     analysis = setup_analysis_andor_tree(scorer=NumberOfReactionsScorer())
 
     assert len(list(analysis.best().reactions())) == 1
+
+
+def test_best_node_multiobjective(default_config, setup_mo_scorer, setup_analysis):
+    analysis, nodes = setup_analysis(scorer=setup_mo_scorer(default_config))
+
+    front = analysis.pareto_front()
+
+    assert len(front) == 3
+    assert nodes[32] in front
 
 
 def test_tree_statistics(setup_analysis):
@@ -112,6 +132,45 @@ def test_tree_statistics_andor_tree(setup_analysis_andor_tree):
     assert stats["policy_used_counts"] == {}
 
 
+def test_tree_statistics_multiobjective(
+    setup_analysis, default_config, setup_mo_scorer
+):
+    analysis, _ = setup_analysis(scorer=setup_mo_scorer(default_config))
+
+    stats = analysis.tree_statistics()
+
+    assert stats["number_of_nodes"] == 40
+    assert stats["max_transforms"] == 6
+    assert stats["max_children"] == 10
+    assert stats["number_of_routes"] == 10
+    assert stats["number_of_solved_routes"] == 1
+    assert stats["top_score"] is None
+    assert stats["is_solved"]
+    assert stats["number_of_steps"].count("|") == 2
+    assert stats["number_of_precursors"].count("|") == 2
+    assert stats["number_of_precursors_in_stock"].count("|") == 2
+    assert stats["policy_used_counts"] == {"uspto": 39}
+
+
+def test_tree_statistics_andor_tree_multiobjective(
+    setup_analysis_andor_tree, default_config, setup_mo_scorer
+):
+    analysis = setup_analysis_andor_tree(scorer=setup_mo_scorer(default_config))
+
+    stats = analysis.tree_statistics()
+    assert stats["number_of_nodes"] == 124
+    assert stats["max_transforms"] == 4
+    assert stats["max_children"] == 32
+    assert stats["number_of_routes"] == 97
+    assert stats["number_of_solved_routes"] == 1
+    assert stats["top_score"] is None
+    assert stats["is_solved"]
+    assert stats["number_of_steps"].count("|") == 9
+    assert stats["number_of_precursors"].count("|") == 9
+    assert stats["number_of_precursors_in_stock"].count("|") == 9
+    assert stats["policy_used_counts"] == {}
+
+
 def test_create_route_collection_full(setup_analysis, mocker):
     analysis, _ = setup_analysis()
 
@@ -119,9 +178,9 @@ def test_create_route_collection_full(setup_analysis, mocker):
 
     assert len(routes) == 5
     # Check a few of the routes
-    assert np.round(routes.scores[0], 3) == 0.994
+    assert np.round(routes.scores[0]["state score"], 3) == 0.994
     assert len(routes.reaction_trees[0].graph) == 8
-    assert np.round(routes.scores[1], 3) == 0.681
+    assert np.round(routes.scores[1]["state score"], 3) == 0.681
     assert len(routes.reaction_trees[1].graph) == 5
 
     assert "dict" not in routes[0]
@@ -153,11 +212,11 @@ def test_compute_new_score(setup_analysis):
 
     routes.compute_scores(NumberOfReactionsScorer())
 
-    assert np.round(routes.scores[0], 3) == 0.994
+    assert np.round(routes.scores[0]["state score"], 3) == 0.994
     assert np.round(routes.all_scores[0]["state score"], 3) == 0.994
     assert routes.all_scores[0]["number of reactions"] == 2
 
-    assert np.round(routes.scores[1], 3) == 0.681
+    assert np.round(routes.scores[1]["state score"], 3) == 0.681
     assert np.round(routes.all_scores[1]["state score"], 3) == 0.681
     assert routes.all_scores[1]["number of reactions"] == 1
 
@@ -237,12 +296,12 @@ def test_compute_new_score_for_trees(default_config, setup_linear_reaction_tree)
     routes = RouteCollection(reaction_trees=[rt])
 
     assert routes.nodes[0] is None
-    assert routes.scores[0] is np.nan
+    assert routes.scores[0] == {}
     assert routes.all_scores[0] == {}
 
     routes.compute_scores(StateScorer(default_config), NumberOfReactionsScorer())
 
-    assert routes.scores[0] is np.nan
+    assert routes.scores[0] == {}
     assert np.round(routes.all_scores[0]["state score"], 3) == 0.994
     assert routes.all_scores[0]["number of reactions"] == 2
 

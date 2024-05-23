@@ -6,6 +6,7 @@ import random
 from typing import TYPE_CHECKING
 
 import numpy as np
+from paretoset import paretoset
 
 from aizynthfinder.chem import TreeMolecule, deserialize_action, serialize_action
 from aizynthfinder.search.mcts.state import MctsState
@@ -114,7 +115,7 @@ class MctsNode:
         """
         mol = TreeMolecule(parent=None, transform=0, smiles=smiles)
         state = MctsState(mols=[mol], config=config)
-        return MctsNode(state=state, owner=tree, config=config)
+        return cls(state=state, owner=tree, config=config)
 
     @classmethod
     def from_dict(
@@ -126,7 +127,7 @@ class MctsNode:
         parent: Optional["MctsNode"] = None,
     ) -> "MctsNode":
         """
-        Create a new node from a dictionary, i.e. deserialization
+        Create a new node from a dictionary, i.e. deserialization.
 
         :param dict_: the serialized node
         :param tree: the search tree
@@ -137,7 +138,7 @@ class MctsNode:
         """
         # pylint: disable=protected-access
         state = MctsState.from_dict(dict_["state"], config, molecules)
-        node = MctsNode(state=state, owner=tree, config=config, parent=parent)
+        node = cls(state=state, owner=tree, config=config, parent=parent)
         node.is_expanded = dict_["is_expanded"]
         node.is_expandable = dict_["is_expandable"]
         node._children_values = dict_["children_values"]
@@ -148,7 +149,7 @@ class MctsNode:
             for action_dict in dict_["children_actions"]
         ]
         node._children = [
-            MctsNode.from_dict(child, tree, config, molecules, parent=node)
+            cls.from_dict(child, tree, config, molecules, parent=node)
             if child
             else None
             for child in dict_["children"]
@@ -158,7 +159,7 @@ class MctsNode:
     @property
     def children(self) -> List["MctsNode"]:
         """
-        Returns all of the instantiated children
+        Returns all of the instantiated children.
 
         :return: the children
         """
@@ -166,22 +167,22 @@ class MctsNode:
 
     @property
     def is_solved(self) -> bool:
-        """Return if the state is solved"""
+        """Return if the state is solved."""
         return self.state.is_solved
 
     @property
     def parent(self) -> Optional["MctsNode"]:
-        """Return the parent of the node"""
+        """Return the parent of the node."""
         return self._parent
 
     @property
     def state(self) -> MctsState:
-        """Return the underlying state of the node"""
+        """Return the underlying state of the node."""
         return self._state
 
     @property
     def _algo_config(self) -> StrDict:
-        """Just a convinient, shorter name of this"""
+        """Just a convinient, shorter name of this."""
         return self._config.search.algorithm_config
 
     def actions_to(self) -> List[RetroReaction]:
@@ -251,19 +252,13 @@ class MctsNode:
 
         # Calculate the possible actions, fill the child_info lists
         # Actions by default only assumes 1 set of reactants
-        (
-            self._children_actions,
-            self._children_priors,
-        ) = self._expansion_policy(self.state.expandable_mols, cache_molecules)
-        nactions = len(self._children_actions)
-        self._children_visitations = [1] * nactions
-        self._children = [None] * nactions
-        if self._algo_config["use_prior"]:
-            self._children_values = list(self._children_priors)
-        else:
-            self._children_values = [self._algo_config["default_prior"]] * nactions
+        actions, priors = self._expansion_policy(
+            self.state.expandable_mols, cache_molecules
+        )
+        self._fill_children_lists(actions, priors)
 
-        if nactions == 0:  # Reverse the expansion if it did not produce any children
+        # Reverse the expansion if it did not produce any children
+        if len(actions) == 0:
             self.is_expandable = False
             self.is_expanded = False
 
@@ -275,6 +270,7 @@ class MctsNode:
         # Instantiate all children actions created by the marked policy,
         # a new list of actions will be iterated over, because it can grow due
         # to instantiation
+        nactions = len(actions)
         for child_idx, action in enumerate(self._children_actions[:nactions]):
             policy_name = action.metadata.get("policy_name")
             if (
@@ -285,7 +281,7 @@ class MctsNode:
 
     def is_terminal(self) -> bool:
         """
-        Node is terminal if its unexpandable, or the internal state is terminal (solved)
+        Node is terminal if its unexpandable, or the internal state is terminal (solved).
 
         :return: the terminal attribute of the node
         """
@@ -293,7 +289,7 @@ class MctsNode:
 
     def path_to(self) -> Tuple[List[RetroReaction], List[MctsNode]]:
         """
-        Return the path to this node, which is a list of actions and a list of node
+        Return the path to this node, which is a list of actions and a list of node.
 
         :return: the actions and nodes
         """
@@ -301,7 +297,7 @@ class MctsNode:
 
     def promising_child(self) -> Optional["MctsNode"]:
         """
-        Return the child with the currently highest Q+U
+        Return the child with the currently highest Q+U.
 
         The selected child will be instantiated if it has not been already.
 
@@ -310,17 +306,14 @@ class MctsNode:
 
         :return: the child
         """
-
-        def _score_and_select():
-            scores = self._children_q() + self._children_u()
-            indices = np.where(scores == scores.max())[0]
-            index = np.random.choice(indices)
-
-            return self._select_child(index)
-
         child = None
-        while child is None and max(self._children_values) > 0:
-            child = _score_and_select()
+        while child is None:
+            try:
+                child = self._score_and_select()
+            # _score_and_select raises exception if no children can be selected
+            except ValueError:
+                child = None
+                break
 
         if not child:
             self._logger.debug(
@@ -333,15 +326,15 @@ class MctsNode:
 
     def serialize(self, molecule_store: MoleculeSerializer) -> StrDict:
         """
-        Serialize the node object to a dictionary
+        Serialize the node object to a dictionary.
 
         :param molecule_store: the serialized molecules
         :return: the serialized node
         """
         return {
             "state": self.state.serialize(molecule_store),
-            "children_values": [float(value) for value in self._children_values],
-            "children_priors": [float(value) for value in self._children_priors],
+            "children_values": self._serialize_stats_list("_children_values"),
+            "children_priors": self._serialize_stats_list("_children_priors"),
             "children_visitations": self._children_visitations,
             "children_actions": [
                 serialize_action(action, molecule_store)
@@ -357,7 +350,7 @@ class MctsNode:
 
     def to_reaction_tree(self) -> ReactionTree:
         """
-        Return reaction tree from the path of actions and nodes leading to this node
+        Return reaction tree from the path of actions and nodes leading to this node.
 
         :return: the constructed tree
         """
@@ -395,7 +388,7 @@ class MctsNode:
                 # if the action generated more states, we will just not generate
                 # a child for that state
                 if state_index == 0:
-                    self._children_values[child_idx] = -1e6
+                    self._disable_child(child_idx)
                 continue
 
             # If there's more than one outcome, the lists need be expanded
@@ -403,14 +396,17 @@ class MctsNode:
                 child_idx = self._expand_children_lists(first_child_idx, state_index)
 
             if self._filter_child_reaction(self._children_actions[child_idx]):
-                self._children_values[child_idx] = -1e6
+                self._disable_child(child_idx)
             else:
-                new_node = MctsNode(
+                new_node = self.__class__(
                     state=state, owner=self.tree, config=self._config, parent=self
                 )
                 self._children[child_idx] = new_node
                 new_nodes.append(new_node)
         return new_nodes
+
+    def _disable_child(self, child_idx: int) -> None:
+        self._children_values[child_idx] = -1e6
 
     def _expand_children_lists(self, old_index: int, action_index: int) -> int:
         new_action = self._children_actions[old_index].copy(index=action_index)
@@ -420,6 +416,19 @@ class MctsNode:
         self._children_visitations.append(self._children_visitations[old_index])
         self._children.append(None)
         return len(self._children) - 1
+
+    def _fill_children_lists(
+        self, actions: List[RetroReaction], priors: List[float]
+    ) -> None:
+        self._children_actions = actions
+        self._children_priors = priors
+        nactions = len(actions)
+        self._children_visitations = [1] * nactions
+        self._children = [None] * nactions
+        if self._algo_config["use_prior"]:
+            self._children_values = list(self._children_priors)
+        else:
+            self._children_values = [self._algo_config["default_prior"]] * nactions
 
     def _filter_child_reaction(self, reaction: RetroReaction) -> bool:
         if self._regenerated_blacklisted(reaction):
@@ -440,8 +449,7 @@ class MctsNode:
 
     def _generated_degeneracy(self, new_state: MctsState, child_idx: int) -> bool:
         """
-        Check if a new MCTS state is equal to another MCTS state of a children
-        node.
+        Check if a new MCTS state is equal to another MCTS state of a children node.
 
         The check can be "partial" in which the equality is based only on the expandable molecules,
         or "full" in which the equality is based on all molecules in the state.
@@ -485,7 +493,7 @@ class MctsNode:
 
     def _instantiate_child(self, child_idx: int) -> List["MctsNode"]:
         """
-        Instantiate the children node
+        Instantiate the children node.
 
         The algorithm is:
         * Apply the reaction associated with the child
@@ -506,7 +514,7 @@ class MctsNode:
             _ = reaction.reactants
 
         if not self._check_child_reaction(reaction):
-            self._children_values[child_idx] = -1e6
+            self._disable_child(child_idx)
             return []
 
         keep_mols = [mol for mol in self.state.mols if mol is not reaction.mol]
@@ -525,9 +533,17 @@ class MctsNode:
                     return True
         return False
 
+    def _score_and_select(self) -> Optional["MctsNode"]:
+        if not max(self._children_values) > 0:
+            raise ValueError("Has no selectable children")
+        scores = self._children_q() + self._children_u()
+        indices = np.where(scores == scores.max())[0]
+        index = np.random.choice(indices)
+        return self._select_child(index)
+
     def _select_child(self, child_idx: int) -> Optional["MctsNode"]:
         """
-        Selecting a child node implies instantiating the children nodes
+        Selecting a child node implies instantiating the children nodes.
 
         If the child has already been instantiated, return immediately
         Otherwise, select a random node of the feasible ones to return
@@ -539,3 +555,194 @@ class MctsNode:
         if new_nodes:
             return random.choice(new_nodes)
         return None
+
+    def _serialize_stats_list(self, name: str) -> List[float]:
+        return [float(value) for value in getattr(self, name)]
+
+
+class ParetoMctsNode(MctsNode):
+    """
+    A node in a multi-objective tree search.
+
+    This implements the algorithm from:
+        Chen W., Liu L. Pareto Monte Carlo Tree Search for Multi-Objective Informative Planning
+        Robotics: Science and Systems 2019, 2012 arXiv:2111.01825
+
+
+    The main difference compared to the standard MCTS algorithm is:
+        - Children stats: the values, cumulative reward and priors are nested
+                     list, with one value per objective
+        - Selection: children on Pareto front are computed, and
+                     a child from this set is taken randomly
+
+    This implementation disregards the prior of the children when it has been
+    visited once.
+
+    It is assumed that all objectives are to be maximised.
+    """
+
+    def __init__(
+        self,
+        state: MctsState,
+        owner: MctsSearchTree,
+        config: Configuration,
+        parent: Optional[ParetoMctsNode] = None,
+    ):
+        super().__init__(state, owner, config, parent)
+        self._num_objectives = len(self._algo_config["search_rewards"])
+        self._prior_weight = 1
+        self._direction = "max"  # current implementation assumes maximisation
+        self._children_rewards_cummulative: List[List[float]]
+        self._children_values: List[List[float]]  # type: ignore
+        self._children_priors: List[List[float]]  # type: ignore
+
+    def backpropagate(self, child: "MctsNode", value_estimate: List[float]) -> None:  # type: ignore
+        """
+        Update the number of visitations of a particular child and its value.
+
+        :param child: the child node
+        :param value_estimate: the value to add to the child value
+        """
+        idx = self._children.index(child)
+        self._children_visitations[idx] += 1
+        # here we only update the cummulative rewards,
+        #  _children_values are updated at selection time
+        new_value_estimate = [
+            cum_reward + new_reward
+            for cum_reward, new_reward in zip(
+                self._children_rewards_cummulative[idx], value_estimate
+            )
+        ]
+        self._children_rewards_cummulative[idx] = new_value_estimate
+
+    def children_view(self) -> StrDict:
+        """
+        Creates a view of the children attributes. Each of the
+        list returned is a new list, although the actual children
+        are not copied.
+
+        The return dictionary will have keys "actions", "values",
+        "priors", "visitations", "rewards_cum", and "objects".
+
+        :return: the view
+        """
+        dict_ = super().children_view()
+        dict_["rewards_cum"] = list(self._children_rewards_cummulative)
+        return dict_
+
+    def serialize(self, molecule_store: MoleculeSerializer) -> StrDict:
+        """
+        Serialize the node object to a dictionary.
+
+        :param molecule_store: the serialized molecules
+        :return: the serialized node
+        """
+        dict_ = super().serialize(molecule_store)
+        dict_["children_cumulative_reward"] = self._serialize_stats_list(
+            "_children_rewards_cummulative"
+        )
+        return dict_
+
+    def _disable_child(self, child_idx: int) -> None:
+        self._children_rewards_cummulative[child_idx] = [-1e6] * self._num_objectives
+
+    def _expand_children_lists(self, old_index: int, action_index: int) -> int:
+        ret = super()._expand_children_lists(old_index, action_index)
+        # These lists are nested lists, so need to make sure that the inner lists are also new
+        self._children_values[-1] = list(self._children_values[-1])
+        self._children_priors[-1] = list(self._children_priors[-1])
+        self._children_rewards_cummulative.append(
+            list(self._children_rewards_cummulative[old_index])
+        )
+        return ret
+
+    def _fill_children_lists(
+        self, actions: List[RetroReaction], priors: List[float]
+    ) -> None:
+        self._children_actions = actions
+        nactions = len(actions)
+        # shape: num_actions x 1
+        self._children_visitations = [1] * nactions
+        self._children = [None] * nactions
+        # shape: num_actions x num_objectives
+        self._children_rewards_cummulative = [[0.0] * self._num_objectives] * nactions
+        if self._algo_config["use_prior"]:
+            # shape: num_actions x num_objectives
+            # for children i, 3 objectives -> [prior i, prior i, prior i]
+            self._children_priors = [[prior] * self._num_objectives for prior in priors]
+
+        else:
+            self._children_priors = [
+                [self._algo_config["default_prior"]] * self._num_objectives
+            ] * nactions
+
+        # at initialisation, values = prior as cummulative rewards are zero
+        self._children_values = [
+            [prior * self._prior_weight for prior in priors]
+            for priors in self._children_priors
+        ]
+
+    def _children_q(self, children_values_arr):
+        children_visitations_expanded = np.repeat(
+            np.array(self._children_visitations).reshape(-1, 1),
+            axis=1,
+            repeats=self._num_objectives,
+        )
+        return children_values_arr / children_visitations_expanded
+
+    def _compute_children_scores(self) -> np.ndarray:
+        """Compute the modified ucb scores: alpha * prior + average reward + exploration."""
+        # update prior to zero once the node has been visited
+        children_priors_arr = self._prior_schedule_oneoff()
+        # compute prior_weight * prior + cummulative rewards
+        children_values_arr = self._prior_weight * children_priors_arr + np.array(
+            self._children_rewards_cummulative
+        )
+        expanded_u = np.repeat(
+            self._children_u().reshape(-1, 1), axis=1, repeats=self._num_objectives
+        )
+        # _children_scores shape: num_childrens x num_objectives
+        children_scores = self._children_q(children_values_arr) + expanded_u
+        if children_scores.shape[1] != self._num_objectives:
+            raise ValueError(
+                f"expected second dimension to have {self._num_objectives},"
+                f"currently has {children_scores.shape[1]}"
+            )
+        self._children_values = children_values_arr.tolist()
+        self._children_priors = children_priors_arr.tolist()
+        return children_scores
+
+    def _prior_schedule_oneoff(self) -> np.ndarray:
+        # shape: num_children x 1
+        visted_mask = (np.array(self._children_visitations) > 1).reshape(-1, 1)
+        # shape: num_children x num_objectives
+        visted_mask = np.repeat(visted_mask, axis=1, repeats=self._num_objectives)
+        # set the prior weights for visited children to be zero
+        children_priors_arr = np.array(self._children_priors)
+        children_priors_arr[visted_mask] = 0
+        return children_priors_arr
+
+    def _score_and_select(self) -> Optional["MctsNode"]:
+        if not max(max(value_list) for value_list in self._children_values) > 0:
+            raise ValueError("Has no selectable children")
+        children_scores = self._compute_children_scores()
+        pareto_idxs = self._update_pareto_front(children_scores)
+        index = np.random.choice(pareto_idxs)
+        return self._select_child(index)
+
+    def _serialize_stats_list(self, name: str):
+        return [
+            [float(value) for value in value_list] for value_list in getattr(self, name)
+        ]
+
+    def _update_pareto_front(self, children_scores: np.ndarray) -> np.ndarray:
+        """
+        Update the pareto front of a node, this step normally happens
+        after its values for the best child have been updated.
+
+        :param children_scores: Children scores
+        :returns: Pareto front children indexes
+        """
+        direction_arr = np.repeat(self._direction, self._num_objectives)
+        mask = paretoset(children_scores, sense=direction_arr, distinct=False)
+        return np.arange(len(self._children))[mask]

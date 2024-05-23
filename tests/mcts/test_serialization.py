@@ -1,8 +1,6 @@
-from aizynthfinder.chem.serialization import MoleculeSerializer, MoleculeDeserializer
 from aizynthfinder.chem import TreeMolecule
-from aizynthfinder.search.mcts import MctsState
-from aizynthfinder.search.mcts import MctsNode
-from aizynthfinder.search.mcts import MctsSearchTree
+from aizynthfinder.chem.serialization import MoleculeDeserializer, MoleculeSerializer
+from aizynthfinder.search.mcts import MctsNode, MctsSearchTree, MctsState
 
 
 def test_serialize_deserialize_state(default_config):
@@ -21,7 +19,7 @@ def test_serialize_deserialize_state(default_config):
     state1 = MctsState.from_dict(state_serialized, default_config, deserializer)
     node1 = MctsNode(state=state1, owner=None, config=default_config)
 
-    search_reward = default_config.search.algorithm_config["search_reward"]
+    search_reward = default_config.search.algorithm_config["search_rewards"][0]
     scorer = default_config.scorers[search_reward]
 
     assert len(state1.mols) == 1

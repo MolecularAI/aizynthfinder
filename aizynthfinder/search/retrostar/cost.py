@@ -129,5 +129,5 @@ class ZeroMoleculeCost:
     def __repr__(self) -> str:
         return "zero"
 
-    def calculate(self, mol: Molecule) -> float:
+    def calculate(self, _mol: Molecule) -> float:  # pytest: disable=unused-argument
         return 0.0

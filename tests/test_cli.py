@@ -65,7 +65,6 @@ def expected_checkpoint_output() -> List[Dict]:
                 "b": 2,
                 "is_solved": True,
                 "stock_info": 1,
-                "top_scores": "",
                 "trees": 3,
             },
         },
@@ -76,7 +75,6 @@ def expected_checkpoint_output() -> List[Dict]:
                 "b": 2,
                 "is_solved": True,
                 "stock_info": 1,
-                "top_scores": "",
                 "trees": 3,
             },
         },
@@ -87,7 +85,6 @@ def expected_checkpoint_output() -> List[Dict]:
                 "b": 2,
                 "is_solved": True,
                 "stock_info": 1,
-                "top_scores": "",
                 "trees": 3,
             },
         },
@@ -98,7 +95,6 @@ def expected_checkpoint_output() -> List[Dict]:
                 "b": 2,
                 "is_solved": True,
                 "stock_info": 1,
-                "top_scores": "",
                 "trees": 3,
             },
         },
@@ -114,7 +110,6 @@ def multi_smiles_with_checkpoint_results() -> pd.DataFrame:
             "b": [2, 2, 2, 2],
             "is_solved": [True, True, True, True],
             "stock_info": [1, 1, 1, 1],
-            "top_scores": ["", "", "", ""],
             "trees": [3, 3, 3, 3],
         },
     )
@@ -163,7 +158,6 @@ def test_cli_single_smiles(mocker, add_cli_arguments, tmpdir, capsys):
     json_patch.assert_called_once()
     output = capsys.readouterr()
     assert f"Trees saved to {output_name}" in output.out
-    assert "Scores for best routes" in output.out
     assert "a: 1" in output.out
     assert "b: 2" in output.out
 
@@ -341,6 +335,22 @@ def test_cli_single_smile_with_postprocessing(
     assert "another quantity: 10" in output.out
 
     sys.path.remove(module_path)
+
+
+def test_cli_single_smile_with_preprocessing(
+    mocker, add_cli_arguments, tmpdir, shared_datadir
+):
+    module_path = str(shared_datadir)
+    sys.path.append(module_path)
+    mocker.patch("aizynthfinder.interfaces.aizynthcli.AiZynthFinder")
+    output_name = str(tmpdir / "trees.json")
+    add_cli_arguments(
+        "--pre_processing pre_processing_test --smiles COO --config config_local.yml --output "
+        + output_name
+    )
+
+    with pytest.raises(ValueError, match="-1"):
+        cli_main()
 
 
 def test_cli_smiles_argument_incorrect(

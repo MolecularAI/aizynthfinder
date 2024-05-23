@@ -1,5 +1,6 @@
 """ Module containing classes and routines for the CLI
 """
+
 from __future__ import annotations
 
 import argparse
@@ -36,6 +37,7 @@ if TYPE_CHECKING:
     )
 
     _PostProcessingJob = Callable[[AiZynthFinder], StrDict]
+    _PreProcessingJob = Callable[[AiZynthFinder, int], None]
 
 
 def _do_clustering(
@@ -116,6 +118,9 @@ def _get_arguments() -> argparse.Namespace:
         help="a number of modules that performs post-processing tasks",
     )
     parser.add_argument(
+        "--pre_processing", help="a module that perform pre-processing tasks"
+    )
+    parser.add_argument(
         "--checkpoint",
         required=False,
         help="the path to the checkpoint file",
@@ -135,6 +140,21 @@ def _load_postprocessing_jobs(modules: Optional[List[str]]) -> List[_PostProcess
                 print(f"Adding post-processing job from {module_name}")
                 jobs.append(getattr(module, "post_processing"))
     return jobs
+
+
+def _load_preprocessing_job(module_name: Optional[str]) -> Optional[_PreProcessingJob]:
+    if not module_name:
+        return None
+
+    try:
+        module = importlib.import_module(module_name)
+    except ModuleNotFoundError:
+        pass
+    else:
+        if hasattr(module, "pre_processing"):
+            print(f"Adding pre-processing job from {module_name}")
+            return getattr(module, "pre_processing")
+    return None
 
 
 def _select_stocks(finder: AiZynthFinder, args: argparse.Namespace) -> None:
@@ -176,9 +196,12 @@ def _process_single_smiles(
     do_clustering: bool,
     route_distance_model: Optional[str],
     post_processing: List[_PostProcessingJob],
+    pre_processing: Optional[_PreProcessingJob],
 ) -> None:
     output_name = output_name or "trees.json"
     finder.target_smiles = smiles
+    if pre_processing:
+        pre_processing(finder, -1)
     try:
         finder.prepare_tree()
     except ValueError as err:
@@ -195,9 +218,6 @@ def _process_single_smiles(
             indent=2,
         )
     logger().info(f"Trees saved to {output_name}")
-
-    scores = ", ".join("%.4f" % score for score in finder.routes.scores)
-    logger().info(f"Scores for best routes: {scores}")
 
     stats = finder.extract_statistics()
     if do_clustering:
@@ -218,6 +238,7 @@ def _process_multi_smiles(
     do_clustering: bool,
     route_distance_model: Optional[str],
     post_processing: List[_PostProcessingJob],
+    pre_processing: Optional[_PreProcessingJob],
     checkpoint: Optional[str],
 ) -> None:
     output_name = output_name or "output.json.gz"
@@ -237,7 +258,9 @@ def _process_multi_smiles(
             for key, value in checkpoint_data.items()
             if key != "processed_smiles"
         }
-    for smi in smiles:
+    for idx, smi in enumerate(smiles):
+        if pre_processing:
+            pre_processing(finder, idx)
         processed_results = {}
         finder.target_smiles = smi
         try:
@@ -261,9 +284,6 @@ def _process_multi_smiles(
         for key, value in stats.items():
             processed_results[key] = value
         processed_results["stock_info"] = finder.stock_info()
-        processed_results["top_scores"] = ", ".join(
-            "%.4f" % score for score in finder.routes.scores
-        )
         processed_results["trees"] = finder.routes.dict_with_extra(
             include_metadata=True, include_scores=True
         )
@@ -355,6 +375,7 @@ def main() -> None:
     finder = AiZynthFinder(configfile=args.config)
     _select_stocks(finder, args)
     post_processing = _load_postprocessing_jobs(args.post_processing)
+    pre_processing = _load_preprocessing_job(args.pre_processing)
     finder.expansion_policy.select(args.policy or finder.expansion_policy.items[0])
     if args.filter:
         finder.filter_policy.select(args.filter)
@@ -368,6 +389,7 @@ def main() -> None:
         args.cluster,
         args.route_distance_model,
         post_processing,
+        pre_processing,
         args.checkpoint,
     ]
     if multi_smiles:

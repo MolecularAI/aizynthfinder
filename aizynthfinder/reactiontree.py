@@ -1,4 +1,5 @@
 """ Module containing the implementation of a reaction tree or route and factory classes to make such trees """
+
 from __future__ import annotations
 
 import abc
@@ -163,6 +164,18 @@ class ReactionTree:
         for node in self.graph:
             if isinstance(node, UniqueMolecule):
                 yield node
+
+    def parent_molecule(self, mol: UniqueMolecule) -> UniqueMolecule:
+        """Returns the parent molecule within the reaction tree.
+        :param mol: the query node (molecule)
+        :return: the parent molecule
+        """
+        if mol is self.root:
+            raise ValueError("Root molecule does not have any parent node.")
+
+        parent_reaction = list(self.graph.predecessors(mol))[0]
+        parent_molecule = list(self.graph.predecessors(parent_reaction))[0]
+        return parent_molecule
 
     def reactions(self) -> Iterable[FixedRetroReaction]:
         """
