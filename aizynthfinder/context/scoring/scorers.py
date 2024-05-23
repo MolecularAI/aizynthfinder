@@ -1,8 +1,10 @@
 """ Module containing classes used to score the reaction routes.
 """
+
 from __future__ import annotations
 
 import abc
+import json
 from collections import defaultdict
 from collections.abc import Sequence as SequenceAbc
 from dataclasses import dataclass
@@ -10,14 +12,29 @@ from typing import TYPE_CHECKING
 
 import numpy as np
 
+try:
+    from route_distances.route_distances import route_distances_calculator
+except ImportError:
+    SUPPORT_DISTANCES = False
+else:
+    SUPPORT_DISTANCES = True
+
 from aizynthfinder.chem import TreeMolecule
 from aizynthfinder.context.stock import StockException
 from aizynthfinder.reactiontree import ReactionTree
 from aizynthfinder.search.mcts import MctsNode
+from aizynthfinder.utils.bonds import BrokenBonds
 from aizynthfinder.utils.exceptions import ScorerException
+from aizynthfinder.utils.logging import logger
+from aizynthfinder.utils.sc_score import SCScore
 
 if TYPE_CHECKING:
-    from aizynthfinder.chem import FixedRetroReaction, Molecule, RetroReaction
+    from aizynthfinder.chem import (
+        FixedRetroReaction,
+        Molecule,
+        RetroReaction,
+        UniqueMolecule,
+    )
     from aizynthfinder.context.config import Configuration
     from aizynthfinder.utils.type_utils import (
         Iterable,
@@ -29,6 +46,7 @@ if TYPE_CHECKING:
         Union,
     )
 
+    _Molecules = Sequence[Molecule]
     _Scoreable = TypeVar("_Scoreable", MctsNode, ReactionTree)
     _Scoreables = Sequence[_Scoreable]
     _ScorerItemType = Union[_Scoreables, _Scoreable]
@@ -515,7 +533,8 @@ class StockAvailabilityScorer(Scorer):
 
     The score is calculated as a product of a stock score per starting material. The stock
     score for each molecule is based on the source of the stock, or a default value if the
-    molecule is not in stock.
+    molecule is not in stock. The `other_source_score` parameter can be used to
+    distinguish between "not in stock" and "not in the specificed sources" cases.
     """
 
     def __init__(
@@ -523,11 +542,13 @@ class StockAvailabilityScorer(Scorer):
         config: Configuration,
         source_score: StrDict,
         default_score: float = 0.1,
+        other_source_score: Optional[float] = None,
     ) -> None:
         super().__init__(config)
         assert self._config is not None
         self.source_score = source_score
         self.default_score = default_score
+        self.other_source_score = other_source_score
 
     def __repr__(self) -> str:
         return "stock availability"
@@ -544,7 +565,12 @@ class StockAvailabilityScorer(Scorer):
                 for source in availability
                 if source in self.source_score
             ]
-            prod *= max(scores) if scores else self.default_score
+            if scores:
+                prod *= max(scores)
+            elif self.other_source_score and mol in self._config.stock:
+                prod *= self.other_source_score
+            else:
+                prod *= self.default_score
         return prod
 
     def _score_node(self, node: MctsNode) -> float:
@@ -552,6 +578,269 @@ class StockAvailabilityScorer(Scorer):
 
     def _score_reaction_tree(self, tree: ReactionTree) -> float:
         return self._calculate_leaf_costs(tree.leafs())
+
+
+class BrokenBondsScorer(Scorer):
+    """Class for scoring nodes and reaction trees based on the breaking of atom bonds
+
+    The score is a summation of the depths in the tree where the focussed bonds
+    are found to break in the reaction. If a focussed bond is found to be unbroken
+    in the entire tree, the total length of the tree will be added to the score.
+    """
+
+    scorer_name = "broken bonds"
+
+    def __init__(self, config: Configuration) -> None:
+        super().__init__(config)
+        self._break_bonds = [tuple(bond) for bond in config.search.break_bonds]
+        self._break_bonds_operator = config.search.break_bonds_operator.lower()
+        self._reverse_order = False
+
+    def __repr__(self) -> str:
+        return self.scorer_name
+
+    def _calculate_broken_bonds_score(
+        self, reactions: Sequence[RetroReaction], depths: Sequence[int]
+    ) -> float:
+
+        if not reactions:
+            return 0
+
+        max_score = len(set(depths)) * len(self._break_bonds)
+        broken_focussed_bonds = []
+        scores = []
+
+        # The score should be 0 when no transformations were reported
+        if not depths:
+            return 0
+
+        for reaction, depth in zip(reactions, depths):
+            broken_bonds = BrokenBonds(self._break_bonds)(reaction)
+            broken_untracked_bonds = [
+                bond for bond in broken_bonds if bond not in broken_focussed_bonds
+            ]
+            if len(broken_untracked_bonds) > 0:
+                broken_focussed_bonds += broken_untracked_bonds
+                scores.append(1 - (depth / max_score))
+                if self._break_bonds_operator == "or":
+                    break
+
+        if self._break_bonds_operator != "or" or (
+            self._break_bonds_operator == "or" and len(broken_focussed_bonds) == 0
+        ):
+            # type: ignore
+            if unbroken_bonds := set(self._break_bonds) - set(broken_focussed_bonds):
+                scores.append(1 - (len(set(depths)) * len(unbroken_bonds)) / max_score)
+        return sum(scores) / len(scores)
+
+    def _score_node(self, node: MctsNode) -> float:
+        reactions = node.actions_to()
+        depths = []
+        for reaction in reactions:
+            depth = (
+                max(
+                    reactant.transform
+                    for reactant in reaction.reactants[reaction.index]
+                )
+                - 1
+            )
+            depths.append(depth)
+        return self._calculate_broken_bonds_score(reactions, depths)
+
+    def _score_reaction_tree(self, tree: ReactionTree) -> float:
+        reactions = [
+            reaction.to_smiles_based_retroreaction() for reaction in tree.reactions()
+        ]
+        depths = [tree.depth(reaction) // 2 for reaction in tree.reactions()]
+        return self._calculate_broken_bonds_score(reactions, depths)
+
+
+class RouteSimilarityScorer(Scorer):
+    """
+    Class for scoring based on an LSTM model for computing Tree Edit Distance to
+    a set of reference routes.
+
+    :param config: the configuration of the tree search
+    :param routes_path: the filename of a JSON file with reference routes
+    :param model_path: the filename of a checkpoint file with the LSTM model
+    :param scaler_params: the parameter settings of the scaler
+    :param agg_func: the name of numpy function used to aggregate the distances
+                     to the reference routes
+    :param similarity: if True, will compute similarity score else distance scores
+    """
+
+    scorer_name = "route similarity"
+
+    def __init__(
+        self,
+        config: Configuration,
+        routes_path: str,
+        model_path: str,
+        scaler_params: Optional[StrDict] = None,
+        agg_func: str = "min",
+        similarity: bool = False,
+    ) -> None:
+        if not SUPPORT_DISTANCES:
+            raise ValueError(
+                "Distance calculations are not supported by this installation."
+                " Please install aizynthfinder with extras dependencies."
+            )
+
+        # Default scaler from benchmarking
+        if scaler_params is None:
+            scaler_params = {
+                "name": "squash",
+                "slope": 0.5,
+                "xoffset": 10,
+                "yoffset": 0,
+            }
+
+        super().__init__(config, scaler_params)
+        self._reverse_order = similarity
+        self.calculator = route_distances_calculator("lstm", model_path=model_path)
+
+        # Scalar needs to be applied before taking into account of `similarity` parameter,
+        # hence we are reassigning the global scaler and then disabling it.
+        self._local_scaler = self._scaler
+        self._scaler = None
+
+        if not hasattr(np, agg_func):
+            raise ValueError(f"Cannot identify aggregate function {agg_func} in numpy")
+        self.agg_func = getattr(np, agg_func)
+        self.similarity = similarity
+
+        try:
+            with open(routes_path or "") as file:
+                self.routes = json.load(file)
+        except FileNotFoundError:
+            logger().info(
+                f"Could not load reference routes from {routes_path}. Assuming they will be set later"
+            )
+            self.routes = []
+        self.n_routes = len(self.routes)
+
+    def _score_node(self, node: MctsNode) -> float:
+        # We don't have any short-cut to score a node,
+        # so we need to convert it to a reaction tree
+        return self._score_reaction_tree(node.to_reaction_tree())
+
+    def _score_reaction_tree(self, tree: ReactionTree) -> float:
+        if not self.routes:
+            return 0.0 if self.similarity else 1.0
+
+        dist_matrix = self.calculator(self.routes + [tree.to_dict()])
+        distances = dist_matrix[self.n_routes, : self.n_routes]
+        score = self.agg_func(distances)
+        norm_score = self._local_scaler(score)
+        if self.similarity:
+            return 1.0 - float(norm_score)
+        return float(norm_score)
+
+
+class DeltaSyntheticComplexityScorer(Scorer):
+    """
+    Class for scoring nodes based on the delta-synthetic-complexity of the node
+    and its parent 'horizon' steps up in the tree.
+
+    :param config: the configuration the tree search
+    :param sc_score_model: the path to the SCScore model
+    :param scaler_params: the parameter settings of the scaler, defaults to max-min between -1.5 and 4
+    :param horizon: the number of steps backwards to look for parent molecule
+    """
+
+    scorer_name: str = "delta-SC score"
+
+    def __init__(
+        self,
+        config: Configuration,
+        sc_score_model: str,
+        scaler_params: Optional[StrDict] = None,
+        horizon: int = 3,
+    ) -> None:
+        if scaler_params is None:
+            scaler_params = {
+                "name": "min_max",
+                "min_val": -1.5,
+                "max_val": 4,
+                "reverse": False,
+            }
+        super().__init__(config, scaler_params)
+        ## This is necessary because config should not be optional for this scorer
+        self._config: Configuration = config
+
+        self.horizon = horizon
+        self._model = SCScore(sc_score_model)
+
+    def sc_deltas(self, mols: _Molecules, parents: _Molecules) -> Sequence[float]:
+        """
+        Calculate delta SC-score among the list of mol-parent pairs.
+
+        :params mols: the leaves of the tree
+        :param parents: the parent of the leaves
+        :returns: the pair-wise difference in SCScore
+        """
+        delta_sc_scores = []
+        for mol, parent in zip(mols, parents):
+            mol.sanitize()
+            parent.sanitize()
+
+            sc_score_mol = self._model(mol.rd_mol)
+            sc_score_parent = self._model(parent.rd_mol)
+
+            delta_sc_score = sc_score_parent - sc_score_mol
+            delta_sc_scores.append(delta_sc_score)
+        return delta_sc_scores
+
+    def _get_parent_from_reaction_tree(
+        self, tree: ReactionTree, mol: UniqueMolecule, horizon: int
+    ) -> UniqueMolecule:
+        horizon = min(horizon, tree.depth(mol) // 2)
+
+        parent = mol
+        # Step up in the tree, first a reaction, then a molecule
+        for _ in range(horizon):
+            parent = tree.parent_molecule(parent)
+
+        return parent
+
+    def _get_parent_from_tree_molecule(
+        self, mol: TreeMolecule, horizon: int
+    ) -> TreeMolecule:
+        horizon = min(horizon, mol.transform)
+
+        parent = mol
+        # Step up in the tree via parent nodes
+        for _ in range(horizon):
+            grandparent = parent.parent
+            if not grandparent:
+                break
+            parent = grandparent
+
+        return parent
+
+    def _score_node(self, node: MctsNode) -> float:
+        expandable_mols = node.state.expandable_mols
+        if not expandable_mols:
+            expandable_mols = list(node.state.mols)
+
+        parent_mols = [
+            self._get_parent_from_tree_molecule(mol, self.horizon)
+            for mol in expandable_mols
+        ]
+        delta_sc_scores = self.sc_deltas(expandable_mols, parent_mols)
+        return min(delta_sc_scores)
+
+    def _score_reaction_tree(self, tree: ReactionTree) -> float:
+        expandable_mols = [node for node in tree.leafs() if not tree.in_stock(node)]
+        if not expandable_mols:
+            expandable_mols = list(tree.leafs())
+
+        parent_mols = [
+            self._get_parent_from_reaction_tree(tree, node, self.horizon)
+            for node in expandable_mols
+        ]
+        delta_sc_scores = self.sc_deltas(expandable_mols, parent_mols)
+        return min(delta_sc_scores)
 
 
 class CombinedScorer(Scorer):

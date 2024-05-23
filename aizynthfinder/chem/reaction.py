@@ -9,8 +9,14 @@ from typing import TYPE_CHECKING
 
 import numpy as np
 from rdchiral import main as rdc
-from rdchiral.bonds import get_atoms_across_double_bonds
-from rdchiral.initialization import BondDirOpposite
+
+try:
+    from rdchiral.bonds import get_atoms_across_double_bonds
+    from rdchiral.initialization import BondDirOpposite
+except ImportError:
+    RDCHIRAL_CPP = True
+else:
+    RDCHIRAL_CPP = False
 from rdkit import Chem
 from rdkit.Chem import AllChem
 from rdkit.Chem.rdchem import BondDir, BondStereo, ChiralType
@@ -34,6 +40,11 @@ if TYPE_CHECKING:
         StrDict,
         Tuple,
         Union,
+    )
+
+if RDCHIRAL_CPP:
+    logger().warning(
+        "WARNING: C++ version of RDChiral is supported, but with limited functionality"
     )
 
 
@@ -102,7 +113,7 @@ class _ReactionInterfaceMixin:
         """
         reactants = ".".join(mol.smiles for mol in self._reactants_getter())  # type: ignore
         products = ".".join(mol.smiles for mol in self._products_getter())  # type: ignore
-        return "%s>>%s" % (reactants, products)
+        return f"{reactants}>>{products}"
 
 
 class RetroReaction(abc.ABC, _ReactionInterfaceMixin):
@@ -631,3 +642,11 @@ class _RdChiralProductWrapper:
 
         # Get atoms across double bonds defined by mapnum
         self.atoms_across_double_bonds = get_atoms_across_double_bonds(self.reactants)
+
+
+if RDCHIRAL_CPP:
+
+    def _wrapper(mol):
+        return rdc.rdchiralReactants(mol.mapped_smiles)
+
+    _RdChiralProductWrapper = _wrapper  # type: ignore

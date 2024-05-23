@@ -15,7 +15,8 @@ from aizynthfinder.analysis import (
 )
 from aizynthfinder.chem import FixedRetroReaction, Molecule, TreeMolecule
 from aizynthfinder.context.config import Configuration
-from aizynthfinder.context.scoring import CombinedScorer
+from aizynthfinder.context.policy import BondFilter
+from aizynthfinder.context.scoring import BrokenBondsScorer, CombinedScorer
 from aizynthfinder.reactiontree import ReactionTreeFromExpansion
 from aizynthfinder.search.andor_trees import AndOrSearchTreeBase
 from aizynthfinder.search.mcts import MctsSearchTree
@@ -82,6 +83,9 @@ class AiZynthFinder:
         self.search_stats: StrDict = dict()
         self.routes = RouteCollection([])
         self.analysis: Optional[TreeAnalysis] = None
+        self._num_objectives = len(
+            self.config.search.algorithm_config.get("search_rewards", [])
+        )
 
     @property
     def target_smiles(self) -> str:
@@ -107,7 +111,7 @@ class AiZynthFinder:
     def build_routes(
         self,
         selection: Optional[RouteSelectionArguments] = None,
-        scorer: Optional[str] = None,
+        scorer: Optional[Union[str, List[str]]] = None,
     ) -> None:
         """
         Build reaction routes
@@ -116,18 +120,10 @@ class AiZynthFinder:
         to extract results from the tree search.
 
         :param selection: the selection criteria for the routes
-        :param scorer: a reference to the object used to score the nodes
+        :param scorer: a reference to the object used to score the nodes, can be a list
         :raises ValueError: if the search tree not initialized
         """
-
-        scorer = scorer or self.config.post_processing.route_scorer
-
-        if not self.tree:
-            raise ValueError("Search tree not initialized")
-
-        _scorer = self.scorers[scorer]
-
-        self.analysis = TreeAnalysis(self.tree, scorer=_scorer)
+        self.analysis = self._setup_analysis(scorer=scorer)
         config_selection = RouteSelectionArguments(
             nmin=self.config.post_processing.min_routes,
             nmax=self.config.post_processing.max_routes,
@@ -174,9 +170,13 @@ class AiZynthFinder:
             self.stock.exclude(self.target_mol)
             self._logger.debug("Excluding the target compound from the stock")
 
+        if self.config.search.break_bonds or self.config.search.freeze_bonds:
+            self._setup_focussed_bonds(self.target_mol)
+
         self._setup_search_tree()
         self.analysis = None
         self.routes = RouteCollection([])
+        self.filter_policy.reset_cache()
         self.expansion_policy.reset_cache()
 
     def stock_info(self) -> StrDict:
@@ -249,8 +249,40 @@ class AiZynthFinder:
         self.search_stats["time"] = time_past
         return time_past
 
+    def _setup_focussed_bonds(self, target_mol: Molecule) -> None:
+        """
+        Setup multi-objective scoring function with 'broken bonds'-scorer and
+        add 'frozen bonds'-filter to filter policy.
+
+        :param target_mol: the target molecule.
+        """
+        target_mol = TreeMolecule(smiles=target_mol.smiles, parent=None)
+
+        bond_filter_key = "__finder_bond_filter"
+        if self.config.search.freeze_bonds:
+            if not target_mol.has_all_focussed_bonds(self.config.search.freeze_bonds):
+                raise ValueError("Bonds in 'freeze_bond' must exist in target molecule")
+            bond_filter = BondFilter(bond_filter_key, self.config)
+            self.filter_policy.load(bond_filter)
+            self.filter_policy.select(bond_filter_key, append=True)
+        elif (
+            self.filter_policy.selection
+            and bond_filter_key in self.filter_policy.selection
+        ):
+            self.filter_policy.deselect(bond_filter_key)
+
+        search_rewards = self.config.search.algorithm_config.get("search_rewards")
+        if not search_rewards:
+            return
+
+        if self.config.search.break_bonds and "broken bonds" in search_rewards:
+            if not target_mol.has_all_focussed_bonds(self.config.search.break_bonds):
+                raise ValueError("Bonds in 'break_bonds' must exist in target molecule")
+            self.scorers.load(BrokenBondsScorer(self.config))
+            self._num_objectives = len(search_rewards)
+
     def _setup_search_tree(self) -> None:
-        self._logger.debug("Defining tree root: %s" % self.target_smiles)
+        self._logger.debug(f"Defining tree root:  {self.target_smiles}")
         if self.config.search.algorithm.lower() == "mcts":
             self.tree = MctsSearchTree(
                 root_smiles=self.target_smiles, config=self.config
@@ -258,6 +290,50 @@ class AiZynthFinder:
         else:
             cls = load_dynamic_class(self.config.search.algorithm)
             self.tree = cls(root_smiles=self.target_smiles, config=self.config)
+
+    def _setup_analysis(
+        self,
+        scorer: Optional[Union[str, List[str]]],
+    ) -> TreeAnalysis:
+        """Configure TreeAnalysis
+
+        :param scorer: a reference to the object used to score the nodes, can be a list
+        :returns: the configured TreeAnalysis
+        :raises ValueError: if the search tree not initialized
+        """
+        if not self.tree:
+            raise ValueError("Search tree not initialized")
+
+        if scorer is None:
+            scorer_names = self.config.post_processing.route_scorers
+            # If not defined, use the same scorer as the search rewards
+            if not scorer_names:
+                search_rewards = self.config.search.algorithm_config.get(
+                    "search_rewards"
+                )
+                scorer_names = search_rewards if search_rewards else ["state score"]
+
+        elif isinstance(scorer, str):
+            scorer_names = [scorer]
+        else:
+            scorer_names = list(scorer)
+
+        if "broken bonds" in scorer_names:
+            # Add broken bonds scorer if required
+            self.scorers.load(BrokenBondsScorer(self.config))
+
+        scorers = [self.scorers[name] for name in scorer_names]
+
+        if self.config.post_processing.scorer_weights:
+            scorers = [
+                CombinedScorer(
+                    self.config,
+                    scorer_names,
+                    self.config.post_processing.scorer_weights,
+                )
+            ]
+
+        return TreeAnalysis(self.tree, scorers)
 
 
 class AiZynthExpander:

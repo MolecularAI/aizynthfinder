@@ -68,6 +68,86 @@ def test_multi_expansion_strategy_wo_additive_expansion(
     assert priors == [0.7, 0.2]
 
 
+def test_weighted_multi_expansion_strategy(
+    default_config, setup_template_expansion_policy
+):
+    expansion_policy = default_config.expansion_policy
+    strategy1, _ = setup_template_expansion_policy("policy1")
+    expansion_policy.load(strategy1)
+    strategy2, _ = setup_template_expansion_policy("policy2")
+    expansion_policy.load(strategy2)
+
+    multi_expansion_strategy = MultiExpansionStrategy(
+        "multi_expansion_strategy",
+        default_config,
+        expansion_strategies=["policy1", "policy2"],
+        expansion_strategy_weights=[0.25, 0.75],
+    )
+    multi_expansion_strategy.additive_expansion = True
+
+    mols = [TreeMolecule(smiles="CCO", parent=None)]
+    _, priors = multi_expansion_strategy.get_actions(mols)
+
+    priors = [round(p, 4) for p in priors]
+    assert priors == [0.1944, 0.0556, 0.5833, 0.1667]
+
+
+def test_weighted_multi_expansion_strategy_wrong_weights(
+    default_config, setup_template_expansion_policy
+):
+    expansion_policy = default_config.expansion_policy
+    strategy1, _ = setup_template_expansion_policy("policy1")
+    expansion_policy.load(strategy1)
+    strategy2, _ = setup_template_expansion_policy("policy2")
+    expansion_policy.load(strategy2)
+
+    with pytest.raises(
+        ValueError,
+        match="The expansion strategy weights in MultiExpansion should sum to one. ",
+    ):
+        multi_expansion_strategy = MultiExpansionStrategy(
+            "multi_expansion_strategy",
+            default_config,
+            expansion_strategies=["policy1", "policy2"],
+            expansion_strategy_weights=[0.2, 0.7],
+        )
+
+
+def test_multi_expansion_strategy_cutoff(
+    default_config, setup_template_expansion_policy
+):
+    expansion_policy = default_config.expansion_policy
+    strategy1, _ = setup_template_expansion_policy("policy1")
+    expansion_policy.load(strategy1)
+    strategy2, _ = setup_template_expansion_policy("policy2")
+    expansion_policy.load(strategy2)
+
+    multi_expansion_strategy = MultiExpansionStrategy(
+        "multi_expansion_strategy",
+        default_config,
+        expansion_strategies=["policy1", "policy2"],
+        additive_expansion=True,
+        cutoff_number=4,
+    )
+
+    mols = [TreeMolecule(smiles="CCO", parent=None)]
+    actions, priors = multi_expansion_strategy.get_actions(mols)
+
+    assert len(actions) == 4
+    assert len(priors) == 4
+
+    multi_expansion_strategy = MultiExpansionStrategy(
+        "multi_expansion_strategy",
+        default_config,
+        expansion_strategies=["policy1", "policy2"],
+        additive_expansion=True,
+        cutoff_number=2,
+    )
+    actions, priors = multi_expansion_strategy.get_actions(mols)
+    assert len(actions) == 2
+    assert len(priors) == 2
+
+
 def test_create_templated_expansion_strategy_wo_kwargs():
     with pytest.raises(
         PolicyException, match=" class needs to be initiated with keyword arguments"

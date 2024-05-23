@@ -22,7 +22,6 @@ if TYPE_CHECKING:
 
     from aizynthfinder.chem import FixedRetroReaction, RetroReaction, UniqueMolecule
 
-    # pylint: disable=ungrouped-imports
     from aizynthfinder.utils.type_utils import (
         Any,
         Dict,
@@ -121,13 +120,13 @@ def crop_image(img: PilImage, margin: int = 20) -> PilImage:
     for x in range(0, img.width):
         for y in range(0, img.height):
             if img.getpixel((x, y)) != (255, 255, 255):
-                if x < x0_lim:
+                if x < x0_lim:  # pylint: disable=R1730
                     x0_lim = x
-                if x > x1_lim:
+                if x > x1_lim:  # pylint: disable=R1731
                     x1_lim = x
-                if y < y0_lim:
+                if y < y0_lim:  # pylint: disable=R1730
                     y0_lim = y
-                if y > y1_lim:
+                if y > y1_lim:  # pylint: disable=R1731
                     y1_lim = y
     x0_lim = max(x0_lim, 0)
     y0_lim = max(y0_lim, 0)

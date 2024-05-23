@@ -8,6 +8,7 @@ import numpy as np
 from rdkit import Chem, DataStructs
 from rdkit.Chem import AllChem, Descriptors
 
+from aizynthfinder.utils.bonds import sort_bonds
 from aizynthfinder.utils.exceptions import MoleculeException
 
 if TYPE_CHECKING:
@@ -319,6 +320,30 @@ class TreeMolecule(Molecule):
             for atom_index1, atom_index2 in bonds
         ]
         return self._atom_bonds
+
+    def get_bonds_in_molecule(
+        self, query_bonds: Sequence[Sequence[int]]
+    ) -> Sequence[Sequence[int]]:
+        """
+        Get bonds (from a list of bonds) that are present in the molecule.
+        :param bonds: List of bond (atom pairs)
+        :return: A list of bonds
+        """
+        molecule_bonds = sort_bonds(self.mapped_atom_bonds)
+        query_bonds = sort_bonds(query_bonds)
+        bonds_in_mol = [bond for bond in query_bonds if bond in molecule_bonds]
+        return bonds_in_mol
+
+    def has_all_focussed_bonds(self, bonds: Sequence[Sequence[int]]) -> bool:
+        """Checks that the focussed bonds exist in the target molecule's atom bonds.
+
+        :param bonds: Focussed bonds.
+        :param target_mol: The target molecule.
+
+        :return: A boolean indicating if the input bonds exist in the target molecule.
+        """
+        bonds_in_mol = self.get_bonds_in_molecule(bonds)
+        return len(bonds_in_mol) == len(bonds)
 
     def _set_atom_mappings(self) -> None:
         atom_mappings = [

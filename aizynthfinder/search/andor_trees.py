@@ -46,12 +46,12 @@ class AndOrSearchTreeBase(abc.ABC):
         return []
 
     @abc.abstractmethod
-    def one_iteration(self) -> bool:  # pylint: disable=no-self-use
+    def one_iteration(self) -> bool:
         """Perform one iteration of the search"""
         return False
 
     @abc.abstractmethod
-    def routes(self) -> List[ReactionTree]:  # pylint: disable=no-self-use
+    def routes(self) -> List[ReactionTree]:
         """Return the routes of the tree"""
         return []
 

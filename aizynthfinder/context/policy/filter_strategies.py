@@ -9,14 +9,18 @@ import numpy as np
 
 from aizynthfinder.chem import TemplatedRetroReaction
 from aizynthfinder.context.policy.utils import _make_fingerprint
-from aizynthfinder.utils.exceptions import PolicyException, RejectionException
+from aizynthfinder.utils.bonds import BrokenBonds
+from aizynthfinder.utils.exceptions import (
+    PolicyException,
+    RejectionException,
+)
 from aizynthfinder.utils.logging import logger
 from aizynthfinder.utils.models import load_model
 
 if TYPE_CHECKING:
     from aizynthfinder.chem.reaction import RetroReaction
     from aizynthfinder.context.config import Configuration
-    from aizynthfinder.utils.type_utils import Any, List, Tuple
+    from aizynthfinder.utils.type_utils import Any, Dict, List, Optional, Tuple
 
 
 class FilterStrategy(abc.ABC):
@@ -60,6 +64,33 @@ class FilterStrategy(abc.ABC):
         :param reaction: the reaction to filter
         :raises: if the reaction should be rejected.
         """
+
+
+class BondFilter(FilterStrategy):
+    """
+    Check if focussed bonds to freeze stay frozen in a reaction.
+
+    :param key: the key or label
+    :param config: the configuration of the tree search
+    """
+
+    def __init__(self, key: str, config: Configuration, **kwargs: Any) -> None:
+        super().__init__(key, config, **kwargs)
+
+        self._freeze_bonds = config.search.freeze_bonds
+        self._broken_bonds = BrokenBonds(self._freeze_bonds)
+        self._logger.info(
+            f"Loading bond filter to {key} with {len(self._freeze_bonds)} "
+            "bonds to freeze"
+        )
+
+    def apply(self, reaction: RetroReaction) -> None:
+        broken_frozen_bonds = self._broken_bonds(reaction)
+        if len(broken_frozen_bonds) > 0:
+            raise RejectionException(
+                f"{reaction} was filtered out as the focussed bonds "
+                f"'{broken_frozen_bonds}' were found to be broken in the reaction"
+            )
 
 
 class QuickKerasFilter(FilterStrategy):

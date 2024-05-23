@@ -222,3 +222,12 @@ class FilterPolicy(ContextCollection):
                 del kwargs["type"]
             obj = cls(key, self._config, **kwargs)
             self.load(obj)
+
+    def reset_cache(self) -> None:
+        """Reset filtering cache."""
+        if not self.selection:
+            return
+
+        for name in self.selection:
+            if hasattr(self[name], "reset_cache"):
+                self[name].reset_cache()

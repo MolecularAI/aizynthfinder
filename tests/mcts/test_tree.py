@@ -19,9 +19,9 @@ def test_backpropagation(setup_complete_mcts_tree, mocker):
     tree, nodes = setup_complete_mcts_tree
     for node in nodes:
         node.backpropagate = mocker.MagicMock()
-    score = 1.5
+    score = tree.reward_scorer[tree.reward_scorer_name](nodes[2])
 
-    tree.backpropagate(nodes[2], score)
+    tree.backpropagate(nodes[2])
 
     nodes[0].backpropagate.assert_called_once_with(nodes[1], score)
     nodes[1].backpropagate.assert_called_once_with(nodes[2], score)

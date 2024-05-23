@@ -166,3 +166,15 @@ def test_subtrees(load_reaction_tree):
     mols = list(subtrees[2].molecules())
     assert len(mols) == 3
     assert [subtrees[2].depth(mol) for mol in mols] == [0, 2, 2]
+
+
+def test_reactiontree_parent_mol(load_reaction_tree):
+    dict_ = load_reaction_tree("linear_route.json")
+    rt = ReactionTree.from_dict(dict_)
+    molecules = list(rt.molecules())
+
+    assert rt.parent_molecule(molecules[1]) is molecules[0]
+    assert rt.parent_molecule(molecules[2]) is molecules[0]
+
+    with pytest.raises(ValueError):
+        rt.parent_molecule(molecules[0])

@@ -34,6 +34,7 @@ def test_load_from_file(write_yaml):
                 },
                 "max_transforms": 6,
                 "time_limit": 200,
+                "break_bonds": [[1, 2], [3, 4]],
                 "break_bonds_operator": "OR",
             },
         }
@@ -43,15 +44,18 @@ def test_load_from_file(write_yaml):
 
     assert config.search.algorithm == "mcts"
     assert config.search.time_limit == 200
+    assert config.search.break_bonds == [[1, 2], [3, 4]]
+    assert config.search.break_bonds_operator == "OR"
 
     assert config.search.algorithm_config == {
         "C": 1.9,
         "default_prior": 0.9,
         "use_prior": False,
         "prune_cycles_in_search": True,
-        "search_reward": "state score",
+        "search_rewards": ["state score"],
         "immediate_instantiation": (),
         "mcts_grouping": None,
+        "search_rewards_weights": [],
     }
 
 
@@ -69,6 +73,9 @@ def test_update_search(default_config):
     assert config.search.algorithm_config["C"] != 2.0
     assert config.search.time_limit != 300
     assert config.search.max_transforms == 6
+    assert config.search.break_bonds != [[1, 2], [3, 4]]
+    assert config.search.freeze_bonds != [[2, 3]]
+    assert config.search.break_bonds_operator == "and"
 
     config = config.from_dict(
         {
@@ -76,12 +83,18 @@ def test_update_search(default_config):
                 "algorithm_config": {"C": 2.0},
                 "time_limit": 300,
                 "max_transforms": None,
+                "break_bonds": [[1, 2], [3, 4]],
+                "freeze_bonds": [[2, 3]],
+                "break_bonds_operator": "or",
             }
         }
     )
     assert config.search.algorithm_config["C"] == 2.0
     assert config.search.time_limit == 300
     assert config.search.max_transforms == 6
+    assert config.search.break_bonds == [[1, 2], [3, 4]]
+    assert config.search.freeze_bonds == [[2, 3]]
+    assert config.search.break_bonds_operator == "or"
 
     with pytest.raises(AttributeError):
         config = config.from_dict(
@@ -90,6 +103,19 @@ def test_update_search(default_config):
                     "time_limit": 300,
                     "max_transforms": None,
                     "dummy": 2,
+                }
+            }
+        )
+
+    with pytest.raises(
+        ValueError, match="Lists of bond pairs to break/freeze should be of length 2"
+    ):
+        config = config.from_dict(
+            {
+                "search": {
+                    "time_limit": 300,
+                    "max_transforms": None,
+                    "break_bonds": [[1, 2, 3]],
                 }
             }
         )
@@ -323,7 +349,7 @@ def test_load_algorithm_config(write_yaml):
         "default_prior",
         "use_prior",
         "prune_cycles_in_search",
-        "search_reward",
+        "search_rewards",
         "immediate_instantiation",
         "mcts_grouping",
     ]
@@ -351,7 +377,7 @@ def test_init_search_yaml(write_yaml, create_dummy_templates, mock_onnx_model):
                     "cutoff_number": 300,
                 }
             },
-            "search": {"time_limit": 300},
+            "search": {"time_limit": 300, "break_bonds": [[1, 2]]},
         }
     )
 
@@ -359,6 +385,7 @@ def test_init_search_yaml(write_yaml, create_dummy_templates, mock_onnx_model):
 
     assert finder.config.expansion_policy["policy1"].cutoff_number == 300
     assert finder.config.search.time_limit == 300
+    assert finder.config.search.break_bonds == [[1, 2]]
 
 
 def test_init_search_dict(create_dummy_templates, mock_onnx_model):
@@ -372,13 +399,14 @@ def test_init_search_dict(create_dummy_templates, mock_onnx_model):
                 "cutoff_number": 300,
             }
         },
-        "search": {"time_limit": 300},
+        "search": {"time_limit": 300, "break_bonds": [[1, 2]]},
     }
 
     finder = AiZynthFinder(configdict=dict_)
 
     assert finder.config.expansion_policy["policy1"].cutoff_number == 300
     assert finder.config.search.time_limit == 300
+    assert finder.config.search.break_bonds == [[1, 2]]
 
 
 def test_init_search_yaml_dict(write_yaml, create_dummy_templates, mock_onnx_model):
@@ -393,7 +421,7 @@ def test_init_search_yaml_dict(write_yaml, create_dummy_templates, mock_onnx_mod
                     "cutoff_number": 300,
                 }
             },
-            "search": {"time_limit": 300},
+            "search": {"time_limit": 300, "break_bonds": [[1, 2]]},
         }
     )
     dict_ = {
@@ -405,11 +433,13 @@ def test_init_search_yaml_dict(write_yaml, create_dummy_templates, mock_onnx_mod
                 "cutoff_number": 100,
             }
         },
+        "search": {"break_bonds": []},
     }
 
     finder = AiZynthFinder(filename, configdict=dict_)
 
     assert finder.config.expansion_policy["policy1"].cutoff_number == 300
+    assert finder.config.search.break_bonds == [[1, 2]]
 
 
 def test_init_search_none(default_config):

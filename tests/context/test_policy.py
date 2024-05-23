@@ -7,8 +7,11 @@ from aizynthfinder.chem import (
     TreeMolecule,
 )
 from aizynthfinder.context.policy import (
+    BondFilter,
     QuickKerasFilter,
     ReactantsCountFilter,
+    TemplateBasedDirectExpansionStrategy,
+    TemplateBasedExpansionStrategy,
 )
 from aizynthfinder.utils.exceptions import PolicyException, RejectionException
 
@@ -117,7 +120,7 @@ def test_get_actions(default_config, setup_template_expansion_policy):
     default_config.expansion_policy["policy1"].rescale_prior = True
     expansion_policy.reset_cache()
     actions, priors = expansion_policy.get_actions(mols)
-    assert [round(prior, 1) for prior in priors] == [0.6, 0.4]
+    assert [round(prior, 4) for prior in priors] == [0.7778, 0.2222]
 
 
 def test_get_actions_two_policies(default_config, setup_template_expansion_policy):
@@ -182,6 +185,31 @@ def test_get_actions_using_rdkit(
         _ = actions[0].reactants
 
 
+def test_get_actions_with_direct_application(
+    default_config, setup_template_expansion_policy
+):
+    smarts = (
+        "([#8:4]-[N;H0;D3;+0:5](-[C;D1;H3:6])-[C;H0;D3;+0:1](-[C:2])=[O;D1;H0:3])"
+        ">>(Cl-[C;H0;D3;+0:1](-[C:2])=[O;D1;H0:3]).([#8:4]-[NH;D2;+0:5]-[C;D1;H3:6])"
+    )
+    strategy, _ = setup_template_expansion_policy(
+        templates=[smarts] * 3, expansion_cls=TemplateBasedDirectExpansionStrategy
+    )
+    expansion_policy = default_config.expansion_policy
+    expansion_policy.load(strategy)
+    mols = [TreeMolecule(smiles="CCCCOc1ccc(CC(=O)N(C)O)cc1", parent=None)]
+    expansion_policy.select("policy1")
+
+    actions, _ = expansion_policy.get_actions(mols)
+
+    assert actions[0] is not None
+    assert isinstance(actions[0], SmilesBasedRetroReaction)
+    assert (
+        actions[0].reaction_smiles()
+        == "CCCCOc1ccc(CC(=O)N(C)O)cc1>>CCCCOc1ccc(CC(=O)Cl)cc1.CNO"
+    )
+
+
 def test_template_based_expansion_caching(
     default_config, mock_onnx_model, create_dummy_templates
 ):
@@ -200,6 +228,53 @@ def test_template_based_expansion_caching(
     mock_onnx_model.assert_called_once()
     assert priors1 == priors2
     assert actions1[0].smarts == actions2[0].smarts
+
+
+def test_masking_reaction_templates(
+    default_config, mock_onnx_model, tmpdir, create_dummy_templates
+):
+    template_filename = create_dummy_templates(3)
+    mask_file = str(tmpdir / "mask.npz")
+    np.savez_compressed(mask_file, np.array([True, False, True]))
+
+    expansion_policy = default_config.expansion_policy
+    expansion_policy.load_from_config(
+        **{
+            "policy1": {
+                "model": "dummy1.onnx",
+                "template": template_filename,
+                "mask": mask_file,
+            }
+        },
+    )
+    policy = expansion_policy["policy1"]
+    mols = [TreeMolecule(smiles="CCO", parent=None)]
+
+    _, priors = policy(mols)
+    assert priors == [0.2, 0.1, 0.0]
+
+
+def test_masking_reaction_templates_raises_error(
+    default_config, mock_onnx_model, tmpdir, create_dummy_templates
+):
+    template_filename = create_dummy_templates(3)
+    mask_file = str(tmpdir / "mask.npz")
+    np.savez_compressed(mask_file, np.array([True, False]))
+
+    expansion_policy = default_config.expansion_policy
+
+    with pytest.raises(
+        PolicyException, match=" does not match the number of templates"
+    ):
+        expansion_policy.load_from_config(
+            **{
+                "policy1": {
+                    "model": "dummy1.onnx",
+                    "template": template_filename,
+                    "mask": mask_file,
+                }
+            },
+        )
 
 
 def test_create_quick_filter_strategy_wo_kwargs():
@@ -320,3 +395,33 @@ def test_reactants_count_rejection(default_config):
 
     with pytest.raises(RejectionException):
         filter(rxn1)
+
+
+def test_broken_frozen_bond_filter(default_config):
+    mol = TreeMolecule(smiles="[CH3:1][NH:2][C:3](C)=[O:4]", parent=None)
+    reaction = SmilesBasedRetroReaction(
+        mol,
+        mapped_prod_smiles="[CH3:1][NH:2][C:3](C)=[O:4]",
+        reactants_str="C[C:3](=[O:4])O.[CH3:1][NH:2]",
+    )
+    default_config.search.freeze_bonds = [(1, 2), (3, 4), (3, 2)]
+
+    bond_filter = BondFilter("test", default_config)
+    with pytest.raises(
+        RejectionException,
+        match=r"focussed bonds \'\[\(2, 3\)\]\' were found to be broken",
+    ):
+        bond_filter(reaction)
+
+
+def test_frozen_bond_filter(default_config):
+    mol = TreeMolecule(smiles="[CH3:1][NH:2][C:3](C)=[O:4]", parent=None)
+    reaction = SmilesBasedRetroReaction(
+        mol,
+        mapped_prod_smiles="[CH3:1][NH:2][C:3](C)=[O:4]",
+        reactants_str="C[C:3](=[O:4])O.[CH3:1][NH:2]",
+    )
+    default_config.search.freeze_bonds = [(1, 2)]
+
+    bond_filter = BondFilter("test", default_config)
+    assert bond_filter(reaction) is None

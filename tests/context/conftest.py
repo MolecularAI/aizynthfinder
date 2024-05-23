@@ -6,6 +6,7 @@ import pytest
 import pytest_mock
 
 from aizynthfinder.context.policy import TemplateBasedExpansionStrategy
+from aizynthfinder.context.scoring import BrokenBondsScorer
 from aizynthfinder.context.stock import (
     MongoDbInchiKeyQuery,
     StockException,
@@ -68,16 +69,55 @@ def mocked_mongo_db_query(mocker):
 def setup_template_expansion_policy(
     default_config, create_dummy_templates, create_templates_file, mock_onnx_model
 ):
-    def wrapper(key="policy1", templates=None):
+    def wrapper(
+        key="policy1", templates=None, expansion_cls=TemplateBasedExpansionStrategy
+    ):
         if templates is None:
             templates_filename = create_dummy_templates(3)
         else:
             templates_filename = create_templates_file(templates)
 
-        strategy = TemplateBasedExpansionStrategy(
+        strategy = expansion_cls(
             key, default_config, model="dummy.onnx", template=templates_filename
         )
 
         return strategy, mock_onnx_model
+
+    return wrapper
+
+
+@pytest.fixture
+def setup_mcts_broken_bonds(setup_stock, setup_expanded_mcts, shared_datadir):
+    def wrapper(broken=True, config=None):
+        root_smi = "CN1CCC(C(=O)c2cccc([NH:1][C:2](=O)c3ccc(F)cc3)c2F)CC1"
+
+        reaction_template = pd.read_csv(
+            shared_datadir / "test_reactions_template.csv", sep="\t"
+        )
+        template1_smarts = reaction_template["RetroTemplate"][0]
+        template2_smarts = reaction_template["RetroTemplate"][1]
+
+        child1_smi = ["N#Cc1cccc(NC(=O)c2ccc(F)cc2)c1F", "CN1CCC(Cl)CC1", "O"]
+        child2_smi = ["N#Cc1cccc(N)c1F", "O=C(Cl)c1ccc(F)cc1"]
+
+        if not broken:
+            template2_smarts = reaction_template["RetroTemplate"][2]
+            child2_smi = ["N#Cc1cccc(Cl)c1F", "NC(=O)c1ccc(F)cc1"]
+
+        lookup = {
+            root_smi: {"smarts": template1_smarts, "prior": 1.0},
+            child1_smi[0]: {
+                "smarts": template2_smarts,
+                "prior": 1.0,
+            },
+        }
+
+        stock = [child1_smi[1], child1_smi[2]] + child2_smi
+
+        if config:
+            config.scorers.create_default_scorers()
+            config.scorers.load(BrokenBondsScorer(config))
+        setup_stock(config, *stock)
+        return setup_expanded_mcts(lookup)
 
     return wrapper

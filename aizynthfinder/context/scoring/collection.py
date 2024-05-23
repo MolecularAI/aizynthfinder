@@ -61,24 +61,33 @@ class ScorerCollection(ContextCollection):
         self._config = config
         self.create_default_scorers()
 
+    def __repr__(self) -> str:
+        if self.selection:
+            return f"{self._collection_name} ({', '.join(self.selection)})"
+
+        return f"{self._collection_name} ({', '.join(self.items)})"
+
     def create_default_scorers(self) -> None:
         """
         Setup the scores that only need the config as their input.
         """
         for cls in _SIMPLE_SCORERS:
-            self.load(cls(self._config))
+            self.load(cls(self._config), silent=True)
 
-    def load(self, scorer: Scorer) -> None:  # type: ignore
+    def load(self, scorer: Scorer, silent: bool = False) -> None:  # type: ignore
         """
         Add a pre-initialized scorer object to the collection
 
         :param scorer: the item to add
+        :param silent: if True will not write out the name of the loaded scorer
         """
         if not isinstance(scorer, Scorer):
             raise ScorerException(
                 "Only objects of classes inherited from Scorer can be added"
             )
         self._items[repr(scorer)] = scorer
+        if not silent:
+            self._logger.info(f"Loaded scorer: {repr(scorer)}")
 
     def load_from_config(self, **scorers_config: Any) -> None:
         """
@@ -119,7 +128,8 @@ class ScorerCollection(ContextCollection):
                 scorer = self._items[name]
             except KeyError:
                 raise ScorerException(f"Unable to find '{name}' in parent collection")
-            new_collection.load(scorer)
+            new_collection.load(scorer, silent=True)
+            new_collection.select(name, append=True)
         return new_collection
 
     def names(self) -> List[str]:

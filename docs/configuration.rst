@@ -43,12 +43,16 @@ A more detailed configuration file is shown below
         default_prior: 0.5
         use_prior: True
         prune_cycles_in_search: True
-        search_reward: state score
+        search_rewards: 
+          - state score
       max_transforms: 6
       iteration_limit: 100
       return_first: false
       time_limit: 120
       exclude_target_from_stock: True 
+      break_bonds: [[1, 2], [2, 3]]
+      freeze_bonds: [[3, 4]]
+      break_bonds_operator: or
     expansion:
       my_policy:
         type: template-based
@@ -129,7 +133,8 @@ algorithm_config: C                          1.4            The C value used to 
 algorithm_config: default_prior              0.5            The prior that is used if policy-provided priors are not used.
 algorithm_config: use_prior                  True           If True, priors from the policy is used instead of the `default_prior`.
 algorithm_config: prune_cycles_in_search     True           If True, prevents the MCTS from creating cycles by recreating previously seen molecules when it is expanded.
-algorithm_config: search_reward              state score    The scoring used for the MCTS search algorithm.
+algorithm_config: search_rewards             [state score]  The scoring used for the MCTS search algorithm.
+algorithm_config: search_rewards_weights     []             The scoring weights used by the Combined Scorer for the MCTS search algorithm.
 algorithm_config: immediate_instantiation    []             list of expansion policies for which the MCTS algorithm immediately instantiate the children node upon expansion
 algorithm_config: mcts_grouping              -              if is partial or full the MCTS algorithm will group expansions that produce the same state. If ``partial`` is used the equality will only be determined based on the expandable molecules, whereas ``full`` will check all molecules.
 max_transforms                               6              The maximum depth of the search tree.
@@ -137,6 +142,9 @@ iteration_limit                              100            The maximum number o
 time_limit                                   120            The maximum number of seconds to complete the tree search.
 return_first                                 False          If True, the tree search will be terminated as soon as one solution is found.
 exclude_target_from_stock                    True           If True, the target is in stock will be broken down.
+break_bonds                                  []             The list of lists of atom numbers of molecular bonds pairs to break during the search. 
+freeze_bonds                                 []             The list of lists of atom numbers of molecular bonds pairs to freeze or retain during the search.
+break_bonds_operator                         and            If set to 'and', all bond pairs listed in `break_bonds` must be broken. If set to 'or', breaking any listed bond pair in `break_bonds` is sufficient.
 ============================================ ============== ===========
 
 
@@ -164,6 +172,7 @@ cutoff_number                                50             The maximum number o
 use_rdchiral                                 True           If True, will apply templates with RDChiral, otherwise RDKit will be used.
 use_remote_models                            False          If True, will try to connect to remote Tensorflow servers.
 rescale_prior                                False          If True, will apply a softmax function to the priors.
+mask                                         ""             The path to a numpy .npz file containing a Boolean vector of masks for the reaction templates.
 ============================================ ============== ===========
 
 
