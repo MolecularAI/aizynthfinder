@@ -15,7 +15,6 @@
 - The multi-objective MCTS core algorithm is now implemented within the MCTS search functionality.
 - A separate GUI component has been introduced for doing MO tree analysis. Additional functionalities have been added to GUI widgets to set two rewards/objectives to MCTS search. Pareto front is automatically plotted if MO-MCTS is run. Route re-ordering is automatically disabled for MO-MCTS.
 - Preprocessing of the tree search can now be done using `aizynthcli`.
-- `ReagentConnectAvailabilityQuery` can be used as an internal stock query class that uses the CAG client for querying reagent connect for availability.
 - The `StockAvailablityScorer` has been updated such that it takes and additional `other_source_score` parameter.
 - A `cutoff_number` parameter can be provided to the multi-expansion strategy to obtain only the top predictions.
 - A `BrokenBondsScorer` has been created for scoring nodes and reaction trees based on the breaking of atom bonds.
