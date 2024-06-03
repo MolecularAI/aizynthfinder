@@ -1,0 +1,32 @@
+aizynthfinder.search package
+============================
+
+Subpackages
+-----------
+
+.. toctree::
+   :maxdepth: 4
+
+   aizynthfinder.search.breadth_first
+   aizynthfinder.search.dfpn
+   aizynthfinder.search.mcts
+   aizynthfinder.search.retrostar
+
+Submodules
+----------
+
+aizynthfinder.search.andor\_trees module
+----------------------------------------
+
+.. automodule:: aizynthfinder.search.andor_trees
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+Module contents
+---------------
+
+.. automodule:: aizynthfinder.search
+   :members:
+   :undoc-members:
+   :show-inheritance:

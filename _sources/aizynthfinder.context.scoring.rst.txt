@@ -1,0 +1,29 @@
+aizynthfinder.context.scoring package
+=====================================
+
+Submodules
+----------
+
+aizynthfinder.context.scoring.collection module
+-----------------------------------------------
+
+.. automodule:: aizynthfinder.context.scoring.collection
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+aizynthfinder.context.scoring.scorers module
+--------------------------------------------
+
+.. automodule:: aizynthfinder.context.scoring.scorers
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+Module contents
+---------------
+
+.. automodule:: aizynthfinder.context.scoring
+   :members:
+   :undoc-members:
+   :show-inheritance:
