@@ -422,7 +422,7 @@ def test_download_public_data(tmpdir, mocker, add_cli_arguments):
     filenames = glob.glob(str(tmpdir / "*.onnx"))
     assert len(filenames) == 3
 
-    filenames = glob.glob(str(tmpdir / "*.onnx"))
+    filenames = glob.glob(str(tmpdir / "*.hdf5"))
     assert len(filenames) == 1
 
     for filename in filenames:
