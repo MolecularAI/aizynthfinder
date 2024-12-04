@@ -19,7 +19,7 @@ from aizynthfinder.tools.download_public_data import main as download_main
 from aizynthfinder.tools.make_stock import main as make_stock_main
 
 try:
-    from aizynthfinder.interfaces.gui import ClusteringGui
+    from aizynthfinder.interfaces.gui.clustering import ClusteringGui
 except ImportError:
     SUPPORT_CLUSTERING = False
 else:

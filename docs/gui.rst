@@ -69,7 +69,7 @@ There is a GUI extension to perform clustering of the routes. Enter the followin
 .. code-block::
 
     %matplotlib inline
-    from aizynthfinder.interfaces.gui import ClusteringGui
+    from aizynthfinder.interfaces.gui.clustering import ClusteringGui
     ClusteringGui.from_app(app)
 
 
