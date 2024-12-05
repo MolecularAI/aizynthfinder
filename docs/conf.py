@@ -4,9 +4,9 @@ import sys
 sys.path.insert(0, os.path.abspath("."))
 
 project = "aizynthfinder"
-copyright = "2020-2022, Molecular AI group"
+copyright = "2020-2024, Molecular AI group"
 author = "Molecular AI group"
-release = "4.3.0"
+release = "4.3.1"
 
 # This make sure that the cli_help.txt file is properly formated
 with open("cli_help.txt", "r") as fileobj:

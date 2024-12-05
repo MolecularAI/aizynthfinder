@@ -1,5 +1,17 @@
 # CHANGELOG
 
+## Version 4.3.1 2024-12-05
+
+### Trival changes
+
+- Upgraded dependencies
+- Removed conda env file for user setup
+- Removed download of old HDF5 model files
+
+### Bug-fixes
+
+- Fixed import of clustering GUI causing issues
+
 ## Version 4.3.0 2024-05-22
 
 ### Features
