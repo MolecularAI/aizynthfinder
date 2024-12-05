@@ -1,0 +1,37 @@
+aizynthfinder.chem package
+==========================
+
+Submodules
+----------
+
+aizynthfinder.chem.mol module
+-----------------------------
+
+.. automodule:: aizynthfinder.chem.mol
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+aizynthfinder.chem.reaction module
+----------------------------------
+
+.. automodule:: aizynthfinder.chem.reaction
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+aizynthfinder.chem.serialization module
+---------------------------------------
+
+.. automodule:: aizynthfinder.chem.serialization
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+Module contents
+---------------
+
+.. automodule:: aizynthfinder.chem
+   :members:
+   :undoc-members:
+   :show-inheritance:
