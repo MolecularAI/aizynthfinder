@@ -6,6 +6,7 @@
 
 - Upgraded dependencies
 - Removed conda env file for user setup
+- Removed download of old HDF5 model files
 
 ### Bug-fixes
 
