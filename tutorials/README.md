@@ -21,3 +21,12 @@
 * How to score route with rxnutils
 * How to calculate route similarities
 * How to cluster routes
+
+## C - search parameters
+
+[Google co-lab](https://colab.research.google.com/github/MolecularAI/aizynthfinder/blob/tutorials/tutorials/C_search_parameters.ipynb)
+
+* How to modify the stock
+* How to add custom stock rules
+* How to use common search parameters
+* How to select and use different search algorithms
