@@ -305,7 +305,6 @@ def test_scoring_branched_route_not_in_stock(
     assert pytest.approx(cost_score, abs=1e-4) == 31.2344
 
 
-
 def test_reaction_class_scorer_tree(shared_datadir, default_config, load_reaction_tree):
     tree = ReactionTree.from_dict(
         load_reaction_tree("linear_route_w_metadata.json", remove_metadata=False)
