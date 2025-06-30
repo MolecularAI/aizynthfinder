@@ -8,6 +8,7 @@ from aizynthfinder.chem import (
 )
 from aizynthfinder.context.policy import (
     BondFilter,
+    FrozenSubstructureFilter,
     QuickKerasFilter,
     ReactantsCountFilter,
     TemplateBasedDirectExpansionStrategy,
@@ -425,3 +426,45 @@ def test_frozen_bond_filter(default_config):
 
     bond_filter = BondFilter("test", default_config)
     assert bond_filter(reaction) is None
+
+
+def test_frozen_substructure_filter(default_config):
+    mol = TreeMolecule(smiles="c1ccccc1Oc2ccccc2", parent=None)
+    reaction = SmilesBasedRetroReaction(
+        mol,
+        reactants_str="c1ccccc1O.c1ccccc1",
+    )
+
+    substr_filter = FrozenSubstructureFilter(
+        "test", default_config, smarts_list=["c-O-c"]
+    )
+    with pytest.raises(
+        RejectionException, match="because of broken substructure: c-O-c"
+    ):
+        substr_filter(reaction) is None
+
+
+def test_frozen_substructure_filter_not_in_product(default_config):
+    mol = TreeMolecule(smiles="c1ccccc1Sc2ccccc2", parent=None)
+    reaction = SmilesBasedRetroReaction(
+        mol,
+        reactants_str="c1ccccc1S.c1ccccc1",
+    )
+
+    substr_filter = FrozenSubstructureFilter(
+        "test", default_config, smarts_list=["c-O-c"]
+    )
+    assert substr_filter(reaction) is None
+
+
+def test_frozen_substructure_filter_not_broken(default_config):
+    mol = TreeMolecule(smiles="c1ccccc1Oc2ccccc2", parent=None)
+    reaction = SmilesBasedRetroReaction(
+        mol,
+        reactants_str="c1ccccc1Oc1ccccc1",
+    )
+
+    substr_filter = FrozenSubstructureFilter(
+        "test", default_config, smarts_list=["c-O-c"]
+    )
+    assert substr_filter(reaction) is None

@@ -1,5 +1,18 @@
 # CHANGELOG
 
+## Version 4.4.0 2025-06-30
+
+## Features
+
+- Add scorers that are wrappers around rxnutils scorers
+- Add filter policy for keeping substructures frozen
+- Add stock option based on molecular weight
+
+## Miscellaneous 
+
+- Add rxnutils as dependency
+- Remove routines in rxnutils to reduce code duplication
+
 ## Version 4.3.2 2025-04-07
 
 ### Trivial changes

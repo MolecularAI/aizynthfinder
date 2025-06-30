@@ -1,5 +1,6 @@
 """ Module containing a GUI extension for clustering
 """
+
 from __future__ import annotations
 
 from typing import TYPE_CHECKING
@@ -30,12 +31,11 @@ class ClusteringGui:
     GUI extension to cluster routes
 
     :param routes: the routes to cluster
-    :param content: what to cluster on
     """
 
-    def __init__(self, routes: RouteCollection, content: str = "both"):
+    def __init__(self, routes: RouteCollection):
         self._routes = routes
-        self._routes.distance_matrix(content=content, recreate=True)
+        self._routes.distance_matrix(recreate=True)
         self._input: StrDict = dict()
         self._output: StrDict = dict()
         self._buttons: StrDict = dict()
@@ -44,17 +44,16 @@ class ClusteringGui:
         self._create_output()
 
     @classmethod
-    def from_app(cls, app: AiZynthApp, content: str = "both"):
+    def from_app(cls, app: AiZynthApp):
         """
         Helper function to create a GUI from a GUI app interface
 
         :param app: the app to extract the routes from
-        :param content: what to cluster on
         :return: the GUI object
         """
         if app.finder.routes is None:
             raise ValueError("Cannot initialize GUI from no routes")
-        return ClusteringGui(app.finder.routes, content)
+        return ClusteringGui(app.finder.routes)
 
     def _create_dendrogram(self) -> None:
         dend_out = Output(

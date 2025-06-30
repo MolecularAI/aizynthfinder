@@ -1,5 +1,6 @@
 """ Module containing classes that interfaces different stock classes
 """
+
 from __future__ import annotations
 
 import copy
@@ -9,9 +10,9 @@ from typing import TYPE_CHECKING
 from aizynthfinder.chem import Molecule
 from aizynthfinder.context.collection import ContextCollection
 from aizynthfinder.context.stock.queries import (
+    STOCK_QUERY_ALIAS,
     InMemoryInchiKeyQuery,
     MolbloomFilterQuery,
-    STOCK_QUERY_ALIAS,
     StockQueryMixin,
 )
 from aizynthfinder.context.stock.queries import __name__ as queries_module
@@ -60,7 +61,12 @@ class Stock(ContextCollection):
     def __init__(self) -> None:
         super().__init__()
         self._exclude: Set[str] = set()
-        self._stop_criteria: StrDict = {"amount": None, "price": None, "counts": {}}
+        self._stop_criteria: StrDict = {
+            "amount": None,
+            "price": None,
+            "weight": None,
+            "counts": {},
+        }
         self._use_stop_criteria: bool = False
 
     def __contains__(self, mol: Molecule) -> bool:
@@ -235,7 +241,7 @@ class Stock(ContextCollection):
         """
         Set criteria that stop the search
 
-        The keys of the criteria can be "price" or "amount" which accepts numerical settings,
+        The keys of the criteria can be "price", "amount", or "weight" which accepts numerical settings,
         or "counts" that should be dictionary of maximum allowed count for each atomic symbol.
 
         Example:
@@ -245,6 +251,7 @@ class Stock(ContextCollection):
             criteria = {
                 "price": 5,
                 "amount": 100,
+                "weight": 250,
                 "counts": {
                     "C": 6,
                     "O": 4
@@ -257,6 +264,7 @@ class Stock(ContextCollection):
         self._stop_criteria = {
             "price": criteria.get("price"),
             "amount": criteria.get("amount"),
+            "weight": criteria.get("weight"),
             "counts": copy.deepcopy(criteria.get("size", criteria.get("counts"))),
         }
         self._use_stop_criteria = any(self._stop_criteria.values())
@@ -304,6 +312,9 @@ class Stock(ContextCollection):
         return price <= self._stop_criteria.get("price", price)
 
     def _apply_stop_criteria(self, mol: Molecule) -> bool:
+        if not self._apply_weight_criteria(mol):
+            return False
+
         if not self._apply_counts_criteria(mol):
             return False
 
@@ -316,6 +327,11 @@ class Stock(ContextCollection):
         for key in self.selection or []:
             self[key].clear_cache()
         return passes
+
+    def _apply_weight_criteria(self, mol: Molecule) -> bool:
+        if not self._stop_criteria["weight"]:
+            return True
+        return mol.weight <= self._stop_criteria["weight"]
 
     def _mol_property(self, mol, property_name):
         values = []

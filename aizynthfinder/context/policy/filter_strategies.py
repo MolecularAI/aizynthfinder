@@ -1,19 +1,18 @@
 """ Module containing classes that implements different filter policy strategies
 """
+
 from __future__ import annotations
 
 import abc
 from typing import TYPE_CHECKING
 
 import numpy as np
+from rdkit import Chem
 
 from aizynthfinder.chem import TemplatedRetroReaction
 from aizynthfinder.context.policy.utils import _make_fingerprint
 from aizynthfinder.utils.bonds import BrokenBonds
-from aizynthfinder.utils.exceptions import (
-    PolicyException,
-    RejectionException,
-)
+from aizynthfinder.utils.exceptions import PolicyException, RejectionException
 from aizynthfinder.utils.logging import logger
 from aizynthfinder.utils.models import load_model
 
@@ -182,8 +181,46 @@ class ReactantsCountFilter(FilterStrategy):
             )
 
 
+class FrozenSubstructureFilter(FilterStrategy):
+    """
+    Filter for rejecting reactions that break up substructures
+
+    :param key: the key or label
+    :param config: the configuration of the tree search
+    :param smarts_list: the SMARTS patterns of the sub-structures
+    """
+
+    _required_kwargs: List[str] = ["smarts_list"]
+
+    def __init__(self, key: str, config: Configuration, **kwargs: Any) -> None:
+        super().__init__(key, config, **kwargs)
+        self._smarts_list = kwargs.get("smarts_list", [])
+        self._mol_lists = [Chem.MolFromSmarts(smarts) for smarts in self._smarts_list]
+        self._logger.info(
+            f"Loading frozen substructure filter to {key} with {len(self._mol_lists)} substructures"
+        )
+
+    def apply(self, reaction: RetroReaction) -> None:
+        for mol in self._mol_lists:
+            # If it did not exists in the product, we cannot expect it to be present in the reactants
+            if not reaction.mol.rd_mol.HasSubstructMatch(mol):
+                continue
+
+            found = False
+            for reactant in reaction.reactants[reaction.index]:
+                if reactant.rd_mol.HasSubstructMatch(mol):
+                    found = True
+                    break
+
+            if not found:
+                raise RejectionException(
+                    f"{reaction} was filtered out because of broken substructure: {Chem.MolToSmarts(mol)}"
+                )
+
+
 FILTER_STRATEGY_ALIAS = {
     "feasibility": "QuickKerasFilter",
     "quick_keras_filter": "QuickKerasFilter",
     "reactants_count": "ReactantsCountFilter",
+    "frozen_substructure": "FrozenSubstructureFilter",
 }

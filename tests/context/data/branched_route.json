@@ -10,9 +10,7 @@
       "hide": false,
       "smiles": "OOc1ccc(-c2ccc(NC3CCCC(C4C=CC=C4)C3)cc2)cc1>>OOc1ccc(-c2ccccc2)cc1.NC1CCCC(C2C=CC=C2)C1",
       "is_reaction": true,
-      "metadata": {
-        "mapped_reaction_smiles": "[OH:1][O:2][c:3]1[cH:4][cH:5][c:6](-[c:7]2[cH:8][cH:9][c:10]([NH:11][CH:12]3[CH2:13][CH2:14][CH2:15][CH:16]([CH:17]4[CH:18]=[CH:19][CH:20]=[CH:21]4)[CH2:22]3)[cH:23][cH:24]2)[cH:25][cH:26]1>>[NH2:11][CH:12]1[CH2:13][CH2:14][CH2:15][CH:16]([CH:17]2[CH:18]=[CH:19][CH:20]=[CH:21]2)[CH2:22]1.[OH:1][O:2][c:3]1[cH:4][cH:5][c:6](-[c:7]2[cH:8][cH:9][cH:10][cH:23][cH:24]2)[cH:25][cH:26]1"
-      },
+      "metadata": {},
       "children": [
         {
           "type": "mol",
@@ -26,9 +24,7 @@
               "hide": false,
               "smiles": "OOc1ccc(-c2ccccc2)cc1>>c1ccccc1.OOc1ccccc1",
               "is_reaction": true,
-              "metadata": {
-                "mapped_reaction_smiles": "[OH:1][O:2][c:3]1[cH:4][cH:5][c:6](-[c:7]2[cH:8][cH:9][cH:10][cH:23][cH:24]2)[cH:25][cH:26]1>>[OH:1][O:2][c:3]1[cH:4][cH:5][cH:6][cH:25][cH:26]1.[cH:7]1[cH:8][cH:9][cH:10][cH:23][cH:24]1"
-              },
+              "metadata": {},
               "children": [
                 {
                   "type": "mol",
@@ -49,9 +45,7 @@
                       "hide": false,
                       "smiles": "OOc1ccccc1>>O.Oc1ccccc1",
                       "is_reaction": true,
-                      "metadata": {
-                        "mapped_reaction_smiles": "[OH:1][O:2][c:3]1[cH:4][cH:5][cH:6][cH:25][cH:26]1>>[OH2:1].[OH:2][c:3]1[cH:4][cH:5][cH:6][cH:25][cH:26]1"
-                      },
+                      "metadata": {},
                       "children": [
                         {
                           "type": "mol",
@@ -87,9 +81,7 @@
               "hide": false,
               "smiles": "NC1CCCC(C2C=CC=C2)C1>>NC1CCCCC1.C1=CCC=C1",
               "is_reaction": true,
-              "metadata": {
-                "mapped_reaction_smiles": "[NH2:11][CH:12]1[CH2:13][CH2:14][CH2:15][CH:16]([CH:17]2[CH:18]=[CH:19][CH:20]=[CH:21]2)[CH2:22]1>>[CH:17]1=[CH:18][CH2:19][CH:20]=[CH:21]1.[NH2:11][CH:12]1[CH2:13][CH2:14][CH2:15][CH2:16][CH2:22]1"
-              },
+              "metadata": {},
               "children": [
                 {
                   "type": "mol",

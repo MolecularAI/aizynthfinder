@@ -1,19 +1,26 @@
+from networkx import get_node_attributes, set_node_attributes
 import numpy as np
 import pytest
+
+
 from aizynthfinder.chem import Molecule, UniqueMolecule
 from aizynthfinder.context.config import Configuration
 from aizynthfinder.context.scoring import (
     AverageTemplateOccurrenceScorer,
     BrokenBondsScorer,
     CombinedScorer,
+    DeepSetScorer,
     DeltaSyntheticComplexityScorer,
+    FractionInSourceStockScorer,
     FractionInStockScorer,
-    MaxTransformScorerer,
+    MaxTransformScorer,
+    FractionOfIntermediatesInStockScorer,
     NumberOfPrecursorsInStockScorer,
     NumberOfPrecursorsScorer,
     NumberOfReactionsScorer,
     PriceSumScorer,
     ReactionClassMembershipScorer,
+    ReactionClassRankScorer,
     RouteCostScorer,
     RouteSimilarityScorer,
     ScorerCollection,
@@ -139,7 +146,10 @@ def test_scorers_one_mcts_node(default_config):
 
     assert pytest.approx(StateScorer(default_config)(node), abs=1e-3) == 0.0497
     assert FractionInStockScorer(default_config)(node) == 0
-    assert MaxTransformScorerer(default_config)(node) == 0
+    assert (
+        FractionInSourceStockScorer(default_config, source_stocks=["stock"])(node) == 0
+    )
+    assert MaxTransformScorer(default_config)(node) == 0
     assert NumberOfReactionsScorer(default_config)(node) == 0
     assert NumberOfPrecursorsScorer(default_config)(node) == 1
     assert NumberOfPrecursorsInStockScorer(default_config)(node) == 0
@@ -147,12 +157,34 @@ def test_scorers_one_mcts_node(default_config):
     assert RouteCostScorer(default_config)(node) == 10
 
 
-def test_scoring_branched_mcts_tree(default_config, setup_branched_mcts):
+def test_scoring_branched_mcts_tree(default_config, setup_branched_mcts, setup_stock):
     _, node = setup_branched_mcts()
+
+    config2 = Configuration()
+    setup_stock(config2, "NC1CCCC(C2C=CC=C2)C1", "OOc1ccccc1")
+    default_config.stock.load(config2.stock["stock"], "stock2")
+    default_config.stock.select(["stock"])
 
     assert pytest.approx(StateScorer(default_config)(node), abs=1e-4) == 0.9866
     assert FractionInStockScorer(default_config)(node) == 1
-    assert MaxTransformScorerer(default_config)(node) == 3
+    assert (
+        FractionInSourceStockScorer(default_config, source_stocks=["stock"])(node) == 1
+    )
+    assert (
+        FractionInSourceStockScorer(default_config, source_stocks=["not-a-stock"])(node)
+        == 0
+    )
+
+    assert (
+        round(
+            FractionOfIntermediatesInStockScorer(default_config, stock_name="stock2")(
+                node
+            ),
+            4,
+        )
+        == 0.6667
+    )
+    assert MaxTransformScorer(default_config)(node) == 3
     assert NumberOfReactionsScorer()(node) == 4
     assert NumberOfPrecursorsScorer(default_config)(node) == 5
     assert NumberOfPrecursorsInStockScorer(default_config)(node) == 5
@@ -161,12 +193,42 @@ def test_scoring_branched_mcts_tree(default_config, setup_branched_mcts):
     assert pytest.approx(cost_score, abs=1e-4) == 13.6563
 
 
+def test_scoring_branched_mcts_tree_root(default_config, setup_stock):
+    # Test a route that is solved but has no reactions
+    setup_stock(None, "CCCCOc1ccc(CC(=O)N(C)O)cc1")
+    tree = MctsSearchTree(default_config, root_smiles="CCCCOc1ccc(CC(=O)N(C)O)cc1")
+    node = tree.root
+
+    assert pytest.approx(StateScorer(default_config)(node), abs=1e-4) == 0.9991
+    assert FractionInStockScorer(default_config)(node) == 1.0
+    assert (
+        FractionInSourceStockScorer(default_config, source_stocks=["stock"])(node)
+        == 1.0
+    )
+    assert (
+        FractionInSourceStockScorer(default_config, source_stocks=["not-a-stock"])(node)
+        == 0
+    )
+    assert (
+        FractionOfIntermediatesInStockScorer(default_config, stock_name="stock")(node)
+        == 1.0
+    )
+    assert MaxTransformScorer(default_config)(node) == 0
+    assert NumberOfReactionsScorer()(node) == 0
+    assert NumberOfPrecursorsScorer(default_config)(node) == 1
+    assert NumberOfPrecursorsInStockScorer(default_config)(node) == 1
+    assert PriceSumScorer(default_config)(node) == 1.0
+    assert RouteCostScorer(default_config)(node) == 1.0
+    assert StockAvailabilityScorer(default_config, {"stock": 1})(node) == 1.0
+    assert ReactionClassMembershipScorer(default_config, ["abc"])(node) == 1.0
+
+
 def test_scoring_branched_mcts_tree_not_in_stock(default_config, setup_branched_mcts):
     _, node = setup_branched_mcts("O")
 
     assert pytest.approx(StateScorer(default_config)(node), abs=1e-4) == 0.7966
     assert FractionInStockScorer(default_config)(node) == 4 / 5
-    assert MaxTransformScorerer(default_config)(node) == 3
+    assert MaxTransformScorer(default_config)(node) == 3
     assert NumberOfReactionsScorer()(node) == 4
     assert NumberOfPrecursorsScorer(default_config)(node) == 5
     assert NumberOfPrecursorsInStockScorer(default_config)(node) == 4
@@ -175,19 +237,31 @@ def test_scoring_branched_mcts_tree_not_in_stock(default_config, setup_branched_
     assert pytest.approx(cost_score, abs=1e-4) == 31.2344
 
 
-def test_scorers_tree_one_node_route(default_config):
+def test_scorers_tree_one_node_route(default_config, setup_stock, shared_datadir):
+    setup_stock(None, "CCCCOc1ccc(CC(=O)N(C)O)cc1")
     tree = ReactionTree()
     tree.root = UniqueMolecule(smiles="CCCCOc1ccc(CC(=O)N(C)O)cc1")
     tree.graph.add_node(tree.root)
+    tree.graph.nodes[tree.root]["in_stock"] = True
 
-    assert pytest.approx(StateScorer(default_config)(tree), abs=1e-3) == 0.0497
-    assert FractionInStockScorer(default_config)(tree) == 0
-    assert MaxTransformScorerer(default_config)(tree) == -1
+    assert pytest.approx(StateScorer(default_config)(tree), abs=1e-3) == 0.9991
+    assert FractionInStockScorer(default_config)(tree) == 1
+    assert (
+        FractionInSourceStockScorer(default_config, source_stocks=["stock"])(tree)
+        == 1.0
+    )
+    assert (
+        FractionOfIntermediatesInStockScorer(default_config, stock_name="stock")(tree)
+        == 1.0
+    )
+    assert MaxTransformScorer(default_config)(tree) == -1
     assert NumberOfReactionsScorer(default_config)(tree) == 0
     assert NumberOfPrecursorsScorer(default_config)(tree) == 1
-    assert NumberOfPrecursorsInStockScorer(default_config)(tree) == 0
-    assert PriceSumScorer(default_config)(tree) == 10
-    assert RouteCostScorer(default_config)(tree) == 10
+    assert NumberOfPrecursorsInStockScorer(default_config)(tree) == 1
+    assert PriceSumScorer(default_config)(tree) == 1
+    assert RouteCostScorer(default_config)(tree) == 1
+    assert StockAvailabilityScorer(default_config, {"stock": 1})(tree) == 1.0
+    assert ReactionClassMembershipScorer(default_config, ["abc"])(tree) == 1.0
 
 
 def test_scoring_branched_route(default_config, setup_branched_reaction_tree):
@@ -195,7 +269,14 @@ def test_scoring_branched_route(default_config, setup_branched_reaction_tree):
 
     assert pytest.approx(StateScorer(default_config)(tree), abs=1e-4) == 0.9866
     assert FractionInStockScorer(default_config)(tree) == 1
-    assert MaxTransformScorerer(default_config)(tree) == 3
+    assert (
+        FractionInSourceStockScorer(default_config, source_stocks=["stock"])(tree) == 1
+    )
+    assert (
+        FractionInSourceStockScorer(default_config, source_stocks=["not-a-stock"])(tree)
+        == 0
+    )
+    assert MaxTransformScorer(default_config)(tree) == 3
     assert NumberOfReactionsScorer()(tree) == 4
     assert NumberOfPrecursorsScorer(default_config)(tree) == 5
     assert NumberOfPrecursorsInStockScorer(default_config)(tree) == 5
@@ -210,8 +291,12 @@ def test_scoring_branched_route_not_in_stock(
     tree = setup_branched_reaction_tree("O")
 
     assert pytest.approx(StateScorer(default_config)(tree), abs=1e-4) == 0.7966
+    assert (
+        FractionInSourceStockScorer(default_config, source_stocks=["stock"])(tree)
+        == 4 / 5
+    )
     assert FractionInStockScorer(default_config)(tree) == 4 / 5
-    assert MaxTransformScorerer(default_config)(tree) == 3
+    assert MaxTransformScorer(default_config)(tree) == 3
     assert NumberOfReactionsScorer()(tree) == 4
     assert NumberOfPrecursorsScorer(default_config)(tree) == 5
     assert NumberOfPrecursorsInStockScorer(default_config)(tree) == 4
@@ -220,12 +305,44 @@ def test_scoring_branched_route_not_in_stock(
     assert pytest.approx(cost_score, abs=1e-4) == 31.2344
 
 
-def test_reaction_class_scorer_tree(default_config, load_reaction_tree):
-    tree = ReactionTree.from_dict(load_reaction_tree("linear_route_w_metadata.json"))
+
+def test_reaction_class_scorer_tree(shared_datadir, default_config, load_reaction_tree):
+    tree = ReactionTree.from_dict(
+        load_reaction_tree("linear_route_w_metadata.json", remove_metadata=False)
+    )
     scorer = ReactionClassMembershipScorer(default_config, reaction_class_set=["abc"])
 
     # one within the set, one outside the set
-    assert scorer(tree) == 0.1
+    assert round(scorer(tree), 4) == 0.1
+    scorer2 = ReactionClassMembershipScorer(
+        default_config, reaction_class_set=str(shared_datadir / "reaction_classes.txt")
+    )
+    assert round(scorer2(tree), 4) == 0.1
+
+    # both reaction classes in the set
+    scorer3 = ReactionClassMembershipScorer(
+        default_config, reaction_class_set=["abc", "xyz"]
+    )
+    assert round(scorer3(tree), 4) == 1.0
+
+    # empty list => no reaction classes in the set
+    scorer4 = ReactionClassMembershipScorer(default_config, reaction_class_set=[])
+    assert round(scorer4(tree), 4) == 0.01
+
+
+def test_reaction_scorer_w_power_scaling(default_config, load_reaction_tree):
+    n_reaction_scorer = NumberOfReactionsScorer(default_config)
+    scorer = NumberOfReactionsScorer(default_config, scaler_params={"name": "power"})
+
+    tree = ReactionTree.from_dict(load_reaction_tree("linear_route_w_metadata.json"))
+
+    assert n_reaction_scorer(tree) == 2
+    assert round(scorer(tree), 4) == 0.9604
+
+    tree = ReactionTree.from_dict(load_reaction_tree("branched_route.json"))
+
+    assert n_reaction_scorer(tree) == 4
+    assert round(scorer(tree), 4) == 0.9224
 
 
 def test_stock_availability_scorer_tree(
@@ -271,11 +388,83 @@ def test_stock_availability_scorer_tree_other_source_score(
     assert pytest.approx(scorer(tree)) == 0.01
 
 
+def test_fraction_in_source_stock_score(
+    default_config, load_reaction_tree, setup_stock
+):
+    # Setting up two stocks for this test
+    setup_stock(
+        default_config,
+        "NC1CCCC(C2C=CC=C2)C1",
+    )
+    config2 = Configuration()
+    setup_stock(
+        config2,
+        "c1ccccc1",
+    )
+    default_config.stock.load(config2.stock["stock"], "stock2")
+    default_config.stock.select(["stock", "stock2"])
+    tree = ReactionTree.from_dict(load_reaction_tree("linear_route_w_metadata.json"))
+
+    # Not specifying source stock
+    with pytest.raises(
+        TypeError, match="missing 1 required positional argument: 'source_stocks'"
+    ):
+        FractionInSourceStockScorer(default_config)
+
+    # Only specifying one stock explicitly
+    scorer = FractionInSourceStockScorer(default_config, source_stocks=["stock2"])
+
+    # (0+1+0)/3 one in stock, one in stock2, one not in stock
+    assert round(scorer(tree), 4) == 0.3333
+
+    # Specifying both stocks explicitly
+    scorer = FractionInSourceStockScorer(
+        default_config, source_stocks=["stock", "stock2"]
+    )
+
+    # (1+1+0)/3 one in stock, one in stock2, one not in stock
+    assert round(scorer(tree), 4) == 0.6667
+
+
+def test_fraction_intermediates_in_stock_score(
+    default_config, load_reaction_tree, setup_stock
+):
+    # Setting up two stocks for this test
+    setup_stock(
+        default_config,
+        "NC1CCCC(C2C=CC=C2)C1",
+        "c1ccccc1",
+    )
+    config2 = Configuration()
+    setup_stock(config2, "OOc1ccc(-c2ccccc2)cc1")
+    default_config.stock.load(config2.stock["stock"], "stock2")
+    default_config.stock.select(["stock"])
+    tree = ReactionTree.from_dict(load_reaction_tree("linear_route_w_metadata.json"))
+
+    # Not specifying source stock
+    with pytest.raises(
+        TypeError, match="missing 1 required positional argument: 'stock_name'"
+    ):
+        FractionOfIntermediatesInStockScorer(default_config)
+
+    # Only specifying one stock explicitly
+    scorer = FractionOfIntermediatesInStockScorer(default_config, stock_name="stock2")
+
+    # one intermediate in stock2 (the only intermediate node which is not in stock)
+    assert round(scorer(tree), 4) == 1
+
+    # Specifying stock the same stock as the one used in search
+    scorer = FractionOfIntermediatesInStockScorer(default_config, stock_name="stock")
+
+    # no intermediates are found in stock since the same stock was used in the search
+    assert round(scorer(tree), 4) == 0
+
+
 def test_create_scorer_collection(default_config):
     collection = ScorerCollection(default_config)
     collection.create_default_scorers()
 
-    assert len(collection) == 5
+    assert len(collection) == 4
 
     assert "state score" in collection.names()
     assert "number of reactions" in collection.names()
@@ -367,7 +556,7 @@ def test_score_vector(default_config, setup_branched_mcts):
     collection.select_all()
 
     scores = collection.score_vector(node)
-    assert pytest.approx(scores, abs=1e-3) == [0.9866, 4, 5, 5, 0]
+    assert pytest.approx(scores, abs=1e-3) == [0.9866, 4, 5, 5]
 
 
 def test_score_vector_no_selection(default_config, setup_branched_mcts):
@@ -383,7 +572,7 @@ def test_weighted_sum_score(default_config, setup_branched_mcts):
     collection = ScorerCollection(default_config)
     collection.select_all()
 
-    score = collection.weighted_score(node, weights=[0.0, 0.5, 1.0, 1.0, 0.0])
+    score = collection.weighted_score(node, weights=[0.0, 0.5, 1.0, 1.0])
     assert score == 12
 
     with pytest.raises(ScorerException):
@@ -450,6 +639,38 @@ def test_combined_scorer_node_default_weights(default_config, setup_mcts_broken_
 
     assert repr(combined_scorer) == "state score + broken bonds"
     assert round(score, 4) == 0.747
+
+
+def test_combined_scorer_node_default_weights_geometric(
+    default_config, setup_mcts_broken_bonds
+):
+    default_config.search.break_bonds = [(1, 2)]
+    _, node = setup_mcts_broken_bonds(config=default_config)
+
+    combined_scorer = CombinedScorer(
+        default_config,
+        ["state score", "broken bonds"],
+        combine_strategy="mean-geometric",
+    )
+    score = combined_scorer(node)
+
+    assert repr(combined_scorer) == "state score + broken bonds (mean-geometric)"
+    assert round(score, 4) == 0.705
+
+
+def test_combined_scorer_node_default_weights_product(
+    default_config, setup_mcts_broken_bonds
+):
+    default_config.search.break_bonds = [(1, 2)]
+    _, node = setup_mcts_broken_bonds(config=default_config)
+
+    combined_scorer = CombinedScorer(
+        default_config, ["state score", "broken bonds"], combine_strategy="product"
+    )
+    score = combined_scorer(node)
+
+    assert repr(combined_scorer) == "state score + broken bonds (product)"
+    assert round(score, 4) == 0.497
 
 
 def test_combined_scorer_node(default_config, setup_mcts_broken_bonds):
@@ -547,7 +768,7 @@ def test_delta_complexity_scorer_tree(
     default_config, mocker, setup_branched_reaction_tree
 ):
     tree = setup_branched_reaction_tree()
-    calc_patch = mocker.patch("aizynthfinder.context.scoring.scorers.SCScore")
+    calc_patch = mocker.patch("aizynthfinder.context.scoring.scorers_mols.SCScore")
     calc_patch.return_value.return_value = 1.0
 
     scorer = DeltaSyntheticComplexityScorer(default_config, "dummy")
@@ -557,9 +778,65 @@ def test_delta_complexity_scorer_tree(
 
 def test_delta_complexity_scorer_node(default_config, mocker, setup_branched_mcts):
     _, node = setup_branched_mcts()
-    calc_patch = mocker.patch("aizynthfinder.context.scoring.scorers.SCScore")
+    calc_patch = mocker.patch("aizynthfinder.context.scoring.scorers_mols.SCScore")
     calc_patch.return_value.return_value = 1.0
 
     scorer = DeltaSyntheticComplexityScorer(default_config, "dummy")
 
     assert pytest.approx(scorer(node), abs=1e-3) == 0.2727
+
+
+def test_reaction_class_rank(default_config, load_reaction_tree, tmpdir):
+    # Only test with a tree for this scorer as it is the same
+    # functionality for node. Also don't need extensive testing,
+    # because it is a wrapper around rxnutils.
+    class_rank_path = str(tmpdir / "ranks.csv")
+    with open(class_rank_path, "w") as fileobj:
+        fileobj.write("reaction_class,rank_score\n")
+        fileobj.write("abc,6\n")
+        fileobj.write("xyz,5\n")
+
+    preferred_classes_path = str(tmpdir / "classes.txt")
+    with open(preferred_classes_path, "w") as fileobj:
+        fileobj.write("abc\n")
+
+    tree = ReactionTree.from_dict(
+        load_reaction_tree("linear_route_w_metadata.json", remove_metadata=False)
+    )
+
+    scorer = ReactionClassRankScorer(
+        default_config, class_rank_path, preferred_classes_path
+    )
+
+    assert scorer(tree) == pytest.approx(0.6666, abs=1e-4)
+
+
+def test_deepset_scorer(default_config, load_reaction_tree, tmpdir, mocker):
+    # Only test with a tree for this scorer as it is the same
+    # functionality for node. Also don't need extensive testing,
+    # because it is a wrapper around rxnutils.
+    class_rank_path = str(tmpdir / "ranks.csv")
+    with open(class_rank_path, "w") as fileobj:
+        fileobj.write("reaction_class,rank_score\n")
+        fileobj.write("0.0,6\n")
+
+    tree = ReactionTree.from_dict(
+        load_reaction_tree("linear_route_w_metadata.json", remove_metadata=False)
+    )
+    # The classifications in the json is unfortunately note valid classifications
+    for rxn in tree.reactions():
+        rxn.metadata["classification"] = "0.0"
+
+    mocked_onxx_model = mocker.patch(
+        "rxnutils.routes.deepset.scoring.onnxruntime.InferenceSession"
+    )
+    # The first return is for the SCScore, the second for the DeepSet model
+    mocked_onxx_model.return_value.run.side_effect = [[[2]], [5.0]]
+    scorer = DeepSetScorer(
+        default_config,
+        "dummy",
+        "dummy",
+        class_rank_path,
+    )
+
+    assert scorer(tree) == pytest.approx(3.99, abs=1e-2)

@@ -10,13 +10,9 @@ from typing import TYPE_CHECKING
 
 import networkx as nx
 from networkx.algorithms.traversal.depth_first_search import dfs_tree
-
-try:
-    from route_distances.route_distances import route_distances_calculator
-except ImportError:
-    SUPPORT_DISTANCES = False
-else:
-    SUPPORT_DISTANCES = True
+from rxnutils.routes.comparison import simple_route_similarity
+from rxnutils.routes.image import RouteImageFactory
+from rxnutils.routes.readers import read_aizynthfinder_dict
 
 from aizynthfinder.chem import (
     FixedRetroReaction,
@@ -24,7 +20,6 @@ from aizynthfinder.chem import (
     UniqueMolecule,
     none_molecule,
 )
-from aizynthfinder.utils.image import RouteImageFactory
 
 if TYPE_CHECKING:
     from aizynthfinder.chem import RetroReaction
@@ -33,6 +28,7 @@ if TYPE_CHECKING:
         Dict,
         FrameColors,
         Iterable,
+        List,
         Optional,
         PilImage,
         StrDict,
@@ -85,6 +81,19 @@ class ReactionTree:
             "is_solved": self.is_solved,
         }
 
+    def child_reactions(self, reaction: FixedRetroReaction) -> List[FixedRetroReaction]:
+        """
+        Return the child reactions of a reaction node in the tree.
+
+        :param reaction: the query node (reaction)
+        :return: child reactions
+        """
+        child_molecule_nodes = self.graph.successors(reaction)
+        reaction_nodes = []
+        for molecule_node in child_molecule_nodes:
+            reaction_nodes.extend(list(self.graph.successors(molecule_node)))
+        return reaction_nodes
+
     def depth(self, node: Union[UniqueMolecule, FixedRetroReaction]) -> int:
         """
         Return the depth of a node in the route
@@ -94,25 +103,18 @@ class ReactionTree:
         """
         return self.graph.nodes[node].get("depth", -1)
 
-    def distance_to(self, other: "ReactionTree", content: str = "both") -> float:
+    def distance_to(self, other: "ReactionTree") -> float:
         """
         Calculate the distance to another reaction tree
 
-        This is a tree edit distance, with unit cost to
-        insert and deleted nodes, and the Jaccard distance for substituting nodes
+        This is a simple distance based on a route similarity
 
         :param other: the reaction tree to compare to
-        :param content: determine what part of the tree to include in the calculation
         :return: the distance between the routes
         """
-        if not SUPPORT_DISTANCES:
-            raise ValueError(
-                "Distance calculations are not supported by this installation."
-                " Please install aizynthfinder with extras dependencies."
-            )
-        calculator = route_distances_calculator("ted", content=content)
-        distances = calculator([self.to_dict(), other.to_dict()])
-        return distances[0, 1]
+        route1 = read_aizynthfinder_dict(self.to_dict())
+        route2 = read_aizynthfinder_dict(other.to_dict())
+        return 1.0 - float(simple_route_similarity([route1, route2])[0, 1])
 
     def hash_key(self) -> str:
         """

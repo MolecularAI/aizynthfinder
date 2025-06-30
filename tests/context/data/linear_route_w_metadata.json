@@ -15,6 +15,7 @@
       "smiles": "OOc1ccc(-c2ccc(NC3CCCC(C4C=CC=C4)C3)cc2)cc1>>OOc1ccc(-c2ccccc2)cc1.NC1CCCC(C2C=CC=C2)C1",
       "is_reaction": true,
       "metadata": {
+        "mapped_reaction_smiles": "[NH:1]([CH:2]1[CH2:3][CH2:4][CH2:5][CH:6]([CH:7]2[CH:8]=[CH:9][CH:10]=[CH:11]2)[CH2:12]1)[c:22]1[cH:21][cH:20][c:19](-[c:18]2[cH:17][cH:16][c:15]([O:14][OH:13])[cH:26][cH:25]2)[cH:24][cH:23]1>>[NH2:1][CH:2]1[CH2:3][CH2:4][CH2:5][CH:6]([CH:7]2[CH:8]=[CH:9][CH:10]=[CH:11]2)[CH2:12]1.[OH:13][O:14][c:15]1[cH:16][cH:17][c:18](-[c:19]2[cH:20][cH:21][cH:22][cH:23][cH:24]2)[cH:25][cH:26]1",
         "classification": "abc"
       },
       "children": [
@@ -38,7 +39,8 @@
               "smiles": "OOc1ccc(-c2ccccc2)cc1>>c1ccccc1.OOc1ccccc1",
               "is_reaction": true,
               "metadata": {
-                "classification": "xyz"
+                "classification": "xyz",
+                "mapped_reaction_smiles": "[OH:1][O:2][c:3]1[cH:4][cH:5][c:6](-[c:9]2[cH:10][cH:11][cH:12][cH:13][cH:14]2)[cH:7][cH:8]1>>[OH:1][O:2][c:3]1[cH:4][cH:5][cH:6][cH:7][cH:8]1.[cH:9]1[cH:10][cH:11][cH:12][cH:13][cH:14]1"
               },
               "children": [
                 {

@@ -1,19 +1,21 @@
 """ Module containing classes used to score the reaction routes.
 """
+
 from __future__ import annotations
 
 from typing import TYPE_CHECKING
 
 from aizynthfinder.context.collection import ContextCollection
-from aizynthfinder.context.scoring.scorers import (
-    AverageTemplateOccurrenceScorer,
+from aizynthfinder.context.scoring.scorers import StateScorer
+from aizynthfinder.context.scoring.scorers import __name__ as scorers_module
+from aizynthfinder.context.scoring.scorers_mols import (
     NumberOfPrecursorsInStockScorer,
     NumberOfPrecursorsScorer,
+)
+from aizynthfinder.context.scoring.scorers_reactions import (
     NumberOfReactionsScorer,
     Scorer,
-    StateScorer,
 )
-from aizynthfinder.context.scoring.scorers import __name__ as scorers_module
 from aizynthfinder.reactiontree import ReactionTree
 from aizynthfinder.search.mcts import MctsNode
 from aizynthfinder.utils.exceptions import ScorerException
@@ -33,7 +35,6 @@ _SIMPLE_SCORERS = [
     NumberOfReactionsScorer,
     NumberOfPrecursorsScorer,
     NumberOfPrecursorsInStockScorer,
-    AverageTemplateOccurrenceScorer,
 ]
 
 

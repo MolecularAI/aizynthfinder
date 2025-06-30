@@ -344,6 +344,24 @@ def test_counts_filter(default_config, make_stock_query):
     assert mol2 not in stock
 
 
+def test_weight_filter(default_config, make_stock_query):
+    mol1 = Molecule(smiles="c1ccccc1")  # weight ca 78
+    mol2 = Molecule(smiles="CC(=O)CO")  # weight ca 74
+    stock_query = make_stock_query([mol1, mol2])
+    stock = default_config.stock
+
+    stock.load(stock_query, "stock1")
+    stock.select(["stock1"])
+
+    assert mol1 in stock
+    assert mol2 in stock
+
+    stock.set_stop_criteria({"weight": 75})
+
+    assert mol1 not in stock
+    assert mol2 in stock
+
+
 def test_no_entries_filter(default_config, make_stock_query):
     stock_query = make_stock_query([])
     stock = default_config.stock

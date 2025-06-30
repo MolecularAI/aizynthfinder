@@ -6,7 +6,7 @@ sys.path.insert(0, os.path.abspath("."))
 project = "aizynthfinder"
 copyright = "2020-2025, Molecular AI group"
 author = "Molecular AI group"
-release = "4.3.2"
+release = "4.4.0"
 
 # This make sure that the cli_help.txt file is properly formated
 with open("cli_help.txt", "r") as fileobj:
