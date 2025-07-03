@@ -1,0 +1,202 @@
+<!DOCTYPE html>
+
+<html lang="en" data-content_root="./">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <title>Python interface &#8212; aizynthfinder 4.4.0 documentation</title>
+    <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=5ecbeea2" />
+    <link rel="stylesheet" type="text/css" href="_static/alabaster.css?v=a66d8bb5" />
+    <script src="_static/documentation_options.js?v=2f20d6c1"></script>
+    <script src="_static/doctools.js?v=9a2dae69"></script>
+    <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="Configuration file" href="configuration.html" />
+    <link rel="prev" title="Command-line interface" href="cli.html" />
+   
+  <link rel="stylesheet" href="_static/custom.css" type="text/css" />
+  
+
+  
+  
+
+  </head><body>
+  <div class="document">
+    
+      <div class="sphinxsidebar" role="navigation" aria-label="Main">
+        <div class="sphinxsidebarwrapper">
+<h1 class="logo"><a href="index.html">aizynthfinder</a></h1>
+
+
+
+<p class="blurb">A fast, robust and flexible software for retrosynthetic planning</p>
+
+
+
+
+
+
+<h3>Navigation</h3>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="gui.html">Graphical user interface</a></li>
+<li class="toctree-l1"><a class="reference internal" href="cli.html">Command-line interface</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Python interface</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#expansion-interface">Expansion interface</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#further-reading">Further reading</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="configuration.html">Configuration file</a></li>
+<li class="toctree-l1"><a class="reference internal" href="stocks.html">Stocks</a></li>
+<li class="toctree-l1"><a class="reference internal" href="scoring.html">Scoring</a></li>
+<li class="toctree-l1"><a class="reference internal" href="howto.html">How-to</a></li>
+<li class="toctree-l1"><a class="reference internal" href="aizynthfinder.html">aizynthfinder package</a></li>
+<li class="toctree-l1"><a class="reference internal" href="sequences.html">Sequences</a></li>
+<li class="toctree-l1"><a class="reference internal" href="relationships.html">Relationships</a></li>
+</ul>
+
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="index.html">Documentation overview</a><ul>
+      <li>Previous: <a href="cli.html" title="previous chapter">Command-line interface</a></li>
+      <li>Next: <a href="configuration.html" title="next chapter">Configuration file</a></li>
+  </ul></li>
+</ul>
+</div>
+<search id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"/>
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</search>
+<script>document.getElementById('searchbox').style.display = "block"</script>
+
+
+
+
+
+
+
+
+        </div>
+      </div>
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          
+
+          <div class="body" role="main">
+            
+  <section id="python-interface">
+<h1>Python interface<a class="headerlink" href="#python-interface" title="Link to this heading">¶</a></h1>
+<p>This page gives a quick example of how the tree search can be completed
+by writing your own python interface. This is not recommended for most users.</p>
+<ol class="arabic simple">
+<li><p>Import the necessary class</p></li>
+</ol>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">aizynthfinder.aizynthfinder</span><span class="w"> </span><span class="kn">import</span> <span class="n">AiZynthFinder</span>
+</pre></div>
+</div>
+<ol class="arabic simple" start="2">
+<li><p>Instantiate that class by providing a configuration file.</p></li>
+</ol>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">filename</span> <span class="o">=</span> <span class="s2">&quot;config.yml&quot;</span>
+<span class="n">finder</span> <span class="o">=</span> <span class="n">AiZynthFinder</span><span class="p">(</span><span class="n">configfile</span><span class="o">=</span><span class="n">filename</span><span class="p">)</span>
+</pre></div>
+</div>
+<ol class="arabic simple" start="3">
+<li><p>Select stock and policy</p></li>
+</ol>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">finder</span><span class="o">.</span><span class="n">stock</span><span class="o">.</span><span class="n">select</span><span class="p">(</span><span class="s2">&quot;zinc&quot;</span><span class="p">)</span>
+<span class="n">finder</span><span class="o">.</span><span class="n">expansion_policy</span><span class="o">.</span><span class="n">select</span><span class="p">(</span><span class="s2">&quot;uspto&quot;</span><span class="p">)</span>
+<span class="n">finder</span><span class="o">.</span><span class="n">filter_policy</span><span class="o">.</span><span class="n">select</span><span class="p">(</span><span class="s2">&quot;uspto&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+<p><cite>zinc</cite> and <cite>uspto</cite> where the keys given to the stock and the policy in the configuration file.
+The first policy set is the expansion policy and the second is the filter policy. The filter policy is optional.</p>
+<ol class="arabic simple" start="4">
+<li><p>Set the target SMILES and perform the tree search</p></li>
+</ol>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">finder</span><span class="o">.</span><span class="n">target_smiles</span> <span class="o">=</span> <span class="s2">&quot;Cc1cccc(c1N(CC(=O)Nc2ccc(cc2)c3ncon3)C(=O)C4CCS(=O)(=O)CC4)C&quot;</span>
+<span class="n">finder</span><span class="o">.</span><span class="n">tree_search</span><span class="p">()</span>
+</pre></div>
+</div>
+<ol class="arabic simple" start="5">
+<li><p>Analyse the search tree and build routes</p></li>
+</ol>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">finder</span><span class="o">.</span><span class="n">build_routes</span><span class="p">()</span>
+<span class="n">stats</span> <span class="o">=</span> <span class="n">finder</span><span class="o">.</span><span class="n">extract_statistics</span><span class="p">()</span>
+</pre></div>
+</div>
+<p>The <code class="docutils literal notranslate"><span class="pre">build_routes</span></code> method needs to be called before any analysis can be done.</p>
+<section id="expansion-interface">
+<h2>Expansion interface<a class="headerlink" href="#expansion-interface" title="Link to this heading">¶</a></h2>
+<p>There is an interface for the expansion policy as well. It can be used to break down a molecule into reactants.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">filename</span> <span class="o">=</span> <span class="s2">&quot;config.yml&quot;</span>
+<span class="n">expander</span> <span class="o">=</span> <span class="n">AiZynthExpander</span><span class="p">(</span><span class="n">configfile</span><span class="o">=</span><span class="n">filename</span><span class="p">)</span>
+<span class="n">expander</span><span class="o">.</span><span class="n">expansion_policy</span><span class="o">.</span><span class="n">select</span><span class="p">(</span><span class="s2">&quot;uspto&quot;</span><span class="p">)</span>
+<span class="n">expander</span><span class="o">.</span><span class="n">filter_policy</span><span class="o">.</span><span class="n">select</span><span class="p">(</span><span class="s2">&quot;uspto&quot;</span><span class="p">)</span>
+<span class="n">reactions</span> <span class="o">=</span> <span class="n">expander</span><span class="o">.</span><span class="n">do_expansion</span><span class="p">(</span><span class="s2">&quot;Cc1cccc(c1N(CC(=O)Nc2ccc(cc2)c3ncon3)C(=O)C4CCS(=O)(=O)CC4)C&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>for this, you only need to select the policies. The filter policy is optional and using it will only add the
+feasibility of the reactions not filter it out.</p>
+<p>The result is a nested list of <cite>FixedRetroReaction</cite> objects. This you can manipulate to for instance get
+out all the reactants SMILES strings</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">reactants_smiles</span> <span class="o">=</span> <span class="p">[]</span>
+<span class="k">for</span> <span class="n">reaction_tuple</span> <span class="ow">in</span> <span class="n">reactions</span><span class="p">:</span>
+    <span class="n">reactants_smiles</span><span class="o">.</span><span class="n">append</span><span class="p">([</span><span class="n">mol</span><span class="o">.</span><span class="n">smiles</span> <span class="k">for</span> <span class="n">mol</span> <span class="ow">in</span> <span class="n">reaction_tuple</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">reactants</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+</pre></div>
+</div>
+<p>or you can put all the metadata of all the reactions in a pandas dataframe</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span><span class="w"> </span><span class="nn">pandas</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">pd</span>
+<span class="n">metadata</span> <span class="o">=</span> <span class="p">[]</span>
+<span class="k">for</span> <span class="n">reaction_tuple</span> <span class="ow">in</span> <span class="n">reactions</span><span class="p">:</span>
+    <span class="k">for</span> <span class="n">reaction</span> <span class="ow">in</span> <span class="n">reaction_tuple</span><span class="p">:</span>
+        <span class="n">metadata</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">reaction</span><span class="o">.</span><span class="n">metadata</span><span class="p">)</span>
+<span class="n">df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span><span class="n">metadata</span><span class="p">)</span>
+</pre></div>
+</div>
+</section>
+<section id="further-reading">
+<h2>Further reading<a class="headerlink" href="#further-reading" title="Link to this heading">¶</a></h2>
+<p>The docstrings of all modules, classes and methods can be consulted <a class="reference internal" href="aizynthfinder.html"><span class="doc">here</span></a></p>
+<p>and you can always find them in an interactive Python shell using for instance:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">aizynthfinder.chem</span><span class="w"> </span><span class="kn">import</span> <span class="n">Molecule</span>
+<span class="n">help</span><span class="p">(</span><span class="n">Molecule</span><span class="p">)</span>
+<span class="n">help</span><span class="p">(</span><span class="n">Molecule</span><span class="o">.</span><span class="n">fingerprint</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>If you are interested in the the relationships between the classes have a look <a class="reference internal" href="relationships.html"><span class="doc">here</span></a>
+and if you want to dig deeper in to the main algorithmic sequences have a look <a class="reference internal" href="sequences.html"><span class="doc">here</span></a></p>
+</section>
+</section>
+
+
+          </div>
+          
+        </div>
+      </div>
+    <div class="clearer"></div>
+  </div>
+    <div class="footer">
+      &#169;2020-2025, Molecular AI group.
+      
+      |
+      Powered by <a href="https://www.sphinx-doc.org/">Sphinx 7.4.7</a>
+      &amp; <a href="https://alabaster.readthedocs.io">Alabaster 0.7.16</a>
+      
+      |
+      <a href="_sources/python_interface.rst.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+
+    
+  </body>
+</html>

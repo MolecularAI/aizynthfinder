@@ -1,0 +1,411 @@
+<!DOCTYPE html>
+
+<html lang="en" data-content_root="./">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <title>Configuration file &#8212; aizynthfinder 4.4.0 documentation</title>
+    <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=5ecbeea2" />
+    <link rel="stylesheet" type="text/css" href="_static/alabaster.css?v=a66d8bb5" />
+    <script src="_static/documentation_options.js?v=2f20d6c1"></script>
+    <script src="_static/doctools.js?v=9a2dae69"></script>
+    <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="Stocks" href="stocks.html" />
+    <link rel="prev" title="Python interface" href="python_interface.html" />
+   
+  <link rel="stylesheet" href="_static/custom.css" type="text/css" />
+  
+
+  
+  
+
+  </head><body>
+  <div class="document">
+    
+      <div class="sphinxsidebar" role="navigation" aria-label="Main">
+        <div class="sphinxsidebarwrapper">
+<h1 class="logo"><a href="index.html">aizynthfinder</a></h1>
+
+
+
+<p class="blurb">A fast, robust and flexible software for retrosynthetic planning</p>
+
+
+
+
+
+
+<h3>Navigation</h3>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="gui.html">Graphical user interface</a></li>
+<li class="toctree-l1"><a class="reference internal" href="cli.html">Command-line interface</a></li>
+<li class="toctree-l1"><a class="reference internal" href="python_interface.html">Python interface</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Configuration file</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#simple-usage">Simple usage</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#advanced-usage">Advanced usage</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="stocks.html">Stocks</a></li>
+<li class="toctree-l1"><a class="reference internal" href="scoring.html">Scoring</a></li>
+<li class="toctree-l1"><a class="reference internal" href="howto.html">How-to</a></li>
+<li class="toctree-l1"><a class="reference internal" href="aizynthfinder.html">aizynthfinder package</a></li>
+<li class="toctree-l1"><a class="reference internal" href="sequences.html">Sequences</a></li>
+<li class="toctree-l1"><a class="reference internal" href="relationships.html">Relationships</a></li>
+</ul>
+
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="index.html">Documentation overview</a><ul>
+      <li>Previous: <a href="python_interface.html" title="previous chapter">Python interface</a></li>
+      <li>Next: <a href="stocks.html" title="next chapter">Stocks</a></li>
+  </ul></li>
+</ul>
+</div>
+<search id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"/>
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</search>
+<script>document.getElementById('searchbox').style.display = "block"</script>
+
+
+
+
+
+
+
+
+        </div>
+      </div>
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          
+
+          <div class="body" role="main">
+            
+  <section id="configuration-file">
+<h1>Configuration file<a class="headerlink" href="#configuration-file" title="Link to this heading">¶</a></h1>
+<p>The configuration file that is to be provided to the interfaces
+specify file paths to policy models and stocks, in addition to
+detailed parameters of the tree search.</p>
+<section id="simple-usage">
+<h2>Simple usage<a class="headerlink" href="#simple-usage" title="Link to this heading">¶</a></h2>
+<p>Let’s say you have a</p>
+<blockquote>
+<div><ul class="simple">
+<li><p>A trained Keras expansion model that is called <cite>uspto_expansion.onnx</cite></p></li>
+<li><p>A library of unique templates called <cite>uspto_templates.csv.gz</cite></p></li>
+<li><p>A stock file in HDF5 format, called <cite>zinc_stock.hdf5</cite></p></li>
+</ul>
+</div></blockquote>
+<p>(this could have been created by the <code class="docutils literal notranslate"><span class="pre">smiles2stock</span></code> tool, see <a class="reference internal" href="stocks.html"><span class="doc">here</span></a>)</p>
+<p>then to use them in the tree search, create a file called <cite>config.yml</cite> that has the following content</p>
+<div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">expansion</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">full</span><span class="p">:</span>
+<span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">uspto_expansion.onnx</span>
+<span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">uspto_templates.csv.gz</span>
+<span class="nt">stock</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">zinc</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">zinc_stock.hdf5</span>
+</pre></div>
+</div>
+</section>
+<section id="advanced-usage">
+<h2>Advanced usage<a class="headerlink" href="#advanced-usage" title="Link to this heading">¶</a></h2>
+<p>A more detailed configuration file is shown below</p>
+<div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">search</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">algorithm</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">mcts</span>
+<span class="w">  </span><span class="nt">algorithm_config</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">C</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">1.4</span>
+<span class="w">    </span><span class="nt">default_prior</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">0.5</span>
+<span class="w">    </span><span class="nt">use_prior</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">True</span>
+<span class="w">    </span><span class="nt">prune_cycles_in_search</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">True</span>
+<span class="w">    </span><span class="nt">search_rewards</span><span class="p">:</span>
+<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">state score</span>
+<span class="w">  </span><span class="nt">max_transforms</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">6</span>
+<span class="w">  </span><span class="nt">iteration_limit</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">100</span>
+<span class="w">  </span><span class="nt">return_first</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">false</span>
+<span class="w">  </span><span class="nt">time_limit</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">120</span>
+<span class="w">  </span><span class="nt">exclude_target_from_stock</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">True</span>
+<span class="w">  </span><span class="nt">break_bonds</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">[[</span><span class="nv">1</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="nv">2</span><span class="p p-Indicator">],</span><span class="w"> </span><span class="p p-Indicator">[</span><span class="nv">2</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="nv">3</span><span class="p p-Indicator">]]</span>
+<span class="w">  </span><span class="nt">freeze_bonds</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">[[</span><span class="nv">3</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="nv">4</span><span class="p p-Indicator">]]</span>
+<span class="w">  </span><span class="nt">break_bonds_operator</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">or</span>
+<span class="nt">expansion</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">my_policy</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">type</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">template-based</span>
+<span class="w">    </span><span class="nt">model</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">/path/to/keras/model/weights.hdf5</span>
+<span class="w">    </span><span class="nt">template</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">/path/to/hdf5/templates.hdf5</span>
+<span class="w">    </span><span class="nt">template_column</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">retro_template</span>
+<span class="w">    </span><span class="nt">cutoff_cumulative</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">0.995</span>
+<span class="w">    </span><span class="nt">cutoff_number</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">50</span>
+<span class="w">    </span><span class="nt">use_rdchiral</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">True</span>
+<span class="w">    </span><span class="nt">use_remote_models</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">False</span>
+<span class="w">  </span><span class="nt">my_full_policy</span><span class="p">:</span>
+<span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">/path/to/keras/model/weights.hdf5</span>
+<span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">/path/to/hdf5/templates.hdf5</span>
+<span class="nt">filter</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">uspto</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">type</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">quick-filter</span>
+<span class="w">    </span><span class="nt">model</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">/path/to/keras/model/weights.hdf5</span>
+<span class="w">    </span><span class="nt">exclude_from_policy</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">rc</span>
+<span class="w">    </span><span class="nt">filter_cutoff</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">0.05</span>
+<span class="w">    </span><span class="nt">use_remote_models</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">False</span>
+<span class="w">  </span><span class="nt">uspto_full</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">/path/to/keras/model/weights.hdf5</span>
+<span class="nt">stock</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">buyables</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">type</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">inchiset</span>
+<span class="w">    </span><span class="nt">path</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">/path/to/stock1.hdf5</span>
+<span class="w">  </span><span class="nt">emolecules</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">/path/to/stock1.hdf5</span>
+</pre></div>
+</div>
+<dl class="simple">
+<dt>The (expansion) policy models are specified using two files</dt><dd><ul class="simple">
+<li><p>a checkpoint files from Keras in ONNX or hdf5 format,</p></li>
+<li><p>a HDF5 or a CSV file containing templates.</p></li>
+</ul>
+</dd>
+</dl>
+<p>A key like <code class="docutils literal notranslate"><span class="pre">my_policy</span></code> should be set and the configuration contains <code class="docutils literal notranslate"><span class="pre">type</span></code>, <code class="docutils literal notranslate"><span class="pre">model</span></code> and <code class="docutils literal notranslate"><span class="pre">template</span></code> that must be provided.
+If the other settings are not assigned, their default values are taken.
+The policy <code class="docutils literal notranslate"><span class="pre">my_full_policy</span></code> exemplifies a short-cut to the template-based expansion model when no other settings need to be
+provided, only the <code class="docutils literal notranslate"><span class="pre">model</span></code> and <code class="docutils literal notranslate"><span class="pre">templates</span></code> can be provided. The default settings will be taken in this case.</p>
+<p>The template file should be readable by <code class="docutils literal notranslate"><span class="pre">pandas</span></code> using  the <code class="docutils literal notranslate"><span class="pre">table</span></code> key and the <code class="docutils literal notranslate"><span class="pre">retro_template</span></code> column.
+A policy can then be selected using the provided key, like <code class="docutils literal notranslate"><span class="pre">my_policy</span></code> in the above example.</p>
+<p>The filter policy model is specified using a single checkpoint file.
+Any key like <code class="docutils literal notranslate"><span class="pre">uspto</span></code> can be set. The settings contains <code class="docutils literal notranslate"><span class="pre">type</span></code> and <code class="docutils literal notranslate"><span class="pre">model</span></code> that must be provided. If the other
+settings are not assigned, their default values are taken.
+The filter <code class="docutils literal notranslate"><span class="pre">uspto_full</span></code> exemplifies a short-cut to the quick-filter model when no other settings need to be
+provided, only the <code class="docutils literal notranslate"><span class="pre">model</span></code> can be provided. The default settings will be taken in this case.</p>
+<dl class="simple">
+<dt>The stock files can be</dt><dd><ul class="simple">
+<li><p>HDF5 files with the <code class="docutils literal notranslate"><span class="pre">table</span></code> key an the <code class="docutils literal notranslate"><span class="pre">inchi_key</span></code> column.</p></li>
+<li><p>A CSV file with a <code class="docutils literal notranslate"><span class="pre">inchi_key</span></code> column</p></li>
+<li><p>A text file a single column</p></li>
+</ul>
+</dd>
+</dl>
+<p>In all cases, the column should contain pre-computed inchi keys of the molecules.
+The stocks can be set using any key, like <code class="docutils literal notranslate"><span class="pre">buyables</span></code> or <code class="docutils literal notranslate"><span class="pre">emolecules</span></code> in the above example.
+The <code class="docutils literal notranslate"><span class="pre">type</span></code> and <code class="docutils literal notranslate"><span class="pre">path</span></code> parameters can also be set along with other parameters.
+If no other settings need to be provided, only the <code class="docutils literal notranslate"><span class="pre">path</span></code> can be provided, whereby it will be
+treated as a
+short-cut to the inchiset class..</p>
+<p>The values in the <code class="docutils literal notranslate"><span class="pre">search</span></code> sections are optional, and if missing, default values are considered. These
+values can also be taken from environment variables. An example of this can be seen as below:</p>
+<div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">search</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">iteration_limit</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">${ITERATION_LIMIT}</span>
+<span class="w">  </span><span class="nt">algorithm_config</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">C</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">${C}</span>
+<span class="w">  </span><span class="nt">time_limit</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">${TIME_LIMIT}</span>
+<span class="w">  </span><span class="nt">max_transforms</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">${MAX_TRANSFORMS}</span>
+</pre></div>
+</div>
+<p>These are the available <code class="docutils literal notranslate"><span class="pre">search</span></code> settings. The <code class="docutils literal notranslate"><span class="pre">algorithm_config</span></code> refers to MCTS settings:</p>
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p>Setting</p></th>
+<th class="head"><p>Default value</p></th>
+<th class="head"><p>Description</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>algorithm</p></td>
+<td><p>mcts</p></td>
+<td><p>The search algorithm. Can be set to <cite>package.module.ClassName</cite> to use a custom search method.</p></td>
+</tr>
+<tr class="row-odd"><td><p>algorithm_config: C</p></td>
+<td><p>1.4</p></td>
+<td><p>The C value used to balance exploitation and exploration in the upper confidence bound score of the nodes.</p></td>
+</tr>
+<tr class="row-even"><td><p>algorithm_config: default_prior</p></td>
+<td><p>0.5</p></td>
+<td><p>The prior that is used if policy-provided priors are not used.</p></td>
+</tr>
+<tr class="row-odd"><td><p>algorithm_config: use_prior</p></td>
+<td><p>True</p></td>
+<td><p>If True, priors from the policy is used instead of the <cite>default_prior</cite>.</p></td>
+</tr>
+<tr class="row-even"><td><p>algorithm_config: prune_cycles_in_search</p></td>
+<td><p>True</p></td>
+<td><p>If True, prevents the MCTS from creating cycles by recreating previously seen molecules when it is expanded.</p></td>
+</tr>
+<tr class="row-odd"><td><p>algorithm_config: search_rewards</p></td>
+<td><p>[state score]</p></td>
+<td><p>The scoring used for the MCTS search algorithm.</p></td>
+</tr>
+<tr class="row-even"><td><p>algorithm_config: search_rewards_weights</p></td>
+<td><p>[]</p></td>
+<td><p>The scoring weights used by the Combined Scorer for the MCTS search algorithm.</p></td>
+</tr>
+<tr class="row-odd"><td><p>algorithm_config: immediate_instantiation</p></td>
+<td><p>[]</p></td>
+<td><p>list of expansion policies for which the MCTS algorithm immediately instantiate the children node upon expansion</p></td>
+</tr>
+<tr class="row-even"><td><p>algorithm_config: mcts_grouping</p></td>
+<td><ul class="simple">
+<li></li>
+</ul>
+</td>
+<td><p>if is partial or full the MCTS algorithm will group expansions that produce the same state. If <code class="docutils literal notranslate"><span class="pre">partial</span></code> is used the equality will only be determined based on the expandable molecules, whereas <code class="docutils literal notranslate"><span class="pre">full</span></code> will check all molecules.</p></td>
+</tr>
+<tr class="row-odd"><td><p>max_transforms</p></td>
+<td><p>6</p></td>
+<td><p>The maximum depth of the search tree.</p></td>
+</tr>
+<tr class="row-even"><td><p>iteration_limit</p></td>
+<td><p>100</p></td>
+<td><p>The maximum number of iterations for the tree search.</p></td>
+</tr>
+<tr class="row-odd"><td><p>time_limit</p></td>
+<td><p>120</p></td>
+<td><p>The maximum number of seconds to complete the tree search.</p></td>
+</tr>
+<tr class="row-even"><td><p>return_first</p></td>
+<td><p>False</p></td>
+<td><p>If True, the tree search will be terminated as soon as one solution is found.</p></td>
+</tr>
+<tr class="row-odd"><td><p>exclude_target_from_stock</p></td>
+<td><p>True</p></td>
+<td><p>If True, the target is in stock will be broken down.</p></td>
+</tr>
+<tr class="row-even"><td><p>break_bonds</p></td>
+<td><p>[]</p></td>
+<td><p>The list of lists of atom numbers of molecular bonds pairs to break during the search.</p></td>
+</tr>
+<tr class="row-odd"><td><p>freeze_bonds</p></td>
+<td><p>[]</p></td>
+<td><p>The list of lists of atom numbers of molecular bonds pairs to freeze or retain during the search.</p></td>
+</tr>
+<tr class="row-even"><td><p>break_bonds_operator</p></td>
+<td><p>and</p></td>
+<td><p>If set to ‘and’, all bond pairs listed in <cite>break_bonds</cite> must be broken. If set to ‘or’, breaking any listed bond pair in <cite>break_bonds</cite> is sufficient.</p></td>
+</tr>
+</tbody>
+</table>
+<p>The <code class="docutils literal notranslate"><span class="pre">post_processing</span></code> settings are:</p>
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p>Setting</p></th>
+<th class="head"><p>Default value</p></th>
+<th class="head"><p>Description</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>min_routes</p></td>
+<td><p>5</p></td>
+<td><p>The minumum number of routes to extract if <code class="docutils literal notranslate"><span class="pre">all_routes</span></code> is not set.</p></td>
+</tr>
+<tr class="row-odd"><td><p>max_routes</p></td>
+<td><p>25</p></td>
+<td><p>The maximum number of routes to extract if <code class="docutils literal notranslate"><span class="pre">all_routes</span></code> is not set.</p></td>
+</tr>
+<tr class="row-even"><td><p>all_routes</p></td>
+<td><p>False</p></td>
+<td><p>If True, will extract all solved routes.</p></td>
+</tr>
+<tr class="row-odd"><td><p>route_distance_model</p></td>
+<td><p>N/A</p></td>
+<td><p>If set, will load the quick route distance model from this checkpoint file.</p></td>
+</tr>
+<tr class="row-even"><td><p>route_scorer</p></td>
+<td><p>state score</p></td>
+<td><p>The scoring for routes when extracting them in the post processing step.</p></td>
+</tr>
+</tbody>
+</table>
+<p>The <code class="docutils literal notranslate"><span class="pre">expansion</span></code> settings are for template-based models:</p>
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p>Setting</p></th>
+<th class="head"><p>Default value</p></th>
+<th class="head"><p>Description</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>template_column</p></td>
+<td><p>retro_template</p></td>
+<td><p>The column in the template file that contains the templates.</p></td>
+</tr>
+<tr class="row-odd"><td><p>cutoff_cumulative</p></td>
+<td><p>0.995</p></td>
+<td><p>The accumulative probability of the suggested templates is capped at this value. All other templates above this threshold are discarded.</p></td>
+</tr>
+<tr class="row-even"><td><p>cutoff_number</p></td>
+<td><p>50</p></td>
+<td><p>The maximum number of templates that will be returned from the expansion policy.</p></td>
+</tr>
+<tr class="row-odd"><td><p>use_rdchiral</p></td>
+<td><p>True</p></td>
+<td><p>If True, will apply templates with RDChiral, otherwise RDKit will be used.</p></td>
+</tr>
+<tr class="row-even"><td><p>use_remote_models</p></td>
+<td><p>False</p></td>
+<td><p>If True, will try to connect to remote Tensorflow servers.</p></td>
+</tr>
+<tr class="row-odd"><td><p>rescale_prior</p></td>
+<td><p>False</p></td>
+<td><p>If True, will apply a softmax function to the priors.</p></td>
+</tr>
+<tr class="row-even"><td><p>mask</p></td>
+<td><p>“”</p></td>
+<td><p>The path to a numpy .npz file containing a Boolean vector of masks for the reaction templates.</p></td>
+</tr>
+</tbody>
+</table>
+<p>The <code class="docutils literal notranslate"><span class="pre">filter</span></code> settings are for quick-filter models:</p>
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p>Setting</p></th>
+<th class="head"><p>Default value</p></th>
+<th class="head"><p>Description</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>exclude_from_policy</p></td>
+<td><p>[]</p></td>
+<td><p>The list of names of the filter policies to exclude.</p></td>
+</tr>
+<tr class="row-odd"><td><p>filter_cutoff</p></td>
+<td><p>0.05</p></td>
+<td><p>The cut-off for the quick-filter policy.</p></td>
+</tr>
+<tr class="row-even"><td><p>use_remote_models</p></td>
+<td><p>False</p></td>
+<td><p>If True, will try to connect to remote Tensorflow servers.</p></td>
+</tr>
+</tbody>
+</table>
+</section>
+</section>
+
+
+          </div>
+          
+        </div>
+      </div>
+    <div class="clearer"></div>
+  </div>
+    <div class="footer">
+      &#169;2020-2025, Molecular AI group.
+      
+      |
+      Powered by <a href="https://www.sphinx-doc.org/">Sphinx 7.4.7</a>
+      &amp; <a href="https://alabaster.readthedocs.io">Alabaster 0.7.16</a>
+      
+      |
+      <a href="_sources/configuration.rst.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+
+    
+  </body>
+</html>

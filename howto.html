@@ -1,0 +1,209 @@
+<!DOCTYPE html>
+
+<html lang="en" data-content_root="./">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <title>How-to &#8212; aizynthfinder 4.4.0 documentation</title>
+    <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=5ecbeea2" />
+    <link rel="stylesheet" type="text/css" href="_static/alabaster.css?v=a66d8bb5" />
+    <script src="_static/documentation_options.js?v=2f20d6c1"></script>
+    <script src="_static/doctools.js?v=9a2dae69"></script>
+    <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="aizynthfinder package" href="aizynthfinder.html" />
+    <link rel="prev" title="Scoring" href="scoring.html" />
+   
+  <link rel="stylesheet" href="_static/custom.css" type="text/css" />
+  
+
+  
+  
+
+  </head><body>
+  <div class="document">
+    
+      <div class="sphinxsidebar" role="navigation" aria-label="Main">
+        <div class="sphinxsidebarwrapper">
+<h1 class="logo"><a href="index.html">aizynthfinder</a></h1>
+
+
+
+<p class="blurb">A fast, robust and flexible software for retrosynthetic planning</p>
+
+
+
+
+
+
+<h3>Navigation</h3>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="gui.html">Graphical user interface</a></li>
+<li class="toctree-l1"><a class="reference internal" href="cli.html">Command-line interface</a></li>
+<li class="toctree-l1"><a class="reference internal" href="python_interface.html">Python interface</a></li>
+<li class="toctree-l1"><a class="reference internal" href="configuration.html">Configuration file</a></li>
+<li class="toctree-l1"><a class="reference internal" href="stocks.html">Stocks</a></li>
+<li class="toctree-l1"><a class="reference internal" href="scoring.html">Scoring</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">How-to</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#using-retro">Using Retro*</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#using-multiple-expansion-policies">Using multiple expansion policies</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#output-more-routes">Output more routes</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#running-multi-objective-mo-mcts-with-disconnection-aware-chemformer">Running multi-objective (MO) MCTS with disconnection-aware Chemformer</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="aizynthfinder.html">aizynthfinder package</a></li>
+<li class="toctree-l1"><a class="reference internal" href="sequences.html">Sequences</a></li>
+<li class="toctree-l1"><a class="reference internal" href="relationships.html">Relationships</a></li>
+</ul>
+
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="index.html">Documentation overview</a><ul>
+      <li>Previous: <a href="scoring.html" title="previous chapter">Scoring</a></li>
+      <li>Next: <a href="aizynthfinder.html" title="next chapter">aizynthfinder package</a></li>
+  </ul></li>
+</ul>
+</div>
+<search id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"/>
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</search>
+<script>document.getElementById('searchbox').style.display = "block"</script>
+
+
+
+
+
+
+
+
+        </div>
+      </div>
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          
+
+          <div class="body" role="main">
+            
+  <section id="how-to">
+<h1>How-to<a class="headerlink" href="#how-to" title="Link to this heading">¶</a></h1>
+<p>This page outlines a few guidelines on some more advanced use-cases of AiZynthFinder or
+frequently raised issues.</p>
+<section id="using-retro">
+<h2>Using Retro*<a class="headerlink" href="#using-retro" title="Link to this heading">¶</a></h2>
+<p>AiZynthFinder implements other search algorithms than MCTS. This is an example of how Retro* can be used.</p>
+<p>The search algorithm is specified in the configuration file.</p>
+<div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">search</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">algorithm</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">aizynthfinder.search.retrostar.search_tree.SearchTree</span>
+</pre></div>
+</div>
+<p>This will use Retro* without a constant-valued oracle function. To specify the oracle function, you can
+do</p>
+<div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">search</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">algorithm</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">aizynthfinder.search.retrostar.search_tree.SearchTree</span>
+<span class="w">  </span><span class="nt">algorithm_config</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">molecule_cost</span><span class="p">:</span>
+<span class="w">      </span><span class="nt">cost</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">aizynthfinder.search.retrostar.cost.RetroStarCost</span>
+<span class="w">      </span><span class="nt">model_path</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">retrostar_value_model.pickle</span>
+<span class="w">      </span><span class="nt">fingerprint_length</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">2048</span>
+<span class="w">      </span><span class="nt">fingerprint_radius</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">2</span>
+<span class="w">      </span><span class="nt">dropout_rate</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">0.1</span>
+</pre></div>
+</div>
+<p>The pickle file can be downloaded from <a class="reference external" href="https://github.com/MolecularAI/PaRoutes/blob/main/publication/retrostar_value_model.pickle?raw=true">here</a></p>
+</section>
+<section id="using-multiple-expansion-policies">
+<h2>Using multiple expansion policies<a class="headerlink" href="#using-multiple-expansion-policies" title="Link to this heading">¶</a></h2>
+<p>AiZynthFinder can use multiple expansion policies. This gives an example how a general USPTO and a RingBreaker model
+can be used together</p>
+<div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">expansion</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">uspto</span><span class="p">:</span>
+<span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">uspto_keras_model.hdf5</span>
+<span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">uspto_unique_templates.csv.gz</span>
+<span class="w">  </span><span class="nt">ringbreaker</span><span class="p">:</span>
+<span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">uspto_ringbreaker_keras_model.hdf5</span>
+<span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">uspto_ringbreaker_unique_templates.csv.gz</span>
+<span class="w">  </span><span class="nt">multi_expansion_strategy</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">type</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">aizynthfinder.context.policy.MultiExpansionStrategy</span>
+<span class="w">    </span><span class="nt">expansion_strategies</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">[</span><span class="nv">uspto</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="nv">ringbreaker</span><span class="p p-Indicator">]</span>
+<span class="w">    </span><span class="nt">additive_expansion</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">True</span>
+</pre></div>
+</div>
+<p>and then to use this with <code class="docutils literal notranslate"><span class="pre">aizynthcli</span></code> do something like this</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">aizynthcli</span> <span class="o">--</span><span class="n">smiles</span> <span class="n">smiles</span><span class="o">.</span><span class="n">txt</span> <span class="o">--</span><span class="n">config</span> <span class="n">config</span><span class="o">.</span><span class="n">yml</span> <span class="o">--</span><span class="n">policy</span> <span class="n">multi_expansion_strategy</span>
+</pre></div>
+</div>
+</section>
+<section id="output-more-routes">
+<h2>Output more routes<a class="headerlink" href="#output-more-routes" title="Link to this heading">¶</a></h2>
+<p>The number of routes in the output of <code class="docutils literal notranslate"><span class="pre">aizynthcli</span></code> can be controlled from the configuration file.</p>
+<p>This is how you can extract at least 25 routes but not more than 50 per target</p>
+<div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">post_processing</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">min_routes</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">25</span>
+<span class="w">  </span><span class="nt">max_routes</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">50</span>
+</pre></div>
+</div>
+<p>Alternatively, you can extract all solved routes. If a target is unsolved, it will return the number
+of routes specified by <code class="docutils literal notranslate"><span class="pre">min_routes</span></code> and <code class="docutils literal notranslate"><span class="pre">max_routes</span></code>.</p>
+<div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">post_processing</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">min_routes</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">5</span>
+<span class="w">    </span><span class="nt">max_routes</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">10</span>
+<span class="w">    </span><span class="nt">all_routes</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">True</span>
+</pre></div>
+</div>
+</section>
+<section id="running-multi-objective-mo-mcts-with-disconnection-aware-chemformer">
+<h2>Running multi-objective (MO) MCTS with disconnection-aware Chemformer<a class="headerlink" href="#running-multi-objective-mo-mcts-with-disconnection-aware-chemformer" title="Link to this heading">¶</a></h2>
+<p>Disconnection-aware retrosynthesis can be done with 1) MO-MCTS (state score + broken bonds score), 2) Chemformer or 3) both.</p>
+<p>First, you need to specify the bond constraints under search, see below.
+To run the MO-MCTS with the “broken bonds” score, add the “broken bonds” score to the list of search_rewards:</p>
+<div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">search</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">break_bonds</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">[[</span><span class="nv">1</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="nv">2</span><span class="p p-Indicator">],</span><span class="w"> </span><span class="p p-Indicator">[</span><span class="nv">3</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="nv">4</span><span class="p p-Indicator">]]</span>
+<span class="w">    </span><span class="nt">freeze_bonds</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">[]</span>
+<span class="w">    </span><span class="nt">algorithm_config</span><span class="p">:</span>
+<span class="w">      </span><span class="nt">search_rewards</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">[</span><span class="s">&quot;state</span><span class="nv"> </span><span class="s">score&quot;</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="s">&quot;broken</span><span class="nv"> </span><span class="s">bonds&quot;</span><span class="p p-Indicator">]</span>
+</pre></div>
+</div>
+<p>To use the disconnection-aware Chemformer, you first need to add the <cite>plugins</cite> folder to the <cite>PYTHONPATH</cite>, e.g.</p>
+<blockquote>
+<div><p>export PYTHONPATH=~/aizynthfinder/plugins/</p>
+</div></blockquote>
+<p>The script for starting a disconnection-aware Chemformer service is available at <a class="reference external" href="https://github.com/MolecularAI/Chemformer">https://github.com/MolecularAI/Chemformer</a>.
+The multi-expansion policy with template-based model and Chemformer is specified with:</p>
+<p>To use MO-tree ranking and building, set:</p>
+<p>Note: If post_processing.route_scorers is not specified, it will default to search.algorithm_config.search_rewards.</p>
+</section>
+</section>
+
+
+          </div>
+          
+        </div>
+      </div>
+    <div class="clearer"></div>
+  </div>
+    <div class="footer">
+      &#169;2020-2025, Molecular AI group.
+      
+      |
+      Powered by <a href="https://www.sphinx-doc.org/">Sphinx 7.4.7</a>
+      &amp; <a href="https://alabaster.readthedocs.io">Alabaster 0.7.16</a>
+      
+      |
+      <a href="_sources/howto.rst.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+
+    
+  </body>
+</html>

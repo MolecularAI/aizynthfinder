@@ -1,0 +1,655 @@
+<!DOCTYPE html>
+
+<html lang="en" data-content_root="./">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <title>aizynthfinder.context package &#8212; aizynthfinder 4.4.0 documentation</title>
+    <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=5ecbeea2" />
+    <link rel="stylesheet" type="text/css" href="_static/alabaster.css?v=a66d8bb5" />
+    <script src="_static/documentation_options.js?v=2f20d6c1"></script>
+    <script src="_static/doctools.js?v=9a2dae69"></script>
+    <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="aizynthfinder.context.policy package" href="aizynthfinder.context.policy.html" />
+    <link rel="prev" title="aizynthfinder.chem package" href="aizynthfinder.chem.html" />
+   
+  <link rel="stylesheet" href="_static/custom.css" type="text/css" />
+  
+
+  
+  
+
+  </head><body>
+  <div class="document">
+    
+      <div class="sphinxsidebar" role="navigation" aria-label="Main">
+        <div class="sphinxsidebarwrapper">
+<h1 class="logo"><a href="index.html">aizynthfinder</a></h1>
+
+
+
+<p class="blurb">A fast, robust and flexible software for retrosynthetic planning</p>
+
+
+
+
+
+
+<h3>Navigation</h3>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="gui.html">Graphical user interface</a></li>
+<li class="toctree-l1"><a class="reference internal" href="cli.html">Command-line interface</a></li>
+<li class="toctree-l1"><a class="reference internal" href="python_interface.html">Python interface</a></li>
+<li class="toctree-l1"><a class="reference internal" href="configuration.html">Configuration file</a></li>
+<li class="toctree-l1"><a class="reference internal" href="stocks.html">Stocks</a></li>
+<li class="toctree-l1"><a class="reference internal" href="scoring.html">Scoring</a></li>
+<li class="toctree-l1"><a class="reference internal" href="howto.html">How-to</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="aizynthfinder.html">aizynthfinder package</a><ul class="current">
+<li class="toctree-l2 current"><a class="reference internal" href="aizynthfinder.html#subpackages">Subpackages</a><ul class="current">
+<li class="toctree-l3"><a class="reference internal" href="aizynthfinder.analysis.html">aizynthfinder.analysis package</a></li>
+<li class="toctree-l3"><a class="reference internal" href="aizynthfinder.chem.html">aizynthfinder.chem package</a></li>
+<li class="toctree-l3 current"><a class="current reference internal" href="#">aizynthfinder.context package</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#subpackages">Subpackages</a><ul>
+<li class="toctree-l5"><a class="reference internal" href="aizynthfinder.context.policy.html">aizynthfinder.context.policy package</a></li>
+<li class="toctree-l5"><a class="reference internal" href="aizynthfinder.context.scoring.html">aizynthfinder.context.scoring package</a></li>
+<li class="toctree-l5"><a class="reference internal" href="aizynthfinder.context.stock.html">aizynthfinder.context.stock package</a></li>
+</ul>
+</li>
+<li class="toctree-l4"><a class="reference internal" href="#submodules">Submodules</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#module-aizynthfinder.context.collection">aizynthfinder.context.collection module</a><ul>
+<li class="toctree-l5"><a class="reference internal" href="#aizynthfinder.context.collection.ContextCollection"><code class="docutils literal notranslate"><span class="pre">ContextCollection</span></code></a><ul>
+<li class="toctree-l6"><a class="reference internal" href="#aizynthfinder.context.collection.ContextCollection.items"><code class="docutils literal notranslate"><span class="pre">ContextCollection.items</span></code></a></li>
+<li class="toctree-l6"><a class="reference internal" href="#aizynthfinder.context.collection.ContextCollection.selection"><code class="docutils literal notranslate"><span class="pre">ContextCollection.selection</span></code></a></li>
+<li class="toctree-l6"><a class="reference internal" href="#aizynthfinder.context.collection.ContextCollection.deselect"><code class="docutils literal notranslate"><span class="pre">ContextCollection.deselect()</span></code></a></li>
+<li class="toctree-l6"><a class="reference internal" href="#aizynthfinder.context.collection.ContextCollection.load"><code class="docutils literal notranslate"><span class="pre">ContextCollection.load()</span></code></a></li>
+<li class="toctree-l6"><a class="reference internal" href="#aizynthfinder.context.collection.ContextCollection.load_from_config"><code class="docutils literal notranslate"><span class="pre">ContextCollection.load_from_config()</span></code></a></li>
+<li class="toctree-l6"><a class="reference internal" href="#aizynthfinder.context.collection.ContextCollection.select"><code class="docutils literal notranslate"><span class="pre">ContextCollection.select()</span></code></a></li>
+<li class="toctree-l6"><a class="reference internal" href="#aizynthfinder.context.collection.ContextCollection.select_all"><code class="docutils literal notranslate"><span class="pre">ContextCollection.select_all()</span></code></a></li>
+<li class="toctree-l6"><a class="reference internal" href="#aizynthfinder.context.collection.ContextCollection.select_first"><code class="docutils literal notranslate"><span class="pre">ContextCollection.select_first()</span></code></a></li>
+<li class="toctree-l6"><a class="reference internal" href="#aizynthfinder.context.collection.ContextCollection.select_last"><code class="docutils literal notranslate"><span class="pre">ContextCollection.select_last()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l4"><a class="reference internal" href="#module-aizynthfinder.context.config">aizynthfinder.context.config module</a><ul>
+<li class="toctree-l5"><a class="reference internal" href="#aizynthfinder.context.config.Configuration"><code class="docutils literal notranslate"><span class="pre">Configuration</span></code></a><ul>
+<li class="toctree-l6"><a class="reference internal" href="#aizynthfinder.context.config.Configuration.search"><code class="docutils literal notranslate"><span class="pre">Configuration.search</span></code></a></li>
+<li class="toctree-l6"><a class="reference internal" href="#aizynthfinder.context.config.Configuration.post_processing"><code class="docutils literal notranslate"><span class="pre">Configuration.post_processing</span></code></a></li>
+<li class="toctree-l6"><a class="reference internal" href="#aizynthfinder.context.config.Configuration.stock"><code class="docutils literal notranslate"><span class="pre">Configuration.stock</span></code></a></li>
+<li class="toctree-l6"><a class="reference internal" href="#aizynthfinder.context.config.Configuration.expansion_policy"><code class="docutils literal notranslate"><span class="pre">Configuration.expansion_policy</span></code></a></li>
+<li class="toctree-l6"><a class="reference internal" href="#aizynthfinder.context.config.Configuration.filter_policy"><code class="docutils literal notranslate"><span class="pre">Configuration.filter_policy</span></code></a></li>
+<li class="toctree-l6"><a class="reference internal" href="#aizynthfinder.context.config.Configuration.scorers"><code class="docutils literal notranslate"><span class="pre">Configuration.scorers</span></code></a></li>
+<li class="toctree-l6"><a class="reference internal" href="#aizynthfinder.context.config.Configuration.from_dict"><code class="docutils literal notranslate"><span class="pre">Configuration.from_dict()</span></code></a></li>
+<li class="toctree-l6"><a class="reference internal" href="#aizynthfinder.context.config.Configuration.from_file"><code class="docutils literal notranslate"><span class="pre">Configuration.from_file()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l4"><a class="reference internal" href="#module-aizynthfinder.context">Module contents</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="aizynthfinder.interfaces.html">aizynthfinder.interfaces package</a></li>
+<li class="toctree-l3"><a class="reference internal" href="aizynthfinder.search.html">aizynthfinder.search package</a></li>
+<li class="toctree-l3"><a class="reference internal" href="aizynthfinder.tools.html">aizynthfinder.tools package</a></li>
+<li class="toctree-l3"><a class="reference internal" href="aizynthfinder.utils.html">aizynthfinder.utils package</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="aizynthfinder.html#submodules">Submodules</a></li>
+<li class="toctree-l2"><a class="reference internal" href="aizynthfinder.html#module-aizynthfinder.aizynthfinder">aizynthfinder.aizynthfinder module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="aizynthfinder.html#module-aizynthfinder.reactiontree">aizynthfinder.reactiontree module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="aizynthfinder.html#module-aizynthfinder">Module contents</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="sequences.html">Sequences</a></li>
+<li class="toctree-l1"><a class="reference internal" href="relationships.html">Relationships</a></li>
+</ul>
+
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="index.html">Documentation overview</a><ul>
+  <li><a href="aizynthfinder.html">aizynthfinder package</a><ul>
+      <li>Previous: <a href="aizynthfinder.chem.html" title="previous chapter">aizynthfinder.chem package</a></li>
+      <li>Next: <a href="aizynthfinder.context.policy.html" title="next chapter">aizynthfinder.context.policy package</a></li>
+  </ul></li>
+  </ul></li>
+</ul>
+</div>
+<search id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"/>
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</search>
+<script>document.getElementById('searchbox').style.display = "block"</script>
+
+
+
+
+
+
+
+
+        </div>
+      </div>
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          
+
+          <div class="body" role="main">
+            
+  <section id="aizynthfinder-context-package">
+<h1>aizynthfinder.context package<a class="headerlink" href="#aizynthfinder-context-package" title="Link to this heading">¶</a></h1>
+<section id="subpackages">
+<h2>Subpackages<a class="headerlink" href="#subpackages" title="Link to this heading">¶</a></h2>
+<div class="toctree-wrapper compound">
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="aizynthfinder.context.policy.html">aizynthfinder.context.policy package</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="aizynthfinder.context.policy.html#submodules">Submodules</a></li>
+<li class="toctree-l2"><a class="reference internal" href="aizynthfinder.context.policy.html#module-aizynthfinder.context.policy.expansion_strategies">aizynthfinder.context.policy.expansion_strategies module</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="aizynthfinder.context.policy.html#aizynthfinder.context.policy.expansion_strategies.ExpansionStrategy"><code class="docutils literal notranslate"><span class="pre">ExpansionStrategy</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="aizynthfinder.context.policy.html#aizynthfinder.context.policy.expansion_strategies.ExpansionStrategy.get_actions"><code class="docutils literal notranslate"><span class="pre">ExpansionStrategy.get_actions()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="aizynthfinder.context.policy.html#aizynthfinder.context.policy.expansion_strategies.ExpansionStrategy.reset_cache"><code class="docutils literal notranslate"><span class="pre">ExpansionStrategy.reset_cache()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="aizynthfinder.context.policy.html#aizynthfinder.context.policy.expansion_strategies.MultiExpansionStrategy"><code class="docutils literal notranslate"><span class="pre">MultiExpansionStrategy</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="aizynthfinder.context.policy.html#aizynthfinder.context.policy.expansion_strategies.MultiExpansionStrategy.get_actions"><code class="docutils literal notranslate"><span class="pre">MultiExpansionStrategy.get_actions()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="aizynthfinder.context.policy.html#aizynthfinder.context.policy.expansion_strategies.TemplateBasedExpansionStrategy"><code class="docutils literal notranslate"><span class="pre">TemplateBasedExpansionStrategy</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="aizynthfinder.context.policy.html#aizynthfinder.context.policy.expansion_strategies.TemplateBasedExpansionStrategy.get_actions"><code class="docutils literal notranslate"><span class="pre">TemplateBasedExpansionStrategy.get_actions()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="aizynthfinder.context.policy.html#aizynthfinder.context.policy.expansion_strategies.TemplateBasedExpansionStrategy.reset_cache"><code class="docutils literal notranslate"><span class="pre">TemplateBasedExpansionStrategy.reset_cache()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="aizynthfinder.context.policy.html#aizynthfinder.context.policy.expansion_strategies.TemplateBasedDirectExpansionStrategy"><code class="docutils literal notranslate"><span class="pre">TemplateBasedDirectExpansionStrategy</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="aizynthfinder.context.policy.html#aizynthfinder.context.policy.expansion_strategies.TemplateBasedDirectExpansionStrategy.get_actions"><code class="docutils literal notranslate"><span class="pre">TemplateBasedDirectExpansionStrategy.get_actions()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="aizynthfinder.context.policy.html#module-aizynthfinder.context.policy.filter_strategies">aizynthfinder.context.policy.filter_strategies module</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="aizynthfinder.context.policy.html#aizynthfinder.context.policy.filter_strategies.FilterStrategy"><code class="docutils literal notranslate"><span class="pre">FilterStrategy</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="aizynthfinder.context.policy.html#aizynthfinder.context.policy.filter_strategies.FilterStrategy.apply"><code class="docutils literal notranslate"><span class="pre">FilterStrategy.apply()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="aizynthfinder.context.policy.html#aizynthfinder.context.policy.filter_strategies.BondFilter"><code class="docutils literal notranslate"><span class="pre">BondFilter</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="aizynthfinder.context.policy.html#aizynthfinder.context.policy.filter_strategies.BondFilter.apply"><code class="docutils literal notranslate"><span class="pre">BondFilter.apply()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="aizynthfinder.context.policy.html#aizynthfinder.context.policy.filter_strategies.QuickKerasFilter"><code class="docutils literal notranslate"><span class="pre">QuickKerasFilter</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="aizynthfinder.context.policy.html#aizynthfinder.context.policy.filter_strategies.QuickKerasFilter.apply"><code class="docutils literal notranslate"><span class="pre">QuickKerasFilter.apply()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="aizynthfinder.context.policy.html#aizynthfinder.context.policy.filter_strategies.QuickKerasFilter.feasibility"><code class="docutils literal notranslate"><span class="pre">QuickKerasFilter.feasibility()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="aizynthfinder.context.policy.html#aizynthfinder.context.policy.filter_strategies.ReactantsCountFilter"><code class="docutils literal notranslate"><span class="pre">ReactantsCountFilter</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="aizynthfinder.context.policy.html#aizynthfinder.context.policy.filter_strategies.ReactantsCountFilter.apply"><code class="docutils literal notranslate"><span class="pre">ReactantsCountFilter.apply()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="aizynthfinder.context.policy.html#aizynthfinder.context.policy.filter_strategies.FrozenSubstructureFilter"><code class="docutils literal notranslate"><span class="pre">FrozenSubstructureFilter</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="aizynthfinder.context.policy.html#aizynthfinder.context.policy.filter_strategies.FrozenSubstructureFilter.apply"><code class="docutils literal notranslate"><span class="pre">FrozenSubstructureFilter.apply()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="aizynthfinder.context.policy.html#module-aizynthfinder.context.policy.policies">aizynthfinder.context.policy.policies module</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="aizynthfinder.context.policy.html#aizynthfinder.context.policy.policies.ExpansionPolicy"><code class="docutils literal notranslate"><span class="pre">ExpansionPolicy</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="aizynthfinder.context.policy.html#aizynthfinder.context.policy.policies.ExpansionPolicy.get_actions"><code class="docutils literal notranslate"><span class="pre">ExpansionPolicy.get_actions()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="aizynthfinder.context.policy.html#aizynthfinder.context.policy.policies.ExpansionPolicy.load"><code class="docutils literal notranslate"><span class="pre">ExpansionPolicy.load()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="aizynthfinder.context.policy.html#aizynthfinder.context.policy.policies.ExpansionPolicy.load_from_config"><code class="docutils literal notranslate"><span class="pre">ExpansionPolicy.load_from_config()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="aizynthfinder.context.policy.html#aizynthfinder.context.policy.policies.ExpansionPolicy.reset_cache"><code class="docutils literal notranslate"><span class="pre">ExpansionPolicy.reset_cache()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="aizynthfinder.context.policy.html#aizynthfinder.context.policy.policies.FilterPolicy"><code class="docutils literal notranslate"><span class="pre">FilterPolicy</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="aizynthfinder.context.policy.html#aizynthfinder.context.policy.policies.FilterPolicy.apply"><code class="docutils literal notranslate"><span class="pre">FilterPolicy.apply()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="aizynthfinder.context.policy.html#aizynthfinder.context.policy.policies.FilterPolicy.load"><code class="docutils literal notranslate"><span class="pre">FilterPolicy.load()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="aizynthfinder.context.policy.html#aizynthfinder.context.policy.policies.FilterPolicy.load_from_config"><code class="docutils literal notranslate"><span class="pre">FilterPolicy.load_from_config()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="aizynthfinder.context.policy.html#aizynthfinder.context.policy.policies.FilterPolicy.reset_cache"><code class="docutils literal notranslate"><span class="pre">FilterPolicy.reset_cache()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="aizynthfinder.context.policy.html#module-aizynthfinder.context.policy.utils">aizynthfinder.context.policy.utils module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="aizynthfinder.context.policy.html#module-aizynthfinder.context.policy">Module contents</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="aizynthfinder.context.scoring.html">aizynthfinder.context.scoring package</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="aizynthfinder.context.scoring.html#submodules">Submodules</a></li>
+<li class="toctree-l2"><a class="reference internal" href="aizynthfinder.context.scoring.html#module-aizynthfinder.context.scoring.collection">aizynthfinder.context.scoring.collection module</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="aizynthfinder.context.scoring.html#aizynthfinder.context.scoring.collection.ScorerCollection"><code class="docutils literal notranslate"><span class="pre">ScorerCollection</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="aizynthfinder.context.scoring.html#aizynthfinder.context.scoring.collection.ScorerCollection.create_default_scorers"><code class="docutils literal notranslate"><span class="pre">ScorerCollection.create_default_scorers()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="aizynthfinder.context.scoring.html#aizynthfinder.context.scoring.collection.ScorerCollection.load"><code class="docutils literal notranslate"><span class="pre">ScorerCollection.load()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="aizynthfinder.context.scoring.html#aizynthfinder.context.scoring.collection.ScorerCollection.load_from_config"><code class="docutils literal notranslate"><span class="pre">ScorerCollection.load_from_config()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="aizynthfinder.context.scoring.html#aizynthfinder.context.scoring.collection.ScorerCollection.make_subset"><code class="docutils literal notranslate"><span class="pre">ScorerCollection.make_subset()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="aizynthfinder.context.scoring.html#aizynthfinder.context.scoring.collection.ScorerCollection.names"><code class="docutils literal notranslate"><span class="pre">ScorerCollection.names()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="aizynthfinder.context.scoring.html#aizynthfinder.context.scoring.collection.ScorerCollection.objects"><code class="docutils literal notranslate"><span class="pre">ScorerCollection.objects()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="aizynthfinder.context.scoring.html#aizynthfinder.context.scoring.collection.ScorerCollection.score_vector"><code class="docutils literal notranslate"><span class="pre">ScorerCollection.score_vector()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="aizynthfinder.context.scoring.html#aizynthfinder.context.scoring.collection.ScorerCollection.weighted_score"><code class="docutils literal notranslate"><span class="pre">ScorerCollection.weighted_score()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="aizynthfinder.context.scoring.html#module-aizynthfinder.context.scoring.scorers">aizynthfinder.context.scoring.scorers module</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="aizynthfinder.context.scoring.html#aizynthfinder.context.scoring.scorers.CombinedScorer"><code class="docutils literal notranslate"><span class="pre">CombinedScorer</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="aizynthfinder.context.scoring.html#aizynthfinder.context.scoring.scorers.StateScorer"><code class="docutils literal notranslate"><span class="pre">StateScorer</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="aizynthfinder.context.scoring.html#aizynthfinder.context.scoring.scorers.StateScorer.scorer_name"><code class="docutils literal notranslate"><span class="pre">StateScorer.scorer_name</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="aizynthfinder.context.scoring.html#aizynthfinder.context.scoring.scorers.RouteCostScorer"><code class="docutils literal notranslate"><span class="pre">RouteCostScorer</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="aizynthfinder.context.scoring.html#aizynthfinder.context.scoring.scorers.RouteCostScorer.scorer_name"><code class="docutils literal notranslate"><span class="pre">RouteCostScorer.scorer_name</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="aizynthfinder.context.scoring.html#aizynthfinder.context.scoring.scorers.BrokenBondsScorer"><code class="docutils literal notranslate"><span class="pre">BrokenBondsScorer</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="aizynthfinder.context.scoring.html#aizynthfinder.context.scoring.scorers.BrokenBondsScorer.scorer_name"><code class="docutils literal notranslate"><span class="pre">BrokenBondsScorer.scorer_name</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="aizynthfinder.context.scoring.html#aizynthfinder.context.scoring.scorers.RouteSimilarityScorer"><code class="docutils literal notranslate"><span class="pre">RouteSimilarityScorer</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="aizynthfinder.context.scoring.html#aizynthfinder.context.scoring.scorers.RouteSimilarityScorer.scorer_name"><code class="docutils literal notranslate"><span class="pre">RouteSimilarityScorer.scorer_name</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="aizynthfinder.context.scoring.html#aizynthfinder.context.scoring.scorers.DeepSetScorer"><code class="docutils literal notranslate"><span class="pre">DeepSetScorer</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="aizynthfinder.context.scoring.html#aizynthfinder.context.scoring.scorers.DeepSetScorer.scorer_name"><code class="docutils literal notranslate"><span class="pre">DeepSetScorer.scorer_name</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="aizynthfinder.context.scoring.html#module-aizynthfinder.context.scoring.scorers_base">aizynthfinder.context.scoring.scorers_base module</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="aizynthfinder.context.scoring.html#aizynthfinder.context.scoring.scorers_base.SquashScaler"><code class="docutils literal notranslate"><span class="pre">SquashScaler</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="aizynthfinder.context.scoring.html#aizynthfinder.context.scoring.scorers_base.SquashScaler.slope"><code class="docutils literal notranslate"><span class="pre">SquashScaler.slope</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="aizynthfinder.context.scoring.html#aizynthfinder.context.scoring.scorers_base.SquashScaler.xoffset"><code class="docutils literal notranslate"><span class="pre">SquashScaler.xoffset</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="aizynthfinder.context.scoring.html#aizynthfinder.context.scoring.scorers_base.SquashScaler.yoffset"><code class="docutils literal notranslate"><span class="pre">SquashScaler.yoffset</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="aizynthfinder.context.scoring.html#aizynthfinder.context.scoring.scorers_base.MinMaxScaler"><code class="docutils literal notranslate"><span class="pre">MinMaxScaler</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="aizynthfinder.context.scoring.html#aizynthfinder.context.scoring.scorers_base.MinMaxScaler.min_val"><code class="docutils literal notranslate"><span class="pre">MinMaxScaler.min_val</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="aizynthfinder.context.scoring.html#aizynthfinder.context.scoring.scorers_base.MinMaxScaler.max_val"><code class="docutils literal notranslate"><span class="pre">MinMaxScaler.max_val</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="aizynthfinder.context.scoring.html#aizynthfinder.context.scoring.scorers_base.MinMaxScaler.reverse"><code class="docutils literal notranslate"><span class="pre">MinMaxScaler.reverse</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="aizynthfinder.context.scoring.html#aizynthfinder.context.scoring.scorers_base.MinMaxScaler.scale_factor"><code class="docutils literal notranslate"><span class="pre">MinMaxScaler.scale_factor</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="aizynthfinder.context.scoring.html#aizynthfinder.context.scoring.scorers_base.PowerScaler"><code class="docutils literal notranslate"><span class="pre">PowerScaler</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="aizynthfinder.context.scoring.html#aizynthfinder.context.scoring.scorers_base.PowerScaler.base_coefficient"><code class="docutils literal notranslate"><span class="pre">PowerScaler.base_coefficient</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="aizynthfinder.context.scoring.html#aizynthfinder.context.scoring.scorers_base.Scorer"><code class="docutils literal notranslate"><span class="pre">Scorer</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="aizynthfinder.context.scoring.html#aizynthfinder.context.scoring.scorers_base.Scorer.scorer_name"><code class="docutils literal notranslate"><span class="pre">Scorer.scorer_name</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="aizynthfinder.context.scoring.html#aizynthfinder.context.scoring.scorers_base.Scorer.sort"><code class="docutils literal notranslate"><span class="pre">Scorer.sort()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="aizynthfinder.context.scoring.html#aizynthfinder.context.scoring.scorers_base.make_rxnutils_route"><code class="docutils literal notranslate"><span class="pre">make_rxnutils_route()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="aizynthfinder.context.scoring.html#module-aizynthfinder.context.scoring.scorers_mols">aizynthfinder.context.scoring.scorers_mols module</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="aizynthfinder.context.scoring.html#aizynthfinder.context.scoring.scorers_mols.FractionInStockScorer"><code class="docutils literal notranslate"><span class="pre">FractionInStockScorer</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="aizynthfinder.context.scoring.html#aizynthfinder.context.scoring.scorers_mols.FractionInStockScorer.scorer_name"><code class="docutils literal notranslate"><span class="pre">FractionInStockScorer.scorer_name</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="aizynthfinder.context.scoring.html#aizynthfinder.context.scoring.scorers_mols.FractionInSourceStockScorer"><code class="docutils literal notranslate"><span class="pre">FractionInSourceStockScorer</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="aizynthfinder.context.scoring.html#aizynthfinder.context.scoring.scorers_mols.FractionInSourceStockScorer.scorer_name"><code class="docutils literal notranslate"><span class="pre">FractionInSourceStockScorer.scorer_name</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="aizynthfinder.context.scoring.html#aizynthfinder.context.scoring.scorers_mols.FractionOfIntermediatesInStockScorer"><code class="docutils literal notranslate"><span class="pre">FractionOfIntermediatesInStockScorer</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="aizynthfinder.context.scoring.html#aizynthfinder.context.scoring.scorers_mols.NumberOfPrecursorsScorer"><code class="docutils literal notranslate"><span class="pre">NumberOfPrecursorsScorer</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="aizynthfinder.context.scoring.html#aizynthfinder.context.scoring.scorers_mols.NumberOfPrecursorsScorer.scorer_name"><code class="docutils literal notranslate"><span class="pre">NumberOfPrecursorsScorer.scorer_name</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="aizynthfinder.context.scoring.html#aizynthfinder.context.scoring.scorers_mols.NumberOfPrecursorsInStockScorer"><code class="docutils literal notranslate"><span class="pre">NumberOfPrecursorsInStockScorer</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="aizynthfinder.context.scoring.html#aizynthfinder.context.scoring.scorers_mols.NumberOfPrecursorsInStockScorer.scorer_name"><code class="docutils literal notranslate"><span class="pre">NumberOfPrecursorsInStockScorer.scorer_name</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="aizynthfinder.context.scoring.html#aizynthfinder.context.scoring.scorers_mols.PriceSumScorer"><code class="docutils literal notranslate"><span class="pre">PriceSumScorer</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="aizynthfinder.context.scoring.html#aizynthfinder.context.scoring.scorers_mols.PriceSumScorer.scorer_name"><code class="docutils literal notranslate"><span class="pre">PriceSumScorer.scorer_name</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="aizynthfinder.context.scoring.html#aizynthfinder.context.scoring.scorers_mols.StockAvailabilityScorer"><code class="docutils literal notranslate"><span class="pre">StockAvailabilityScorer</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="aizynthfinder.context.scoring.html#aizynthfinder.context.scoring.scorers_mols.DeltaSyntheticComplexityScorer"><code class="docutils literal notranslate"><span class="pre">DeltaSyntheticComplexityScorer</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="aizynthfinder.context.scoring.html#aizynthfinder.context.scoring.scorers_mols.DeltaSyntheticComplexityScorer.scorer_name"><code class="docutils literal notranslate"><span class="pre">DeltaSyntheticComplexityScorer.scorer_name</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="aizynthfinder.context.scoring.html#aizynthfinder.context.scoring.scorers_mols.DeltaSyntheticComplexityScorer.sc_deltas"><code class="docutils literal notranslate"><span class="pre">DeltaSyntheticComplexityScorer.sc_deltas()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="aizynthfinder.context.scoring.html#module-aizynthfinder.context.scoring.scorers_reactions">aizynthfinder.context.scoring.scorers_reactions module</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="aizynthfinder.context.scoring.html#aizynthfinder.context.scoring.scorers_reactions.MaxTransformScorer"><code class="docutils literal notranslate"><span class="pre">MaxTransformScorer</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="aizynthfinder.context.scoring.html#aizynthfinder.context.scoring.scorers_reactions.MaxTransformScorer.scorer_name"><code class="docutils literal notranslate"><span class="pre">MaxTransformScorer.scorer_name</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="aizynthfinder.context.scoring.html#aizynthfinder.context.scoring.scorers_reactions.NumberOfReactionsScorer"><code class="docutils literal notranslate"><span class="pre">NumberOfReactionsScorer</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="aizynthfinder.context.scoring.html#aizynthfinder.context.scoring.scorers_reactions.NumberOfReactionsScorer.scorer_name"><code class="docutils literal notranslate"><span class="pre">NumberOfReactionsScorer.scorer_name</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="aizynthfinder.context.scoring.html#aizynthfinder.context.scoring.scorers_reactions.AverageTemplateOccurrenceScorer"><code class="docutils literal notranslate"><span class="pre">AverageTemplateOccurrenceScorer</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="aizynthfinder.context.scoring.html#aizynthfinder.context.scoring.scorers_reactions.AverageTemplateOccurrenceScorer.scorer_name"><code class="docutils literal notranslate"><span class="pre">AverageTemplateOccurrenceScorer.scorer_name</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="aizynthfinder.context.scoring.html#aizynthfinder.context.scoring.scorers_reactions.ReactionClassMembershipScorer"><code class="docutils literal notranslate"><span class="pre">ReactionClassMembershipScorer</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="aizynthfinder.context.scoring.html#aizynthfinder.context.scoring.scorers_reactions.ReactionClassRankScorer"><code class="docutils literal notranslate"><span class="pre">ReactionClassRankScorer</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="aizynthfinder.context.scoring.html#aizynthfinder.context.scoring.scorers_reactions.ReactionClassRankScorer.scorer_name"><code class="docutils literal notranslate"><span class="pre">ReactionClassRankScorer.scorer_name</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="aizynthfinder.context.scoring.html#module-aizynthfinder.context.scoring">Module contents</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="aizynthfinder.context.stock.html">aizynthfinder.context.stock package</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="aizynthfinder.context.stock.html#submodules">Submodules</a></li>
+<li class="toctree-l2"><a class="reference internal" href="aizynthfinder.context.stock.html#module-aizynthfinder.context.stock.queries">aizynthfinder.context.stock.queries module</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="aizynthfinder.context.stock.html#aizynthfinder.context.stock.queries.StockQueryMixin"><code class="docutils literal notranslate"><span class="pre">StockQueryMixin</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="aizynthfinder.context.stock.html#aizynthfinder.context.stock.queries.StockQueryMixin.amount"><code class="docutils literal notranslate"><span class="pre">StockQueryMixin.amount()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="aizynthfinder.context.stock.html#aizynthfinder.context.stock.queries.StockQueryMixin.availability_string"><code class="docutils literal notranslate"><span class="pre">StockQueryMixin.availability_string()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="aizynthfinder.context.stock.html#aizynthfinder.context.stock.queries.StockQueryMixin.cached_search"><code class="docutils literal notranslate"><span class="pre">StockQueryMixin.cached_search()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="aizynthfinder.context.stock.html#aizynthfinder.context.stock.queries.StockQueryMixin.clear_cache"><code class="docutils literal notranslate"><span class="pre">StockQueryMixin.clear_cache()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="aizynthfinder.context.stock.html#aizynthfinder.context.stock.queries.StockQueryMixin.price"><code class="docutils literal notranslate"><span class="pre">StockQueryMixin.price()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="aizynthfinder.context.stock.html#aizynthfinder.context.stock.queries.InMemoryInchiKeyQuery"><code class="docutils literal notranslate"><span class="pre">InMemoryInchiKeyQuery</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="aizynthfinder.context.stock.html#aizynthfinder.context.stock.queries.InMemoryInchiKeyQuery.stock_inchikeys"><code class="docutils literal notranslate"><span class="pre">InMemoryInchiKeyQuery.stock_inchikeys</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="aizynthfinder.context.stock.html#aizynthfinder.context.stock.queries.InMemoryInchiKeyQuery.price"><code class="docutils literal notranslate"><span class="pre">InMemoryInchiKeyQuery.price()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="aizynthfinder.context.stock.html#aizynthfinder.context.stock.queries.MongoDbInchiKeyQuery"><code class="docutils literal notranslate"><span class="pre">MongoDbInchiKeyQuery</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="aizynthfinder.context.stock.html#aizynthfinder.context.stock.queries.MongoDbInchiKeyQuery.availability_string"><code class="docutils literal notranslate"><span class="pre">MongoDbInchiKeyQuery.availability_string()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="aizynthfinder.context.stock.html#aizynthfinder.context.stock.queries.MolbloomFilterQuery"><code class="docutils literal notranslate"><span class="pre">MolbloomFilterQuery</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="aizynthfinder.context.stock.html#module-aizynthfinder.context.stock.stock">aizynthfinder.context.stock.stock module</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="aizynthfinder.context.stock.html#aizynthfinder.context.stock.stock.Stock"><code class="docutils literal notranslate"><span class="pre">Stock</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="aizynthfinder.context.stock.html#aizynthfinder.context.stock.stock.Stock.stop_criteria"><code class="docutils literal notranslate"><span class="pre">Stock.stop_criteria</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="aizynthfinder.context.stock.html#aizynthfinder.context.stock.stock.Stock.amount"><code class="docutils literal notranslate"><span class="pre">Stock.amount()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="aizynthfinder.context.stock.html#aizynthfinder.context.stock.stock.Stock.availability_list"><code class="docutils literal notranslate"><span class="pre">Stock.availability_list()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="aizynthfinder.context.stock.html#aizynthfinder.context.stock.stock.Stock.availability_string"><code class="docutils literal notranslate"><span class="pre">Stock.availability_string()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="aizynthfinder.context.stock.html#aizynthfinder.context.stock.stock.Stock.exclude"><code class="docutils literal notranslate"><span class="pre">Stock.exclude()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="aizynthfinder.context.stock.html#aizynthfinder.context.stock.stock.Stock.load"><code class="docutils literal notranslate"><span class="pre">Stock.load()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="aizynthfinder.context.stock.html#aizynthfinder.context.stock.stock.Stock.load_from_config"><code class="docutils literal notranslate"><span class="pre">Stock.load_from_config()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="aizynthfinder.context.stock.html#aizynthfinder.context.stock.stock.Stock.price"><code class="docutils literal notranslate"><span class="pre">Stock.price()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="aizynthfinder.context.stock.html#aizynthfinder.context.stock.stock.Stock.reset_exclusion_list"><code class="docutils literal notranslate"><span class="pre">Stock.reset_exclusion_list()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="aizynthfinder.context.stock.html#aizynthfinder.context.stock.stock.Stock.select"><code class="docutils literal notranslate"><span class="pre">Stock.select()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="aizynthfinder.context.stock.html#aizynthfinder.context.stock.stock.Stock.set_stop_criteria"><code class="docutils literal notranslate"><span class="pre">Stock.set_stop_criteria()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="aizynthfinder.context.stock.html#aizynthfinder.context.stock.stock.Stock.smiles_in_stock"><code class="docutils literal notranslate"><span class="pre">Stock.smiles_in_stock()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="aizynthfinder.context.stock.html#module-aizynthfinder.context.stock">Module contents</a></li>
+</ul>
+</li>
+</ul>
+</div>
+</section>
+<section id="submodules">
+<h2>Submodules<a class="headerlink" href="#submodules" title="Link to this heading">¶</a></h2>
+</section>
+<section id="module-aizynthfinder.context.collection">
+<span id="aizynthfinder-context-collection-module"></span><h2>aizynthfinder.context.collection module<a class="headerlink" href="#module-aizynthfinder.context.collection" title="Link to this heading">¶</a></h2>
+<p>Module containing a class that is the base class for all collection classes (stock, policies, scorers)</p>
+<dl class="py class">
+<dt class="sig sig-object py" id="aizynthfinder.context.collection.ContextCollection">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">aizynthfinder.context.collection.</span></span><span class="sig-name descname"><span class="pre">ContextCollection</span></span><a class="headerlink" href="#aizynthfinder.context.collection.ContextCollection" title="Link to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">ABC</span></code></p>
+<p>Abstract base class for a collection of items
+that can be loaded and then (de-)selected.</p>
+<blockquote>
+<div><p>One can obtain individual items with:</p>
+</div></blockquote>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">an_item</span> <span class="o">=</span> <span class="n">collection</span><span class="p">[</span><span class="s2">&quot;key&quot;</span><span class="p">]</span>
+</pre></div>
+</div>
+<p>And delete items with</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="k">del</span> <span class="n">collection</span><span class="p">[</span><span class="s2">&quot;key&quot;</span><span class="p">]</span>
+</pre></div>
+</div>
+<dl class="field-list simple">
+</dl>
+<dl class="py property">
+<dt class="sig sig-object py" id="aizynthfinder.context.collection.ContextCollection.items">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">items</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></em><a class="headerlink" href="#aizynthfinder.context.collection.ContextCollection.items" title="Link to this definition">¶</a></dt>
+<dd><p>The available item keys</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="aizynthfinder.context.collection.ContextCollection.selection">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">selection</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></em><a class="headerlink" href="#aizynthfinder.context.collection.ContextCollection.selection" title="Link to this definition">¶</a></dt>
+<dd><p>The keys of the selected item(s)</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="aizynthfinder.context.collection.ContextCollection.deselect">
+<span class="sig-name descname"><span class="pre">deselect</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">key</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#aizynthfinder.context.collection.ContextCollection.deselect" title="Link to this definition">¶</a></dt>
+<dd><p>Deselect one or all items</p>
+<p>If no key is passed, all items will be deselected.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>key</strong> (<em>Optional</em><em>[</em><em>str</em><em>]</em>) – the key of the item to deselect, defaults to None</p>
+</dd>
+<dt class="field-even">Raises<span class="colon">:</span></dt>
+<dd class="field-even"><p><strong>KeyError</strong> – if the key is not among the selected ones</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>None</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="aizynthfinder.context.collection.ContextCollection.load">
+<em class="property"><span class="pre">abstract</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">load</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">_</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#aizynthfinder.context.collection.ContextCollection.load" title="Link to this definition">¶</a></dt>
+<dd><p>Load an item. Needs to be implemented by a sub-class</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>_</strong> (<em>Any</em>)</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>None</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="aizynthfinder.context.collection.ContextCollection.load_from_config">
+<em class="property"><span class="pre">abstract</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">load_from_config</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">config</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#aizynthfinder.context.collection.ContextCollection.load_from_config" title="Link to this definition">¶</a></dt>
+<dd><p>Load items from a configuration. Needs to be implemented by a sub-class</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>config</strong> (<em>Any</em>)</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>None</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="aizynthfinder.context.collection.ContextCollection.select">
+<span class="sig-name descname"><span class="pre">select</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">value</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">append</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#aizynthfinder.context.collection.ContextCollection.select" title="Link to this definition">¶</a></dt>
+<dd><p>Select one or more items.</p>
+<p>If this is a single selection collection, only a single value is accepted.
+If this is a multiple selection collection it will overwrite the selection completely,
+unless <code class="docutils literal notranslate"><span class="pre">append</span></code> is True and a single key is given.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>value</strong> (<em>Union</em><em>[</em><em>str</em><em>, </em><em>List</em><em>[</em><em>str</em><em>]</em><em>]</em>) – the key or keys of the item(s) to select</p></li>
+<li><p><strong>append</strong> (<em>bool</em>) – if True will append single keys to existing selection</p></li>
+</ul>
+</dd>
+<dt class="field-even">Raises<span class="colon">:</span></dt>
+<dd class="field-even"><ul class="simple">
+<li><p><strong>ValueError</strong> – if this a single collection and value is multiple keys</p></li>
+<li><p><strong>KeyError</strong> – if at least one of the keys are not corresponding to a loaded item</p></li>
+</ul>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>None</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="aizynthfinder.context.collection.ContextCollection.select_all">
+<span class="sig-name descname"><span class="pre">select_all</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#aizynthfinder.context.collection.ContextCollection.select_all" title="Link to this definition">¶</a></dt>
+<dd><p>Select all loaded items</p>
+<dl class="field-list simple">
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>None</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="aizynthfinder.context.collection.ContextCollection.select_first">
+<span class="sig-name descname"><span class="pre">select_first</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#aizynthfinder.context.collection.ContextCollection.select_first" title="Link to this definition">¶</a></dt>
+<dd><p>Select the first loaded item</p>
+<dl class="field-list simple">
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>None</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="aizynthfinder.context.collection.ContextCollection.select_last">
+<span class="sig-name descname"><span class="pre">select_last</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#aizynthfinder.context.collection.ContextCollection.select_last" title="Link to this definition">¶</a></dt>
+<dd><p>Select the last loaded item</p>
+<dl class="field-list simple">
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>None</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+</section>
+<section id="module-aizynthfinder.context.config">
+<span id="aizynthfinder-context-config-module"></span><h2>aizynthfinder.context.config module<a class="headerlink" href="#module-aizynthfinder.context.config" title="Link to this heading">¶</a></h2>
+<p>Module containing a class for encapsulating the settings of the tree search</p>
+<dl class="py class">
+<dt class="sig sig-object py" id="aizynthfinder.context.config.Configuration">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">aizynthfinder.context.config.</span></span><span class="sig-name descname"><span class="pre">Configuration</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">search=&lt;factory&gt;</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">post_processing=&lt;factory&gt;</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#aizynthfinder.context.config.Configuration" title="Link to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<p>Encapsulating the settings of the tree search, including the policy,
+the stock, the loaded scorers and various parameters.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>search</strong> (<em>_SearchConfiguration</em>)</p></li>
+<li><p><strong>post_processing</strong> (<em>_PostprocessingConfiguration</em>)</p></li>
+</ul>
+</dd>
+</dl>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="aizynthfinder.context.config.Configuration.search">
+<span class="sig-name descname"><span class="pre">search</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">_SearchConfiguration</span></em><a class="headerlink" href="#aizynthfinder.context.config.Configuration.search" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="aizynthfinder.context.config.Configuration.post_processing">
+<span class="sig-name descname"><span class="pre">post_processing</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">_PostprocessingConfiguration</span></em><a class="headerlink" href="#aizynthfinder.context.config.Configuration.post_processing" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="aizynthfinder.context.config.Configuration.stock">
+<span class="sig-name descname"><span class="pre">stock</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference internal" href="aizynthfinder.context.stock.html#aizynthfinder.context.stock.stock.Stock" title="aizynthfinder.context.stock.stock.Stock"><span class="pre">Stock</span></a></em><a class="headerlink" href="#aizynthfinder.context.config.Configuration.stock" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="aizynthfinder.context.config.Configuration.expansion_policy">
+<span class="sig-name descname"><span class="pre">expansion_policy</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference internal" href="aizynthfinder.context.policy.html#aizynthfinder.context.policy.policies.ExpansionPolicy" title="aizynthfinder.context.policy.policies.ExpansionPolicy"><span class="pre">ExpansionPolicy</span></a></em><a class="headerlink" href="#aizynthfinder.context.config.Configuration.expansion_policy" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="aizynthfinder.context.config.Configuration.filter_policy">
+<span class="sig-name descname"><span class="pre">filter_policy</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference internal" href="aizynthfinder.context.policy.html#aizynthfinder.context.policy.policies.FilterPolicy" title="aizynthfinder.context.policy.policies.FilterPolicy"><span class="pre">FilterPolicy</span></a></em><a class="headerlink" href="#aizynthfinder.context.config.Configuration.filter_policy" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="aizynthfinder.context.config.Configuration.scorers">
+<span class="sig-name descname"><span class="pre">scorers</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference internal" href="aizynthfinder.context.scoring.html#aizynthfinder.context.scoring.collection.ScorerCollection" title="aizynthfinder.context.scoring.collection.ScorerCollection"><span class="pre">ScorerCollection</span></a></em><a class="headerlink" href="#aizynthfinder.context.config.Configuration.scorers" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="aizynthfinder.context.config.Configuration.from_dict">
+<em class="property"><span class="pre">classmethod</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">from_dict</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">source</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#aizynthfinder.context.config.Configuration.from_dict" title="Link to this definition">¶</a></dt>
+<dd><p>Loads a configuration from a dictionary structure.
+The parameters not set in the dictionary are taken from the default values.
+The policies and stocks specified are directly loaded.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>source</strong> (<em>StrDict</em>) – the dictionary source</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>a Configuration object with settings from the source</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference internal" href="#aizynthfinder.context.config.Configuration" title="aizynthfinder.context.config.Configuration">Configuration</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="aizynthfinder.context.config.Configuration.from_file">
+<em class="property"><span class="pre">classmethod</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">from_file</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">filename</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#aizynthfinder.context.config.Configuration.from_file" title="Link to this definition">¶</a></dt>
+<dd><p>Loads a configuration from a yaml file.
+The parameters not set in the yaml file are taken from the default values.
+The policies and stocks specified in the yaml file are directly loaded.
+The parameters in the yaml file may also contain environment variables as
+values.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>filename</strong> (<em>str</em>) – the path to a yaml file</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>a Configuration object with settings from the yaml file</p>
+</dd>
+<dt class="field-odd">Raises<span class="colon">:</span></dt>
+<dd class="field-odd"><dl class="simple">
+<dt>ValueError: if parameter’s value expects an environment variable that</dt><dd><p>does not exist in the current environment</p>
+</dd>
+</dl>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><a class="reference internal" href="#aizynthfinder.context.config.Configuration" title="aizynthfinder.context.config.Configuration"><em>Configuration</em></a></p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+</section>
+<section id="module-aizynthfinder.context">
+<span id="module-contents"></span><h2>Module contents<a class="headerlink" href="#module-aizynthfinder.context" title="Link to this heading">¶</a></h2>
+</section>
+</section>
+
+
+          </div>
+          
+        </div>
+      </div>
+    <div class="clearer"></div>
+  </div>
+    <div class="footer">
+      &#169;2020-2025, Molecular AI group.
+      
+      |
+      Powered by <a href="https://www.sphinx-doc.org/">Sphinx 7.4.7</a>
+      &amp; <a href="https://alabaster.readthedocs.io">Alabaster 0.7.16</a>
+      
+      |
+      <a href="_sources/aizynthfinder.context.rst.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+
+    
+  </body>
+</html>

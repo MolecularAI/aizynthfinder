@@ -1,0 +1,43 @@
+aizynthfinder package
+=====================
+
+Subpackages
+-----------
+
+.. toctree::
+   :maxdepth: 4
+
+   aizynthfinder.analysis
+   aizynthfinder.chem
+   aizynthfinder.context
+   aizynthfinder.interfaces
+   aizynthfinder.search
+   aizynthfinder.tools
+   aizynthfinder.utils
+
+Submodules
+----------
+
+aizynthfinder.aizynthfinder module
+----------------------------------
+
+.. automodule:: aizynthfinder.aizynthfinder
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+aizynthfinder.reactiontree module
+---------------------------------
+
+.. automodule:: aizynthfinder.reactiontree
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+Module contents
+---------------
+
+.. automodule:: aizynthfinder
+   :members:
+   :undoc-members:
+   :show-inheritance:

@@ -1,0 +1,278 @@
+<!DOCTYPE html>
+
+<html lang="en" data-content_root="./">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <title>aizynthfinder.interfaces.gui package &#8212; aizynthfinder 4.4.0 documentation</title>
+    <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=5ecbeea2" />
+    <link rel="stylesheet" type="text/css" href="_static/alabaster.css?v=a66d8bb5" />
+    <script src="_static/documentation_options.js?v=2f20d6c1"></script>
+    <script src="_static/doctools.js?v=9a2dae69"></script>
+    <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="aizynthfinder.search package" href="aizynthfinder.search.html" />
+    <link rel="prev" title="aizynthfinder.interfaces package" href="aizynthfinder.interfaces.html" />
+   
+  <link rel="stylesheet" href="_static/custom.css" type="text/css" />
+  
+
+  
+  
+
+  </head><body>
+  <div class="document">
+    
+      <div class="sphinxsidebar" role="navigation" aria-label="Main">
+        <div class="sphinxsidebarwrapper">
+<h1 class="logo"><a href="index.html">aizynthfinder</a></h1>
+
+
+
+<p class="blurb">A fast, robust and flexible software for retrosynthetic planning</p>
+
+
+
+
+
+
+<h3>Navigation</h3>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="gui.html">Graphical user interface</a></li>
+<li class="toctree-l1"><a class="reference internal" href="cli.html">Command-line interface</a></li>
+<li class="toctree-l1"><a class="reference internal" href="python_interface.html">Python interface</a></li>
+<li class="toctree-l1"><a class="reference internal" href="configuration.html">Configuration file</a></li>
+<li class="toctree-l1"><a class="reference internal" href="stocks.html">Stocks</a></li>
+<li class="toctree-l1"><a class="reference internal" href="scoring.html">Scoring</a></li>
+<li class="toctree-l1"><a class="reference internal" href="howto.html">How-to</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="aizynthfinder.html">aizynthfinder package</a><ul class="current">
+<li class="toctree-l2 current"><a class="reference internal" href="aizynthfinder.html#subpackages">Subpackages</a><ul class="current">
+<li class="toctree-l3"><a class="reference internal" href="aizynthfinder.analysis.html">aizynthfinder.analysis package</a></li>
+<li class="toctree-l3"><a class="reference internal" href="aizynthfinder.chem.html">aizynthfinder.chem package</a></li>
+<li class="toctree-l3"><a class="reference internal" href="aizynthfinder.context.html">aizynthfinder.context package</a></li>
+<li class="toctree-l3 current"><a class="reference internal" href="aizynthfinder.interfaces.html">aizynthfinder.interfaces package</a><ul class="current">
+<li class="toctree-l4 current"><a class="reference internal" href="aizynthfinder.interfaces.html#subpackages">Subpackages</a><ul class="current">
+<li class="toctree-l5 current"><a class="current reference internal" href="#">aizynthfinder.interfaces.gui package</a><ul>
+<li class="toctree-l6"><a class="reference internal" href="#submodules">Submodules</a></li>
+<li class="toctree-l6"><a class="reference internal" href="#module-aizynthfinder.interfaces.gui.clustering">aizynthfinder.interfaces.gui.clustering module</a><ul>
+<li class="toctree-l7"><a class="reference internal" href="#aizynthfinder.interfaces.gui.clustering.ClusteringGui"><code class="docutils literal notranslate"><span class="pre">ClusteringGui</span></code></a><ul>
+<li class="toctree-l8"><a class="reference internal" href="#aizynthfinder.interfaces.gui.clustering.ClusteringGui.from_app"><code class="docutils literal notranslate"><span class="pre">ClusteringGui.from_app()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l6"><a class="reference internal" href="#module-aizynthfinder.interfaces.gui.pareto_fronts">aizynthfinder.interfaces.gui.pareto_fronts module</a><ul>
+<li class="toctree-l7"><a class="reference internal" href="#aizynthfinder.interfaces.gui.pareto_fronts.ParetoFrontsGUI"><code class="docutils literal notranslate"><span class="pre">ParetoFrontsGUI</span></code></a><ul>
+<li class="toctree-l8"><a class="reference internal" href="#aizynthfinder.interfaces.gui.pareto_fronts.ParetoFrontsGUI.from_app"><code class="docutils literal notranslate"><span class="pre">ParetoFrontsGUI.from_app()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l6"><a class="reference internal" href="#module-aizynthfinder.interfaces.gui.utils">aizynthfinder.interfaces.gui.utils module</a><ul>
+<li class="toctree-l7"><a class="reference internal" href="#aizynthfinder.interfaces.gui.utils.pareto_fronts_plot"><code class="docutils literal notranslate"><span class="pre">pareto_fronts_plot()</span></code></a></li>
+<li class="toctree-l7"><a class="reference internal" href="#aizynthfinder.interfaces.gui.utils.route_display"><code class="docutils literal notranslate"><span class="pre">route_display()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l6"><a class="reference internal" href="#module-aizynthfinder.interfaces.gui">Module contents</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l4"><a class="reference internal" href="aizynthfinder.interfaces.html#submodules">Submodules</a></li>
+<li class="toctree-l4"><a class="reference internal" href="aizynthfinder.interfaces.html#module-aizynthfinder.interfaces.aizynthapp">aizynthfinder.interfaces.aizynthapp module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="aizynthfinder.interfaces.html#module-aizynthfinder.interfaces.aizynthcli">aizynthfinder.interfaces.aizynthcli module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="aizynthfinder.interfaces.html#module-aizynthfinder.interfaces">Module contents</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="aizynthfinder.search.html">aizynthfinder.search package</a></li>
+<li class="toctree-l3"><a class="reference internal" href="aizynthfinder.tools.html">aizynthfinder.tools package</a></li>
+<li class="toctree-l3"><a class="reference internal" href="aizynthfinder.utils.html">aizynthfinder.utils package</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="aizynthfinder.html#submodules">Submodules</a></li>
+<li class="toctree-l2"><a class="reference internal" href="aizynthfinder.html#module-aizynthfinder.aizynthfinder">aizynthfinder.aizynthfinder module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="aizynthfinder.html#module-aizynthfinder.reactiontree">aizynthfinder.reactiontree module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="aizynthfinder.html#module-aizynthfinder">Module contents</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="sequences.html">Sequences</a></li>
+<li class="toctree-l1"><a class="reference internal" href="relationships.html">Relationships</a></li>
+</ul>
+
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="index.html">Documentation overview</a><ul>
+  <li><a href="aizynthfinder.html">aizynthfinder package</a><ul>
+  <li><a href="aizynthfinder.interfaces.html">aizynthfinder.interfaces package</a><ul>
+      <li>Previous: <a href="aizynthfinder.interfaces.html" title="previous chapter">aizynthfinder.interfaces package</a></li>
+      <li>Next: <a href="aizynthfinder.search.html" title="next chapter">aizynthfinder.search package</a></li>
+  </ul></li>
+  </ul></li>
+  </ul></li>
+</ul>
+</div>
+<search id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"/>
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</search>
+<script>document.getElementById('searchbox').style.display = "block"</script>
+
+
+
+
+
+
+
+
+        </div>
+      </div>
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          
+
+          <div class="body" role="main">
+            
+  <section id="aizynthfinder-interfaces-gui-package">
+<h1>aizynthfinder.interfaces.gui package<a class="headerlink" href="#aizynthfinder-interfaces-gui-package" title="Link to this heading">¶</a></h1>
+<section id="submodules">
+<h2>Submodules<a class="headerlink" href="#submodules" title="Link to this heading">¶</a></h2>
+</section>
+<section id="module-aizynthfinder.interfaces.gui.clustering">
+<span id="aizynthfinder-interfaces-gui-clustering-module"></span><h2>aizynthfinder.interfaces.gui.clustering module<a class="headerlink" href="#module-aizynthfinder.interfaces.gui.clustering" title="Link to this heading">¶</a></h2>
+<p>Module containing a GUI extension for clustering</p>
+<dl class="py class">
+<dt class="sig sig-object py" id="aizynthfinder.interfaces.gui.clustering.ClusteringGui">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">aizynthfinder.interfaces.gui.clustering.</span></span><span class="sig-name descname"><span class="pre">ClusteringGui</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">routes</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#aizynthfinder.interfaces.gui.clustering.ClusteringGui" title="Link to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<p>GUI extension to cluster routes</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>routes</strong> (<a class="reference internal" href="aizynthfinder.analysis.html#aizynthfinder.analysis.routes.RouteCollection" title="aizynthfinder.analysis.routes.RouteCollection"><em>RouteCollection</em></a>) – the routes to cluster</p>
+</dd>
+</dl>
+<dl class="py method">
+<dt class="sig sig-object py" id="aizynthfinder.interfaces.gui.clustering.ClusteringGui.from_app">
+<em class="property"><span class="pre">classmethod</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">from_app</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">app</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#aizynthfinder.interfaces.gui.clustering.ClusteringGui.from_app" title="Link to this definition">¶</a></dt>
+<dd><p>Helper function to create a GUI from a GUI app interface</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>app</strong> (<a class="reference internal" href="aizynthfinder.interfaces.html#aizynthfinder.interfaces.aizynthapp.AiZynthApp" title="aizynthfinder.interfaces.aizynthapp.AiZynthApp"><em>AiZynthApp</em></a>) – the app to extract the routes from</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>the GUI object</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+</section>
+<section id="module-aizynthfinder.interfaces.gui.pareto_fronts">
+<span id="aizynthfinder-interfaces-gui-pareto-fronts-module"></span><h2>aizynthfinder.interfaces.gui.pareto_fronts module<a class="headerlink" href="#module-aizynthfinder.interfaces.gui.pareto_fronts" title="Link to this heading">¶</a></h2>
+<p>Module containing a GUI extension for plotting pareto fronts</p>
+<dl class="py class">
+<dt class="sig sig-object py" id="aizynthfinder.interfaces.gui.pareto_fronts.ParetoFrontsGUI">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">aizynthfinder.interfaces.gui.pareto_fronts.</span></span><span class="sig-name descname"><span class="pre">ParetoFrontsGUI</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">tree</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">scorers</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#aizynthfinder.interfaces.gui.pareto_fronts.ParetoFrontsGUI" title="Link to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<p>GUI extension for plotting pareto fronts of routes.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>routes</strong> – the routes to plot</p></li>
+<li><p><strong>scorers</strong> (<a class="reference internal" href="aizynthfinder.context.scoring.html#aizynthfinder.context.scoring.collection.ScorerCollection" title="aizynthfinder.context.scoring.collection.ScorerCollection"><em>ScorerCollection</em></a>) – the available scorers</p></li>
+<li><p><strong>tree</strong> (<em>Union</em><em>[</em><a class="reference internal" href="aizynthfinder.search.mcts.html#aizynthfinder.search.mcts.search.MctsSearchTree" title="aizynthfinder.search.mcts.search.MctsSearchTree"><em>MctsSearchTree</em></a><em>, </em><a class="reference internal" href="aizynthfinder.search.html#aizynthfinder.search.andor_trees.AndOrSearchTreeBase" title="aizynthfinder.search.andor_trees.AndOrSearchTreeBase"><em>AndOrSearchTreeBase</em></a><em>]</em>)</p></li>
+</ul>
+</dd>
+</dl>
+<dl class="py method">
+<dt class="sig sig-object py" id="aizynthfinder.interfaces.gui.pareto_fronts.ParetoFrontsGUI.from_app">
+<em class="property"><span class="pre">classmethod</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">from_app</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">app</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#aizynthfinder.interfaces.gui.pareto_fronts.ParetoFrontsGUI.from_app" title="Link to this definition">¶</a></dt>
+<dd><p>,
+Helper function to create a GUI from a GUI app interface</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>app</strong> (<a class="reference internal" href="aizynthfinder.interfaces.html#aizynthfinder.interfaces.aizynthapp.AiZynthApp" title="aizynthfinder.interfaces.aizynthapp.AiZynthApp"><em>AiZynthApp</em></a>) – the app to extract the routes from</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>the GUI object</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+</section>
+<section id="module-aizynthfinder.interfaces.gui.utils">
+<span id="aizynthfinder-interfaces-gui-utils-module"></span><h2>aizynthfinder.interfaces.gui.utils module<a class="headerlink" href="#module-aizynthfinder.interfaces.gui.utils" title="Link to this heading">¶</a></h2>
+<p>Module containing utility functions for GUI.</p>
+<dl class="py function">
+<dt class="sig sig-object py" id="aizynthfinder.interfaces.gui.utils.pareto_fronts_plot">
+<span class="sig-prename descclassname"><span class="pre">aizynthfinder.interfaces.gui.utils.</span></span><span class="sig-name descname"><span class="pre">pareto_fronts_plot</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">routes</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#aizynthfinder.interfaces.gui.utils.pareto_fronts_plot" title="Link to this definition">¶</a></dt>
+<dd><p>Plot the pareto front(s).</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>routes</strong> (<a class="reference internal" href="aizynthfinder.analysis.html#aizynthfinder.analysis.routes.RouteCollection" title="aizynthfinder.analysis.routes.RouteCollection"><em>RouteCollection</em></a>) – the route collection to plot as Pareto fronts</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>None</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="aizynthfinder.interfaces.gui.utils.route_display">
+<span class="sig-prename descclassname"><span class="pre">aizynthfinder.interfaces.gui.utils.</span></span><span class="sig-name descname"><span class="pre">route_display</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">index</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">routes</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">output_widget</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#aizynthfinder.interfaces.gui.utils.route_display" title="Link to this definition">¶</a></dt>
+<dd><p>Display a route with auxillary information in a widget</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>index</strong> (<em>Optional</em><em>[</em><em>int</em><em>]</em>) – the index of the route to display</p></li>
+<li><p><strong>routes</strong> (<a class="reference internal" href="aizynthfinder.analysis.html#aizynthfinder.analysis.routes.RouteCollection" title="aizynthfinder.analysis.routes.RouteCollection"><em>RouteCollection</em></a>) – the route collection</p></li>
+<li><p><strong>output_widget</strong> (<em>widgets.Output</em>) – the widget to display the route on</p></li>
+</ul>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>None</p>
+</dd>
+</dl>
+</dd></dl>
+
+</section>
+<section id="module-aizynthfinder.interfaces.gui">
+<span id="module-contents"></span><h2>Module contents<a class="headerlink" href="#module-aizynthfinder.interfaces.gui" title="Link to this heading">¶</a></h2>
+<p>Package for GUI extensions</p>
+</section>
+</section>
+
+
+          </div>
+          
+        </div>
+      </div>
+    <div class="clearer"></div>
+  </div>
+    <div class="footer">
+      &#169;2020-2025, Molecular AI group.
+      
+      |
+      Powered by <a href="https://www.sphinx-doc.org/">Sphinx 7.4.7</a>
+      &amp; <a href="https://alabaster.readthedocs.io">Alabaster 0.7.16</a>
+      
+      |
+      <a href="_sources/aizynthfinder.interfaces.gui.rst.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+
+    
+  </body>
+</html>

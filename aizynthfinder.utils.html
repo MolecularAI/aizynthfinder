@@ -1,0 +1,921 @@
+<!DOCTYPE html>
+
+<html lang="en" data-content_root="./">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <title>aizynthfinder.utils package &#8212; aizynthfinder 4.4.0 documentation</title>
+    <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=5ecbeea2" />
+    <link rel="stylesheet" type="text/css" href="_static/alabaster.css?v=a66d8bb5" />
+    <script src="_static/documentation_options.js?v=2f20d6c1"></script>
+    <script src="_static/doctools.js?v=9a2dae69"></script>
+    <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="Sequences" href="sequences.html" />
+    <link rel="prev" title="aizynthfinder.tools package" href="aizynthfinder.tools.html" />
+   
+  <link rel="stylesheet" href="_static/custom.css" type="text/css" />
+  
+
+  
+  
+
+  </head><body>
+  <div class="document">
+    
+      <div class="sphinxsidebar" role="navigation" aria-label="Main">
+        <div class="sphinxsidebarwrapper">
+<h1 class="logo"><a href="index.html">aizynthfinder</a></h1>
+
+
+
+<p class="blurb">A fast, robust and flexible software for retrosynthetic planning</p>
+
+
+
+
+
+
+<h3>Navigation</h3>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="gui.html">Graphical user interface</a></li>
+<li class="toctree-l1"><a class="reference internal" href="cli.html">Command-line interface</a></li>
+<li class="toctree-l1"><a class="reference internal" href="python_interface.html">Python interface</a></li>
+<li class="toctree-l1"><a class="reference internal" href="configuration.html">Configuration file</a></li>
+<li class="toctree-l1"><a class="reference internal" href="stocks.html">Stocks</a></li>
+<li class="toctree-l1"><a class="reference internal" href="scoring.html">Scoring</a></li>
+<li class="toctree-l1"><a class="reference internal" href="howto.html">How-to</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="aizynthfinder.html">aizynthfinder package</a><ul class="current">
+<li class="toctree-l2 current"><a class="reference internal" href="aizynthfinder.html#subpackages">Subpackages</a><ul class="current">
+<li class="toctree-l3"><a class="reference internal" href="aizynthfinder.analysis.html">aizynthfinder.analysis package</a></li>
+<li class="toctree-l3"><a class="reference internal" href="aizynthfinder.chem.html">aizynthfinder.chem package</a></li>
+<li class="toctree-l3"><a class="reference internal" href="aizynthfinder.context.html">aizynthfinder.context package</a></li>
+<li class="toctree-l3"><a class="reference internal" href="aizynthfinder.interfaces.html">aizynthfinder.interfaces package</a></li>
+<li class="toctree-l3"><a class="reference internal" href="aizynthfinder.search.html">aizynthfinder.search package</a></li>
+<li class="toctree-l3"><a class="reference internal" href="aizynthfinder.tools.html">aizynthfinder.tools package</a></li>
+<li class="toctree-l3 current"><a class="current reference internal" href="#">aizynthfinder.utils package</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#submodules">Submodules</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#module-aizynthfinder.utils.bonds">aizynthfinder.utils.bonds module</a><ul>
+<li class="toctree-l5"><a class="reference internal" href="#aizynthfinder.utils.bonds.BrokenBonds"><code class="docutils literal notranslate"><span class="pre">BrokenBonds</span></code></a></li>
+<li class="toctree-l5"><a class="reference internal" href="#aizynthfinder.utils.bonds.sort_bonds"><code class="docutils literal notranslate"><span class="pre">sort_bonds()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l4"><a class="reference internal" href="#module-aizynthfinder.utils.exceptions">aizynthfinder.utils.exceptions module</a><ul>
+<li class="toctree-l5"><a class="reference internal" href="#aizynthfinder.utils.exceptions.CostException"><code class="docutils literal notranslate"><span class="pre">CostException</span></code></a></li>
+<li class="toctree-l5"><a class="reference internal" href="#aizynthfinder.utils.exceptions.ExternalModelAPIError"><code class="docutils literal notranslate"><span class="pre">ExternalModelAPIError</span></code></a></li>
+<li class="toctree-l5"><a class="reference internal" href="#aizynthfinder.utils.exceptions.MoleculeException"><code class="docutils literal notranslate"><span class="pre">MoleculeException</span></code></a></li>
+<li class="toctree-l5"><a class="reference internal" href="#aizynthfinder.utils.exceptions.NodeUnexpectedBehaviourException"><code class="docutils literal notranslate"><span class="pre">NodeUnexpectedBehaviourException</span></code></a></li>
+<li class="toctree-l5"><a class="reference internal" href="#aizynthfinder.utils.exceptions.PolicyException"><code class="docutils literal notranslate"><span class="pre">PolicyException</span></code></a></li>
+<li class="toctree-l5"><a class="reference internal" href="#aizynthfinder.utils.exceptions.RejectionException"><code class="docutils literal notranslate"><span class="pre">RejectionException</span></code></a></li>
+<li class="toctree-l5"><a class="reference internal" href="#aizynthfinder.utils.exceptions.ScorerException"><code class="docutils literal notranslate"><span class="pre">ScorerException</span></code></a></li>
+<li class="toctree-l5"><a class="reference internal" href="#aizynthfinder.utils.exceptions.StockException"><code class="docutils literal notranslate"><span class="pre">StockException</span></code></a></li>
+<li class="toctree-l5"><a class="reference internal" href="#aizynthfinder.utils.exceptions.TreeAnalysisException"><code class="docutils literal notranslate"><span class="pre">TreeAnalysisException</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l4"><a class="reference internal" href="#module-aizynthfinder.utils.files">aizynthfinder.utils.files module</a><ul>
+<li class="toctree-l5"><a class="reference internal" href="#aizynthfinder.utils.files.read_datafile"><code class="docutils literal notranslate"><span class="pre">read_datafile()</span></code></a></li>
+<li class="toctree-l5"><a class="reference internal" href="#aizynthfinder.utils.files.save_datafile"><code class="docutils literal notranslate"><span class="pre">save_datafile()</span></code></a></li>
+<li class="toctree-l5"><a class="reference internal" href="#aizynthfinder.utils.files.cat_hdf_files"><code class="docutils literal notranslate"><span class="pre">cat_hdf_files()</span></code></a></li>
+<li class="toctree-l5"><a class="reference internal" href="#aizynthfinder.utils.files.cat_datafiles"><code class="docutils literal notranslate"><span class="pre">cat_datafiles()</span></code></a></li>
+<li class="toctree-l5"><a class="reference internal" href="#aizynthfinder.utils.files.split_file"><code class="docutils literal notranslate"><span class="pre">split_file()</span></code></a></li>
+<li class="toctree-l5"><a class="reference internal" href="#aizynthfinder.utils.files.start_processes"><code class="docutils literal notranslate"><span class="pre">start_processes()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l4"><a class="reference internal" href="#module-aizynthfinder.utils.image">aizynthfinder.utils.image module</a><ul>
+<li class="toctree-l5"><a class="reference internal" href="#aizynthfinder.utils.image.save_molecule_images"><code class="docutils literal notranslate"><span class="pre">save_molecule_images()</span></code></a></li>
+<li class="toctree-l5"><a class="reference internal" href="#aizynthfinder.utils.image.make_visjs_page"><code class="docutils literal notranslate"><span class="pre">make_visjs_page()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l4"><a class="reference internal" href="#module-aizynthfinder.utils.loading">aizynthfinder.utils.loading module</a><ul>
+<li class="toctree-l5"><a class="reference internal" href="#aizynthfinder.utils.loading.load_dynamic_class"><code class="docutils literal notranslate"><span class="pre">load_dynamic_class()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l4"><a class="reference internal" href="#module-aizynthfinder.utils.logging">aizynthfinder.utils.logging module</a><ul>
+<li class="toctree-l5"><a class="reference internal" href="#aizynthfinder.utils.logging.logger"><code class="docutils literal notranslate"><span class="pre">logger()</span></code></a></li>
+<li class="toctree-l5"><a class="reference internal" href="#aizynthfinder.utils.logging.setup_logger"><code class="docutils literal notranslate"><span class="pre">setup_logger()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l4"><a class="reference internal" href="#module-aizynthfinder.utils.math">aizynthfinder.utils.math module</a><ul>
+<li class="toctree-l5"><a class="reference internal" href="#aizynthfinder.utils.math.dense_layer_forward_pass"><code class="docutils literal notranslate"><span class="pre">dense_layer_forward_pass()</span></code></a></li>
+<li class="toctree-l5"><a class="reference internal" href="#aizynthfinder.utils.math.rectified_linear_unit"><code class="docutils literal notranslate"><span class="pre">rectified_linear_unit()</span></code></a></li>
+<li class="toctree-l5"><a class="reference internal" href="#aizynthfinder.utils.math.sigmoid"><code class="docutils literal notranslate"><span class="pre">sigmoid()</span></code></a></li>
+<li class="toctree-l5"><a class="reference internal" href="#aizynthfinder.utils.math.softmax"><code class="docutils literal notranslate"><span class="pre">softmax()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l4"><a class="reference internal" href="#module-aizynthfinder.utils.models">aizynthfinder.utils.models module</a><ul>
+<li class="toctree-l5"><a class="reference internal" href="#aizynthfinder.utils.models.load_model"><code class="docutils literal notranslate"><span class="pre">load_model()</span></code></a></li>
+<li class="toctree-l5"><a class="reference internal" href="#aizynthfinder.utils.models.LocalKerasModel"><code class="docutils literal notranslate"><span class="pre">LocalKerasModel</span></code></a><ul>
+<li class="toctree-l6"><a class="reference internal" href="#aizynthfinder.utils.models.LocalKerasModel.predict"><code class="docutils literal notranslate"><span class="pre">LocalKerasModel.predict()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l5"><a class="reference internal" href="#aizynthfinder.utils.models.LocalOnnxModel"><code class="docutils literal notranslate"><span class="pre">LocalOnnxModel</span></code></a><ul>
+<li class="toctree-l6"><a class="reference internal" href="#aizynthfinder.utils.models.LocalOnnxModel.predict"><code class="docutils literal notranslate"><span class="pre">LocalOnnxModel.predict()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l5"><a class="reference internal" href="#aizynthfinder.utils.models.ExternalModelViaREST"><code class="docutils literal notranslate"><span class="pre">ExternalModelViaREST</span></code></a><ul>
+<li class="toctree-l6"><a class="reference internal" href="#aizynthfinder.utils.models.ExternalModelViaREST.predict"><code class="docutils literal notranslate"><span class="pre">ExternalModelViaREST.predict()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l5"><a class="reference internal" href="#aizynthfinder.utils.models.ExternalModelViaGRPC"><code class="docutils literal notranslate"><span class="pre">ExternalModelViaGRPC</span></code></a><ul>
+<li class="toctree-l6"><a class="reference internal" href="#aizynthfinder.utils.models.ExternalModelViaGRPC.predict"><code class="docutils literal notranslate"><span class="pre">ExternalModelViaGRPC.predict()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l4"><a class="reference internal" href="#module-aizynthfinder.utils.mongo">aizynthfinder.utils.mongo module</a><ul>
+<li class="toctree-l5"><a class="reference internal" href="#aizynthfinder.utils.mongo.get_mongo_client"><code class="docutils literal notranslate"><span class="pre">get_mongo_client()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l4"><a class="reference internal" href="#module-aizynthfinder.utils.paths">aizynthfinder.utils.paths module</a><ul>
+<li class="toctree-l5"><a class="reference internal" href="#aizynthfinder.utils.paths.package_path"><code class="docutils literal notranslate"><span class="pre">package_path()</span></code></a></li>
+<li class="toctree-l5"><a class="reference internal" href="#aizynthfinder.utils.paths.data_path"><code class="docutils literal notranslate"><span class="pre">data_path()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l4"><a class="reference internal" href="#module-aizynthfinder.utils.sc_score">aizynthfinder.utils.sc_score module</a><ul>
+<li class="toctree-l5"><a class="reference internal" href="#aizynthfinder.utils.sc_score.SCScore"><code class="docutils literal notranslate"><span class="pre">SCScore</span></code></a><ul>
+<li class="toctree-l6"><a class="reference internal" href="#aizynthfinder.utils.sc_score.SCScore.forward"><code class="docutils literal notranslate"><span class="pre">SCScore.forward()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l4"><a class="reference internal" href="#module-aizynthfinder.utils.type_utils">aizynthfinder.utils.type_utils module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#module-aizynthfinder.utils">Module contents</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="aizynthfinder.html#submodules">Submodules</a></li>
+<li class="toctree-l2"><a class="reference internal" href="aizynthfinder.html#module-aizynthfinder.aizynthfinder">aizynthfinder.aizynthfinder module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="aizynthfinder.html#module-aizynthfinder.reactiontree">aizynthfinder.reactiontree module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="aizynthfinder.html#module-aizynthfinder">Module contents</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="sequences.html">Sequences</a></li>
+<li class="toctree-l1"><a class="reference internal" href="relationships.html">Relationships</a></li>
+</ul>
+
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="index.html">Documentation overview</a><ul>
+  <li><a href="aizynthfinder.html">aizynthfinder package</a><ul>
+      <li>Previous: <a href="aizynthfinder.tools.html" title="previous chapter">aizynthfinder.tools package</a></li>
+      <li>Next: <a href="sequences.html" title="next chapter">Sequences</a></li>
+  </ul></li>
+  </ul></li>
+</ul>
+</div>
+<search id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"/>
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</search>
+<script>document.getElementById('searchbox').style.display = "block"</script>
+
+
+
+
+
+
+
+
+        </div>
+      </div>
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          
+
+          <div class="body" role="main">
+            
+  <section id="aizynthfinder-utils-package">
+<h1>aizynthfinder.utils package<a class="headerlink" href="#aizynthfinder-utils-package" title="Link to this heading">¶</a></h1>
+<section id="submodules">
+<h2>Submodules<a class="headerlink" href="#submodules" title="Link to this heading">¶</a></h2>
+</section>
+<section id="module-aizynthfinder.utils.bonds">
+<span id="aizynthfinder-utils-bonds-module"></span><h2>aizynthfinder.utils.bonds module<a class="headerlink" href="#module-aizynthfinder.utils.bonds" title="Link to this heading">¶</a></h2>
+<p>Module containing a class to identify broken focussed bonds</p>
+<dl class="py class">
+<dt class="sig sig-object py" id="aizynthfinder.utils.bonds.BrokenBonds">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">aizynthfinder.utils.bonds.</span></span><span class="sig-name descname"><span class="pre">BrokenBonds</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">focussed_bonds</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#aizynthfinder.utils.bonds.BrokenBonds" title="Link to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<p>A class to keep track of focussed bonds breaking in a target molecule.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>focussed_bonds</strong> (<em>Sequence</em><em>[</em><em>Sequence</em><em>[</em><em>int</em><em>]</em><em>]</em>) – A list of focussed bond pairs. The bond pairs are represented
+as tuples of size 2. These bond pairs exist in the target molecule’s atom bonds.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="aizynthfinder.utils.bonds.sort_bonds">
+<span class="sig-prename descclassname"><span class="pre">aizynthfinder.utils.bonds.</span></span><span class="sig-name descname"><span class="pre">sort_bonds</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">bonds</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#aizynthfinder.utils.bonds.sort_bonds" title="Link to this definition">¶</a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>bonds</strong> (<em>Sequence</em><em>[</em><em>Sequence</em><em>[</em><em>int</em><em>]</em><em>]</em>)</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>List[Tuple[int, int]]</p>
+</dd>
+</dl>
+</dd></dl>
+
+</section>
+<section id="module-aizynthfinder.utils.exceptions">
+<span id="aizynthfinder-utils-exceptions-module"></span><h2>aizynthfinder.utils.exceptions module<a class="headerlink" href="#module-aizynthfinder.utils.exceptions" title="Link to this heading">¶</a></h2>
+<p>Module containing custom exception classes</p>
+<dl class="py exception">
+<dt class="sig sig-object py" id="aizynthfinder.utils.exceptions.CostException">
+<em class="property"><span class="pre">exception</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">aizynthfinder.utils.exceptions.</span></span><span class="sig-name descname"><span class="pre">CostException</span></span><a class="headerlink" href="#aizynthfinder.utils.exceptions.CostException" title="Link to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">Exception</span></code></p>
+<p>Exception raised by molecule cost classes</p>
+</dd></dl>
+
+<dl class="py exception">
+<dt class="sig sig-object py" id="aizynthfinder.utils.exceptions.ExternalModelAPIError">
+<em class="property"><span class="pre">exception</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">aizynthfinder.utils.exceptions.</span></span><span class="sig-name descname"><span class="pre">ExternalModelAPIError</span></span><a class="headerlink" href="#aizynthfinder.utils.exceptions.ExternalModelAPIError" title="Link to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">Exception</span></code></p>
+<p>Custom error type to signal failure in External model</p>
+</dd></dl>
+
+<dl class="py exception">
+<dt class="sig sig-object py" id="aizynthfinder.utils.exceptions.MoleculeException">
+<em class="property"><span class="pre">exception</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">aizynthfinder.utils.exceptions.</span></span><span class="sig-name descname"><span class="pre">MoleculeException</span></span><a class="headerlink" href="#aizynthfinder.utils.exceptions.MoleculeException" title="Link to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">Exception</span></code></p>
+<p>An exception that is raised by molecule class</p>
+</dd></dl>
+
+<dl class="py exception">
+<dt class="sig sig-object py" id="aizynthfinder.utils.exceptions.NodeUnexpectedBehaviourException">
+<em class="property"><span class="pre">exception</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">aizynthfinder.utils.exceptions.</span></span><span class="sig-name descname"><span class="pre">NodeUnexpectedBehaviourException</span></span><a class="headerlink" href="#aizynthfinder.utils.exceptions.NodeUnexpectedBehaviourException" title="Link to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">Exception</span></code></p>
+<p>Exception that is raised if the tree search is behaving unexpectedly.</p>
+</dd></dl>
+
+<dl class="py exception">
+<dt class="sig sig-object py" id="aizynthfinder.utils.exceptions.PolicyException">
+<em class="property"><span class="pre">exception</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">aizynthfinder.utils.exceptions.</span></span><span class="sig-name descname"><span class="pre">PolicyException</span></span><a class="headerlink" href="#aizynthfinder.utils.exceptions.PolicyException" title="Link to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">Exception</span></code></p>
+<p>An exception raised by policy classes</p>
+</dd></dl>
+
+<dl class="py exception">
+<dt class="sig sig-object py" id="aizynthfinder.utils.exceptions.RejectionException">
+<em class="property"><span class="pre">exception</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">aizynthfinder.utils.exceptions.</span></span><span class="sig-name descname"><span class="pre">RejectionException</span></span><a class="headerlink" href="#aizynthfinder.utils.exceptions.RejectionException" title="Link to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">Exception</span></code></p>
+<p>An exception raised if a retro action should be rejected</p>
+</dd></dl>
+
+<dl class="py exception">
+<dt class="sig sig-object py" id="aizynthfinder.utils.exceptions.ScorerException">
+<em class="property"><span class="pre">exception</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">aizynthfinder.utils.exceptions.</span></span><span class="sig-name descname"><span class="pre">ScorerException</span></span><a class="headerlink" href="#aizynthfinder.utils.exceptions.ScorerException" title="Link to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">Exception</span></code></p>
+<p>Exception raised by scoring classes</p>
+</dd></dl>
+
+<dl class="py exception">
+<dt class="sig sig-object py" id="aizynthfinder.utils.exceptions.StockException">
+<em class="property"><span class="pre">exception</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">aizynthfinder.utils.exceptions.</span></span><span class="sig-name descname"><span class="pre">StockException</span></span><a class="headerlink" href="#aizynthfinder.utils.exceptions.StockException" title="Link to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">Exception</span></code></p>
+<p>An exception raised by stock classes</p>
+</dd></dl>
+
+<dl class="py exception">
+<dt class="sig sig-object py" id="aizynthfinder.utils.exceptions.TreeAnalysisException">
+<em class="property"><span class="pre">exception</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">aizynthfinder.utils.exceptions.</span></span><span class="sig-name descname"><span class="pre">TreeAnalysisException</span></span><a class="headerlink" href="#aizynthfinder.utils.exceptions.TreeAnalysisException" title="Link to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">Exception</span></code></p>
+<p>Exception raised when analysing trees</p>
+</dd></dl>
+
+</section>
+<section id="module-aizynthfinder.utils.files">
+<span id="aizynthfinder-utils-files-module"></span><h2>aizynthfinder.utils.files module<a class="headerlink" href="#module-aizynthfinder.utils.files" title="Link to this heading">¶</a></h2>
+<p>Module containing routines to work with files and processes.</p>
+<dl class="py function">
+<dt class="sig sig-object py" id="aizynthfinder.utils.files.read_datafile">
+<span class="sig-prename descclassname"><span class="pre">aizynthfinder.utils.files.</span></span><span class="sig-name descname"><span class="pre">read_datafile</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">filename</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#aizynthfinder.utils.files.read_datafile" title="Link to this definition">¶</a></dt>
+<dd><p>Read aizynth output from disc in either .hdf5 or .json format</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>filename</strong> (<em>Union</em><em>[</em><em>str</em><em>, </em><em>Path</em><em>]</em>) – the path to the data</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>the loaded data</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>pd.DataFrame</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="aizynthfinder.utils.files.save_datafile">
+<span class="sig-prename descclassname"><span class="pre">aizynthfinder.utils.files.</span></span><span class="sig-name descname"><span class="pre">save_datafile</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">filename</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#aizynthfinder.utils.files.save_datafile" title="Link to this definition">¶</a></dt>
+<dd><p>Save the given data to disc in either .hdf5 or .json format</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>data</strong> (<em>pd.DataFrame</em>) – the data to save</p></li>
+<li><p><strong>filename</strong> (<em>Union</em><em>[</em><em>str</em><em>, </em><em>Path</em><em>]</em>) – the path to the data</p></li>
+</ul>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>None</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="aizynthfinder.utils.files.cat_hdf_files">
+<span class="sig-prename descclassname"><span class="pre">aizynthfinder.utils.files.</span></span><span class="sig-name descname"><span class="pre">cat_hdf_files</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">input_files</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">output_name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">trees_name</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#aizynthfinder.utils.files.cat_hdf_files" title="Link to this definition">¶</a></dt>
+<dd><p>Concatenate hdf5 or json datafiles</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>input_files</strong> (<em>List</em><em>[</em><em>str</em><em>]</em>)</p></li>
+<li><p><strong>output_name</strong> (<em>str</em>)</p></li>
+<li><p><strong>trees_name</strong> (<em>Optional</em><em>[</em><em>str</em><em>]</em>)</p></li>
+</ul>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>None</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="aizynthfinder.utils.files.cat_datafiles">
+<span class="sig-prename descclassname"><span class="pre">aizynthfinder.utils.files.</span></span><span class="sig-name descname"><span class="pre">cat_datafiles</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">input_files</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">output_name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">trees_name</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#aizynthfinder.utils.files.cat_datafiles" title="Link to this definition">¶</a></dt>
+<dd><p>Concatenate hdf5 or json datafiles</p>
+<p>if <cite>tree_name</cite> is given, will take out the <cite>trees</cite> column
+from the tables and save it to a gzipped-json file.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>input_files</strong> (<em>List</em><em>[</em><em>str</em><em>]</em>) – the paths to the files to concatenate</p></li>
+<li><p><strong>output_name</strong> (<em>str</em>) – the name of the concatenated file</p></li>
+<li><p><strong>trees_name</strong> (<em>Optional</em><em>[</em><em>str</em><em>]</em>) – the name of the concatenated trees</p></li>
+</ul>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>None</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="aizynthfinder.utils.files.split_file">
+<span class="sig-prename descclassname"><span class="pre">aizynthfinder.utils.files.</span></span><span class="sig-name descname"><span class="pre">split_file</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">filename</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">nparts</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#aizynthfinder.utils.files.split_file" title="Link to this definition">¶</a></dt>
+<dd><p>Split the content of a text file into a given number of temporary files</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>filename</strong> (<em>str</em>) – the path to the file to split</p></li>
+<li><p><strong>nparts</strong> (<em>int</em>) – the number of parts to create</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>list of filenames of the parts</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>List[str]</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="aizynthfinder.utils.files.start_processes">
+<span class="sig-prename descclassname"><span class="pre">aizynthfinder.utils.files.</span></span><span class="sig-name descname"><span class="pre">start_processes</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">inputs</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">log_prefix</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cmd_callback</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">poll_freq</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">5</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#aizynthfinder.utils.files.start_processes" title="Link to this definition">¶</a></dt>
+<dd><p>Start a number of background processes and wait for them
+to complete.</p>
+<p>The standard output and standard error is saved to a log file.</p>
+<p>The command to start for each process is given by the <code class="docutils literal notranslate"><span class="pre">cmd_callback</span></code>
+function that takes the index of the process and an item of the input
+as arguments.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>inputs</strong> (<em>Sequence</em><em>[</em><em>Any</em><em>]</em>) – a sequence of input to the processes</p></li>
+<li><p><strong>log_prefix</strong> (<em>str</em>) – the prefix to the log file of each processes</p></li>
+<li><p><strong>cmd_callback</strong> (<em>Callable</em>) – function that creates the process commands</p></li>
+<li><p><strong>poll_freq</strong> (<em>int</em>) – the polling frequency for checking if processes are completed</p></li>
+</ul>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>None</p>
+</dd>
+</dl>
+</dd></dl>
+
+</section>
+<section id="module-aizynthfinder.utils.image">
+<span id="aizynthfinder-utils-image-module"></span><h2>aizynthfinder.utils.image module<a class="headerlink" href="#module-aizynthfinder.utils.image" title="Link to this heading">¶</a></h2>
+<p>This module contains a collection of routines to produce pretty images</p>
+<dl class="py function">
+<dt class="sig sig-object py" id="aizynthfinder.utils.image.save_molecule_images">
+<span class="sig-prename descclassname"><span class="pre">aizynthfinder.utils.image.</span></span><span class="sig-name descname"><span class="pre">save_molecule_images</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">molecules</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">frame_colors</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">size</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">300</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#aizynthfinder.utils.image.save_molecule_images" title="Link to this definition">¶</a></dt>
+<dd><p>Create images of a list of molecules and save them to disc
+a globally managed folder.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>molecules</strong> (<em>Sequence</em><em>[</em><a class="reference internal" href="aizynthfinder.chem.html#aizynthfinder.chem.mol.Molecule" title="aizynthfinder.chem.mol.Molecule"><em>Molecule</em></a><em>]</em>) – the molecules to save as images</p></li>
+<li><p><strong>frame_colors</strong> (<em>Sequence</em><em>[</em><em>PilColor</em><em>]</em>) – the color of the frame around each image</p></li>
+<li><p><strong>size</strong> (<em>int</em>) – the sub-image size for each molecule</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>the filename of the created images</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Dict[<a class="reference internal" href="aizynthfinder.chem.html#aizynthfinder.chem.mol.Molecule" title="aizynthfinder.chem.mol.Molecule">Molecule</a>, str]</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="aizynthfinder.utils.image.make_visjs_page">
+<span class="sig-prename descclassname"><span class="pre">aizynthfinder.utils.image.</span></span><span class="sig-name descname"><span class="pre">make_visjs_page</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">filename</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">molecules</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">reactions</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">edges</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">frame_colors</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">hierarchical</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#aizynthfinder.utils.image.make_visjs_page" title="Link to this definition">¶</a></dt>
+<dd><p>Create HTML code of a bipartite graph of molecules and reactions
+using the vis.js network library.</p>
+<p>Package the created HTML page and all images as tar-ball.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>filename</strong> (<em>str</em>) – the basename of the archive</p></li>
+<li><p><strong>molecules</strong> (<em>Sequence</em><em>[</em><a class="reference internal" href="aizynthfinder.chem.html#aizynthfinder.chem.mol.Molecule" title="aizynthfinder.chem.mol.Molecule"><em>Molecule</em></a><em>]</em>) – the molecules nodes</p></li>
+<li><p><strong>reactions</strong> (<em>Sequence</em><em>[</em><a class="reference internal" href="aizynthfinder.chem.html#aizynthfinder.chem.reaction.FixedRetroReaction" title="aizynthfinder.chem.reaction.FixedRetroReaction"><em>FixedRetroReaction</em></a><em>]</em>) – the reaction nodes</p></li>
+<li><p><strong>edges</strong> (<em>Union</em><em>[</em><em>Sequence</em><em>[</em><em>Tuple</em><em>[</em><em>Any</em><em>, </em><em>Any</em><em>]</em><em>]</em><em>, </em><em>nx.digraph.OutEdgeView</em><em>]</em>) – the edges of the graph</p></li>
+<li><p><strong>frame_colors</strong> (<em>Sequence</em><em>[</em><em>PilColor</em><em>]</em>) – the color of the frame around each image</p></li>
+<li><p><strong>hierarchical</strong> (<em>bool</em>) – if True, will produce a hierarchical layout</p></li>
+</ul>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>None</p>
+</dd>
+</dl>
+</dd></dl>
+
+</section>
+<section id="module-aizynthfinder.utils.loading">
+<span id="aizynthfinder-utils-loading-module"></span><h2>aizynthfinder.utils.loading module<a class="headerlink" href="#module-aizynthfinder.utils.loading" title="Link to this heading">¶</a></h2>
+<p>Module containing routine to dynamically load a class from a specification</p>
+<dl class="py function">
+<dt class="sig sig-object py" id="aizynthfinder.utils.loading.load_dynamic_class">
+<span class="sig-prename descclassname"><span class="pre">aizynthfinder.utils.loading.</span></span><span class="sig-name descname"><span class="pre">load_dynamic_class</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name_spec</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">default_module=None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">exception_cls=&lt;class</span> <span class="pre">'ValueError'&gt;</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#aizynthfinder.utils.loading.load_dynamic_class" title="Link to this definition">¶</a></dt>
+<dd><p>Load an object from a dynamic specification.</p>
+<dl class="simple">
+<dt>The specification can be either:</dt><dd><p>ClassName, in-case the module name is taken from the <cite>default_module</cite> argument</p>
+</dd>
+<dt>or</dt><dd><p>package_name.module_name.ClassName, in-case the module is taken as <cite>package_name.module_name</cite></p>
+</dd>
+</dl>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>name_spec</strong> (<em>str</em>) – the class specification</p></li>
+<li><p><strong>default_module</strong> (<em>Optional</em><em>[</em><em>str</em><em>]</em>) – the default module</p></li>
+<li><p><strong>exception_cls</strong> (<em>Any</em>) – the exception class to raise on exception</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>the loaded class</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Any</p>
+</dd>
+</dl>
+</dd></dl>
+
+</section>
+<section id="module-aizynthfinder.utils.logging">
+<span id="aizynthfinder-utils-logging-module"></span><h2>aizynthfinder.utils.logging module<a class="headerlink" href="#module-aizynthfinder.utils.logging" title="Link to this heading">¶</a></h2>
+<p>Module containing routines to setup proper logging</p>
+<dl class="py function">
+<dt class="sig sig-object py" id="aizynthfinder.utils.logging.logger">
+<span class="sig-prename descclassname"><span class="pre">aizynthfinder.utils.logging.</span></span><span class="sig-name descname"><span class="pre">logger</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#aizynthfinder.utils.logging.logger" title="Link to this definition">¶</a></dt>
+<dd><p>Returns the logger that should be used by all classes</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>the logger object</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><em>Logger</em></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="aizynthfinder.utils.logging.setup_logger">
+<span class="sig-prename descclassname"><span class="pre">aizynthfinder.utils.logging.</span></span><span class="sig-name descname"><span class="pre">setup_logger</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">console_level</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">file_level</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#aizynthfinder.utils.logging.setup_logger" title="Link to this definition">¶</a></dt>
+<dd><p>Setup the logger that should be used by all classes</p>
+<p>The logger configuration is read from the <cite>logging.yml</cite> file.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>console_level</strong> (<em>int</em>) – the level of logging to the console</p></li>
+<li><p><strong>file_level</strong> (<em>int</em><em> | </em><em>None</em>) – the level of logging to file, if not set logging to file is disabled, default to None</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>the logger object</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><em>Logger</em></p>
+</dd>
+</dl>
+</dd></dl>
+
+</section>
+<section id="module-aizynthfinder.utils.math">
+<span id="aizynthfinder-utils-math-module"></span><h2>aizynthfinder.utils.math module<a class="headerlink" href="#module-aizynthfinder.utils.math" title="Link to this heading">¶</a></h2>
+<p>Module containing diverse math functions, including neural network-related functions.</p>
+<dl class="py function">
+<dt class="sig sig-object py" id="aizynthfinder.utils.math.dense_layer_forward_pass">
+<span class="sig-prename descclassname"><span class="pre">aizynthfinder.utils.math.</span></span><span class="sig-name descname"><span class="pre">dense_layer_forward_pass</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">weights</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">bias</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">activation</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#aizynthfinder.utils.math.dense_layer_forward_pass" title="Link to this definition">¶</a></dt>
+<dd><p>Forward pass through a dense neural network layer.
+:param x: layer input
+:param weights: layer weights
+:param bias: layer bias
+:param activation: layer activation function
+:return: the layer output</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>x</strong> (<em>ndarray</em>)</p></li>
+<li><p><strong>weights</strong> (<em>ndarray</em>)</p></li>
+<li><p><strong>bias</strong> (<em>ndarray</em>)</p></li>
+<li><p><strong>activation</strong> (<em>Callable</em>)</p></li>
+</ul>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><em>ndarray</em></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="aizynthfinder.utils.math.rectified_linear_unit">
+<span class="sig-prename descclassname"><span class="pre">aizynthfinder.utils.math.</span></span><span class="sig-name descname"><span class="pre">rectified_linear_unit</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#aizynthfinder.utils.math.rectified_linear_unit" title="Link to this definition">¶</a></dt>
+<dd><p>ReLU activation function</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>x</strong> (<em>ndarray</em>)</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><em>ndarray</em></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="aizynthfinder.utils.math.sigmoid">
+<span class="sig-prename descclassname"><span class="pre">aizynthfinder.utils.math.</span></span><span class="sig-name descname"><span class="pre">sigmoid</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#aizynthfinder.utils.math.sigmoid" title="Link to this definition">¶</a></dt>
+<dd><p>Sigmoid activation function</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>x</strong> (<em>ndarray</em>)</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><em>ndarray</em></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="aizynthfinder.utils.math.softmax">
+<span class="sig-prename descclassname"><span class="pre">aizynthfinder.utils.math.</span></span><span class="sig-name descname"><span class="pre">softmax</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#aizynthfinder.utils.math.softmax" title="Link to this definition">¶</a></dt>
+<dd><p>Compute softmax values for each sets of scores in x.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>x</strong> (<em>ndarray</em>)</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><em>ndarray</em></p>
+</dd>
+</dl>
+</dd></dl>
+
+</section>
+<section id="module-aizynthfinder.utils.models">
+<span id="aizynthfinder-utils-models-module"></span><h2>aizynthfinder.utils.models module<a class="headerlink" href="#module-aizynthfinder.utils.models" title="Link to this heading">¶</a></h2>
+<p>Module containing helper routines for using Keras, Tensorflow and Onnx models</p>
+<dl class="py function">
+<dt class="sig sig-object py" id="aizynthfinder.utils.models.load_model">
+<span class="sig-prename descclassname"><span class="pre">aizynthfinder.utils.models.</span></span><span class="sig-name descname"><span class="pre">load_model</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">source</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">key</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">use_remote_models</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#aizynthfinder.utils.models.load_model" title="Link to this definition">¶</a></dt>
+<dd><p>Load model from a configuration specification.</p>
+<dl class="simple">
+<dt>If <cite>use_remote_models</cite> is True, tries to load:</dt><dd><ol class="arabic simple">
+<li><p>A Tensorflow server through gRPC</p></li>
+<li><p>A Tensorflow server through REST API</p></li>
+<li><p>A local Keras model</p></li>
+</ol>
+</dd>
+</dl>
+<p>otherwise it just loads the local model.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>source</strong> (<em>str</em>) – if fallbacks to a local model, this is the filename</p></li>
+<li><p><strong>key</strong> (<em>str</em>) – when connecting to Tensorflow server this is the model name</p></li>
+<li><p><strong>use_remote_models</strong> (<em>bool</em>) – if True will try to connect to remote model server</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>a model object with a predict object</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Union[‘LocalKerasModel’, ‘LocalOnnxModel’, ‘ExternalModelViaGRPC’, ‘ExternalModelViaREST’]</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="aizynthfinder.utils.models.LocalKerasModel">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">aizynthfinder.utils.models.</span></span><span class="sig-name descname"><span class="pre">LocalKerasModel</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">filename</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#aizynthfinder.utils.models.LocalKerasModel" title="Link to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<p>A keras policy model that is executed locally.</p>
+<p>The size of the input vector can be determined with the len() method.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Variables<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>model</strong> – the compiled model</p></li>
+<li><p><strong>output_size</strong> – the length of the output vector</p></li>
+</ul>
+</dd>
+<dt class="field-even">Parameters<span class="colon">:</span></dt>
+<dd class="field-even"><p><strong>filename</strong> (<em>str</em>) – the path to a Keras checkpoint file</p>
+</dd>
+</dl>
+<dl class="py method">
+<dt class="sig sig-object py" id="aizynthfinder.utils.models.LocalKerasModel.predict">
+<span class="sig-name descname"><span class="pre">predict</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">_</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#aizynthfinder.utils.models.LocalKerasModel.predict" title="Link to this definition">¶</a></dt>
+<dd><p>Perform a forward pass of the neural network.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>args</strong> (<em>ndarray</em>) – the input vectors</p></li>
+<li><p><strong>_</strong> (<em>ndarray</em>)</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>the vector of the output layer</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><em>ndarray</em></p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="aizynthfinder.utils.models.LocalOnnxModel">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">aizynthfinder.utils.models.</span></span><span class="sig-name descname"><span class="pre">LocalOnnxModel</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">filename</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#aizynthfinder.utils.models.LocalOnnxModel" title="Link to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<p>An Onnx model that is executed locally.</p>
+<p>The size of the input vector can be determined with the len() method.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Variables<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>model</strong> – the compiled Onnx model</p></li>
+<li><p><strong>output_size</strong> – the length of the output vector</p></li>
+</ul>
+</dd>
+<dt class="field-even">Parameters<span class="colon">:</span></dt>
+<dd class="field-even"><p><strong>filename</strong> (<em>str</em>) – the path to a Onnx model checkpoint file</p>
+</dd>
+</dl>
+<dl class="py method">
+<dt class="sig sig-object py" id="aizynthfinder.utils.models.LocalOnnxModel.predict">
+<span class="sig-name descname"><span class="pre">predict</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">_</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#aizynthfinder.utils.models.LocalOnnxModel.predict" title="Link to this definition">¶</a></dt>
+<dd><p>Perform a prediction run on the onnx model.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>args</strong> (<em>ndarray</em>) – the input vectors</p></li>
+<li><p><strong>_</strong> (<em>ndarray</em>)</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>the vector of the output layer</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><em>ndarray</em></p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="aizynthfinder.utils.models.ExternalModelViaREST">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">aizynthfinder.utils.models.</span></span><span class="sig-name descname"><span class="pre">ExternalModelViaREST</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#aizynthfinder.utils.models.ExternalModelViaREST" title="Link to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<p>A neural network model implementation using TF Serving via REST API.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>name</strong> (<em>str</em>) – the name of model</p>
+</dd>
+</dl>
+<dl class="py method">
+<dt class="sig sig-object py" id="aizynthfinder.utils.models.ExternalModelViaREST.predict">
+<span class="sig-name descname"><span class="pre">predict</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#aizynthfinder.utils.models.ExternalModelViaREST.predict" title="Link to this definition">¶</a></dt>
+<dd><p>Get prediction from model.</p>
+<p>If the keys in <cite>kwargs</cite> agree with the model input names, they
+will be used in stead of <cite>arg</cite></p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>args</strong> (<em>ndarray</em>) – the input vectors</p></li>
+<li><p><strong>kwargs</strong> (<em>ndarray</em>) – the named input vectors</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>the vector of the output layer</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><em>ndarray</em></p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="aizynthfinder.utils.models.ExternalModelViaGRPC">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">aizynthfinder.utils.models.</span></span><span class="sig-name descname"><span class="pre">ExternalModelViaGRPC</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#aizynthfinder.utils.models.ExternalModelViaGRPC" title="Link to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<p>A neural network model implementation using TF Serving via gRPC.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>name</strong> (<em>str</em>) – the name of model</p>
+</dd>
+</dl>
+<dl class="py method">
+<dt class="sig sig-object py" id="aizynthfinder.utils.models.ExternalModelViaGRPC.predict">
+<span class="sig-name descname"><span class="pre">predict</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#aizynthfinder.utils.models.ExternalModelViaGRPC.predict" title="Link to this definition">¶</a></dt>
+<dd><p>Get prediction from model.</p>
+<p>If the keys in <cite>kwargs</cite> agree with the model input names, they
+will be used in stead of <cite>arg</cite></p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>args</strong> (<em>ndarray</em>) – the input vectors</p></li>
+<li><p><strong>kwargs</strong> (<em>ndarray</em>) – the named input vectors</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>the vector of the output layer</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><em>ndarray</em></p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+</section>
+<section id="module-aizynthfinder.utils.mongo">
+<span id="aizynthfinder-utils-mongo-module"></span><h2>aizynthfinder.utils.mongo module<a class="headerlink" href="#module-aizynthfinder.utils.mongo" title="Link to this heading">¶</a></h2>
+<p>Module containing routines to obtain a MongoClient instance</p>
+<dl class="py function">
+<dt class="sig sig-object py" id="aizynthfinder.utils.mongo.get_mongo_client">
+<span class="sig-prename descclassname"><span class="pre">aizynthfinder.utils.mongo.</span></span><span class="sig-name descname"><span class="pre">get_mongo_client</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">host</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'localhost'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">port</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">27017</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">user</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">password</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">tls_certs_path</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">''</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#aizynthfinder.utils.mongo.get_mongo_client" title="Link to this definition">¶</a></dt>
+<dd><p>A helper function to create and reuse MongoClient</p>
+<p>The client is only setup once. Therefore if this function is called a second
+time with different parameters, it would still return the first client.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>host</strong> (<em>str</em>) – the host</p></li>
+<li><p><strong>port</strong> (<em>int</em>) – the host port</p></li>
+<li><p><strong>user</strong> (<em>str</em><em> | </em><em>None</em>) – username, defaults to None</p></li>
+<li><p><strong>password</strong> (<em>str</em><em> | </em><em>None</em>) – password, defaults to None</p></li>
+<li><p><strong>tls_certs_path</strong> (<em>str</em>) – the path to TLS certificates if to be used, defaults to “”</p></li>
+</ul>
+</dd>
+<dt class="field-even">Raises<span class="colon">:</span></dt>
+<dd class="field-even"><p><strong>ValueError</strong> – if host and port is not given first time</p>
+</dd>
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>the MongoDB client</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><em>MongoClient</em> | None</p>
+</dd>
+</dl>
+</dd></dl>
+
+</section>
+<section id="module-aizynthfinder.utils.paths">
+<span id="aizynthfinder-utils-paths-module"></span><h2>aizynthfinder.utils.paths module<a class="headerlink" href="#module-aizynthfinder.utils.paths" title="Link to this heading">¶</a></h2>
+<p>Module containing routines for returning package paths</p>
+<dl class="py function">
+<dt class="sig sig-object py" id="aizynthfinder.utils.paths.package_path">
+<span class="sig-prename descclassname"><span class="pre">aizynthfinder.utils.paths.</span></span><span class="sig-name descname"><span class="pre">package_path</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#aizynthfinder.utils.paths.package_path" title="Link to this definition">¶</a></dt>
+<dd><p>Return the path to the package</p>
+<dl class="field-list simple">
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>str</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="aizynthfinder.utils.paths.data_path">
+<span class="sig-prename descclassname"><span class="pre">aizynthfinder.utils.paths.</span></span><span class="sig-name descname"><span class="pre">data_path</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#aizynthfinder.utils.paths.data_path" title="Link to this definition">¶</a></dt>
+<dd><p>Return the path to the <code class="docutils literal notranslate"><span class="pre">data</span></code> directory of the package</p>
+<dl class="field-list simple">
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>str</p>
+</dd>
+</dl>
+</dd></dl>
+
+</section>
+<section id="module-aizynthfinder.utils.sc_score">
+<span id="aizynthfinder-utils-sc-score-module"></span><h2>aizynthfinder.utils.sc_score module<a class="headerlink" href="#module-aizynthfinder.utils.sc_score" title="Link to this heading">¶</a></h2>
+<p>Module containing the implementation of the SC-score model for synthetic complexity scoring.</p>
+<dl class="py class">
+<dt class="sig sig-object py" id="aizynthfinder.utils.sc_score.SCScore">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">aizynthfinder.utils.sc_score.</span></span><span class="sig-name descname"><span class="pre">SCScore</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">model_path</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fingerprint_length</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1024</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fingerprint_radius</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">2</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#aizynthfinder.utils.sc_score.SCScore" title="Link to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<p>Encapsulation of the SCScore model</p>
+<p>Re-write of the SCScorer from the scscorer package</p>
+<p>The predictions of the score is made with a sanitized instance of an RDKit molecule</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">mol</span> <span class="o">=</span> <span class="n">Molecule</span><span class="p">(</span><span class="n">smiles</span><span class="o">=</span><span class="s2">&quot;CCC&quot;</span><span class="p">,</span> <span class="n">sanitize</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<span class="n">scscorer</span> <span class="o">=</span> <span class="n">SCScorer</span><span class="p">(</span><span class="s2">&quot;path_to_model&quot;</span><span class="p">)</span>
+<span class="n">score</span> <span class="o">=</span> <span class="n">scscorer</span><span class="p">(</span><span class="n">mol</span><span class="o">.</span><span class="n">rd_mol</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>The model provided when creating the scorer object should be pickled tuple.
+The first item of the tuple should be a list of the model weights for each layer.
+The second item of the tuple should be a list of the model biases for each layer.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>model_path</strong> (<em>str</em>) – the filename of the model weights and biases</p></li>
+<li><p><strong>fingerprint_length</strong> (<em>int</em>) – the number of bits in the fingerprint</p></li>
+<li><p><strong>fingerprint_radius</strong> (<em>int</em>) – the radius of the fingerprint</p></li>
+</ul>
+</dd>
+</dl>
+<dl class="py method">
+<dt class="sig sig-object py" id="aizynthfinder.utils.sc_score.SCScore.forward">
+<span class="sig-name descname"><span class="pre">forward</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#aizynthfinder.utils.sc_score.SCScore.forward" title="Link to this definition">¶</a></dt>
+<dd><p>Forward pass with dense neural network</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>x</strong> (<em>ndarray</em>)</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><em>ndarray</em></p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+</section>
+<section id="module-aizynthfinder.utils.type_utils">
+<span id="aizynthfinder-utils-type-utils-module"></span><h2>aizynthfinder.utils.type_utils module<a class="headerlink" href="#module-aizynthfinder.utils.type_utils" title="Link to this heading">¶</a></h2>
+<p>Module containing all types and type imports</p>
+</section>
+<section id="module-aizynthfinder.utils">
+<span id="module-contents"></span><h2>Module contents<a class="headerlink" href="#module-aizynthfinder.utils" title="Link to this heading">¶</a></h2>
+</section>
+</section>
+
+
+          </div>
+          
+        </div>
+      </div>
+    <div class="clearer"></div>
+  </div>
+    <div class="footer">
+      &#169;2020-2025, Molecular AI group.
+      
+      |
+      Powered by <a href="https://www.sphinx-doc.org/">Sphinx 7.4.7</a>
+      &amp; <a href="https://alabaster.readthedocs.io">Alabaster 0.7.16</a>
+      
+      |
+      <a href="_sources/aizynthfinder.utils.rst.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+
+    
+  </body>
+</html>

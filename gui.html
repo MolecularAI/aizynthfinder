@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+
+<html lang="en" data-content_root="./">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <title>Graphical user interface &#8212; aizynthfinder 4.4.0 documentation</title>
+    <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=5ecbeea2" />
+    <link rel="stylesheet" type="text/css" href="_static/alabaster.css?v=a66d8bb5" />
+    <script src="_static/documentation_options.js?v=2f20d6c1"></script>
+    <script src="_static/doctools.js?v=9a2dae69"></script>
+    <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="Command-line interface" href="cli.html" />
+    <link rel="prev" title="aizynthfinder documentation" href="index.html" />
+   
+  <link rel="stylesheet" href="_static/custom.css" type="text/css" />
+  
+
+  
+  
+
+  </head><body>
+  <div class="document">
+    
+      <div class="sphinxsidebar" role="navigation" aria-label="Main">
+        <div class="sphinxsidebarwrapper">
+<h1 class="logo"><a href="index.html">aizynthfinder</a></h1>
+
+
+
+<p class="blurb">A fast, robust and flexible software for retrosynthetic planning</p>
+
+
+
+
+
+
+<h3>Navigation</h3>
+<ul class="current">
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Graphical user interface</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#creating-the-notebook">Creating the notebook</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#analysing-the-results">Analysing the results</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#clustering">Clustering</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="cli.html">Command-line interface</a></li>
+<li class="toctree-l1"><a class="reference internal" href="python_interface.html">Python interface</a></li>
+<li class="toctree-l1"><a class="reference internal" href="configuration.html">Configuration file</a></li>
+<li class="toctree-l1"><a class="reference internal" href="stocks.html">Stocks</a></li>
+<li class="toctree-l1"><a class="reference internal" href="scoring.html">Scoring</a></li>
+<li class="toctree-l1"><a class="reference internal" href="howto.html">How-to</a></li>
+<li class="toctree-l1"><a class="reference internal" href="aizynthfinder.html">aizynthfinder package</a></li>
+<li class="toctree-l1"><a class="reference internal" href="sequences.html">Sequences</a></li>
+<li class="toctree-l1"><a class="reference internal" href="relationships.html">Relationships</a></li>
+</ul>
+
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="index.html">Documentation overview</a><ul>
+      <li>Previous: <a href="index.html" title="previous chapter">aizynthfinder documentation</a></li>
+      <li>Next: <a href="cli.html" title="next chapter">Command-line interface</a></li>
+  </ul></li>
+</ul>
+</div>
+<search id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"/>
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</search>
+<script>document.getElementById('searchbox').style.display = "block"</script>
+
+
+
+
+
+
+
+
+        </div>
+      </div>
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          
+
+          <div class="body" role="main">
+            
+  <section id="graphical-user-interface">
+<h1>Graphical user interface<a class="headerlink" href="#graphical-user-interface" title="Link to this heading">¶</a></h1>
+<p>This tool to provide the possibility to perform the tree search on a single compound using a GUI
+through a Jupyter notebook. If you are unfamiliar with notebooks, you find some introduction <a class="reference external" href="https://jupyter-notebook.readthedocs.io/en/stable/notebook.html">here</a>.</p>
+<p>To bring up the notebook, use</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>jupyter<span class="w"> </span>notebook
+</pre></div>
+</div>
+<p>and browse to an existing notebook or create a new one.</p>
+<p>Add these lines to the first cell in the notebook.</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">aizynthfinder.interfaces</span><span class="w"> </span><span class="kn">import</span> <span class="n">AiZynthApp</span>
+<span class="n">app</span> <span class="o">=</span> <span class="n">AiZynthApp</span><span class="p">(</span><span class="s2">&quot;/path/to/configfile.yaml&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>where the <code class="docutils literal notranslate"><span class="pre">AiZynthApp</span></code> class needs to be instantiated with the path to a configuration file (see <a class="reference internal" href="configuration.html"><span class="doc">here</span></a>).</p>
+<p>To use the interface, follow these steps:</p>
+<ol class="arabic simple">
+<li><p>Executed the code in the cell (press <code class="docutils literal notranslate"><span class="pre">Ctrl+Enter</span></code>) and a simple GUI will appear</p></li>
+<li><p>Enter the target SMILES and select stocks and policy model.</p></li>
+<li><p>Press the <code class="docutils literal notranslate"><span class="pre">Run</span> <span class="pre">Search</span></code> button to perform the tree search.</p></li>
+</ol>
+<img alt="_images/gui_input.png" src="_images/gui_input.png" />
+<ol class="arabic simple" start="4">
+<li><p>Press the <code class="docutils literal notranslate"><span class="pre">Show</span> <span class="pre">Reactions</span></code> to see the top-ranked routes</p></li>
+</ol>
+<img alt="_images/gui_results.png" src="_images/gui_results.png" />
+<p>You can also choose to select and sort the top-ranked routes based on another scoring function.</p>
+<section id="creating-the-notebook">
+<h2>Creating the notebook<a class="headerlink" href="#creating-the-notebook" title="Link to this heading">¶</a></h2>
+<p>It is possible to create a notebook automatically with the <code class="docutils literal notranslate"><span class="pre">aizynthapp</span></code> tool</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>aizynthapp<span class="w"> </span>--config<span class="w"> </span>config_local.yml
+</pre></div>
+</div>
+<p>which will also automatically opens up the created notebook.</p>
+</section>
+<section id="analysing-the-results">
+<h2>Analysing the results<a class="headerlink" href="#analysing-the-results" title="Link to this heading">¶</a></h2>
+<p>When the tree search has been finished. One can continue exploring the tree and extract output.
+This is done by using the <code class="docutils literal notranslate"><span class="pre">finder</span></code> property of the app object. The finder holds a reference to an <code class="docutils literal notranslate"><span class="pre">AiZynthFinder</span></code> object.</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">finder</span> <span class="o">=</span> <span class="n">app</span><span class="o">.</span><span class="n">finder</span>
+<span class="n">stats</span> <span class="o">=</span> <span class="n">finder</span><span class="o">.</span><span class="n">extract_statistics</span><span class="p">()</span>
+</pre></div>
+</div>
+</section>
+<section id="clustering">
+<h2>Clustering<a class="headerlink" href="#clustering" title="Link to this heading">¶</a></h2>
+<p>There is a GUI extension to perform clustering of the routes. Enter the following a new cell</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="o">%</span><span class="n">matplotlib</span> <span class="n">inline</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">aizynthfinder.interfaces.gui.clustering</span><span class="w"> </span><span class="kn">import</span> <span class="n">ClusteringGui</span>
+<span class="n">ClusteringGui</span><span class="o">.</span><span class="n">from_app</span><span class="p">(</span><span class="n">app</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>A GUI like this will be shown, where you see the hierarchy of the routes and then can select how many
+clusters you want to create.</p>
+<img alt="_images/gui_clustering.png" src="_images/gui_clustering.png" />
+</section>
+</section>
+
+
+          </div>
+          
+        </div>
+      </div>
+    <div class="clearer"></div>
+  </div>
+    <div class="footer">
+      &#169;2020-2025, Molecular AI group.
+      
+      |
+      Powered by <a href="https://www.sphinx-doc.org/">Sphinx 7.4.7</a>
+      &amp; <a href="https://alabaster.readthedocs.io">Alabaster 0.7.16</a>
+      
+      |
+      <a href="_sources/gui.rst.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+
+    
+  </body>
+</html>

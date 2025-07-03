@@ -1,0 +1,705 @@
+<!DOCTYPE html>
+
+<html lang="en" data-content_root="./">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <title>aizynthfinder.search.retrostar package &#8212; aizynthfinder 4.4.0 documentation</title>
+    <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=5ecbeea2" />
+    <link rel="stylesheet" type="text/css" href="_static/alabaster.css?v=a66d8bb5" />
+    <script src="_static/documentation_options.js?v=2f20d6c1"></script>
+    <script src="_static/doctools.js?v=9a2dae69"></script>
+    <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="aizynthfinder.tools package" href="aizynthfinder.tools.html" />
+    <link rel="prev" title="aizynthfinder.search.mcts package" href="aizynthfinder.search.mcts.html" />
+   
+  <link rel="stylesheet" href="_static/custom.css" type="text/css" />
+  
+
+  
+  
+
+  </head><body>
+  <div class="document">
+    
+      <div class="sphinxsidebar" role="navigation" aria-label="Main">
+        <div class="sphinxsidebarwrapper">
+<h1 class="logo"><a href="index.html">aizynthfinder</a></h1>
+
+
+
+<p class="blurb">A fast, robust and flexible software for retrosynthetic planning</p>
+
+
+
+
+
+
+<h3>Navigation</h3>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="gui.html">Graphical user interface</a></li>
+<li class="toctree-l1"><a class="reference internal" href="cli.html">Command-line interface</a></li>
+<li class="toctree-l1"><a class="reference internal" href="python_interface.html">Python interface</a></li>
+<li class="toctree-l1"><a class="reference internal" href="configuration.html">Configuration file</a></li>
+<li class="toctree-l1"><a class="reference internal" href="stocks.html">Stocks</a></li>
+<li class="toctree-l1"><a class="reference internal" href="scoring.html">Scoring</a></li>
+<li class="toctree-l1"><a class="reference internal" href="howto.html">How-to</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="aizynthfinder.html">aizynthfinder package</a><ul class="current">
+<li class="toctree-l2 current"><a class="reference internal" href="aizynthfinder.html#subpackages">Subpackages</a><ul class="current">
+<li class="toctree-l3"><a class="reference internal" href="aizynthfinder.analysis.html">aizynthfinder.analysis package</a></li>
+<li class="toctree-l3"><a class="reference internal" href="aizynthfinder.chem.html">aizynthfinder.chem package</a></li>
+<li class="toctree-l3"><a class="reference internal" href="aizynthfinder.context.html">aizynthfinder.context package</a></li>
+<li class="toctree-l3"><a class="reference internal" href="aizynthfinder.interfaces.html">aizynthfinder.interfaces package</a></li>
+<li class="toctree-l3 current"><a class="reference internal" href="aizynthfinder.search.html">aizynthfinder.search package</a><ul class="current">
+<li class="toctree-l4 current"><a class="reference internal" href="aizynthfinder.search.html#subpackages">Subpackages</a><ul class="current">
+<li class="toctree-l5"><a class="reference internal" href="aizynthfinder.search.breadth_first.html">aizynthfinder.search.breadth_first package</a></li>
+<li class="toctree-l5"><a class="reference internal" href="aizynthfinder.search.dfpn.html">aizynthfinder.search.dfpn package</a></li>
+<li class="toctree-l5"><a class="reference internal" href="aizynthfinder.search.mcts.html">aizynthfinder.search.mcts package</a></li>
+<li class="toctree-l5 current"><a class="current reference internal" href="#">aizynthfinder.search.retrostar package</a><ul>
+<li class="toctree-l6"><a class="reference internal" href="#submodules">Submodules</a></li>
+<li class="toctree-l6"><a class="reference internal" href="#module-aizynthfinder.search.retrostar.cost">aizynthfinder.search.retrostar.cost module</a><ul>
+<li class="toctree-l7"><a class="reference internal" href="#aizynthfinder.search.retrostar.cost.MoleculeCost"><code class="docutils literal notranslate"><span class="pre">MoleculeCost</span></code></a></li>
+<li class="toctree-l7"><a class="reference internal" href="#aizynthfinder.search.retrostar.cost.RetroStarCost"><code class="docutils literal notranslate"><span class="pre">RetroStarCost</span></code></a><ul>
+<li class="toctree-l8"><a class="reference internal" href="#aizynthfinder.search.retrostar.cost.RetroStarCost.calculate"><code class="docutils literal notranslate"><span class="pre">RetroStarCost.calculate()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l7"><a class="reference internal" href="#aizynthfinder.search.retrostar.cost.ZeroMoleculeCost"><code class="docutils literal notranslate"><span class="pre">ZeroMoleculeCost</span></code></a><ul>
+<li class="toctree-l8"><a class="reference internal" href="#aizynthfinder.search.retrostar.cost.ZeroMoleculeCost.calculate"><code class="docutils literal notranslate"><span class="pre">ZeroMoleculeCost.calculate()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l6"><a class="reference internal" href="#module-aizynthfinder.search.retrostar.nodes">aizynthfinder.search.retrostar.nodes module</a><ul>
+<li class="toctree-l7"><a class="reference internal" href="#aizynthfinder.search.retrostar.nodes.MoleculeNode"><code class="docutils literal notranslate"><span class="pre">MoleculeNode</span></code></a><ul>
+<li class="toctree-l8"><a class="reference internal" href="#aizynthfinder.search.retrostar.nodes.MoleculeNode.create_root"><code class="docutils literal notranslate"><span class="pre">MoleculeNode.create_root()</span></code></a></li>
+<li class="toctree-l8"><a class="reference internal" href="#aizynthfinder.search.retrostar.nodes.MoleculeNode.from_dict"><code class="docutils literal notranslate"><span class="pre">MoleculeNode.from_dict()</span></code></a></li>
+<li class="toctree-l8"><a class="reference internal" href="#aizynthfinder.search.retrostar.nodes.MoleculeNode.children"><code class="docutils literal notranslate"><span class="pre">MoleculeNode.children</span></code></a></li>
+<li class="toctree-l8"><a class="reference internal" href="#aizynthfinder.search.retrostar.nodes.MoleculeNode.target_value"><code class="docutils literal notranslate"><span class="pre">MoleculeNode.target_value</span></code></a></li>
+<li class="toctree-l8"><a class="reference internal" href="#aizynthfinder.search.retrostar.nodes.MoleculeNode.prop"><code class="docutils literal notranslate"><span class="pre">MoleculeNode.prop</span></code></a></li>
+<li class="toctree-l8"><a class="reference internal" href="#aizynthfinder.search.retrostar.nodes.MoleculeNode.add_stub"><code class="docutils literal notranslate"><span class="pre">MoleculeNode.add_stub()</span></code></a></li>
+<li class="toctree-l8"><a class="reference internal" href="#aizynthfinder.search.retrostar.nodes.MoleculeNode.ancestors"><code class="docutils literal notranslate"><span class="pre">MoleculeNode.ancestors()</span></code></a></li>
+<li class="toctree-l8"><a class="reference internal" href="#aizynthfinder.search.retrostar.nodes.MoleculeNode.close"><code class="docutils literal notranslate"><span class="pre">MoleculeNode.close()</span></code></a></li>
+<li class="toctree-l8"><a class="reference internal" href="#aizynthfinder.search.retrostar.nodes.MoleculeNode.serialize"><code class="docutils literal notranslate"><span class="pre">MoleculeNode.serialize()</span></code></a></li>
+<li class="toctree-l8"><a class="reference internal" href="#aizynthfinder.search.retrostar.nodes.MoleculeNode.update"><code class="docutils literal notranslate"><span class="pre">MoleculeNode.update()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l7"><a class="reference internal" href="#aizynthfinder.search.retrostar.nodes.ReactionNode"><code class="docutils literal notranslate"><span class="pre">ReactionNode</span></code></a><ul>
+<li class="toctree-l8"><a class="reference internal" href="#aizynthfinder.search.retrostar.nodes.ReactionNode.create_stub"><code class="docutils literal notranslate"><span class="pre">ReactionNode.create_stub()</span></code></a></li>
+<li class="toctree-l8"><a class="reference internal" href="#aizynthfinder.search.retrostar.nodes.ReactionNode.from_dict"><code class="docutils literal notranslate"><span class="pre">ReactionNode.from_dict()</span></code></a></li>
+<li class="toctree-l8"><a class="reference internal" href="#aizynthfinder.search.retrostar.nodes.ReactionNode.children"><code class="docutils literal notranslate"><span class="pre">ReactionNode.children</span></code></a></li>
+<li class="toctree-l8"><a class="reference internal" href="#aizynthfinder.search.retrostar.nodes.ReactionNode.prop"><code class="docutils literal notranslate"><span class="pre">ReactionNode.prop</span></code></a></li>
+<li class="toctree-l8"><a class="reference internal" href="#aizynthfinder.search.retrostar.nodes.ReactionNode.serialize"><code class="docutils literal notranslate"><span class="pre">ReactionNode.serialize()</span></code></a></li>
+<li class="toctree-l8"><a class="reference internal" href="#aizynthfinder.search.retrostar.nodes.ReactionNode.update"><code class="docutils literal notranslate"><span class="pre">ReactionNode.update()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l6"><a class="reference internal" href="#module-aizynthfinder.search.retrostar.search_tree">aizynthfinder.search.retrostar.search_tree module</a><ul>
+<li class="toctree-l7"><a class="reference internal" href="#aizynthfinder.search.retrostar.search_tree.SearchTree"><code class="docutils literal notranslate"><span class="pre">SearchTree</span></code></a><ul>
+<li class="toctree-l8"><a class="reference internal" href="#aizynthfinder.search.retrostar.search_tree.SearchTree.from_json"><code class="docutils literal notranslate"><span class="pre">SearchTree.from_json()</span></code></a></li>
+<li class="toctree-l8"><a class="reference internal" href="#aizynthfinder.search.retrostar.search_tree.SearchTree.mol_nodes"><code class="docutils literal notranslate"><span class="pre">SearchTree.mol_nodes</span></code></a></li>
+<li class="toctree-l8"><a class="reference internal" href="#aizynthfinder.search.retrostar.search_tree.SearchTree.one_iteration"><code class="docutils literal notranslate"><span class="pre">SearchTree.one_iteration()</span></code></a></li>
+<li class="toctree-l8"><a class="reference internal" href="#aizynthfinder.search.retrostar.search_tree.SearchTree.routes"><code class="docutils literal notranslate"><span class="pre">SearchTree.routes()</span></code></a></li>
+<li class="toctree-l8"><a class="reference internal" href="#aizynthfinder.search.retrostar.search_tree.SearchTree.serialize"><code class="docutils literal notranslate"><span class="pre">SearchTree.serialize()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l6"><a class="reference internal" href="#module-aizynthfinder.search.retrostar">Module contents</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l4"><a class="reference internal" href="aizynthfinder.search.html#submodules">Submodules</a></li>
+<li class="toctree-l4"><a class="reference internal" href="aizynthfinder.search.html#module-aizynthfinder.search.andor_trees">aizynthfinder.search.andor_trees module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="aizynthfinder.search.html#module-aizynthfinder.search">Module contents</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="aizynthfinder.tools.html">aizynthfinder.tools package</a></li>
+<li class="toctree-l3"><a class="reference internal" href="aizynthfinder.utils.html">aizynthfinder.utils package</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="aizynthfinder.html#submodules">Submodules</a></li>
+<li class="toctree-l2"><a class="reference internal" href="aizynthfinder.html#module-aizynthfinder.aizynthfinder">aizynthfinder.aizynthfinder module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="aizynthfinder.html#module-aizynthfinder.reactiontree">aizynthfinder.reactiontree module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="aizynthfinder.html#module-aizynthfinder">Module contents</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="sequences.html">Sequences</a></li>
+<li class="toctree-l1"><a class="reference internal" href="relationships.html">Relationships</a></li>
+</ul>
+
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="index.html">Documentation overview</a><ul>
+  <li><a href="aizynthfinder.html">aizynthfinder package</a><ul>
+  <li><a href="aizynthfinder.search.html">aizynthfinder.search package</a><ul>
+      <li>Previous: <a href="aizynthfinder.search.mcts.html" title="previous chapter">aizynthfinder.search.mcts package</a></li>
+      <li>Next: <a href="aizynthfinder.tools.html" title="next chapter">aizynthfinder.tools package</a></li>
+  </ul></li>
+  </ul></li>
+  </ul></li>
+</ul>
+</div>
+<search id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"/>
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</search>
+<script>document.getElementById('searchbox').style.display = "block"</script>
+
+
+
+
+
+
+
+
+        </div>
+      </div>
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          
+
+          <div class="body" role="main">
+            
+  <section id="aizynthfinder-search-retrostar-package">
+<h1>aizynthfinder.search.retrostar package<a class="headerlink" href="#aizynthfinder-search-retrostar-package" title="Link to this heading">¶</a></h1>
+<section id="submodules">
+<h2>Submodules<a class="headerlink" href="#submodules" title="Link to this heading">¶</a></h2>
+</section>
+<section id="module-aizynthfinder.search.retrostar.cost">
+<span id="aizynthfinder-search-retrostar-cost-module"></span><h2>aizynthfinder.search.retrostar.cost module<a class="headerlink" href="#module-aizynthfinder.search.retrostar.cost" title="Link to this heading">¶</a></h2>
+<p>Module containing Retro* cost models</p>
+<dl class="py class">
+<dt class="sig sig-object py" id="aizynthfinder.search.retrostar.cost.MoleculeCost">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">aizynthfinder.search.retrostar.cost.</span></span><span class="sig-name descname"><span class="pre">MoleculeCost</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">config</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#aizynthfinder.search.retrostar.cost.MoleculeCost" title="Link to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<p>A class to compute the molecule cost.</p>
+<p>The cost to be computed is taken from the input config. If no <cite>molecule_cost</cite> is
+set, assigns ZeroMoleculeCost as the <cite>cost</cite> by default. The <cite>molecule_cost</cite> can be
+set as a dictionary in config under <cite>search</cite> in the following format:
+‘algorithm’: ‘retrostar’
+‘algorithm_config’: {</p>
+<blockquote>
+<div><dl class="simple">
+<dt>‘molecule_cost’: {</dt><dd><p>‘cost’: name of the search cost class or custom_package.custom_model.CustomClass,
+other settings or params</p>
+</dd>
+</dl>
+<p>}</p>
+</div></blockquote>
+<p>}</p>
+<p>The cost can be computed by calling the instantiated class with a molecule.</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">calculator</span> <span class="o">=</span> <span class="n">MyCost</span><span class="p">(</span><span class="n">config</span><span class="p">)</span>
+<span class="n">cost</span> <span class="o">=</span> <span class="n">calculator</span><span class="o">.</span><span class="n">calculate</span><span class="p">(</span><span class="n">molecule</span><span class="p">)</span>
+</pre></div>
+</div>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>config</strong> (<a class="reference internal" href="aizynthfinder.context.html#aizynthfinder.context.config.Configuration" title="aizynthfinder.context.config.Configuration"><em>Configuration</em></a>) – the configuration of the tree search</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="aizynthfinder.search.retrostar.cost.RetroStarCost">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">aizynthfinder.search.retrostar.cost.</span></span><span class="sig-name descname"><span class="pre">RetroStarCost</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#aizynthfinder.search.retrostar.cost.RetroStarCost" title="Link to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<p>Encapsulation of the original Retro* molecular cost model</p>
+<p>Numpy implementation of original pytorch model</p>
+<p>The predictions of the score is made on a Molecule object</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">mol</span> <span class="o">=</span> <span class="n">Molecule</span><span class="p">(</span><span class="n">smiles</span><span class="o">=</span><span class="s2">&quot;CCC&quot;</span><span class="p">)</span>
+<span class="n">scorer</span> <span class="o">=</span> <span class="n">RetroStarCost</span><span class="p">()</span>
+<span class="n">score</span> <span class="o">=</span> <span class="n">scorer</span><span class="o">.</span><span class="n">calculate</span><span class="p">(</span><span class="n">mol</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>The model provided when creating the scorer object should be a pickled
+tuple.
+The first item of the tuple should be a list of the model weights for each layer.
+The second item of the tuple should be a list of the model biases for each layer.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>model_path</strong> – the filename of the model weights and biases</p></li>
+<li><p><strong>fingerprint_length</strong> – the number of bits in the fingerprint</p></li>
+<li><p><strong>fingerprint_radius</strong> – the radius of the fingerprint</p></li>
+<li><p><strong>dropout_rate</strong> – the dropout_rate</p></li>
+<li><p><strong>kwargs</strong> (<em>Any</em>)</p></li>
+</ul>
+</dd>
+</dl>
+<dl class="py method">
+<dt class="sig sig-object py" id="aizynthfinder.search.retrostar.cost.RetroStarCost.calculate">
+<span class="sig-name descname"><span class="pre">calculate</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">mol</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#aizynthfinder.search.retrostar.cost.RetroStarCost.calculate" title="Link to this definition">¶</a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>mol</strong> (<a class="reference internal" href="aizynthfinder.chem.html#aizynthfinder.chem.mol.Molecule" title="aizynthfinder.chem.mol.Molecule"><em>Molecule</em></a>)</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>float</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="aizynthfinder.search.retrostar.cost.ZeroMoleculeCost">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">aizynthfinder.search.retrostar.cost.</span></span><span class="sig-name descname"><span class="pre">ZeroMoleculeCost</span></span><a class="headerlink" href="#aizynthfinder.search.retrostar.cost.ZeroMoleculeCost" title="Link to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<p>Encapsulation of a Zero cost model</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="aizynthfinder.search.retrostar.cost.ZeroMoleculeCost.calculate">
+<span class="sig-name descname"><span class="pre">calculate</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">_mol</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#aizynthfinder.search.retrostar.cost.ZeroMoleculeCost.calculate" title="Link to this definition">¶</a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>_mol</strong> (<a class="reference internal" href="aizynthfinder.chem.html#aizynthfinder.chem.mol.Molecule" title="aizynthfinder.chem.mol.Molecule"><em>Molecule</em></a>)</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>float</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+</section>
+<section id="module-aizynthfinder.search.retrostar.nodes">
+<span id="aizynthfinder-search-retrostar-nodes-module"></span><h2>aizynthfinder.search.retrostar.nodes module<a class="headerlink" href="#module-aizynthfinder.search.retrostar.nodes" title="Link to this heading">¶</a></h2>
+<p>Module containing a classes representation various tree nodes</p>
+<dl class="py class">
+<dt class="sig sig-object py" id="aizynthfinder.search.retrostar.nodes.MoleculeNode">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">aizynthfinder.search.retrostar.nodes.</span></span><span class="sig-name descname"><span class="pre">MoleculeNode</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">mol</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">config</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">molecule_cost</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">parent</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#aizynthfinder.search.retrostar.nodes.MoleculeNode" title="Link to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="aizynthfinder.search.html#aizynthfinder.search.andor_trees.TreeNodeMixin" title="aizynthfinder.search.andor_trees.TreeNodeMixin"><code class="xref py py-class docutils literal notranslate"><span class="pre">TreeNodeMixin</span></code></a></p>
+<p>An OR node representing a molecule</p>
+<dl class="field-list simple">
+<dt class="field-odd">Variables<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>cost</strong> – the cost of synthesizing the molecule</p></li>
+<li><p><strong>expandable</strong> – if True, this node is part of the frontier</p></li>
+<li><p><strong>mol</strong> – the molecule represented by the node</p></li>
+<li><p><strong>in_stock</strong> – if True the molecule is in stock and hence should not be expanded</p></li>
+<li><p><strong>parent</strong> – the parent of the node</p></li>
+<li><p><strong>solved</strong> – if True the molecule is in stock or at least one child node is solved</p></li>
+<li><p><strong>value</strong> – the current rn(m|T)</p></li>
+</ul>
+</dd>
+<dt class="field-even">Parameters<span class="colon">:</span></dt>
+<dd class="field-even"><ul class="simple">
+<li><p><strong>mol</strong> (<a class="reference internal" href="aizynthfinder.chem.html#aizynthfinder.chem.mol.TreeMolecule" title="aizynthfinder.chem.mol.TreeMolecule"><em>TreeMolecule</em></a>) – the molecule to be represented by the node</p></li>
+<li><p><strong>config</strong> (<a class="reference internal" href="aizynthfinder.context.html#aizynthfinder.context.config.Configuration" title="aizynthfinder.context.config.Configuration"><em>Configuration</em></a>) – the configuration of the search</p></li>
+<li><p><strong>parent</strong> (<em>Optional</em><em>[</em><a class="reference internal" href="#aizynthfinder.search.retrostar.nodes.ReactionNode" title="aizynthfinder.search.retrostar.nodes.ReactionNode"><em>ReactionNode</em></a><em>]</em>) – the parent of the node, optional</p></li>
+<li><p><strong>molecule_cost</strong> (<a class="reference internal" href="#aizynthfinder.search.retrostar.cost.MoleculeCost" title="aizynthfinder.search.retrostar.cost.MoleculeCost"><em>MoleculeCost</em></a>)</p></li>
+</ul>
+</dd>
+</dl>
+<dl class="py method">
+<dt class="sig sig-object py" id="aizynthfinder.search.retrostar.nodes.MoleculeNode.create_root">
+<em class="property"><span class="pre">classmethod</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">create_root</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">smiles</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">config</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">molecule_cost</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#aizynthfinder.search.retrostar.nodes.MoleculeNode.create_root" title="Link to this definition">¶</a></dt>
+<dd><p>Create a root node for a tree using a SMILES.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>smiles</strong> (<em>str</em>) – the SMILES representation of the root state</p></li>
+<li><p><strong>config</strong> (<a class="reference internal" href="aizynthfinder.context.html#aizynthfinder.context.config.Configuration" title="aizynthfinder.context.config.Configuration"><em>Configuration</em></a>) – settings of the tree search algorithm</p></li>
+<li><p><strong>molecule_cost</strong> (<a class="reference internal" href="#aizynthfinder.search.retrostar.cost.MoleculeCost" title="aizynthfinder.search.retrostar.cost.MoleculeCost"><em>MoleculeCost</em></a>)</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>the created node</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference internal" href="#aizynthfinder.search.retrostar.nodes.MoleculeNode" title="aizynthfinder.search.retrostar.nodes.MoleculeNode">MoleculeNode</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="aizynthfinder.search.retrostar.nodes.MoleculeNode.from_dict">
+<em class="property"><span class="pre">classmethod</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">from_dict</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">dict_</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">config</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">molecules</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">molecule_cost</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">parent</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#aizynthfinder.search.retrostar.nodes.MoleculeNode.from_dict" title="Link to this definition">¶</a></dt>
+<dd><p>Create a new node from a dictionary, i.e. deserialization</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>dict</strong> – the serialized node</p></li>
+<li><p><strong>config</strong> (<a class="reference internal" href="aizynthfinder.context.html#aizynthfinder.context.config.Configuration" title="aizynthfinder.context.config.Configuration"><em>Configuration</em></a>) – settings of the tree search algorithm</p></li>
+<li><p><strong>molecules</strong> (<a class="reference internal" href="aizynthfinder.chem.html#aizynthfinder.chem.serialization.MoleculeDeserializer" title="aizynthfinder.chem.serialization.MoleculeDeserializer"><em>MoleculeDeserializer</em></a>) – the deserialized molecules</p></li>
+<li><p><strong>parent</strong> (<em>Optional</em><em>[</em><a class="reference internal" href="#aizynthfinder.search.retrostar.nodes.ReactionNode" title="aizynthfinder.search.retrostar.nodes.ReactionNode"><em>ReactionNode</em></a><em>]</em>) – the parent node</p></li>
+<li><p><strong>dict_</strong> (<em>StrDict</em>)</p></li>
+<li><p><strong>molecule_cost</strong> (<a class="reference internal" href="#aizynthfinder.search.retrostar.cost.MoleculeCost" title="aizynthfinder.search.retrostar.cost.MoleculeCost"><em>MoleculeCost</em></a>)</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>a deserialized node</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference internal" href="#aizynthfinder.search.retrostar.nodes.MoleculeNode" title="aizynthfinder.search.retrostar.nodes.MoleculeNode">MoleculeNode</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="aizynthfinder.search.retrostar.nodes.MoleculeNode.children">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">children</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">List</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="#aizynthfinder.search.retrostar.nodes.ReactionNode" title="aizynthfinder.search.retrostar.nodes.ReactionNode"><span class="pre">ReactionNode</span></a><span class="p"><span class="pre">]</span></span></em><a class="headerlink" href="#aizynthfinder.search.retrostar.nodes.MoleculeNode.children" title="Link to this definition">¶</a></dt>
+<dd><p>Gives the reaction children nodes</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="aizynthfinder.search.retrostar.nodes.MoleculeNode.target_value">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">target_value</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">float</span></em><a class="headerlink" href="#aizynthfinder.search.retrostar.nodes.MoleculeNode.target_value" title="Link to this definition">¶</a></dt>
+<dd><p>The V_t(m|T) value,
+the current cost of the tree containing this node</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>the value</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="aizynthfinder.search.retrostar.nodes.MoleculeNode.prop">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">prop</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">StrDict</span></em><a class="headerlink" href="#aizynthfinder.search.retrostar.nodes.MoleculeNode.prop" title="Link to this definition">¶</a></dt>
+<dd><p>Dictionary with publicly exposed properties</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="aizynthfinder.search.retrostar.nodes.MoleculeNode.add_stub">
+<span class="sig-name descname"><span class="pre">add_stub</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">cost</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">reaction</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#aizynthfinder.search.retrostar.nodes.MoleculeNode.add_stub" title="Link to this definition">¶</a></dt>
+<dd><p>Add a stub / sub-tree to this node</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>cost</strong> (<em>float</em>) – the cost of the reaction</p></li>
+<li><p><strong>reaction</strong> (<a class="reference internal" href="aizynthfinder.chem.html#aizynthfinder.chem.reaction.RetroReaction" title="aizynthfinder.chem.reaction.RetroReaction"><em>RetroReaction</em></a>) – the reaction creating the stub</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>list of all newly added molecular nodes</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Sequence[<a class="reference internal" href="#aizynthfinder.search.retrostar.nodes.MoleculeNode" title="aizynthfinder.search.retrostar.nodes.MoleculeNode">MoleculeNode</a>]</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="aizynthfinder.search.retrostar.nodes.MoleculeNode.ancestors">
+<span class="sig-name descname"><span class="pre">ancestors</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#aizynthfinder.search.retrostar.nodes.MoleculeNode.ancestors" title="Link to this definition">¶</a></dt>
+<dd><p>Return the ancestors of this node</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>the ancestors</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>set</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="aizynthfinder.search.retrostar.nodes.MoleculeNode.close">
+<span class="sig-name descname"><span class="pre">close</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#aizynthfinder.search.retrostar.nodes.MoleculeNode.close" title="Link to this definition">¶</a></dt>
+<dd><p>Updates the values of this node after expanding it.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>the delta V value</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>float</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="aizynthfinder.search.retrostar.nodes.MoleculeNode.serialize">
+<span class="sig-name descname"><span class="pre">serialize</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">molecule_store</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#aizynthfinder.search.retrostar.nodes.MoleculeNode.serialize" title="Link to this definition">¶</a></dt>
+<dd><p>Serialize the node object to a dictionary</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>molecule_store</strong> (<a class="reference internal" href="aizynthfinder.chem.html#aizynthfinder.chem.serialization.MoleculeSerializer" title="aizynthfinder.chem.serialization.MoleculeSerializer"><em>MoleculeSerializer</em></a>) – the serialized molecules</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>the serialized node</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>StrDict</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="aizynthfinder.search.retrostar.nodes.MoleculeNode.update">
+<span class="sig-name descname"><span class="pre">update</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">solved</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#aizynthfinder.search.retrostar.nodes.MoleculeNode.update" title="Link to this definition">¶</a></dt>
+<dd><p>Update the node as part of the update algorithm,
+calling the <cite>update()</cite> method of its parent if available.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>solved</strong> (<em>bool</em>) – if the child node was solved</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>None</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="aizynthfinder.search.retrostar.nodes.ReactionNode">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">aizynthfinder.search.retrostar.nodes.</span></span><span class="sig-name descname"><span class="pre">ReactionNode</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">cost</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">reaction</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">parent</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#aizynthfinder.search.retrostar.nodes.ReactionNode" title="Link to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="aizynthfinder.search.html#aizynthfinder.search.andor_trees.TreeNodeMixin" title="aizynthfinder.search.andor_trees.TreeNodeMixin"><code class="xref py py-class docutils literal notranslate"><span class="pre">TreeNodeMixin</span></code></a></p>
+<p>An AND node representing a reaction</p>
+<dl class="field-list simple">
+<dt class="field-odd">Variables<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>cost</strong> – the cost of the reaction</p></li>
+<li><p><strong>parent</strong> – the parent of the node</p></li>
+<li><p><strong>reaction</strong> – the reaction represented by the node</p></li>
+<li><p><strong>solved</strong> – if True all children nodes are solved</p></li>
+<li><p><strong>target_value</strong> – the V(m|T) for the children, the current cost</p></li>
+<li><p><strong>value</strong> – the current rn(r|T)</p></li>
+</ul>
+</dd>
+<dt class="field-even">Parameters<span class="colon">:</span></dt>
+<dd class="field-even"><ul class="simple">
+<li><p><strong>cost</strong> (<em>float</em>) – the cost of the reaction</p></li>
+<li><p><strong>reaction</strong> (<a class="reference internal" href="aizynthfinder.chem.html#aizynthfinder.chem.reaction.RetroReaction" title="aizynthfinder.chem.reaction.RetroReaction"><em>RetroReaction</em></a>) – the reaction to be represented by the node</p></li>
+<li><p><strong>parent</strong> (<a class="reference internal" href="#aizynthfinder.search.retrostar.nodes.MoleculeNode" title="aizynthfinder.search.retrostar.nodes.MoleculeNode"><em>MoleculeNode</em></a>) – the parent of the node</p></li>
+</ul>
+</dd>
+</dl>
+<dl class="py method">
+<dt class="sig sig-object py" id="aizynthfinder.search.retrostar.nodes.ReactionNode.create_stub">
+<em class="property"><span class="pre">classmethod</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">create_stub</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">cost</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">reaction</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">parent</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">config</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#aizynthfinder.search.retrostar.nodes.ReactionNode.create_stub" title="Link to this definition">¶</a></dt>
+<dd><p>Create a ReactionNode and creates all the MoleculeNode objects
+that are the children of the node.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>cost</strong> (<em>float</em>) – the cost of the reaction</p></li>
+<li><p><strong>reaction</strong> (<a class="reference internal" href="aizynthfinder.chem.html#aizynthfinder.chem.reaction.RetroReaction" title="aizynthfinder.chem.reaction.RetroReaction"><em>RetroReaction</em></a>) – the reaction to be represented by the node</p></li>
+<li><p><strong>parent</strong> (<a class="reference internal" href="#aizynthfinder.search.retrostar.nodes.MoleculeNode" title="aizynthfinder.search.retrostar.nodes.MoleculeNode"><em>MoleculeNode</em></a>) – the parent of the node</p></li>
+<li><p><strong>config</strong> (<a class="reference internal" href="aizynthfinder.context.html#aizynthfinder.context.config.Configuration" title="aizynthfinder.context.config.Configuration"><em>Configuration</em></a>) – the configuration of the search tree</p></li>
+</ul>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><a class="reference internal" href="#aizynthfinder.search.retrostar.nodes.ReactionNode" title="aizynthfinder.search.retrostar.nodes.ReactionNode">ReactionNode</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="aizynthfinder.search.retrostar.nodes.ReactionNode.from_dict">
+<em class="property"><span class="pre">classmethod</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">from_dict</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">dict_</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">config</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">molecules</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">molecule_cost</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">parent</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#aizynthfinder.search.retrostar.nodes.ReactionNode.from_dict" title="Link to this definition">¶</a></dt>
+<dd><p>Create a new node from a dictionary, i.e. deserialization</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>dict</strong> – the serialized node</p></li>
+<li><p><strong>config</strong> (<a class="reference internal" href="aizynthfinder.context.html#aizynthfinder.context.config.Configuration" title="aizynthfinder.context.config.Configuration"><em>Configuration</em></a>) – the configuration of the tree search</p></li>
+<li><p><strong>molecules</strong> (<a class="reference internal" href="aizynthfinder.chem.html#aizynthfinder.chem.serialization.MoleculeDeserializer" title="aizynthfinder.chem.serialization.MoleculeDeserializer"><em>MoleculeDeserializer</em></a>) – the deserialized molecules</p></li>
+<li><p><strong>parent</strong> (<a class="reference internal" href="#aizynthfinder.search.retrostar.nodes.MoleculeNode" title="aizynthfinder.search.retrostar.nodes.MoleculeNode"><em>MoleculeNode</em></a>) – the parent node</p></li>
+<li><p><strong>dict_</strong> (<em>StrDict</em>)</p></li>
+<li><p><strong>molecule_cost</strong> (<a class="reference internal" href="#aizynthfinder.search.retrostar.cost.MoleculeCost" title="aizynthfinder.search.retrostar.cost.MoleculeCost"><em>MoleculeCost</em></a>)</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>a deserialized node</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference internal" href="#aizynthfinder.search.retrostar.nodes.ReactionNode" title="aizynthfinder.search.retrostar.nodes.ReactionNode">ReactionNode</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="aizynthfinder.search.retrostar.nodes.ReactionNode.children">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">children</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">List</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="#aizynthfinder.search.retrostar.nodes.MoleculeNode" title="aizynthfinder.search.retrostar.nodes.MoleculeNode"><span class="pre">MoleculeNode</span></a><span class="p"><span class="pre">]</span></span></em><a class="headerlink" href="#aizynthfinder.search.retrostar.nodes.ReactionNode.children" title="Link to this definition">¶</a></dt>
+<dd><p>Gives the molecule children nodes</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="aizynthfinder.search.retrostar.nodes.ReactionNode.prop">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">prop</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">StrDict</span></em><a class="headerlink" href="#aizynthfinder.search.retrostar.nodes.ReactionNode.prop" title="Link to this definition">¶</a></dt>
+<dd><p>Dictionary with publicly exposed properties</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="aizynthfinder.search.retrostar.nodes.ReactionNode.serialize">
+<span class="sig-name descname"><span class="pre">serialize</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">molecule_store</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#aizynthfinder.search.retrostar.nodes.ReactionNode.serialize" title="Link to this definition">¶</a></dt>
+<dd><p>Serialize the node object to a dictionary</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>molecule_store</strong> (<a class="reference internal" href="aizynthfinder.chem.html#aizynthfinder.chem.serialization.MoleculeSerializer" title="aizynthfinder.chem.serialization.MoleculeSerializer"><em>MoleculeSerializer</em></a>) – the serialized molecules</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>the serialized node</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>StrDict</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="aizynthfinder.search.retrostar.nodes.ReactionNode.update">
+<span class="sig-name descname"><span class="pre">update</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">value</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">from_mol</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#aizynthfinder.search.retrostar.nodes.ReactionNode.update" title="Link to this definition">¶</a></dt>
+<dd><p>Update the node as part of the update algorithm,
+calling the <cite>update()</cite> method of its parent</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>value</strong> (<em>float</em>) – the delta V value</p></li>
+<li><p><strong>from_mol</strong> (<em>Optional</em><em>[</em><a class="reference internal" href="aizynthfinder.chem.html#aizynthfinder.chem.mol.TreeMolecule" title="aizynthfinder.chem.mol.TreeMolecule"><em>TreeMolecule</em></a><em>]</em>) – the molecule being expanded, used for excluding propagation</p></li>
+</ul>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>None</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+</section>
+<section id="module-aizynthfinder.search.retrostar.search_tree">
+<span id="aizynthfinder-search-retrostar-search-tree-module"></span><h2>aizynthfinder.search.retrostar.search_tree module<a class="headerlink" href="#module-aizynthfinder.search.retrostar.search_tree" title="Link to this heading">¶</a></h2>
+<p>Module containing a class that holds the tree search</p>
+<dl class="py class">
+<dt class="sig sig-object py" id="aizynthfinder.search.retrostar.search_tree.SearchTree">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">aizynthfinder.search.retrostar.search_tree.</span></span><span class="sig-name descname"><span class="pre">SearchTree</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">config</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">root_smiles</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#aizynthfinder.search.retrostar.search_tree.SearchTree" title="Link to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="aizynthfinder.search.html#aizynthfinder.search.andor_trees.AndOrSearchTreeBase" title="aizynthfinder.search.andor_trees.AndOrSearchTreeBase"><code class="xref py py-class docutils literal notranslate"><span class="pre">AndOrSearchTreeBase</span></code></a></p>
+<p>Encapsulation of the Retro* search tree (an AND/OR tree).</p>
+<dl class="field-list simple">
+<dt class="field-odd">Variables<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>config</strong> – settings of the tree search algorithm</p></li>
+<li><p><strong>root</strong> – the root node</p></li>
+</ul>
+</dd>
+<dt class="field-even">Parameters<span class="colon">:</span></dt>
+<dd class="field-even"><ul class="simple">
+<li><p><strong>config</strong> (<a class="reference internal" href="aizynthfinder.context.html#aizynthfinder.context.config.Configuration" title="aizynthfinder.context.config.Configuration"><em>Configuration</em></a>) – settings of the tree search algorithm</p></li>
+<li><p><strong>root_smiles</strong> (<em>Optional</em><em>[</em><em>str</em><em>]</em>) – the root will be set to a node representing this molecule, defaults to None</p></li>
+</ul>
+</dd>
+</dl>
+<dl class="py method">
+<dt class="sig sig-object py" id="aizynthfinder.search.retrostar.search_tree.SearchTree.from_json">
+<em class="property"><span class="pre">classmethod</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">from_json</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">filename</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">config</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#aizynthfinder.search.retrostar.search_tree.SearchTree.from_json" title="Link to this definition">¶</a></dt>
+<dd><p>Create a new search tree by deserialization from a JSON file</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>filename</strong> (<em>str</em>) – the path to the JSON node</p></li>
+<li><p><strong>config</strong> (<a class="reference internal" href="aizynthfinder.context.html#aizynthfinder.context.config.Configuration" title="aizynthfinder.context.config.Configuration"><em>Configuration</em></a>) – the configuration of the search tree</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>a deserialized tree</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference internal" href="#aizynthfinder.search.retrostar.search_tree.SearchTree" title="aizynthfinder.search.retrostar.search_tree.SearchTree">SearchTree</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="aizynthfinder.search.retrostar.search_tree.SearchTree.mol_nodes">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">mol_nodes</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Sequence</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="aizynthfinder.search.breadth_first.html#aizynthfinder.search.breadth_first.nodes.MoleculeNode" title="aizynthfinder.search.breadth_first.nodes.MoleculeNode"><span class="pre">MoleculeNode</span></a><span class="p"><span class="pre">]</span></span></em><a class="headerlink" href="#aizynthfinder.search.retrostar.search_tree.SearchTree.mol_nodes" title="Link to this definition">¶</a></dt>
+<dd><p>Return the molecule nodes of the tree</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="aizynthfinder.search.retrostar.search_tree.SearchTree.one_iteration">
+<span class="sig-name descname"><span class="pre">one_iteration</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#aizynthfinder.search.retrostar.search_tree.SearchTree.one_iteration" title="Link to this definition">¶</a></dt>
+<dd><dl class="simple">
+<dt>Perform one iteration of</dt><dd><ol class="arabic simple">
+<li><p>Selection</p></li>
+<li><p>Expansion</p></li>
+<li><p>Update</p></li>
+</ol>
+</dd>
+</dl>
+<dl class="field-list simple">
+<dt class="field-odd">Raises<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>StopIteration</strong> – if the search should be pre-maturely terminated</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>if a solution was found</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>bool</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="aizynthfinder.search.retrostar.search_tree.SearchTree.routes">
+<span class="sig-name descname"><span class="pre">routes</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#aizynthfinder.search.retrostar.search_tree.SearchTree.routes" title="Link to this definition">¶</a></dt>
+<dd><p>Extracts and returns routes from the AND/OR tree</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>the routes</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>List[<a class="reference internal" href="aizynthfinder.html#aizynthfinder.reactiontree.ReactionTree" title="aizynthfinder.reactiontree.ReactionTree">ReactionTree</a>]</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="aizynthfinder.search.retrostar.search_tree.SearchTree.serialize">
+<span class="sig-name descname"><span class="pre">serialize</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">filename</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#aizynthfinder.search.retrostar.search_tree.SearchTree.serialize" title="Link to this definition">¶</a></dt>
+<dd><p>Seralize the search tree to a JSON file</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>filename</strong> (<em>str</em>) – the path to the JSON file</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>None</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+</section>
+<section id="module-aizynthfinder.search.retrostar">
+<span id="module-contents"></span><h2>Module contents<a class="headerlink" href="#module-aizynthfinder.search.retrostar" title="Link to this heading">¶</a></h2>
+</section>
+</section>
+
+
+          </div>
+          
+        </div>
+      </div>
+    <div class="clearer"></div>
+  </div>
+    <div class="footer">
+      &#169;2020-2025, Molecular AI group.
+      
+      |
+      Powered by <a href="https://www.sphinx-doc.org/">Sphinx 7.4.7</a>
+      &amp; <a href="https://alabaster.readthedocs.io">Alabaster 0.7.16</a>
+      
+      |
+      <a href="_sources/aizynthfinder.search.retrostar.rst.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+
+    
+  </body>
+</html>

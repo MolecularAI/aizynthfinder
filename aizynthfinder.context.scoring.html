@@ -1,0 +1,1044 @@
+<!DOCTYPE html>
+
+<html lang="en" data-content_root="./">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <title>aizynthfinder.context.scoring package &#8212; aizynthfinder 4.4.0 documentation</title>
+    <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=5ecbeea2" />
+    <link rel="stylesheet" type="text/css" href="_static/alabaster.css?v=a66d8bb5" />
+    <script src="_static/documentation_options.js?v=2f20d6c1"></script>
+    <script src="_static/doctools.js?v=9a2dae69"></script>
+    <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="aizynthfinder.context.stock package" href="aizynthfinder.context.stock.html" />
+    <link rel="prev" title="aizynthfinder.context.policy package" href="aizynthfinder.context.policy.html" />
+   
+  <link rel="stylesheet" href="_static/custom.css" type="text/css" />
+  
+
+  
+  
+
+  </head><body>
+  <div class="document">
+    
+      <div class="sphinxsidebar" role="navigation" aria-label="Main">
+        <div class="sphinxsidebarwrapper">
+<h1 class="logo"><a href="index.html">aizynthfinder</a></h1>
+
+
+
+<p class="blurb">A fast, robust and flexible software for retrosynthetic planning</p>
+
+
+
+
+
+
+<h3>Navigation</h3>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="gui.html">Graphical user interface</a></li>
+<li class="toctree-l1"><a class="reference internal" href="cli.html">Command-line interface</a></li>
+<li class="toctree-l1"><a class="reference internal" href="python_interface.html">Python interface</a></li>
+<li class="toctree-l1"><a class="reference internal" href="configuration.html">Configuration file</a></li>
+<li class="toctree-l1"><a class="reference internal" href="stocks.html">Stocks</a></li>
+<li class="toctree-l1"><a class="reference internal" href="scoring.html">Scoring</a></li>
+<li class="toctree-l1"><a class="reference internal" href="howto.html">How-to</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="aizynthfinder.html">aizynthfinder package</a><ul class="current">
+<li class="toctree-l2 current"><a class="reference internal" href="aizynthfinder.html#subpackages">Subpackages</a><ul class="current">
+<li class="toctree-l3"><a class="reference internal" href="aizynthfinder.analysis.html">aizynthfinder.analysis package</a></li>
+<li class="toctree-l3"><a class="reference internal" href="aizynthfinder.chem.html">aizynthfinder.chem package</a></li>
+<li class="toctree-l3 current"><a class="reference internal" href="aizynthfinder.context.html">aizynthfinder.context package</a><ul class="current">
+<li class="toctree-l4 current"><a class="reference internal" href="aizynthfinder.context.html#subpackages">Subpackages</a><ul class="current">
+<li class="toctree-l5"><a class="reference internal" href="aizynthfinder.context.policy.html">aizynthfinder.context.policy package</a></li>
+<li class="toctree-l5 current"><a class="current reference internal" href="#">aizynthfinder.context.scoring package</a><ul>
+<li class="toctree-l6"><a class="reference internal" href="#submodules">Submodules</a></li>
+<li class="toctree-l6"><a class="reference internal" href="#module-aizynthfinder.context.scoring.collection">aizynthfinder.context.scoring.collection module</a><ul>
+<li class="toctree-l7"><a class="reference internal" href="#aizynthfinder.context.scoring.collection.ScorerCollection"><code class="docutils literal notranslate"><span class="pre">ScorerCollection</span></code></a><ul>
+<li class="toctree-l8"><a class="reference internal" href="#aizynthfinder.context.scoring.collection.ScorerCollection.create_default_scorers"><code class="docutils literal notranslate"><span class="pre">ScorerCollection.create_default_scorers()</span></code></a></li>
+<li class="toctree-l8"><a class="reference internal" href="#aizynthfinder.context.scoring.collection.ScorerCollection.load"><code class="docutils literal notranslate"><span class="pre">ScorerCollection.load()</span></code></a></li>
+<li class="toctree-l8"><a class="reference internal" href="#aizynthfinder.context.scoring.collection.ScorerCollection.load_from_config"><code class="docutils literal notranslate"><span class="pre">ScorerCollection.load_from_config()</span></code></a></li>
+<li class="toctree-l8"><a class="reference internal" href="#aizynthfinder.context.scoring.collection.ScorerCollection.make_subset"><code class="docutils literal notranslate"><span class="pre">ScorerCollection.make_subset()</span></code></a></li>
+<li class="toctree-l8"><a class="reference internal" href="#aizynthfinder.context.scoring.collection.ScorerCollection.names"><code class="docutils literal notranslate"><span class="pre">ScorerCollection.names()</span></code></a></li>
+<li class="toctree-l8"><a class="reference internal" href="#aizynthfinder.context.scoring.collection.ScorerCollection.objects"><code class="docutils literal notranslate"><span class="pre">ScorerCollection.objects()</span></code></a></li>
+<li class="toctree-l8"><a class="reference internal" href="#aizynthfinder.context.scoring.collection.ScorerCollection.score_vector"><code class="docutils literal notranslate"><span class="pre">ScorerCollection.score_vector()</span></code></a></li>
+<li class="toctree-l8"><a class="reference internal" href="#aizynthfinder.context.scoring.collection.ScorerCollection.weighted_score"><code class="docutils literal notranslate"><span class="pre">ScorerCollection.weighted_score()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l6"><a class="reference internal" href="#module-aizynthfinder.context.scoring.scorers">aizynthfinder.context.scoring.scorers module</a><ul>
+<li class="toctree-l7"><a class="reference internal" href="#aizynthfinder.context.scoring.scorers.CombinedScorer"><code class="docutils literal notranslate"><span class="pre">CombinedScorer</span></code></a></li>
+<li class="toctree-l7"><a class="reference internal" href="#aizynthfinder.context.scoring.scorers.StateScorer"><code class="docutils literal notranslate"><span class="pre">StateScorer</span></code></a><ul>
+<li class="toctree-l8"><a class="reference internal" href="#aizynthfinder.context.scoring.scorers.StateScorer.scorer_name"><code class="docutils literal notranslate"><span class="pre">StateScorer.scorer_name</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l7"><a class="reference internal" href="#aizynthfinder.context.scoring.scorers.RouteCostScorer"><code class="docutils literal notranslate"><span class="pre">RouteCostScorer</span></code></a><ul>
+<li class="toctree-l8"><a class="reference internal" href="#aizynthfinder.context.scoring.scorers.RouteCostScorer.scorer_name"><code class="docutils literal notranslate"><span class="pre">RouteCostScorer.scorer_name</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l7"><a class="reference internal" href="#aizynthfinder.context.scoring.scorers.BrokenBondsScorer"><code class="docutils literal notranslate"><span class="pre">BrokenBondsScorer</span></code></a><ul>
+<li class="toctree-l8"><a class="reference internal" href="#aizynthfinder.context.scoring.scorers.BrokenBondsScorer.scorer_name"><code class="docutils literal notranslate"><span class="pre">BrokenBondsScorer.scorer_name</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l7"><a class="reference internal" href="#aizynthfinder.context.scoring.scorers.RouteSimilarityScorer"><code class="docutils literal notranslate"><span class="pre">RouteSimilarityScorer</span></code></a><ul>
+<li class="toctree-l8"><a class="reference internal" href="#aizynthfinder.context.scoring.scorers.RouteSimilarityScorer.scorer_name"><code class="docutils literal notranslate"><span class="pre">RouteSimilarityScorer.scorer_name</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l7"><a class="reference internal" href="#aizynthfinder.context.scoring.scorers.DeepSetScorer"><code class="docutils literal notranslate"><span class="pre">DeepSetScorer</span></code></a><ul>
+<li class="toctree-l8"><a class="reference internal" href="#aizynthfinder.context.scoring.scorers.DeepSetScorer.scorer_name"><code class="docutils literal notranslate"><span class="pre">DeepSetScorer.scorer_name</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l6"><a class="reference internal" href="#module-aizynthfinder.context.scoring.scorers_base">aizynthfinder.context.scoring.scorers_base module</a><ul>
+<li class="toctree-l7"><a class="reference internal" href="#aizynthfinder.context.scoring.scorers_base.SquashScaler"><code class="docutils literal notranslate"><span class="pre">SquashScaler</span></code></a><ul>
+<li class="toctree-l8"><a class="reference internal" href="#aizynthfinder.context.scoring.scorers_base.SquashScaler.slope"><code class="docutils literal notranslate"><span class="pre">SquashScaler.slope</span></code></a></li>
+<li class="toctree-l8"><a class="reference internal" href="#aizynthfinder.context.scoring.scorers_base.SquashScaler.xoffset"><code class="docutils literal notranslate"><span class="pre">SquashScaler.xoffset</span></code></a></li>
+<li class="toctree-l8"><a class="reference internal" href="#aizynthfinder.context.scoring.scorers_base.SquashScaler.yoffset"><code class="docutils literal notranslate"><span class="pre">SquashScaler.yoffset</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l7"><a class="reference internal" href="#aizynthfinder.context.scoring.scorers_base.MinMaxScaler"><code class="docutils literal notranslate"><span class="pre">MinMaxScaler</span></code></a><ul>
+<li class="toctree-l8"><a class="reference internal" href="#aizynthfinder.context.scoring.scorers_base.MinMaxScaler.min_val"><code class="docutils literal notranslate"><span class="pre">MinMaxScaler.min_val</span></code></a></li>
+<li class="toctree-l8"><a class="reference internal" href="#aizynthfinder.context.scoring.scorers_base.MinMaxScaler.max_val"><code class="docutils literal notranslate"><span class="pre">MinMaxScaler.max_val</span></code></a></li>
+<li class="toctree-l8"><a class="reference internal" href="#aizynthfinder.context.scoring.scorers_base.MinMaxScaler.reverse"><code class="docutils literal notranslate"><span class="pre">MinMaxScaler.reverse</span></code></a></li>
+<li class="toctree-l8"><a class="reference internal" href="#aizynthfinder.context.scoring.scorers_base.MinMaxScaler.scale_factor"><code class="docutils literal notranslate"><span class="pre">MinMaxScaler.scale_factor</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l7"><a class="reference internal" href="#aizynthfinder.context.scoring.scorers_base.PowerScaler"><code class="docutils literal notranslate"><span class="pre">PowerScaler</span></code></a><ul>
+<li class="toctree-l8"><a class="reference internal" href="#aizynthfinder.context.scoring.scorers_base.PowerScaler.base_coefficient"><code class="docutils literal notranslate"><span class="pre">PowerScaler.base_coefficient</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l7"><a class="reference internal" href="#aizynthfinder.context.scoring.scorers_base.Scorer"><code class="docutils literal notranslate"><span class="pre">Scorer</span></code></a><ul>
+<li class="toctree-l8"><a class="reference internal" href="#aizynthfinder.context.scoring.scorers_base.Scorer.scorer_name"><code class="docutils literal notranslate"><span class="pre">Scorer.scorer_name</span></code></a></li>
+<li class="toctree-l8"><a class="reference internal" href="#aizynthfinder.context.scoring.scorers_base.Scorer.sort"><code class="docutils literal notranslate"><span class="pre">Scorer.sort()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l7"><a class="reference internal" href="#aizynthfinder.context.scoring.scorers_base.make_rxnutils_route"><code class="docutils literal notranslate"><span class="pre">make_rxnutils_route()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l6"><a class="reference internal" href="#module-aizynthfinder.context.scoring.scorers_mols">aizynthfinder.context.scoring.scorers_mols module</a><ul>
+<li class="toctree-l7"><a class="reference internal" href="#aizynthfinder.context.scoring.scorers_mols.FractionInStockScorer"><code class="docutils literal notranslate"><span class="pre">FractionInStockScorer</span></code></a><ul>
+<li class="toctree-l8"><a class="reference internal" href="#aizynthfinder.context.scoring.scorers_mols.FractionInStockScorer.scorer_name"><code class="docutils literal notranslate"><span class="pre">FractionInStockScorer.scorer_name</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l7"><a class="reference internal" href="#aizynthfinder.context.scoring.scorers_mols.FractionInSourceStockScorer"><code class="docutils literal notranslate"><span class="pre">FractionInSourceStockScorer</span></code></a><ul>
+<li class="toctree-l8"><a class="reference internal" href="#aizynthfinder.context.scoring.scorers_mols.FractionInSourceStockScorer.scorer_name"><code class="docutils literal notranslate"><span class="pre">FractionInSourceStockScorer.scorer_name</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l7"><a class="reference internal" href="#aizynthfinder.context.scoring.scorers_mols.FractionOfIntermediatesInStockScorer"><code class="docutils literal notranslate"><span class="pre">FractionOfIntermediatesInStockScorer</span></code></a></li>
+<li class="toctree-l7"><a class="reference internal" href="#aizynthfinder.context.scoring.scorers_mols.NumberOfPrecursorsScorer"><code class="docutils literal notranslate"><span class="pre">NumberOfPrecursorsScorer</span></code></a><ul>
+<li class="toctree-l8"><a class="reference internal" href="#aizynthfinder.context.scoring.scorers_mols.NumberOfPrecursorsScorer.scorer_name"><code class="docutils literal notranslate"><span class="pre">NumberOfPrecursorsScorer.scorer_name</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l7"><a class="reference internal" href="#aizynthfinder.context.scoring.scorers_mols.NumberOfPrecursorsInStockScorer"><code class="docutils literal notranslate"><span class="pre">NumberOfPrecursorsInStockScorer</span></code></a><ul>
+<li class="toctree-l8"><a class="reference internal" href="#aizynthfinder.context.scoring.scorers_mols.NumberOfPrecursorsInStockScorer.scorer_name"><code class="docutils literal notranslate"><span class="pre">NumberOfPrecursorsInStockScorer.scorer_name</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l7"><a class="reference internal" href="#aizynthfinder.context.scoring.scorers_mols.PriceSumScorer"><code class="docutils literal notranslate"><span class="pre">PriceSumScorer</span></code></a><ul>
+<li class="toctree-l8"><a class="reference internal" href="#aizynthfinder.context.scoring.scorers_mols.PriceSumScorer.scorer_name"><code class="docutils literal notranslate"><span class="pre">PriceSumScorer.scorer_name</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l7"><a class="reference internal" href="#aizynthfinder.context.scoring.scorers_mols.StockAvailabilityScorer"><code class="docutils literal notranslate"><span class="pre">StockAvailabilityScorer</span></code></a></li>
+<li class="toctree-l7"><a class="reference internal" href="#aizynthfinder.context.scoring.scorers_mols.DeltaSyntheticComplexityScorer"><code class="docutils literal notranslate"><span class="pre">DeltaSyntheticComplexityScorer</span></code></a><ul>
+<li class="toctree-l8"><a class="reference internal" href="#aizynthfinder.context.scoring.scorers_mols.DeltaSyntheticComplexityScorer.scorer_name"><code class="docutils literal notranslate"><span class="pre">DeltaSyntheticComplexityScorer.scorer_name</span></code></a></li>
+<li class="toctree-l8"><a class="reference internal" href="#aizynthfinder.context.scoring.scorers_mols.DeltaSyntheticComplexityScorer.sc_deltas"><code class="docutils literal notranslate"><span class="pre">DeltaSyntheticComplexityScorer.sc_deltas()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l6"><a class="reference internal" href="#module-aizynthfinder.context.scoring.scorers_reactions">aizynthfinder.context.scoring.scorers_reactions module</a><ul>
+<li class="toctree-l7"><a class="reference internal" href="#aizynthfinder.context.scoring.scorers_reactions.MaxTransformScorer"><code class="docutils literal notranslate"><span class="pre">MaxTransformScorer</span></code></a><ul>
+<li class="toctree-l8"><a class="reference internal" href="#aizynthfinder.context.scoring.scorers_reactions.MaxTransformScorer.scorer_name"><code class="docutils literal notranslate"><span class="pre">MaxTransformScorer.scorer_name</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l7"><a class="reference internal" href="#aizynthfinder.context.scoring.scorers_reactions.NumberOfReactionsScorer"><code class="docutils literal notranslate"><span class="pre">NumberOfReactionsScorer</span></code></a><ul>
+<li class="toctree-l8"><a class="reference internal" href="#aizynthfinder.context.scoring.scorers_reactions.NumberOfReactionsScorer.scorer_name"><code class="docutils literal notranslate"><span class="pre">NumberOfReactionsScorer.scorer_name</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l7"><a class="reference internal" href="#aizynthfinder.context.scoring.scorers_reactions.AverageTemplateOccurrenceScorer"><code class="docutils literal notranslate"><span class="pre">AverageTemplateOccurrenceScorer</span></code></a><ul>
+<li class="toctree-l8"><a class="reference internal" href="#aizynthfinder.context.scoring.scorers_reactions.AverageTemplateOccurrenceScorer.scorer_name"><code class="docutils literal notranslate"><span class="pre">AverageTemplateOccurrenceScorer.scorer_name</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l7"><a class="reference internal" href="#aizynthfinder.context.scoring.scorers_reactions.ReactionClassMembershipScorer"><code class="docutils literal notranslate"><span class="pre">ReactionClassMembershipScorer</span></code></a></li>
+<li class="toctree-l7"><a class="reference internal" href="#aizynthfinder.context.scoring.scorers_reactions.ReactionClassRankScorer"><code class="docutils literal notranslate"><span class="pre">ReactionClassRankScorer</span></code></a><ul>
+<li class="toctree-l8"><a class="reference internal" href="#aizynthfinder.context.scoring.scorers_reactions.ReactionClassRankScorer.scorer_name"><code class="docutils literal notranslate"><span class="pre">ReactionClassRankScorer.scorer_name</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l6"><a class="reference internal" href="#module-aizynthfinder.context.scoring">Module contents</a></li>
+</ul>
+</li>
+<li class="toctree-l5"><a class="reference internal" href="aizynthfinder.context.stock.html">aizynthfinder.context.stock package</a></li>
+</ul>
+</li>
+<li class="toctree-l4"><a class="reference internal" href="aizynthfinder.context.html#submodules">Submodules</a></li>
+<li class="toctree-l4"><a class="reference internal" href="aizynthfinder.context.html#module-aizynthfinder.context.collection">aizynthfinder.context.collection module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="aizynthfinder.context.html#module-aizynthfinder.context.config">aizynthfinder.context.config module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="aizynthfinder.context.html#module-aizynthfinder.context">Module contents</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="aizynthfinder.interfaces.html">aizynthfinder.interfaces package</a></li>
+<li class="toctree-l3"><a class="reference internal" href="aizynthfinder.search.html">aizynthfinder.search package</a></li>
+<li class="toctree-l3"><a class="reference internal" href="aizynthfinder.tools.html">aizynthfinder.tools package</a></li>
+<li class="toctree-l3"><a class="reference internal" href="aizynthfinder.utils.html">aizynthfinder.utils package</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="aizynthfinder.html#submodules">Submodules</a></li>
+<li class="toctree-l2"><a class="reference internal" href="aizynthfinder.html#module-aizynthfinder.aizynthfinder">aizynthfinder.aizynthfinder module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="aizynthfinder.html#module-aizynthfinder.reactiontree">aizynthfinder.reactiontree module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="aizynthfinder.html#module-aizynthfinder">Module contents</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="sequences.html">Sequences</a></li>
+<li class="toctree-l1"><a class="reference internal" href="relationships.html">Relationships</a></li>
+</ul>
+
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="index.html">Documentation overview</a><ul>
+  <li><a href="aizynthfinder.html">aizynthfinder package</a><ul>
+  <li><a href="aizynthfinder.context.html">aizynthfinder.context package</a><ul>
+      <li>Previous: <a href="aizynthfinder.context.policy.html" title="previous chapter">aizynthfinder.context.policy package</a></li>
+      <li>Next: <a href="aizynthfinder.context.stock.html" title="next chapter">aizynthfinder.context.stock package</a></li>
+  </ul></li>
+  </ul></li>
+  </ul></li>
+</ul>
+</div>
+<search id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"/>
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</search>
+<script>document.getElementById('searchbox').style.display = "block"</script>
+
+
+
+
+
+
+
+
+        </div>
+      </div>
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          
+
+          <div class="body" role="main">
+            
+  <section id="aizynthfinder-context-scoring-package">
+<h1>aizynthfinder.context.scoring package<a class="headerlink" href="#aizynthfinder-context-scoring-package" title="Link to this heading">¶</a></h1>
+<section id="submodules">
+<h2>Submodules<a class="headerlink" href="#submodules" title="Link to this heading">¶</a></h2>
+</section>
+<section id="module-aizynthfinder.context.scoring.collection">
+<span id="aizynthfinder-context-scoring-collection-module"></span><h2>aizynthfinder.context.scoring.collection module<a class="headerlink" href="#module-aizynthfinder.context.scoring.collection" title="Link to this heading">¶</a></h2>
+<p>Module containing classes used to score the reaction routes.</p>
+<dl class="py class">
+<dt class="sig sig-object py" id="aizynthfinder.context.scoring.collection.ScorerCollection">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">aizynthfinder.context.scoring.collection.</span></span><span class="sig-name descname"><span class="pre">ScorerCollection</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">config</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#aizynthfinder.context.scoring.collection.ScorerCollection" title="Link to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="aizynthfinder.context.html#aizynthfinder.context.collection.ContextCollection" title="aizynthfinder.context.collection.ContextCollection"><code class="xref py py-class docutils literal notranslate"><span class="pre">ContextCollection</span></code></a></p>
+<p>Store scorer objects for the aizynthfinder interface.</p>
+<p>The scorers can be obtained by name with simple indexing</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">scorers</span> <span class="o">=</span> <span class="n">ScorerCollection</span><span class="p">()</span>
+<span class="n">scorer</span> <span class="o">=</span> <span class="n">scorers</span><span class="p">[</span><span class="s1">&#39;state score&#39;</span><span class="p">]</span>
+</pre></div>
+</div>
+<p>Scorers defined in this module and that does not require any
+other argument to initialize than the <code class="docutils literal notranslate"><span class="pre">config</span></code> are auto-loaded.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>config</strong> (<a class="reference internal" href="aizynthfinder.context.html#aizynthfinder.context.config.Configuration" title="aizynthfinder.context.config.Configuration"><em>Configuration</em></a>) – the configuration of the tree search</p>
+</dd>
+</dl>
+<dl class="py method">
+<dt class="sig sig-object py" id="aizynthfinder.context.scoring.collection.ScorerCollection.create_default_scorers">
+<span class="sig-name descname"><span class="pre">create_default_scorers</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#aizynthfinder.context.scoring.collection.ScorerCollection.create_default_scorers" title="Link to this definition">¶</a></dt>
+<dd><p>Setup the scores that only need the config as their input.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>None</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="aizynthfinder.context.scoring.collection.ScorerCollection.load">
+<span class="sig-name descname"><span class="pre">load</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">scorer</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">silent</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#aizynthfinder.context.scoring.collection.ScorerCollection.load" title="Link to this definition">¶</a></dt>
+<dd><p>Add a pre-initialized scorer object to the collection</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>scorer</strong> (<a class="reference internal" href="#aizynthfinder.context.scoring.scorers_base.Scorer" title="aizynthfinder.context.scoring.scorers_base.Scorer"><em>Scorer</em></a>) – the item to add</p></li>
+<li><p><strong>silent</strong> (<em>bool</em>) – if True will not write out the name of the loaded scorer</p></li>
+</ul>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>None</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="aizynthfinder.context.scoring.collection.ScorerCollection.load_from_config">
+<span class="sig-name descname"><span class="pre">load_from_config</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">scorers_config</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#aizynthfinder.context.scoring.collection.ScorerCollection.load_from_config" title="Link to this definition">¶</a></dt>
+<dd><p>Load one or several scorers from a configuration dictionary</p>
+<p>The keys are the name of scorer class. If a scorer is not
+defined in the <code class="docutils literal notranslate"><span class="pre">aizynthfinder.context.scoring</span></code> module, the module
+name can be appended, e.g. <code class="docutils literal notranslate"><span class="pre">mypackage.scoring.AwesomeScore</span></code>.</p>
+<p>The values of the configuration is passed directly to the scorer
+class along with the <code class="docutils literal notranslate"><span class="pre">config</span></code> parameter.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Raises<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference internal" href="aizynthfinder.utils.html#aizynthfinder.utils.exceptions.ScorerException" title="aizynthfinder.utils.exceptions.ScorerException"><strong>ScorerException</strong></a> – if module or class could not be found</p>
+</dd>
+<dt class="field-even">Parameters<span class="colon">:</span></dt>
+<dd class="field-even"><p><strong>scorers_config</strong> (<em>Any</em>)</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>None</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="aizynthfinder.context.scoring.collection.ScorerCollection.make_subset">
+<span class="sig-name descname"><span class="pre">make_subset</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">subset_names</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#aizynthfinder.context.scoring.collection.ScorerCollection.make_subset" title="Link to this definition">¶</a></dt>
+<dd><p>Make a new scorer collection by taking a subset of this
+collection. The scorer instances will be shared between
+the collections</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>subset_names</strong> (<em>List</em><em>[</em><em>str</em><em>]</em>) – the scorers to copy over</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>the newly formed collection</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference internal" href="#aizynthfinder.context.scoring.collection.ScorerCollection" title="aizynthfinder.context.scoring.collection.ScorerCollection">ScorerCollection</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="aizynthfinder.context.scoring.collection.ScorerCollection.names">
+<span class="sig-name descname"><span class="pre">names</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#aizynthfinder.context.scoring.collection.ScorerCollection.names" title="Link to this definition">¶</a></dt>
+<dd><p>Return a list of the names of all the loaded scorers</p>
+<dl class="field-list simple">
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>List[str]</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="aizynthfinder.context.scoring.collection.ScorerCollection.objects">
+<span class="sig-name descname"><span class="pre">objects</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#aizynthfinder.context.scoring.collection.ScorerCollection.objects" title="Link to this definition">¶</a></dt>
+<dd><p>Return a list of all the loaded scorer objects</p>
+<dl class="field-list simple">
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>List[<a class="reference internal" href="#aizynthfinder.context.scoring.scorers_base.Scorer" title="aizynthfinder.context.scoring.scorers_base.Scorer">Scorer</a>]</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="aizynthfinder.context.scoring.collection.ScorerCollection.score_vector">
+<span class="sig-name descname"><span class="pre">score_vector</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">item</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#aizynthfinder.context.scoring.collection.ScorerCollection.score_vector" title="Link to this definition">¶</a></dt>
+<dd><p>For the given item, score it with all selected scorers
+and return a vector</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>item</strong> (<em>_Scoreable</em>) – the item to be scored</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>the vector with the scores</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Sequence[float]</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="aizynthfinder.context.scoring.collection.ScorerCollection.weighted_score">
+<span class="sig-name descname"><span class="pre">weighted_score</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">item</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">weights</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#aizynthfinder.context.scoring.collection.ScorerCollection.weighted_score" title="Link to this definition">¶</a></dt>
+<dd><p>For the given item, score it with all selected scorers
+and return a weighted sum of all the scores.</p>
+<p>If weights is not the same length as the number of scorers
+an exception is raised.</p>
+<p>If no scorers are selected this will raise an exception</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>item</strong> (<em>_Scoreable</em>) – the item to be scored</p></li>
+<li><p><strong>weights</strong> (<em>Sequence</em><em>[</em><em>float</em><em>]</em>) – the weights of the scorers</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>the weighted sum</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>float</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+</section>
+<section id="module-aizynthfinder.context.scoring.scorers">
+<span id="aizynthfinder-context-scoring-scorers-module"></span><h2>aizynthfinder.context.scoring.scorers module<a class="headerlink" href="#module-aizynthfinder.context.scoring.scorers" title="Link to this heading">¶</a></h2>
+<p>Module containing classes used to score the reaction routes.</p>
+<dl class="py class">
+<dt class="sig sig-object py" id="aizynthfinder.context.scoring.scorers.CombinedScorer">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">aizynthfinder.context.scoring.scorers.</span></span><span class="sig-name descname"><span class="pre">CombinedScorer</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">config</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">scorers</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">weights</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">combine_strategy</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'mean-arithmetic'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">short_name</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#aizynthfinder.context.scoring.scorers.CombinedScorer" title="Link to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#aizynthfinder.context.scoring.scorers_base.Scorer" title="aizynthfinder.context.scoring.scorers_base.Scorer"><code class="xref py py-class docutils literal notranslate"><span class="pre">Scorer</span></code></a></p>
+<p>Class for scoring nodes and reaction trees by combining weighted scores from a list of scorers</p>
+<p>If no weights are provided as input, the scorer provides default weights that are
+equal for all input scorers.</p>
+<p>The CombinedScorer cannot be instantiated from the config file as it requires the
+names of the scorers to combine as input.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>config</strong> (<a class="reference internal" href="aizynthfinder.context.html#aizynthfinder.context.config.Configuration" title="aizynthfinder.context.config.Configuration"><em>Configuration</em></a>)</p></li>
+<li><p><strong>scorers</strong> (<em>Sequence</em><em>[</em><em>str</em><em>]</em>)</p></li>
+<li><p><strong>weights</strong> (<em>Optional</em><em>[</em><em>Sequence</em><em>[</em><em>float</em><em>]</em><em>]</em>)</p></li>
+<li><p><strong>combine_strategy</strong> (<em>str</em>)</p></li>
+<li><p><strong>short_name</strong> (<em>Optional</em><em>[</em><em>str</em><em>]</em>)</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="aizynthfinder.context.scoring.scorers.StateScorer">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">aizynthfinder.context.scoring.scorers.</span></span><span class="sig-name descname"><span class="pre">StateScorer</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">config</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">scaler_params</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#aizynthfinder.context.scoring.scorers.StateScorer" title="Link to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#aizynthfinder.context.scoring.scorers_base.Scorer" title="aizynthfinder.context.scoring.scorers_base.Scorer"><code class="xref py py-class docutils literal notranslate"><span class="pre">Scorer</span></code></a></p>
+<p>Class for scoring nodes based on the state score</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>config</strong> (<a class="reference internal" href="aizynthfinder.context.html#aizynthfinder.context.config.Configuration" title="aizynthfinder.context.config.Configuration"><em>Configuration</em></a>)</p></li>
+<li><p><strong>scaler_params</strong> (<em>Optional</em><em>[</em><em>StrDict</em><em>]</em>)</p></li>
+</ul>
+</dd>
+</dl>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="aizynthfinder.context.scoring.scorers.StateScorer.scorer_name">
+<span class="sig-name descname"><span class="pre">scorer_name</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'state</span> <span class="pre">score'</span></em><a class="headerlink" href="#aizynthfinder.context.scoring.scorers.StateScorer.scorer_name" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="aizynthfinder.context.scoring.scorers.RouteCostScorer">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">aizynthfinder.context.scoring.scorers.</span></span><span class="sig-name descname"><span class="pre">RouteCostScorer</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">config</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">scaler_params</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">reaction_cost</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">average_yield</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.8</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">default_cost</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">not_in_stock_multiplier</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">10</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#aizynthfinder.context.scoring.scorers.RouteCostScorer" title="Link to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#aizynthfinder.context.scoring.scorers_mols.PriceSumScorer" title="aizynthfinder.context.scoring.scorers_mols.PriceSumScorer"><code class="xref py py-class docutils literal notranslate"><span class="pre">PriceSumScorer</span></code></a></p>
+<p>Score based on the cost of molecules and reactions.
+From Badowski et al. Chem Sci. 2019, 10, 4640</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>config</strong> (<a class="reference internal" href="aizynthfinder.context.html#aizynthfinder.context.config.Configuration" title="aizynthfinder.context.config.Configuration"><em>Configuration</em></a>)</p></li>
+<li><p><strong>scaler_params</strong> (<em>Optional</em><em>[</em><em>StrDict</em><em>]</em>)</p></li>
+<li><p><strong>reaction_cost</strong> (<em>int</em>)</p></li>
+<li><p><strong>average_yield</strong> (<em>float</em>)</p></li>
+<li><p><strong>default_cost</strong> (<em>int</em>)</p></li>
+<li><p><strong>not_in_stock_multiplier</strong> (<em>int</em>)</p></li>
+</ul>
+</dd>
+</dl>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="aizynthfinder.context.scoring.scorers.RouteCostScorer.scorer_name">
+<span class="sig-name descname"><span class="pre">scorer_name</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'route</span> <span class="pre">cost'</span></em><a class="headerlink" href="#aizynthfinder.context.scoring.scorers.RouteCostScorer.scorer_name" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="aizynthfinder.context.scoring.scorers.BrokenBondsScorer">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">aizynthfinder.context.scoring.scorers.</span></span><span class="sig-name descname"><span class="pre">BrokenBondsScorer</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">config</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#aizynthfinder.context.scoring.scorers.BrokenBondsScorer" title="Link to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#aizynthfinder.context.scoring.scorers_base.Scorer" title="aizynthfinder.context.scoring.scorers_base.Scorer"><code class="xref py py-class docutils literal notranslate"><span class="pre">Scorer</span></code></a></p>
+<p>Class for scoring nodes and reaction trees based on the breaking of atom bonds</p>
+<p>The score is a summation of the depths in the tree where the focussed bonds
+are found to break in the reaction. If a focussed bond is found to be unbroken
+in the entire tree, the total length of the tree will be added to the score.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>config</strong> (<a class="reference internal" href="aizynthfinder.context.html#aizynthfinder.context.config.Configuration" title="aizynthfinder.context.config.Configuration"><em>Configuration</em></a>)</p>
+</dd>
+</dl>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="aizynthfinder.context.scoring.scorers.BrokenBondsScorer.scorer_name">
+<span class="sig-name descname"><span class="pre">scorer_name</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'broken</span> <span class="pre">bonds'</span></em><a class="headerlink" href="#aizynthfinder.context.scoring.scorers.BrokenBondsScorer.scorer_name" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="aizynthfinder.context.scoring.scorers.RouteSimilarityScorer">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">aizynthfinder.context.scoring.scorers.</span></span><span class="sig-name descname"><span class="pre">RouteSimilarityScorer</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">config</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">routes_path</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">model_path</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">scaler_params</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">agg_func</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'min'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">similarity</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#aizynthfinder.context.scoring.scorers.RouteSimilarityScorer" title="Link to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#aizynthfinder.context.scoring.scorers_base.Scorer" title="aizynthfinder.context.scoring.scorers_base.Scorer"><code class="xref py py-class docutils literal notranslate"><span class="pre">Scorer</span></code></a></p>
+<p>Class for scoring based on an LSTM model for computing Tree Edit Distance to
+a set of reference routes.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>config</strong> (<a class="reference internal" href="aizynthfinder.context.html#aizynthfinder.context.config.Configuration" title="aizynthfinder.context.config.Configuration"><em>Configuration</em></a>) – the configuration of the tree search</p></li>
+<li><p><strong>routes_path</strong> (<em>str</em>) – the filename of a JSON file with reference routes</p></li>
+<li><p><strong>model_path</strong> (<em>str</em>) – the filename of a checkpoint file with the LSTM model</p></li>
+<li><p><strong>scaler_params</strong> (<em>Optional</em><em>[</em><em>StrDict</em><em>]</em>) – the parameter settings of the scaler</p></li>
+<li><p><strong>agg_func</strong> (<em>str</em>) – the name of numpy function used to aggregate the distances
+to the reference routes</p></li>
+<li><p><strong>similarity</strong> (<em>bool</em>) – if True, will compute similarity score else distance scores</p></li>
+</ul>
+</dd>
+</dl>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="aizynthfinder.context.scoring.scorers.RouteSimilarityScorer.scorer_name">
+<span class="sig-name descname"><span class="pre">scorer_name</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'route</span> <span class="pre">similarity'</span></em><a class="headerlink" href="#aizynthfinder.context.scoring.scorers.RouteSimilarityScorer.scorer_name" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="aizynthfinder.context.scoring.scorers.DeepSetScorer">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">aizynthfinder.context.scoring.scorers.</span></span><span class="sig-name descname"><span class="pre">DeepSetScorer</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">config</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">deepset_model</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sc_score_model</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">class_ranks_path</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">model_score_weight</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.97</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">length_weight</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">-0.43</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">scaler_params</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#aizynthfinder.context.scoring.scorers.DeepSetScorer" title="Link to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#aizynthfinder.context.scoring.scorers_base.Scorer" title="aizynthfinder.context.scoring.scorers_base.Scorer"><code class="xref py py-class docutils literal notranslate"><span class="pre">Scorer</span></code></a></p>
+<p>Class for scoring nodes and reaction trees by a deep learning model,
+augmented by expert knowledge.</p>
+<p>Wrapper for <cite>deepset_route_score</cite> from <cite>rxnutils</cite> with addition
+of the expert knowledge correction for route length.</p>
+<p>The raw output of the score is capped between 0 and 20.
+0 because sometimes the deepset model return negative values, even though
+it should be confined to &gt;= 0
+20 because anything large than 20 is useless and uninteresting, this
+cap could probably be removed in the future if we retrain it.</p>
+<p>How to interpret the score:
+- ”Good” for scores between 0 and 5
+- ”Plausible” for scores between 5 and 9
+- ”Bad” for scores between 10 and 15</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>config</strong> (<a class="reference internal" href="aizynthfinder.context.html#aizynthfinder.context.config.Configuration" title="aizynthfinder.context.config.Configuration"><em>Configuration</em></a>) – the configuration the tree search</p></li>
+<li><p><strong>deepset_model</strong> (<em>str</em>) – the path to the DeepSet model</p></li>
+<li><p><strong>sc_score_model</strong> (<em>str</em>) – the path to the SCScore model</p></li>
+<li><p><strong>class_ranks_path</strong> (<em>str</em>) – the path to a file with reaction class ranks</p></li>
+<li><p><strong>scaler_params</strong> (<em>Optional</em><em>[</em><em>StrDict</em><em>]</em>) – the parameter settings of the scaler</p></li>
+<li><p><strong>model_score_weight</strong> (<em>float</em>)</p></li>
+<li><p><strong>length_weight</strong> (<em>float</em>)</p></li>
+</ul>
+</dd>
+</dl>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="aizynthfinder.context.scoring.scorers.DeepSetScorer.scorer_name">
+<span class="sig-name descname"><span class="pre">scorer_name</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'expert-augmented</span> <span class="pre">score'</span></em><a class="headerlink" href="#aizynthfinder.context.scoring.scorers.DeepSetScorer.scorer_name" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+</section>
+<section id="module-aizynthfinder.context.scoring.scorers_base">
+<span id="aizynthfinder-context-scoring-scorers-base-module"></span><h2>aizynthfinder.context.scoring.scorers_base module<a class="headerlink" href="#module-aizynthfinder.context.scoring.scorers_base" title="Link to this heading">¶</a></h2>
+<p>Module containing base classes used to score routes.</p>
+<dl class="py class">
+<dt class="sig sig-object py" id="aizynthfinder.context.scoring.scorers_base.SquashScaler">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">aizynthfinder.context.scoring.scorers_base.</span></span><span class="sig-name descname"><span class="pre">SquashScaler</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">slope</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">xoffset</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">yoffset</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#aizynthfinder.context.scoring.scorers_base.SquashScaler" title="Link to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<p>Squash function loosely adapted from a sigmoid function with parameters
+to modify and offset the shape</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>slope</strong> (<em>float</em>) – the slope of the midpoint</p></li>
+<li><p><strong>xoffset</strong> (<em>float</em>) – the offset of the midpoint along the x-axis</p></li>
+<li><p><strong>yoffset</strong> (<em>float</em>) – the offset of the curve along the y-axis</p></li>
+</ul>
+</dd>
+</dl>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="aizynthfinder.context.scoring.scorers_base.SquashScaler.slope">
+<span class="sig-name descname"><span class="pre">slope</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">float</span></em><a class="headerlink" href="#aizynthfinder.context.scoring.scorers_base.SquashScaler.slope" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="aizynthfinder.context.scoring.scorers_base.SquashScaler.xoffset">
+<span class="sig-name descname"><span class="pre">xoffset</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">float</span></em><a class="headerlink" href="#aizynthfinder.context.scoring.scorers_base.SquashScaler.xoffset" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="aizynthfinder.context.scoring.scorers_base.SquashScaler.yoffset">
+<span class="sig-name descname"><span class="pre">yoffset</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">float</span></em><a class="headerlink" href="#aizynthfinder.context.scoring.scorers_base.SquashScaler.yoffset" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="aizynthfinder.context.scoring.scorers_base.MinMaxScaler">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">aizynthfinder.context.scoring.scorers_base.</span></span><span class="sig-name descname"><span class="pre">MinMaxScaler</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">min_val</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">max_val</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">reverse</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">scale_factor</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#aizynthfinder.context.scoring.scorers_base.MinMaxScaler" title="Link to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<p>Scaling function that normalises the value between 0 - 1,
+the reverse variable controls the direction of scaling,
+reverse should set to be true for rewards that need to be minimised
+the scale_factor could be used to adjust the scores when they are too small or too big</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>val</strong> – the value that is being scaled</p></li>
+<li><p><strong>min_val</strong> (<em>float</em>) – minimum val param val could take</p></li>
+<li><p><strong>max_val</strong> (<em>float</em>) – maximum val param val could take</p></li>
+<li><p><strong>scale_factor</strong> (<em>float</em>) – scaling factor applied to the minmax scaled output</p></li>
+<li><p><strong>reverse</strong> (<em>bool</em>)</p></li>
+</ul>
+</dd>
+</dl>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="aizynthfinder.context.scoring.scorers_base.MinMaxScaler.min_val">
+<span class="sig-name descname"><span class="pre">min_val</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">float</span></em><a class="headerlink" href="#aizynthfinder.context.scoring.scorers_base.MinMaxScaler.min_val" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="aizynthfinder.context.scoring.scorers_base.MinMaxScaler.max_val">
+<span class="sig-name descname"><span class="pre">max_val</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">float</span></em><a class="headerlink" href="#aizynthfinder.context.scoring.scorers_base.MinMaxScaler.max_val" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="aizynthfinder.context.scoring.scorers_base.MinMaxScaler.reverse">
+<span class="sig-name descname"><span class="pre">reverse</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">bool</span></em><a class="headerlink" href="#aizynthfinder.context.scoring.scorers_base.MinMaxScaler.reverse" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="aizynthfinder.context.scoring.scorers_base.MinMaxScaler.scale_factor">
+<span class="sig-name descname"><span class="pre">scale_factor</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">float</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">1</span></em><a class="headerlink" href="#aizynthfinder.context.scoring.scorers_base.MinMaxScaler.scale_factor" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="aizynthfinder.context.scoring.scorers_base.PowerScaler">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">aizynthfinder.context.scoring.scorers_base.</span></span><span class="sig-name descname"><span class="pre">PowerScaler</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">base_coefficient</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.98</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#aizynthfinder.context.scoring.scorers_base.PowerScaler" title="Link to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<p>Scaling function that returns the base_coefficient to the power of the value.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>val</strong> – the value that is being scaled</p></li>
+<li><p><strong>base_coefficient</strong> (<em>float</em>) – coefficient for scalingm ‘base_coefficient &lt; 1’ =&gt; reversing scale</p></li>
+</ul>
+</dd>
+</dl>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="aizynthfinder.context.scoring.scorers_base.PowerScaler.base_coefficient">
+<span class="sig-name descname"><span class="pre">base_coefficient</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">float</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">0.98</span></em><a class="headerlink" href="#aizynthfinder.context.scoring.scorers_base.PowerScaler.base_coefficient" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="aizynthfinder.context.scoring.scorers_base.Scorer">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">aizynthfinder.context.scoring.scorers_base.</span></span><span class="sig-name descname"><span class="pre">Scorer</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">config</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">scaler_params</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#aizynthfinder.context.scoring.scorers_base.Scorer" title="Link to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">ABC</span></code></p>
+<p>Abstract base class for classes that do scoring on MCTS-like nodes or reaction trees.</p>
+<p>The actual scoring is done be calling an instance of
+a scorer class with a <code class="docutils literal notranslate"><span class="pre">Node</span></code> or <code class="docutils literal notranslate"><span class="pre">ReactionTree</span></code> object as only argument.</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">scorer</span> <span class="o">=</span> <span class="n">MyScorer</span><span class="p">()</span>
+<span class="n">score</span> <span class="o">=</span> <span class="n">scorer</span><span class="p">(</span><span class="n">node1</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>You can also give a list of such objects to the scorer</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">scorer</span> <span class="o">=</span> <span class="n">MyScorer</span><span class="p">()</span>
+<span class="n">scores</span> <span class="o">=</span> <span class="n">scorer</span><span class="p">([</span><span class="n">node1</span><span class="p">,</span> <span class="n">node2</span><span class="p">])</span>
+</pre></div>
+</div>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>config</strong> (<em>Optional</em><em>[</em><a class="reference internal" href="aizynthfinder.context.html#aizynthfinder.context.config.Configuration" title="aizynthfinder.context.config.Configuration"><em>Configuration</em></a><em>]</em>) – the configuration the tree search</p></li>
+<li><p><strong>scaler_params</strong> (<em>Optional</em><em>[</em><em>StrDict</em><em>]</em>) – the parameter settings of the scaler</p></li>
+</ul>
+</dd>
+</dl>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="aizynthfinder.context.scoring.scorers_base.Scorer.scorer_name">
+<span class="sig-name descname"><span class="pre">scorer_name</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'base'</span></em><a class="headerlink" href="#aizynthfinder.context.scoring.scorers_base.Scorer.scorer_name" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="aizynthfinder.context.scoring.scorers_base.Scorer.sort">
+<span class="sig-name descname"><span class="pre">sort</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">items</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#aizynthfinder.context.scoring.scorers_base.Scorer.sort" title="Link to this definition">¶</a></dt>
+<dd><p>Sort nodes or reaction trees in descending order based on the score</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>items</strong> (<em>_Scoreables</em>) – the items to sort</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>the sorted items and their scores</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Tuple[_Scoreables, Sequence[float], Sequence[int]]</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="aizynthfinder.context.scoring.scorers_base.make_rxnutils_route">
+<span class="sig-prename descclassname"><span class="pre">aizynthfinder.context.scoring.scorers_base.</span></span><span class="sig-name descname"><span class="pre">make_rxnutils_route</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">tree</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#aizynthfinder.context.scoring.scorers_base.make_rxnutils_route" title="Link to this definition">¶</a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>tree</strong> (<a class="reference internal" href="aizynthfinder.html#aizynthfinder.reactiontree.ReactionTree" title="aizynthfinder.reactiontree.ReactionTree"><em>ReactionTree</em></a>)</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>SynthesisRoute</p>
+</dd>
+</dl>
+</dd></dl>
+
+</section>
+<section id="module-aizynthfinder.context.scoring.scorers_mols">
+<span id="aizynthfinder-context-scoring-scorers-mols-module"></span><h2>aizynthfinder.context.scoring.scorers_mols module<a class="headerlink" href="#module-aizynthfinder.context.scoring.scorers_mols" title="Link to this heading">¶</a></h2>
+<p>Module containing classes used to score the reaction routes.
+These scores are only based on molecules in the route.</p>
+<dl class="py class">
+<dt class="sig sig-object py" id="aizynthfinder.context.scoring.scorers_mols.FractionInStockScorer">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">aizynthfinder.context.scoring.scorers_mols.</span></span><span class="sig-name descname"><span class="pre">FractionInStockScorer</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">config</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">scaler_params</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#aizynthfinder.context.scoring.scorers_mols.FractionInStockScorer" title="Link to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#aizynthfinder.context.scoring.scorers_base.Scorer" title="aizynthfinder.context.scoring.scorers_base.Scorer"><code class="xref py py-class docutils literal notranslate"><span class="pre">Scorer</span></code></a></p>
+<p>Class for scoring nodes based on the fraction in stock</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>config</strong> (<a class="reference internal" href="aizynthfinder.context.html#aizynthfinder.context.config.Configuration" title="aizynthfinder.context.config.Configuration"><em>Configuration</em></a>)</p></li>
+<li><p><strong>scaler_params</strong> (<em>Optional</em><em>[</em><em>StrDict</em><em>]</em>)</p></li>
+</ul>
+</dd>
+</dl>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="aizynthfinder.context.scoring.scorers_mols.FractionInStockScorer.scorer_name">
+<span class="sig-name descname"><span class="pre">scorer_name</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'fraction</span> <span class="pre">in</span> <span class="pre">stock'</span></em><a class="headerlink" href="#aizynthfinder.context.scoring.scorers_mols.FractionInStockScorer.scorer_name" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="aizynthfinder.context.scoring.scorers_mols.FractionInSourceStockScorer">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">aizynthfinder.context.scoring.scorers_mols.</span></span><span class="sig-name descname"><span class="pre">FractionInSourceStockScorer</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">config</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">source_stocks</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">scaler_params</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#aizynthfinder.context.scoring.scorers_mols.FractionInSourceStockScorer" title="Link to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#aizynthfinder.context.scoring.scorers_base.Scorer" title="aizynthfinder.context.scoring.scorers_base.Scorer"><code class="xref py py-class docutils literal notranslate"><span class="pre">Scorer</span></code></a></p>
+<p>Class for scoring nodes based on the fraction in stock</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>config</strong> (<a class="reference internal" href="aizynthfinder.context.html#aizynthfinder.context.config.Configuration" title="aizynthfinder.context.config.Configuration"><em>Configuration</em></a>)</p></li>
+<li><p><strong>source_stocks</strong> (<em>List</em><em>[</em><em>str</em><em>]</em>)</p></li>
+<li><p><strong>scaler_params</strong> (<em>Optional</em><em>[</em><em>StrDict</em><em>]</em>)</p></li>
+</ul>
+</dd>
+</dl>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="aizynthfinder.context.scoring.scorers_mols.FractionInSourceStockScorer.scorer_name">
+<span class="sig-name descname"><span class="pre">scorer_name</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'fraction</span> <span class="pre">in</span> <span class="pre">source'</span></em><a class="headerlink" href="#aizynthfinder.context.scoring.scorers_mols.FractionInSourceStockScorer.scorer_name" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="aizynthfinder.context.scoring.scorers_mols.FractionOfIntermediatesInStockScorer">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">aizynthfinder.context.scoring.scorers_mols.</span></span><span class="sig-name descname"><span class="pre">FractionOfIntermediatesInStockScorer</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">config</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">stock_name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">scaler_params</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#aizynthfinder.context.scoring.scorers_mols.FractionOfIntermediatesInStockScorer" title="Link to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#aizynthfinder.context.scoring.scorers_base.Scorer" title="aizynthfinder.context.scoring.scorers_base.Scorer"><code class="xref py py-class docutils literal notranslate"><span class="pre">Scorer</span></code></a></p>
+<p>Class for scoring nodes based on the fraction of intermediates in stock</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>config</strong> (<a class="reference internal" href="aizynthfinder.context.html#aizynthfinder.context.config.Configuration" title="aizynthfinder.context.config.Configuration"><em>Configuration</em></a>)</p></li>
+<li><p><strong>stock_name</strong> (<em>str</em>)</p></li>
+<li><p><strong>scaler_params</strong> (<em>Optional</em><em>[</em><em>StrDict</em><em>]</em>)</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="aizynthfinder.context.scoring.scorers_mols.NumberOfPrecursorsScorer">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">aizynthfinder.context.scoring.scorers_mols.</span></span><span class="sig-name descname"><span class="pre">NumberOfPrecursorsScorer</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">config</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">scaler_params</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#aizynthfinder.context.scoring.scorers_mols.NumberOfPrecursorsScorer" title="Link to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#aizynthfinder.context.scoring.scorers_base.Scorer" title="aizynthfinder.context.scoring.scorers_base.Scorer"><code class="xref py py-class docutils literal notranslate"><span class="pre">Scorer</span></code></a></p>
+<p>Class for scoring nodes based on the number of pre-cursors in a node or route</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>config</strong> (<em>Optional</em><em>[</em><a class="reference internal" href="aizynthfinder.context.html#aizynthfinder.context.config.Configuration" title="aizynthfinder.context.config.Configuration"><em>Configuration</em></a><em>]</em>)</p></li>
+<li><p><strong>scaler_params</strong> (<em>Optional</em><em>[</em><em>StrDict</em><em>]</em>)</p></li>
+</ul>
+</dd>
+</dl>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="aizynthfinder.context.scoring.scorers_mols.NumberOfPrecursorsScorer.scorer_name">
+<span class="sig-name descname"><span class="pre">scorer_name</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'number</span> <span class="pre">of</span> <span class="pre">pre-cursors'</span></em><a class="headerlink" href="#aizynthfinder.context.scoring.scorers_mols.NumberOfPrecursorsScorer.scorer_name" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="aizynthfinder.context.scoring.scorers_mols.NumberOfPrecursorsInStockScorer">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">aizynthfinder.context.scoring.scorers_mols.</span></span><span class="sig-name descname"><span class="pre">NumberOfPrecursorsInStockScorer</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">config</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">scaler_params</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#aizynthfinder.context.scoring.scorers_mols.NumberOfPrecursorsInStockScorer" title="Link to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#aizynthfinder.context.scoring.scorers_base.Scorer" title="aizynthfinder.context.scoring.scorers_base.Scorer"><code class="xref py py-class docutils literal notranslate"><span class="pre">Scorer</span></code></a></p>
+<p>Class for scoring nodes based on the number of pre-cursors in stock a
+node or route</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>config</strong> (<a class="reference internal" href="aizynthfinder.context.html#aizynthfinder.context.config.Configuration" title="aizynthfinder.context.config.Configuration"><em>Configuration</em></a>)</p></li>
+<li><p><strong>scaler_params</strong> (<em>Optional</em><em>[</em><em>StrDict</em><em>]</em>)</p></li>
+</ul>
+</dd>
+</dl>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="aizynthfinder.context.scoring.scorers_mols.NumberOfPrecursorsInStockScorer.scorer_name">
+<span class="sig-name descname"><span class="pre">scorer_name</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'number</span> <span class="pre">of</span> <span class="pre">pre-cursors</span> <span class="pre">in</span> <span class="pre">stock'</span></em><a class="headerlink" href="#aizynthfinder.context.scoring.scorers_mols.NumberOfPrecursorsInStockScorer.scorer_name" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="aizynthfinder.context.scoring.scorers_mols.PriceSumScorer">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">aizynthfinder.context.scoring.scorers_mols.</span></span><span class="sig-name descname"><span class="pre">PriceSumScorer</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">config</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">scaler_params</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">default_cost</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">not_in_stock_multiplier</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">10</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#aizynthfinder.context.scoring.scorers_mols.PriceSumScorer" title="Link to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#aizynthfinder.context.scoring.scorers_base.Scorer" title="aizynthfinder.context.scoring.scorers_base.Scorer"><code class="xref py py-class docutils literal notranslate"><span class="pre">Scorer</span></code></a></p>
+<p>Scorer that sums the prices of all pre-cursors</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>config</strong> (<a class="reference internal" href="aizynthfinder.context.html#aizynthfinder.context.config.Configuration" title="aizynthfinder.context.config.Configuration"><em>Configuration</em></a>)</p></li>
+<li><p><strong>scaler_params</strong> (<em>Optional</em><em>[</em><em>StrDict</em><em>]</em>)</p></li>
+<li><p><strong>default_cost</strong> (<em>float</em>)</p></li>
+<li><p><strong>not_in_stock_multiplier</strong> (<em>int</em>)</p></li>
+</ul>
+</dd>
+</dl>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="aizynthfinder.context.scoring.scorers_mols.PriceSumScorer.scorer_name">
+<span class="sig-name descname"><span class="pre">scorer_name</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'sum</span> <span class="pre">of</span> <span class="pre">prices'</span></em><a class="headerlink" href="#aizynthfinder.context.scoring.scorers_mols.PriceSumScorer.scorer_name" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="aizynthfinder.context.scoring.scorers_mols.StockAvailabilityScorer">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">aizynthfinder.context.scoring.scorers_mols.</span></span><span class="sig-name descname"><span class="pre">StockAvailabilityScorer</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">config</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">source_score</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">default_score</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">other_source_score</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#aizynthfinder.context.scoring.scorers_mols.StockAvailabilityScorer" title="Link to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#aizynthfinder.context.scoring.scorers_base.Scorer" title="aizynthfinder.context.scoring.scorers_base.Scorer"><code class="xref py py-class docutils literal notranslate"><span class="pre">Scorer</span></code></a></p>
+<p>Scorer that computes score based on the stock availability of the starting material</p>
+<p>The score is calculated as a product of a stock score per starting material. The stock
+score for each molecule is based on the source of the stock, or a default value if the
+molecule is not in stock. The <cite>other_source_score</cite> parameter can be used to
+distinguish between “not in stock” and “not in the specificed sources” cases.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>config</strong> (<a class="reference internal" href="aizynthfinder.context.html#aizynthfinder.context.config.Configuration" title="aizynthfinder.context.config.Configuration"><em>Configuration</em></a>)</p></li>
+<li><p><strong>source_score</strong> (<em>StrDict</em>)</p></li>
+<li><p><strong>default_score</strong> (<em>float</em>)</p></li>
+<li><p><strong>other_source_score</strong> (<em>Optional</em><em>[</em><em>float</em><em>]</em>)</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="aizynthfinder.context.scoring.scorers_mols.DeltaSyntheticComplexityScorer">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">aizynthfinder.context.scoring.scorers_mols.</span></span><span class="sig-name descname"><span class="pre">DeltaSyntheticComplexityScorer</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">config</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sc_score_model</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">scaler_params</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">horizon</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">3</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#aizynthfinder.context.scoring.scorers_mols.DeltaSyntheticComplexityScorer" title="Link to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#aizynthfinder.context.scoring.scorers_base.Scorer" title="aizynthfinder.context.scoring.scorers_base.Scorer"><code class="xref py py-class docutils literal notranslate"><span class="pre">Scorer</span></code></a></p>
+<p>Class for scoring nodes based on the delta-synthetic-complexity of the node
+and its parent ‘horizon’ steps up in the tree.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>config</strong> (<a class="reference internal" href="aizynthfinder.context.html#aizynthfinder.context.config.Configuration" title="aizynthfinder.context.config.Configuration"><em>Configuration</em></a>) – the configuration the tree search</p></li>
+<li><p><strong>sc_score_model</strong> (<em>str</em>) – the path to the SCScore model</p></li>
+<li><p><strong>scaler_params</strong> (<em>Optional</em><em>[</em><em>StrDict</em><em>]</em>) – the parameter settings of the scaler, defaults to max-min between -1.5 and 4</p></li>
+<li><p><strong>horizon</strong> (<em>int</em>) – the number of steps backwards to look for parent molecule</p></li>
+</ul>
+</dd>
+</dl>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="aizynthfinder.context.scoring.scorers_mols.DeltaSyntheticComplexityScorer.scorer_name">
+<span class="sig-name descname"><span class="pre">scorer_name</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">str</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'delta-SC</span> <span class="pre">score'</span></em><a class="headerlink" href="#aizynthfinder.context.scoring.scorers_mols.DeltaSyntheticComplexityScorer.scorer_name" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="aizynthfinder.context.scoring.scorers_mols.DeltaSyntheticComplexityScorer.sc_deltas">
+<span class="sig-name descname"><span class="pre">sc_deltas</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">mols</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">parents</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#aizynthfinder.context.scoring.scorers_mols.DeltaSyntheticComplexityScorer.sc_deltas" title="Link to this definition">¶</a></dt>
+<dd><p>Calculate delta SC-score among the list of mol-parent pairs.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Params mols<span class="colon">:</span></dt>
+<dd class="field-odd"><p>the leaves of the tree</p>
+</dd>
+<dt class="field-even">Parameters<span class="colon">:</span></dt>
+<dd class="field-even"><ul class="simple">
+<li><p><strong>parents</strong> (<em>_Molecules</em>) – the parent of the leaves</p></li>
+<li><p><strong>mols</strong> (<em>_Molecules</em>)</p></li>
+</ul>
+</dd>
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>the pair-wise difference in SCScore</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>Sequence[float]</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+</section>
+<section id="module-aizynthfinder.context.scoring.scorers_reactions">
+<span id="aizynthfinder-context-scoring-scorers-reactions-module"></span><h2>aizynthfinder.context.scoring.scorers_reactions module<a class="headerlink" href="#module-aizynthfinder.context.scoring.scorers_reactions" title="Link to this heading">¶</a></h2>
+<p>Module containing classes used to score the reaction routes.
+These scores are only based on reactions in the route.</p>
+<dl class="py class">
+<dt class="sig sig-object py" id="aizynthfinder.context.scoring.scorers_reactions.MaxTransformScorer">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">aizynthfinder.context.scoring.scorers_reactions.</span></span><span class="sig-name descname"><span class="pre">MaxTransformScorer</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">config</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">scaler_params</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#aizynthfinder.context.scoring.scorers_reactions.MaxTransformScorer" title="Link to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#aizynthfinder.context.scoring.scorers_base.Scorer" title="aizynthfinder.context.scoring.scorers_base.Scorer"><code class="xref py py-class docutils literal notranslate"><span class="pre">Scorer</span></code></a></p>
+<p>Class for scoring nodes based on the maximum transform</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>config</strong> (<em>Optional</em><em>[</em><a class="reference internal" href="aizynthfinder.context.html#aizynthfinder.context.config.Configuration" title="aizynthfinder.context.config.Configuration"><em>Configuration</em></a><em>]</em>)</p></li>
+<li><p><strong>scaler_params</strong> (<em>Optional</em><em>[</em><em>StrDict</em><em>]</em>)</p></li>
+</ul>
+</dd>
+</dl>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="aizynthfinder.context.scoring.scorers_reactions.MaxTransformScorer.scorer_name">
+<span class="sig-name descname"><span class="pre">scorer_name</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'max</span> <span class="pre">transform'</span></em><a class="headerlink" href="#aizynthfinder.context.scoring.scorers_reactions.MaxTransformScorer.scorer_name" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="aizynthfinder.context.scoring.scorers_reactions.NumberOfReactionsScorer">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">aizynthfinder.context.scoring.scorers_reactions.</span></span><span class="sig-name descname"><span class="pre">NumberOfReactionsScorer</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">config</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">scaler_params</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#aizynthfinder.context.scoring.scorers_reactions.NumberOfReactionsScorer" title="Link to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#aizynthfinder.context.scoring.scorers_base.Scorer" title="aizynthfinder.context.scoring.scorers_base.Scorer"><code class="xref py py-class docutils literal notranslate"><span class="pre">Scorer</span></code></a></p>
+<p>Class for scoring nodes based on the number of reaction it took to get to a node</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>config</strong> (<em>Optional</em><em>[</em><a class="reference internal" href="aizynthfinder.context.html#aizynthfinder.context.config.Configuration" title="aizynthfinder.context.config.Configuration"><em>Configuration</em></a><em>]</em>)</p></li>
+<li><p><strong>scaler_params</strong> (<em>Optional</em><em>[</em><em>StrDict</em><em>]</em>)</p></li>
+</ul>
+</dd>
+</dl>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="aizynthfinder.context.scoring.scorers_reactions.NumberOfReactionsScorer.scorer_name">
+<span class="sig-name descname"><span class="pre">scorer_name</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'number</span> <span class="pre">of</span> <span class="pre">reactions'</span></em><a class="headerlink" href="#aizynthfinder.context.scoring.scorers_reactions.NumberOfReactionsScorer.scorer_name" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="aizynthfinder.context.scoring.scorers_reactions.AverageTemplateOccurrenceScorer">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">aizynthfinder.context.scoring.scorers_reactions.</span></span><span class="sig-name descname"><span class="pre">AverageTemplateOccurrenceScorer</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">config</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">scaler_params</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#aizynthfinder.context.scoring.scorers_reactions.AverageTemplateOccurrenceScorer" title="Link to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#aizynthfinder.context.scoring.scorers_base.Scorer" title="aizynthfinder.context.scoring.scorers_base.Scorer"><code class="xref py py-class docutils literal notranslate"><span class="pre">Scorer</span></code></a></p>
+<p>Class for scoring the nodes based on the average occurrence of the
+templates used to get to a node</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>config</strong> (<em>Optional</em><em>[</em><a class="reference internal" href="aizynthfinder.context.html#aizynthfinder.context.config.Configuration" title="aizynthfinder.context.config.Configuration"><em>Configuration</em></a><em>]</em>)</p></li>
+<li><p><strong>scaler_params</strong> (<em>Optional</em><em>[</em><em>StrDict</em><em>]</em>)</p></li>
+</ul>
+</dd>
+</dl>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="aizynthfinder.context.scoring.scorers_reactions.AverageTemplateOccurrenceScorer.scorer_name">
+<span class="sig-name descname"><span class="pre">scorer_name</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'average</span> <span class="pre">template</span> <span class="pre">occurrence'</span></em><a class="headerlink" href="#aizynthfinder.context.scoring.scorers_reactions.AverageTemplateOccurrenceScorer.scorer_name" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="aizynthfinder.context.scoring.scorers_reactions.ReactionClassMembershipScorer">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">aizynthfinder.context.scoring.scorers_reactions.</span></span><span class="sig-name descname"><span class="pre">ReactionClassMembershipScorer</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">config</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">reaction_class_set</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">in_set_score</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">not_in_set_score</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.1</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#aizynthfinder.context.scoring.scorers_reactions.ReactionClassMembershipScorer" title="Link to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#aizynthfinder.context.scoring.scorers_base.Scorer" title="aizynthfinder.context.scoring.scorers_base.Scorer"><code class="xref py py-class docutils literal notranslate"><span class="pre">Scorer</span></code></a></p>
+<p>Scorer that checks if the reaction classes are in a specified set</p>
+<p>The score is calculated as product over each reaction. For each reaction
+the reaction classification is checked if it is in a given list of classes.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>config</strong> (<a class="reference internal" href="aizynthfinder.context.html#aizynthfinder.context.config.Configuration" title="aizynthfinder.context.config.Configuration"><em>Configuration</em></a>)</p></li>
+<li><p><strong>reaction_class_set</strong> (<em>Union</em><em>[</em><em>str</em><em>, </em><em>List</em><em>[</em><em>str</em><em>]</em><em>]</em>)</p></li>
+<li><p><strong>in_set_score</strong> (<em>float</em>)</p></li>
+<li><p><strong>not_in_set_score</strong> (<em>float</em>)</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="aizynthfinder.context.scoring.scorers_reactions.ReactionClassRankScorer">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">aizynthfinder.context.scoring.scorers_reactions.</span></span><span class="sig-name descname"><span class="pre">ReactionClassRankScorer</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">config</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">class_ranks_path</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">preferred_classes_path</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">non_preferred_factor</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.25</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">scaler_params</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#aizynthfinder.context.scoring.scorers_reactions.ReactionClassRankScorer" title="Link to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#aizynthfinder.context.scoring.scorers_base.Scorer" title="aizynthfinder.context.scoring.scorers_base.Scorer"><code class="xref py py-class docutils literal notranslate"><span class="pre">Scorer</span></code></a></p>
+<p>Class for scoring nodes and reaction trees by a weighted product of the ranks
+of the reaction classes in the route.</p>
+<p>Wrapper for <cite>reaction_class_rank_score</cite> from <cite>rxnutils</cite></p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>config</strong> (<a class="reference internal" href="aizynthfinder.context.html#aizynthfinder.context.config.Configuration" title="aizynthfinder.context.config.Configuration"><em>Configuration</em></a>) – the configuration the tree search</p></li>
+<li><p><strong>class_ranks_path</strong> (<em>str</em>) – the path to a file with reaction class ranks</p></li>
+<li><p><strong>preferred_classes_path</strong> (<em>str</em>) – the path to a file with preferred reaction classes</p></li>
+<li><p><strong>non_preferred_factor</strong> (<em>float</em>) – a penalty factor for non-preferred class</p></li>
+<li><p><strong>scaler_params</strong> (<em>Optional</em><em>[</em><em>StrDict</em><em>]</em>) – the parameter settings of the scaler</p></li>
+</ul>
+</dd>
+</dl>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="aizynthfinder.context.scoring.scorers_reactions.ReactionClassRankScorer.scorer_name">
+<span class="sig-name descname"><span class="pre">scorer_name</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'reaction</span> <span class="pre">class-rank</span> <span class="pre">score'</span></em><a class="headerlink" href="#aizynthfinder.context.scoring.scorers_reactions.ReactionClassRankScorer.scorer_name" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+</section>
+<section id="module-aizynthfinder.context.scoring">
+<span id="module-contents"></span><h2>Module contents<a class="headerlink" href="#module-aizynthfinder.context.scoring" title="Link to this heading">¶</a></h2>
+<p>Sub-package containing scoring routines</p>
+</section>
+</section>
+
+
+          </div>
+          
+        </div>
+      </div>
+    <div class="clearer"></div>
+  </div>
+    <div class="footer">
+      &#169;2020-2025, Molecular AI group.
+      
+      |
+      Powered by <a href="https://www.sphinx-doc.org/">Sphinx 7.4.7</a>
+      &amp; <a href="https://alabaster.readthedocs.io">Alabaster 0.7.16</a>
+      
+      |
+      <a href="_sources/aizynthfinder.context.scoring.rst.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+
+    
+  </body>
+</html>

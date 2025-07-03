@@ -1,0 +1,223 @@
+<!DOCTYPE html>
+
+<html lang="en" data-content_root="./">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <title>Stocks &#8212; aizynthfinder 4.4.0 documentation</title>
+    <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=5ecbeea2" />
+    <link rel="stylesheet" type="text/css" href="_static/alabaster.css?v=a66d8bb5" />
+    <script src="_static/documentation_options.js?v=2f20d6c1"></script>
+    <script src="_static/doctools.js?v=9a2dae69"></script>
+    <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="Scoring" href="scoring.html" />
+    <link rel="prev" title="Configuration file" href="configuration.html" />
+   
+  <link rel="stylesheet" href="_static/custom.css" type="text/css" />
+  
+
+  
+  
+
+  </head><body>
+  <div class="document">
+    
+      <div class="sphinxsidebar" role="navigation" aria-label="Main">
+        <div class="sphinxsidebarwrapper">
+<h1 class="logo"><a href="index.html">aizynthfinder</a></h1>
+
+
+
+<p class="blurb">A fast, robust and flexible software for retrosynthetic planning</p>
+
+
+
+
+
+
+<h3>Navigation</h3>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="gui.html">Graphical user interface</a></li>
+<li class="toctree-l1"><a class="reference internal" href="cli.html">Command-line interface</a></li>
+<li class="toctree-l1"><a class="reference internal" href="python_interface.html">Python interface</a></li>
+<li class="toctree-l1"><a class="reference internal" href="configuration.html">Configuration file</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Stocks</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#mongo-database-stock">Mongo database stock</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#stop-criteria">Stop criteria</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#custom-stock">Custom stock</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#making-stocks">Making stocks</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="scoring.html">Scoring</a></li>
+<li class="toctree-l1"><a class="reference internal" href="howto.html">How-to</a></li>
+<li class="toctree-l1"><a class="reference internal" href="aizynthfinder.html">aizynthfinder package</a></li>
+<li class="toctree-l1"><a class="reference internal" href="sequences.html">Sequences</a></li>
+<li class="toctree-l1"><a class="reference internal" href="relationships.html">Relationships</a></li>
+</ul>
+
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="index.html">Documentation overview</a><ul>
+      <li>Previous: <a href="configuration.html" title="previous chapter">Configuration file</a></li>
+      <li>Next: <a href="scoring.html" title="next chapter">Scoring</a></li>
+  </ul></li>
+</ul>
+</div>
+<search id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"/>
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</search>
+<script>document.getElementById('searchbox').style.display = "block"</script>
+
+
+
+
+
+
+
+
+        </div>
+      </div>
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          
+
+          <div class="body" role="main">
+            
+  <section id="stocks">
+<h1>Stocks<a class="headerlink" href="#stocks" title="Link to this heading">¶</a></h1>
+<p>The stock files specified in the configuration file are loaded and a set of inchi keys
+are stored in-memory for lookup. However, the tool supports other stock queries as well as a way
+to fully customize the lookup.</p>
+<section id="mongo-database-stock">
+<h2>Mongo database stock<a class="headerlink" href="#mongo-database-stock" title="Link to this heading">¶</a></h2>
+<p>First, support for lookup inchi keys in a Mongo database is supported. The Mongo client should
+have a database and a collection containing documents with at least two fields: <cite>inchi_key</cite> and <cite>source</cite>.
+The <cite>inchi_key</cite> field will be used for lookup and <cite>source</cite> specifies the source database of the compound.</p>
+<p>By adding these lines to the configuration file, the Mongo database will be used:</p>
+<div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">stock</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">type</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">mongodb</span>
+<span class="w">    </span><span class="nt">host</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">user@myurl.com</span>
+<span class="w">    </span><span class="nt">database</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">database_name</span>
+<span class="w">    </span><span class="nt">collection</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">compounds</span>
+</pre></div>
+</div>
+<p>If no options are provided to the <code class="docutils literal notranslate"><span class="pre">mongodb_stock</span></code> key, the host, database and collection are taken to be <cite>localhost</cite>,
+<cite>stock_db</cite>, and <cite>molecules</cite>, respectively.</p>
+</section>
+<section id="stop-criteria">
+<h2>Stop criteria<a class="headerlink" href="#stop-criteria" title="Link to this heading">¶</a></h2>
+<p>The stock can be used to stop the tree search based on three criteria: a) minimum price, b) maximum amount and c) count of different elements in the molecule.
+Note that the stock query class need to support querying for price and amount, if the stop criteria should work properly.</p>
+<p>The stop criteria can be specified in the configuration file</p>
+<div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">stock</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">stop_criteria</span><span class="p">:</span>
+<span class="w">        </span><span class="nt">price</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">10</span>
+<span class="w">        </span><span class="nt">counts</span><span class="p">:</span>
+<span class="w">            </span><span class="nt">C</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">10</span>
+</pre></div>
+</div>
+<p>In the Jupyter GUI you can set the limit on the element occurences, but currently not the price and amount limits.</p>
+</section>
+<section id="custom-stock">
+<h2>Custom stock<a class="headerlink" href="#custom-stock" title="Link to this heading">¶</a></h2>
+<p>Support for any type of lookup is provided. You just need to write a python class that implements the <code class="docutils literal notranslate"><span class="pre">__contains__</span></code>
+and subclasses the <code class="docutils literal notranslate"><span class="pre">aizynthfinder.context.stock.queries.StockQueryMixin</span></code>. The <code class="docutils literal notranslate"><span class="pre">__contains__</span></code> method is used for lookup and should take a <code class="docutils literal notranslate"><span class="pre">Molecule</span></code> object as only argument.
+The <code class="docutils literal notranslate"><span class="pre">StockQueryMixin</span></code> mixin class provide a default interface for some methods that perhaps isn’t possible to implement in all query classes.</p>
+<p>This is an example:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">rdkit.Chem</span><span class="w"> </span><span class="kn">import</span> <span class="n">Lipinski</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">aizynthfinder.context.stock.queries</span><span class="w"> </span><span class="kn">import</span> <span class="n">StockQueryMixin</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">CriteriaStock</span><span class="p">(</span><span class="n">StockQueryMixin</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__contains__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">mol</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">Lipinski</span><span class="o">.</span><span class="n">HeavyAtomCount</span><span class="p">(</span><span class="n">mol</span><span class="o">.</span><span class="n">rd_mol</span><span class="p">)</span> <span class="o">&lt;</span> <span class="mi">10</span>
+</pre></div>
+</div>
+<p>To use this stock with the <code class="docutils literal notranslate"><span class="pre">aizynthcli</span></code> tool, save it in a <code class="docutils literal notranslate"><span class="pre">custom_stock.py</span></code> module that is located in a directory known to
+the python interpreter. Add this line to the module.</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">stock</span> <span class="o">=</span> <span class="n">CriteriaStock</span><span class="p">()</span>
+</pre></div>
+</div>
+<p>and it will be automatically used in the tree search.</p>
+<p>Alternatively the custom query class can be used by the <code class="docutils literal notranslate"><span class="pre">aizynthapp</span></code> tool.</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">aizynthfinder</span><span class="w"> </span><span class="kn">import</span> <span class="n">AiZynthApp</span>
+<span class="n">configfile</span><span class="o">=</span><span class="s2">&quot;config_local.yml&quot;</span>
+<span class="n">app</span> <span class="o">=</span> <span class="n">AiZynthApp</span><span class="p">(</span><span class="n">configfile</span><span class="p">,</span> <span class="n">setup</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+<span class="n">app</span><span class="o">.</span><span class="n">finder</span><span class="o">.</span><span class="n">stock</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">CriteriaStock</span><span class="p">(),</span> <span class="s2">&quot;criteria&quot;</span><span class="p">)</span> <span class="c1"># This loads the custom stock class</span>
+<span class="n">app</span><span class="o">.</span><span class="n">setup</span><span class="p">()</span>
+</pre></div>
+</div>
+<p>Lastly, it is possible to specify a custom stock class in the configuration file if it is located in a module that
+is known by the python interpreter.</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">stock</span><span class="p">:</span>
+    <span class="nb">type</span><span class="p">:</span> <span class="n">aizynthfinder</span><span class="o">.</span><span class="n">contrib</span><span class="o">.</span><span class="n">stocks</span><span class="o">.</span><span class="n">CriteriaStock</span>
+</pre></div>
+</div>
+<p>can be used if the <cite>aizynthfinder.contrib.stocks</cite> is an existing sub-package and module.</p>
+</section>
+<section id="making-stocks">
+<h2>Making stocks<a class="headerlink" href="#making-stocks" title="Link to this heading">¶</a></h2>
+<p>We provide a tool to create inchi key-based stocks from SMILES strings. Thereby, one
+can create a stock based on for instance a subset of the ZINC database.</p>
+<p>The tool support both creating a stock in HDF5 format or adding them to an existing Mongo database.</p>
+<p>The tool is easiest to use if one has a number of plain text files, in which each row has one SMILES.</p>
+<p>Then one can use one of these two commands:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">smiles2stock</span> <span class="o">--</span><span class="n">files</span> <span class="n">file1</span><span class="o">.</span><span class="n">smi</span> <span class="n">file2</span><span class="o">.</span><span class="n">smi</span> <span class="o">--</span><span class="n">output</span> <span class="n">stock</span><span class="o">.</span><span class="n">hdf5</span>
+<span class="n">smiles2stock</span> <span class="o">--</span><span class="n">files</span> <span class="n">file1</span><span class="o">.</span><span class="n">smi</span> <span class="n">file2</span><span class="o">.</span><span class="n">smi</span> <span class="o">--</span><span class="n">output</span> <span class="n">my_db</span> <span class="o">--</span><span class="n">target</span> <span class="n">mongo</span>
+</pre></div>
+</div>
+<p>to create either an HDF5 stock or a Mongo database stock, respectively. The <code class="docutils literal notranslate"><span class="pre">file1.smi</span></code> and <code class="docutils literal notranslate"><span class="pre">file2.smi</span></code>
+are simple text files and <code class="docutils literal notranslate"><span class="pre">my_db</span></code> is the source tag for the Mongo database.</p>
+<p>If one has SMILES in any other format, one has to provide a custom module that extract the SMILES from
+the input files. This is an example of such a module that can be used with downloads from the Zinc database
+where the first row contains headers and the SMILES are the first element on each line.</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="k">def</span><span class="w"> </span><span class="nf">extract_smiles</span><span class="p">(</span><span class="n">filename</span><span class="p">):</span>
+    <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">filename</span><span class="p">,</span> <span class="s2">&quot;r&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">fileobj</span><span class="p">:</span>
+        <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">line</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">fileobj</span><span class="o">.</span><span class="n">readlines</span><span class="p">()):</span>
+            <span class="k">if</span> <span class="n">i</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+                <span class="k">continue</span>
+            <span class="k">yield</span> <span class="n">line</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot; &quot;</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
+</pre></div>
+</div>
+<p>if this is saved as <code class="docutils literal notranslate"><span class="pre">load_zinc.py</span></code> in a path that is known to the Python interpreter, it can be
+used like this</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>export PYTHONPATH=`pwd`
+smiles2stock --files load_zinc file1.smi file2.smi --source module --output stock.hdf5
+</pre></div>
+</div>
+<p>where the first line adds the current directory to the python path (if you are using a Bash shell).</p>
+</section>
+</section>
+
+
+          </div>
+          
+        </div>
+      </div>
+    <div class="clearer"></div>
+  </div>
+    <div class="footer">
+      &#169;2020-2025, Molecular AI group.
+      
+      |
+      Powered by <a href="https://www.sphinx-doc.org/">Sphinx 7.4.7</a>
+      &amp; <a href="https://alabaster.readthedocs.io">Alabaster 0.7.16</a>
+      
+      |
+      <a href="_sources/stocks.rst.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+
+    
+  </body>
+</html>

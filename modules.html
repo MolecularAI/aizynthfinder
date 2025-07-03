@@ -1,0 +1,231 @@
+<!DOCTYPE html>
+
+<html lang="en" data-content_root="./">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <title>aizynthfinder &#8212; aizynthfinder 4.4.0 documentation</title>
+    <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=5ecbeea2" />
+    <link rel="stylesheet" type="text/css" href="_static/alabaster.css?v=a66d8bb5" />
+    <script src="_static/documentation_options.js?v=2f20d6c1"></script>
+    <script src="_static/doctools.js?v=9a2dae69"></script>
+    <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+   
+  <link rel="stylesheet" href="_static/custom.css" type="text/css" />
+  
+
+  
+  
+
+  </head><body>
+  <div class="document">
+    
+      <div class="sphinxsidebar" role="navigation" aria-label="Main">
+        <div class="sphinxsidebarwrapper">
+<h1 class="logo"><a href="index.html">aizynthfinder</a></h1>
+
+
+
+<p class="blurb">A fast, robust and flexible software for retrosynthetic planning</p>
+
+
+
+
+
+
+<h3>Navigation</h3>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="gui.html">Graphical user interface</a></li>
+<li class="toctree-l1"><a class="reference internal" href="cli.html">Command-line interface</a></li>
+<li class="toctree-l1"><a class="reference internal" href="python_interface.html">Python interface</a></li>
+<li class="toctree-l1"><a class="reference internal" href="configuration.html">Configuration file</a></li>
+<li class="toctree-l1"><a class="reference internal" href="stocks.html">Stocks</a></li>
+<li class="toctree-l1"><a class="reference internal" href="scoring.html">Scoring</a></li>
+<li class="toctree-l1"><a class="reference internal" href="howto.html">How-to</a></li>
+<li class="toctree-l1"><a class="reference internal" href="aizynthfinder.html">aizynthfinder package</a></li>
+<li class="toctree-l1"><a class="reference internal" href="sequences.html">Sequences</a></li>
+<li class="toctree-l1"><a class="reference internal" href="relationships.html">Relationships</a></li>
+</ul>
+
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="index.html">Documentation overview</a><ul>
+  </ul></li>
+</ul>
+</div>
+<search id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"/>
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</search>
+<script>document.getElementById('searchbox').style.display = "block"</script>
+
+
+
+
+
+
+
+
+        </div>
+      </div>
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          
+
+          <div class="body" role="main">
+            
+  <section id="aizynthfinder">
+<h1>aizynthfinder<a class="headerlink" href="#aizynthfinder" title="Link to this heading">¶</a></h1>
+<div class="toctree-wrapper compound">
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="aizynthfinder.html">aizynthfinder package</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="aizynthfinder.html#subpackages">Subpackages</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="aizynthfinder.analysis.html">aizynthfinder.analysis package</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="aizynthfinder.analysis.html#submodules">Submodules</a></li>
+<li class="toctree-l4"><a class="reference internal" href="aizynthfinder.analysis.html#module-aizynthfinder.analysis.routes">aizynthfinder.analysis.routes module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="aizynthfinder.analysis.html#module-aizynthfinder.analysis.tree_analysis">aizynthfinder.analysis.tree_analysis module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="aizynthfinder.analysis.html#module-aizynthfinder.analysis.utils">aizynthfinder.analysis.utils module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="aizynthfinder.analysis.html#module-aizynthfinder.analysis">Module contents</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="aizynthfinder.chem.html">aizynthfinder.chem package</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="aizynthfinder.chem.html#submodules">Submodules</a></li>
+<li class="toctree-l4"><a class="reference internal" href="aizynthfinder.chem.html#module-aizynthfinder.chem.mol">aizynthfinder.chem.mol module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="aizynthfinder.chem.html#module-aizynthfinder.chem.reaction">aizynthfinder.chem.reaction module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="aizynthfinder.chem.html#module-aizynthfinder.chem.serialization">aizynthfinder.chem.serialization module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="aizynthfinder.chem.html#module-aizynthfinder.chem">Module contents</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="aizynthfinder.context.html">aizynthfinder.context package</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="aizynthfinder.context.html#subpackages">Subpackages</a></li>
+<li class="toctree-l4"><a class="reference internal" href="aizynthfinder.context.html#submodules">Submodules</a></li>
+<li class="toctree-l4"><a class="reference internal" href="aizynthfinder.context.html#module-aizynthfinder.context.collection">aizynthfinder.context.collection module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="aizynthfinder.context.html#module-aizynthfinder.context.config">aizynthfinder.context.config module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="aizynthfinder.context.html#module-aizynthfinder.context">Module contents</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="aizynthfinder.interfaces.html">aizynthfinder.interfaces package</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="aizynthfinder.interfaces.html#subpackages">Subpackages</a></li>
+<li class="toctree-l4"><a class="reference internal" href="aizynthfinder.interfaces.html#submodules">Submodules</a></li>
+<li class="toctree-l4"><a class="reference internal" href="aizynthfinder.interfaces.html#module-aizynthfinder.interfaces.aizynthapp">aizynthfinder.interfaces.aizynthapp module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="aizynthfinder.interfaces.html#module-aizynthfinder.interfaces.aizynthcli">aizynthfinder.interfaces.aizynthcli module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="aizynthfinder.interfaces.html#module-aizynthfinder.interfaces">Module contents</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="aizynthfinder.search.html">aizynthfinder.search package</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="aizynthfinder.search.html#subpackages">Subpackages</a></li>
+<li class="toctree-l4"><a class="reference internal" href="aizynthfinder.search.html#submodules">Submodules</a></li>
+<li class="toctree-l4"><a class="reference internal" href="aizynthfinder.search.html#module-aizynthfinder.search.andor_trees">aizynthfinder.search.andor_trees module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="aizynthfinder.search.html#module-aizynthfinder.search">Module contents</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="aizynthfinder.tools.html">aizynthfinder.tools package</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="aizynthfinder.tools.html#submodules">Submodules</a></li>
+<li class="toctree-l4"><a class="reference internal" href="aizynthfinder.tools.html#module-aizynthfinder.tools.cat_output">aizynthfinder.tools.cat_output module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="aizynthfinder.tools.html#module-aizynthfinder.tools.download_public_data">aizynthfinder.tools.download_public_data module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="aizynthfinder.tools.html#module-aizynthfinder.tools.make_stock">aizynthfinder.tools.make_stock module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="aizynthfinder.tools.html#module-aizynthfinder.tools">Module contents</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="aizynthfinder.utils.html">aizynthfinder.utils package</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="aizynthfinder.utils.html#submodules">Submodules</a></li>
+<li class="toctree-l4"><a class="reference internal" href="aizynthfinder.utils.html#module-aizynthfinder.utils.bonds">aizynthfinder.utils.bonds module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="aizynthfinder.utils.html#module-aizynthfinder.utils.exceptions">aizynthfinder.utils.exceptions module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="aizynthfinder.utils.html#module-aizynthfinder.utils.files">aizynthfinder.utils.files module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="aizynthfinder.utils.html#module-aizynthfinder.utils.image">aizynthfinder.utils.image module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="aizynthfinder.utils.html#module-aizynthfinder.utils.loading">aizynthfinder.utils.loading module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="aizynthfinder.utils.html#module-aizynthfinder.utils.logging">aizynthfinder.utils.logging module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="aizynthfinder.utils.html#module-aizynthfinder.utils.math">aizynthfinder.utils.math module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="aizynthfinder.utils.html#module-aizynthfinder.utils.models">aizynthfinder.utils.models module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="aizynthfinder.utils.html#module-aizynthfinder.utils.mongo">aizynthfinder.utils.mongo module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="aizynthfinder.utils.html#module-aizynthfinder.utils.paths">aizynthfinder.utils.paths module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="aizynthfinder.utils.html#module-aizynthfinder.utils.sc_score">aizynthfinder.utils.sc_score module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="aizynthfinder.utils.html#module-aizynthfinder.utils.type_utils">aizynthfinder.utils.type_utils module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="aizynthfinder.utils.html#module-aizynthfinder.utils">Module contents</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="aizynthfinder.html#submodules">Submodules</a></li>
+<li class="toctree-l2"><a class="reference internal" href="aizynthfinder.html#module-aizynthfinder.aizynthfinder">aizynthfinder.aizynthfinder module</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="aizynthfinder.html#aizynthfinder.aizynthfinder.AiZynthFinder"><code class="docutils literal notranslate"><span class="pre">AiZynthFinder</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="aizynthfinder.html#aizynthfinder.aizynthfinder.AiZynthFinder.target_smiles"><code class="docutils literal notranslate"><span class="pre">AiZynthFinder.target_smiles</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="aizynthfinder.html#aizynthfinder.aizynthfinder.AiZynthFinder.target_mol"><code class="docutils literal notranslate"><span class="pre">AiZynthFinder.target_mol</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="aizynthfinder.html#aizynthfinder.aizynthfinder.AiZynthFinder.build_routes"><code class="docutils literal notranslate"><span class="pre">AiZynthFinder.build_routes()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="aizynthfinder.html#aizynthfinder.aizynthfinder.AiZynthFinder.extract_statistics"><code class="docutils literal notranslate"><span class="pre">AiZynthFinder.extract_statistics()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="aizynthfinder.html#aizynthfinder.aizynthfinder.AiZynthFinder.prepare_tree"><code class="docutils literal notranslate"><span class="pre">AiZynthFinder.prepare_tree()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="aizynthfinder.html#aizynthfinder.aizynthfinder.AiZynthFinder.stock_info"><code class="docutils literal notranslate"><span class="pre">AiZynthFinder.stock_info()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="aizynthfinder.html#aizynthfinder.aizynthfinder.AiZynthFinder.tree_search"><code class="docutils literal notranslate"><span class="pre">AiZynthFinder.tree_search()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="aizynthfinder.html#aizynthfinder.aizynthfinder.AiZynthExpander"><code class="docutils literal notranslate"><span class="pre">AiZynthExpander</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="aizynthfinder.html#aizynthfinder.aizynthfinder.AiZynthExpander.do_expansion"><code class="docutils literal notranslate"><span class="pre">AiZynthExpander.do_expansion()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="aizynthfinder.html#module-aizynthfinder.reactiontree">aizynthfinder.reactiontree module</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="aizynthfinder.html#aizynthfinder.reactiontree.ReactionTree"><code class="docutils literal notranslate"><span class="pre">ReactionTree</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="aizynthfinder.html#aizynthfinder.reactiontree.ReactionTree.from_dict"><code class="docutils literal notranslate"><span class="pre">ReactionTree.from_dict()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="aizynthfinder.html#aizynthfinder.reactiontree.ReactionTree.metadata"><code class="docutils literal notranslate"><span class="pre">ReactionTree.metadata</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="aizynthfinder.html#aizynthfinder.reactiontree.ReactionTree.child_reactions"><code class="docutils literal notranslate"><span class="pre">ReactionTree.child_reactions()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="aizynthfinder.html#aizynthfinder.reactiontree.ReactionTree.depth"><code class="docutils literal notranslate"><span class="pre">ReactionTree.depth()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="aizynthfinder.html#aizynthfinder.reactiontree.ReactionTree.distance_to"><code class="docutils literal notranslate"><span class="pre">ReactionTree.distance_to()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="aizynthfinder.html#aizynthfinder.reactiontree.ReactionTree.hash_key"><code class="docutils literal notranslate"><span class="pre">ReactionTree.hash_key()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="aizynthfinder.html#aizynthfinder.reactiontree.ReactionTree.in_stock"><code class="docutils literal notranslate"><span class="pre">ReactionTree.in_stock()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="aizynthfinder.html#aizynthfinder.reactiontree.ReactionTree.is_branched"><code class="docutils literal notranslate"><span class="pre">ReactionTree.is_branched()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="aizynthfinder.html#aizynthfinder.reactiontree.ReactionTree.leafs"><code class="docutils literal notranslate"><span class="pre">ReactionTree.leafs()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="aizynthfinder.html#aizynthfinder.reactiontree.ReactionTree.molecules"><code class="docutils literal notranslate"><span class="pre">ReactionTree.molecules()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="aizynthfinder.html#aizynthfinder.reactiontree.ReactionTree.parent_molecule"><code class="docutils literal notranslate"><span class="pre">ReactionTree.parent_molecule()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="aizynthfinder.html#aizynthfinder.reactiontree.ReactionTree.reactions"><code class="docutils literal notranslate"><span class="pre">ReactionTree.reactions()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="aizynthfinder.html#aizynthfinder.reactiontree.ReactionTree.subtrees"><code class="docutils literal notranslate"><span class="pre">ReactionTree.subtrees()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="aizynthfinder.html#aizynthfinder.reactiontree.ReactionTree.to_dict"><code class="docutils literal notranslate"><span class="pre">ReactionTree.to_dict()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="aizynthfinder.html#aizynthfinder.reactiontree.ReactionTree.to_image"><code class="docutils literal notranslate"><span class="pre">ReactionTree.to_image()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="aizynthfinder.html#aizynthfinder.reactiontree.ReactionTree.to_json"><code class="docutils literal notranslate"><span class="pre">ReactionTree.to_json()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="aizynthfinder.html#aizynthfinder.reactiontree.ReactionTreeLoader"><code class="docutils literal notranslate"><span class="pre">ReactionTreeLoader</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="aizynthfinder.html#aizynthfinder.reactiontree.ReactionTreeFromDict"><code class="docutils literal notranslate"><span class="pre">ReactionTreeFromDict</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="aizynthfinder.html#aizynthfinder.reactiontree.ReactionTreeFromExpansion"><code class="docutils literal notranslate"><span class="pre">ReactionTreeFromExpansion</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="aizynthfinder.html#module-aizynthfinder">Module contents</a></li>
+</ul>
+</li>
+</ul>
+</div>
+</section>
+
+
+          </div>
+          
+        </div>
+      </div>
+    <div class="clearer"></div>
+  </div>
+    <div class="footer">
+      &#169;2020-2025, Molecular AI group.
+      
+      |
+      Powered by <a href="https://www.sphinx-doc.org/">Sphinx 7.4.7</a>
+      &amp; <a href="https://alabaster.readthedocs.io">Alabaster 0.7.16</a>
+      
+      |
+      <a href="_sources/modules.rst.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+
+    
+  </body>
+</html>

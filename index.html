@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+
+<html lang="en" data-content_root="./">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <title>aizynthfinder documentation &#8212; aizynthfinder 4.4.0 documentation</title>
+    <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=5ecbeea2" />
+    <link rel="stylesheet" type="text/css" href="_static/alabaster.css?v=a66d8bb5" />
+    <script src="_static/documentation_options.js?v=2f20d6c1"></script>
+    <script src="_static/doctools.js?v=9a2dae69"></script>
+    <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="Graphical user interface" href="gui.html" />
+   
+  <link rel="stylesheet" href="_static/custom.css" type="text/css" />
+  
+
+  
+  
+
+  </head><body>
+  <div class="document">
+    
+      <div class="sphinxsidebar" role="navigation" aria-label="Main">
+        <div class="sphinxsidebarwrapper">
+<h1 class="logo"><a href="#">aizynthfinder</a></h1>
+
+
+
+<p class="blurb">A fast, robust and flexible software for retrosynthetic planning</p>
+
+
+
+
+
+
+<h3>Navigation</h3>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="gui.html">Graphical user interface</a></li>
+<li class="toctree-l1"><a class="reference internal" href="cli.html">Command-line interface</a></li>
+<li class="toctree-l1"><a class="reference internal" href="python_interface.html">Python interface</a></li>
+<li class="toctree-l1"><a class="reference internal" href="configuration.html">Configuration file</a></li>
+<li class="toctree-l1"><a class="reference internal" href="stocks.html">Stocks</a></li>
+<li class="toctree-l1"><a class="reference internal" href="scoring.html">Scoring</a></li>
+<li class="toctree-l1"><a class="reference internal" href="howto.html">How-to</a></li>
+<li class="toctree-l1"><a class="reference internal" href="aizynthfinder.html">aizynthfinder package</a></li>
+<li class="toctree-l1"><a class="reference internal" href="sequences.html">Sequences</a></li>
+<li class="toctree-l1"><a class="reference internal" href="relationships.html">Relationships</a></li>
+</ul>
+
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="#">Documentation overview</a><ul>
+      <li>Next: <a href="gui.html" title="next chapter">Graphical user interface</a></li>
+  </ul></li>
+</ul>
+</div>
+<search id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"/>
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</search>
+<script>document.getElementById('searchbox').style.display = "block"</script>
+
+
+
+
+
+
+
+
+        </div>
+      </div>
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          
+
+          <div class="body" role="main">
+            
+  <section id="aizynthfinder-documentation">
+<h1>aizynthfinder documentation<a class="headerlink" href="#aizynthfinder-documentation" title="Link to this heading">¶</a></h1>
+<p>aizynthfinder is a tool for retrosynthetic planning. The default algorithm is based on a Monte Carlo tree search that recursively breaks down a molecule to purchasable precursors. The tree search is guided by a policy that suggests possible precursors by utilizing a neural network trained on a library of known reaction templates.</p>
+<section id="introduction">
+<h2>Introduction<a class="headerlink" href="#introduction" title="Link to this heading">¶</a></h2>
+<p>You run retrosynthesis experiments you need a trained model and a stock collection. You can download a public available model based on USPTO and a stock collection from ZINC database.</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">download_public_data</span> <span class="o">.</span>
+</pre></div>
+</div>
+<p>This will download the data to your current directory. The <code class="docutils literal notranslate"><span class="pre">config.yml</span></code> file can be used directly with the interfaces.</p>
+<p>There are two main interfaces provided by the package:</p>
+<blockquote>
+<div><ul class="simple">
+<li><p>a script that performs tree search in batch mode and</p></li>
+<li><p>an interface that is providing a GUI within a Jupyter notebook.</p></li>
+</ul>
+</div></blockquote>
+<p>The GUI interface should be run in a Jupyter notebook. This is a simple example of the code in a Jupyter notebook cell.</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">aizynthfinder.interfaces</span><span class="w"> </span><span class="kn">import</span> <span class="n">AiZynthApp</span>
+<span class="n">app</span> <span class="o">=</span> <span class="n">AiZynthApp</span><span class="p">(</span><span class="s2">&quot;/path/to/configfile.yaml&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>where the <code class="docutils literal notranslate"><span class="pre">AiZynthApp</span></code> class needs to be instantiated with the path to a configuration file (see <a class="reference internal" href="configuration.html"><span class="doc">here</span></a>).</p>
+<p>To use the interface, follow these steps:</p>
+<blockquote>
+<div><ol class="arabic simple">
+<li><p>Executed the code in the cell (press <code class="docutils literal notranslate"><span class="pre">Ctrl+Enter</span></code>) and a simple GUI will appear</p></li>
+<li><p>Enter the target SMILES and select stocks and policy model.</p></li>
+<li><p>Press the <code class="docutils literal notranslate"><span class="pre">Run</span> <span class="pre">Search</span></code> button to perform the tree search.</p></li>
+<li><p>Press the <code class="docutils literal notranslate"><span class="pre">Show</span> <span class="pre">Reactions</span></code> to see the top-ranked routes</p></li>
+</ol>
+</div></blockquote>
+<p>The batch-mode script is called <code class="docutils literal notranslate"><span class="pre">aizynthcli</span></code> and can be executed like:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>aizynthcli<span class="w"> </span>--config<span class="w"> </span>config.yml<span class="w"> </span>--smiles<span class="w"> </span>smiles.txt
+</pre></div>
+</div>
+<p>where <cite>config.yml</cite> contains configurations such as paths to policy models and stocks (see <a class="reference internal" href="configuration.html"><span class="doc">here</span></a>), and <cite>smiles.txt</cite> is a simple text
+file with SMILES (one on each row).</p>
+<p>If you just want to perform the tree search on a single molecule. You can directly specify it on the command-line
+within quotes:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>aizynthcli<span class="w"> </span>--config<span class="w"> </span>config.yml<span class="w"> </span>--smiles<span class="w"> </span><span class="s2">&quot;COc1cccc(OC(=O)/C=C/c2cc(OC)c(OC)c(OC)c2)c1&quot;</span>
+</pre></div>
+</div>
+<p>The output is some statistics about the tree search, the scores of the top-ranked routes, and the reaction tree
+of the top-ranked routes. When smiles are provided in a text file the results are stored in a JSON file,
+whereas if the SMILEs is provided on the command-line it is printed directly to the prompt
+(except the reaction trees, which are written to a JSON file).</p>
+<div class="toctree-wrapper compound">
+</div>
+</section>
+</section>
+
+
+          </div>
+          
+        </div>
+      </div>
+    <div class="clearer"></div>
+  </div>
+    <div class="footer">
+      &#169;2020-2025, Molecular AI group.
+      
+      |
+      Powered by <a href="https://www.sphinx-doc.org/">Sphinx 7.4.7</a>
+      &amp; <a href="https://alabaster.readthedocs.io">Alabaster 0.7.16</a>
+      
+      |
+      <a href="_sources/index.rst.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+
+    
+  </body>
+</html>

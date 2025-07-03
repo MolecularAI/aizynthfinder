@@ -1,0 +1,873 @@
+<!DOCTYPE html>
+
+<html lang="en" data-content_root="./">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <title>aizynthfinder.chem package &#8212; aizynthfinder 4.4.0 documentation</title>
+    <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=5ecbeea2" />
+    <link rel="stylesheet" type="text/css" href="_static/alabaster.css?v=a66d8bb5" />
+    <script src="_static/documentation_options.js?v=2f20d6c1"></script>
+    <script src="_static/doctools.js?v=9a2dae69"></script>
+    <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="aizynthfinder.context package" href="aizynthfinder.context.html" />
+    <link rel="prev" title="aizynthfinder.analysis package" href="aizynthfinder.analysis.html" />
+   
+  <link rel="stylesheet" href="_static/custom.css" type="text/css" />
+  
+
+  
+  
+
+  </head><body>
+  <div class="document">
+    
+      <div class="sphinxsidebar" role="navigation" aria-label="Main">
+        <div class="sphinxsidebarwrapper">
+<h1 class="logo"><a href="index.html">aizynthfinder</a></h1>
+
+
+
+<p class="blurb">A fast, robust and flexible software for retrosynthetic planning</p>
+
+
+
+
+
+
+<h3>Navigation</h3>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="gui.html">Graphical user interface</a></li>
+<li class="toctree-l1"><a class="reference internal" href="cli.html">Command-line interface</a></li>
+<li class="toctree-l1"><a class="reference internal" href="python_interface.html">Python interface</a></li>
+<li class="toctree-l1"><a class="reference internal" href="configuration.html">Configuration file</a></li>
+<li class="toctree-l1"><a class="reference internal" href="stocks.html">Stocks</a></li>
+<li class="toctree-l1"><a class="reference internal" href="scoring.html">Scoring</a></li>
+<li class="toctree-l1"><a class="reference internal" href="howto.html">How-to</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="aizynthfinder.html">aizynthfinder package</a><ul class="current">
+<li class="toctree-l2 current"><a class="reference internal" href="aizynthfinder.html#subpackages">Subpackages</a><ul class="current">
+<li class="toctree-l3"><a class="reference internal" href="aizynthfinder.analysis.html">aizynthfinder.analysis package</a></li>
+<li class="toctree-l3 current"><a class="current reference internal" href="#">aizynthfinder.chem package</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#submodules">Submodules</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#module-aizynthfinder.chem.mol">aizynthfinder.chem.mol module</a><ul>
+<li class="toctree-l5"><a class="reference internal" href="#aizynthfinder.chem.mol.Molecule"><code class="docutils literal notranslate"><span class="pre">Molecule</span></code></a><ul>
+<li class="toctree-l6"><a class="reference internal" href="#aizynthfinder.chem.mol.Molecule.inchi"><code class="docutils literal notranslate"><span class="pre">Molecule.inchi</span></code></a></li>
+<li class="toctree-l6"><a class="reference internal" href="#aizynthfinder.chem.mol.Molecule.inchi_key"><code class="docutils literal notranslate"><span class="pre">Molecule.inchi_key</span></code></a></li>
+<li class="toctree-l6"><a class="reference internal" href="#aizynthfinder.chem.mol.Molecule.index_to_mapping"><code class="docutils literal notranslate"><span class="pre">Molecule.index_to_mapping</span></code></a></li>
+<li class="toctree-l6"><a class="reference internal" href="#aizynthfinder.chem.mol.Molecule.mapping_to_index"><code class="docutils literal notranslate"><span class="pre">Molecule.mapping_to_index</span></code></a></li>
+<li class="toctree-l6"><a class="reference internal" href="#aizynthfinder.chem.mol.Molecule.weight"><code class="docutils literal notranslate"><span class="pre">Molecule.weight</span></code></a></li>
+<li class="toctree-l6"><a class="reference internal" href="#aizynthfinder.chem.mol.Molecule.basic_compare"><code class="docutils literal notranslate"><span class="pre">Molecule.basic_compare()</span></code></a></li>
+<li class="toctree-l6"><a class="reference internal" href="#aizynthfinder.chem.mol.Molecule.fingerprint"><code class="docutils literal notranslate"><span class="pre">Molecule.fingerprint()</span></code></a></li>
+<li class="toctree-l6"><a class="reference internal" href="#aizynthfinder.chem.mol.Molecule.has_atom_mapping"><code class="docutils literal notranslate"><span class="pre">Molecule.has_atom_mapping()</span></code></a></li>
+<li class="toctree-l6"><a class="reference internal" href="#aizynthfinder.chem.mol.Molecule.make_unique"><code class="docutils literal notranslate"><span class="pre">Molecule.make_unique()</span></code></a></li>
+<li class="toctree-l6"><a class="reference internal" href="#aizynthfinder.chem.mol.Molecule.remove_atom_mapping"><code class="docutils literal notranslate"><span class="pre">Molecule.remove_atom_mapping()</span></code></a></li>
+<li class="toctree-l6"><a class="reference internal" href="#aizynthfinder.chem.mol.Molecule.sanitize"><code class="docutils literal notranslate"><span class="pre">Molecule.sanitize()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l5"><a class="reference internal" href="#aizynthfinder.chem.mol.TreeMolecule"><code class="docutils literal notranslate"><span class="pre">TreeMolecule</span></code></a><ul>
+<li class="toctree-l6"><a class="reference internal" href="#aizynthfinder.chem.mol.TreeMolecule.mapping_to_index"><code class="docutils literal notranslate"><span class="pre">TreeMolecule.mapping_to_index</span></code></a></li>
+<li class="toctree-l6"><a class="reference internal" href="#aizynthfinder.chem.mol.TreeMolecule.mapped_atom_bonds"><code class="docutils literal notranslate"><span class="pre">TreeMolecule.mapped_atom_bonds</span></code></a></li>
+<li class="toctree-l6"><a class="reference internal" href="#aizynthfinder.chem.mol.TreeMolecule.get_bonds_in_molecule"><code class="docutils literal notranslate"><span class="pre">TreeMolecule.get_bonds_in_molecule()</span></code></a></li>
+<li class="toctree-l6"><a class="reference internal" href="#aizynthfinder.chem.mol.TreeMolecule.has_all_focussed_bonds"><code class="docutils literal notranslate"><span class="pre">TreeMolecule.has_all_focussed_bonds()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l5"><a class="reference internal" href="#aizynthfinder.chem.mol.UniqueMolecule"><code class="docutils literal notranslate"><span class="pre">UniqueMolecule</span></code></a></li>
+<li class="toctree-l5"><a class="reference internal" href="#aizynthfinder.chem.mol.none_molecule"><code class="docutils literal notranslate"><span class="pre">none_molecule()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l4"><a class="reference internal" href="#module-aizynthfinder.chem.reaction">aizynthfinder.chem.reaction module</a><ul>
+<li class="toctree-l5"><a class="reference internal" href="#aizynthfinder.chem.reaction.RetroReaction"><code class="docutils literal notranslate"><span class="pre">RetroReaction</span></code></a><ul>
+<li class="toctree-l6"><a class="reference internal" href="#aizynthfinder.chem.reaction.RetroReaction.from_serialization"><code class="docutils literal notranslate"><span class="pre">RetroReaction.from_serialization()</span></code></a></li>
+<li class="toctree-l6"><a class="reference internal" href="#aizynthfinder.chem.reaction.RetroReaction.reactants"><code class="docutils literal notranslate"><span class="pre">RetroReaction.reactants</span></code></a></li>
+<li class="toctree-l6"><a class="reference internal" href="#aizynthfinder.chem.reaction.RetroReaction.smiles"><code class="docutils literal notranslate"><span class="pre">RetroReaction.smiles</span></code></a></li>
+<li class="toctree-l6"><a class="reference internal" href="#aizynthfinder.chem.reaction.RetroReaction.unqueried"><code class="docutils literal notranslate"><span class="pre">RetroReaction.unqueried</span></code></a></li>
+<li class="toctree-l6"><a class="reference internal" href="#aizynthfinder.chem.reaction.RetroReaction.copy"><code class="docutils literal notranslate"><span class="pre">RetroReaction.copy()</span></code></a></li>
+<li class="toctree-l6"><a class="reference internal" href="#aizynthfinder.chem.reaction.RetroReaction.mapped_reaction_smiles"><code class="docutils literal notranslate"><span class="pre">RetroReaction.mapped_reaction_smiles()</span></code></a></li>
+<li class="toctree-l6"><a class="reference internal" href="#aizynthfinder.chem.reaction.RetroReaction.to_dict"><code class="docutils literal notranslate"><span class="pre">RetroReaction.to_dict()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l5"><a class="reference internal" href="#aizynthfinder.chem.reaction.TemplatedRetroReaction"><code class="docutils literal notranslate"><span class="pre">TemplatedRetroReaction</span></code></a><ul>
+<li class="toctree-l6"><a class="reference internal" href="#aizynthfinder.chem.reaction.TemplatedRetroReaction.rd_reaction"><code class="docutils literal notranslate"><span class="pre">TemplatedRetroReaction.rd_reaction</span></code></a></li>
+<li class="toctree-l6"><a class="reference internal" href="#aizynthfinder.chem.reaction.TemplatedRetroReaction.to_dict"><code class="docutils literal notranslate"><span class="pre">TemplatedRetroReaction.to_dict()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l5"><a class="reference internal" href="#aizynthfinder.chem.reaction.SmilesBasedRetroReaction"><code class="docutils literal notranslate"><span class="pre">SmilesBasedRetroReaction</span></code></a><ul>
+<li class="toctree-l6"><a class="reference internal" href="#aizynthfinder.chem.reaction.SmilesBasedRetroReaction.to_dict"><code class="docutils literal notranslate"><span class="pre">SmilesBasedRetroReaction.to_dict()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l5"><a class="reference internal" href="#aizynthfinder.chem.reaction.FixedRetroReaction"><code class="docutils literal notranslate"><span class="pre">FixedRetroReaction</span></code></a><ul>
+<li class="toctree-l6"><a class="reference internal" href="#aizynthfinder.chem.reaction.FixedRetroReaction.copy"><code class="docutils literal notranslate"><span class="pre">FixedRetroReaction.copy()</span></code></a></li>
+<li class="toctree-l6"><a class="reference internal" href="#aizynthfinder.chem.reaction.FixedRetroReaction.to_smiles_based_retroreaction"><code class="docutils literal notranslate"><span class="pre">FixedRetroReaction.to_smiles_based_retroreaction()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l5"><a class="reference internal" href="#aizynthfinder.chem.reaction.hash_reactions"><code class="docutils literal notranslate"><span class="pre">hash_reactions()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l4"><a class="reference internal" href="#module-aizynthfinder.chem.serialization">aizynthfinder.chem.serialization module</a><ul>
+<li class="toctree-l5"><a class="reference internal" href="#aizynthfinder.chem.serialization.MoleculeSerializer"><code class="docutils literal notranslate"><span class="pre">MoleculeSerializer</span></code></a><ul>
+<li class="toctree-l6"><a class="reference internal" href="#aizynthfinder.chem.serialization.MoleculeSerializer.store"><code class="docutils literal notranslate"><span class="pre">MoleculeSerializer.store</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l5"><a class="reference internal" href="#aizynthfinder.chem.serialization.MoleculeDeserializer"><code class="docutils literal notranslate"><span class="pre">MoleculeDeserializer</span></code></a><ul>
+<li class="toctree-l6"><a class="reference internal" href="#aizynthfinder.chem.serialization.MoleculeDeserializer.get_tree_molecules"><code class="docutils literal notranslate"><span class="pre">MoleculeDeserializer.get_tree_molecules()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l5"><a class="reference internal" href="#aizynthfinder.chem.serialization.serialize_action"><code class="docutils literal notranslate"><span class="pre">serialize_action()</span></code></a></li>
+<li class="toctree-l5"><a class="reference internal" href="#aizynthfinder.chem.serialization.deserialize_action"><code class="docutils literal notranslate"><span class="pre">deserialize_action()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l4"><a class="reference internal" href="#module-aizynthfinder.chem">Module contents</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="aizynthfinder.context.html">aizynthfinder.context package</a></li>
+<li class="toctree-l3"><a class="reference internal" href="aizynthfinder.interfaces.html">aizynthfinder.interfaces package</a></li>
+<li class="toctree-l3"><a class="reference internal" href="aizynthfinder.search.html">aizynthfinder.search package</a></li>
+<li class="toctree-l3"><a class="reference internal" href="aizynthfinder.tools.html">aizynthfinder.tools package</a></li>
+<li class="toctree-l3"><a class="reference internal" href="aizynthfinder.utils.html">aizynthfinder.utils package</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="aizynthfinder.html#submodules">Submodules</a></li>
+<li class="toctree-l2"><a class="reference internal" href="aizynthfinder.html#module-aizynthfinder.aizynthfinder">aizynthfinder.aizynthfinder module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="aizynthfinder.html#module-aizynthfinder.reactiontree">aizynthfinder.reactiontree module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="aizynthfinder.html#module-aizynthfinder">Module contents</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="sequences.html">Sequences</a></li>
+<li class="toctree-l1"><a class="reference internal" href="relationships.html">Relationships</a></li>
+</ul>
+
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="index.html">Documentation overview</a><ul>
+  <li><a href="aizynthfinder.html">aizynthfinder package</a><ul>
+      <li>Previous: <a href="aizynthfinder.analysis.html" title="previous chapter">aizynthfinder.analysis package</a></li>
+      <li>Next: <a href="aizynthfinder.context.html" title="next chapter">aizynthfinder.context package</a></li>
+  </ul></li>
+  </ul></li>
+</ul>
+</div>
+<search id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"/>
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</search>
+<script>document.getElementById('searchbox').style.display = "block"</script>
+
+
+
+
+
+
+
+
+        </div>
+      </div>
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          
+
+          <div class="body" role="main">
+            
+  <section id="aizynthfinder-chem-package">
+<h1>aizynthfinder.chem package<a class="headerlink" href="#aizynthfinder-chem-package" title="Link to this heading">¶</a></h1>
+<section id="submodules">
+<h2>Submodules<a class="headerlink" href="#submodules" title="Link to this heading">¶</a></h2>
+</section>
+<section id="module-aizynthfinder.chem.mol">
+<span id="aizynthfinder-chem-mol-module"></span><h2>aizynthfinder.chem.mol module<a class="headerlink" href="#module-aizynthfinder.chem.mol" title="Link to this heading">¶</a></h2>
+<p>Module containing classes to deal with Molecules - mostly wrappers around rdkit routines.</p>
+<dl class="py class">
+<dt class="sig sig-object py" id="aizynthfinder.chem.mol.Molecule">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">aizynthfinder.chem.mol.</span></span><span class="sig-name descname"><span class="pre">Molecule</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">rd_mol</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">smiles</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sanitize</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#aizynthfinder.chem.mol.Molecule" title="Link to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<p>A base class for molecules. Encapsulate an RDKit mol object and
+functions that can be applied to such a molecule.</p>
+<p>The objects of this class is hashable by the inchi key and hence
+comparable with the equality operator.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Variables<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>rd_mol</strong> – the RDkit mol object that is encapsulated</p></li>
+<li><p><strong>smiles</strong> – the SMILES representation of the molecule</p></li>
+</ul>
+</dd>
+<dt class="field-even">Parameters<span class="colon">:</span></dt>
+<dd class="field-even"><ul class="simple">
+<li><p><strong>rd_mol</strong> (<em>Optional</em><em>[</em><em>RdMol</em><em>]</em>) – a RDKit mol object to encapsulate, defaults to None</p></li>
+<li><p><strong>smiles</strong> (<em>Optional</em><em>[</em><em>str</em><em>]</em>) – a SMILES to convert to a molecule object, defaults to None</p></li>
+<li><p><strong>sanitize</strong> (<em>bool</em>) – if True, the molecule will be immediately sanitized, defaults to False</p></li>
+</ul>
+</dd>
+<dt class="field-odd">Raises<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference internal" href="aizynthfinder.utils.html#aizynthfinder.utils.exceptions.MoleculeException" title="aizynthfinder.utils.exceptions.MoleculeException"><strong>MoleculeException</strong></a> – if neither rd_mol or smiles is given, or if the molecule could not be sanitized</p>
+</dd>
+</dl>
+<dl class="py property">
+<dt class="sig sig-object py" id="aizynthfinder.chem.mol.Molecule.inchi">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">inchi</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">str</span></em><a class="headerlink" href="#aizynthfinder.chem.mol.Molecule.inchi" title="Link to this definition">¶</a></dt>
+<dd><p>The inchi representation of the molecule
+Created by lazy evaluation. Will cause the molecule to be sanitized.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>the inchi</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="aizynthfinder.chem.mol.Molecule.inchi_key">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">inchi_key</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">str</span></em><a class="headerlink" href="#aizynthfinder.chem.mol.Molecule.inchi_key" title="Link to this definition">¶</a></dt>
+<dd><p>The inchi key representation of the molecule
+Created by lazy evaluation. Will cause the molecule to be sanitized.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>the inchi key</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="aizynthfinder.chem.mol.Molecule.index_to_mapping">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">index_to_mapping</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Dict</span><span class="p"><span class="pre">[</span></span><span class="pre">int</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">int</span><span class="p"><span class="pre">]</span></span></em><a class="headerlink" href="#aizynthfinder.chem.mol.Molecule.index_to_mapping" title="Link to this definition">¶</a></dt>
+<dd><p>Return a dictionary mapping to atom indices to atom mappings</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="aizynthfinder.chem.mol.Molecule.mapping_to_index">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">mapping_to_index</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Dict</span><span class="p"><span class="pre">[</span></span><span class="pre">int</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">int</span><span class="p"><span class="pre">]</span></span></em><a class="headerlink" href="#aizynthfinder.chem.mol.Molecule.mapping_to_index" title="Link to this definition">¶</a></dt>
+<dd><p>Return a dictionary mapping to atom mappings to atom indices</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="aizynthfinder.chem.mol.Molecule.weight">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">weight</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">float</span></em><a class="headerlink" href="#aizynthfinder.chem.mol.Molecule.weight" title="Link to this definition">¶</a></dt>
+<dd><p>Return the exact molecular weight of the molecule</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="aizynthfinder.chem.mol.Molecule.basic_compare">
+<span class="sig-name descname"><span class="pre">basic_compare</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">other</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#aizynthfinder.chem.mol.Molecule.basic_compare" title="Link to this definition">¶</a></dt>
+<dd><p>Compare this molecule to another but only to
+the basic part of the inchi key, thereby ignoring stereochemistry etc</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>other</strong> (<a class="reference internal" href="#aizynthfinder.chem.mol.Molecule" title="aizynthfinder.chem.mol.Molecule"><em>Molecule</em></a>) – the molecule to compare to</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>True if chemical formula and connectivity is the same</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>bool</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="aizynthfinder.chem.mol.Molecule.fingerprint">
+<span class="sig-name descname"><span class="pre">fingerprint</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">radius</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">nbits</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">2048</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">chiral</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#aizynthfinder.chem.mol.Molecule.fingerprint" title="Link to this definition">¶</a></dt>
+<dd><p>Returns the Morgan fingerprint of the molecule</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>radius</strong> (<em>int</em>) – the radius of the fingerprint</p></li>
+<li><p><strong>nbits</strong> (<em>int</em>) – the length of the fingerprint</p></li>
+<li><p><strong>chiral</strong> (<em>bool</em>) – if True, include chirality information</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>the fingerprint</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><em>ndarray</em></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="aizynthfinder.chem.mol.Molecule.has_atom_mapping">
+<span class="sig-name descname"><span class="pre">has_atom_mapping</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#aizynthfinder.chem.mol.Molecule.has_atom_mapping" title="Link to this definition">¶</a></dt>
+<dd><p>Determines if a the molecule has atom mappings</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>True if at least one atom has a mapping</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>bool</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="aizynthfinder.chem.mol.Molecule.make_unique">
+<span class="sig-name descname"><span class="pre">make_unique</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#aizynthfinder.chem.mol.Molecule.make_unique" title="Link to this definition">¶</a></dt>
+<dd><p>Returns an instance of the UniqueMolecule class that
+is representing the same molecule but is not hashable or comparable.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>the unique molecule</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><a class="reference internal" href="#aizynthfinder.chem.mol.UniqueMolecule" title="aizynthfinder.chem.mol.UniqueMolecule"><em>UniqueMolecule</em></a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="aizynthfinder.chem.mol.Molecule.remove_atom_mapping">
+<span class="sig-name descname"><span class="pre">remove_atom_mapping</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">exceptions</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#aizynthfinder.chem.mol.Molecule.remove_atom_mapping" title="Link to this definition">¶</a></dt>
+<dd><p>Remove all mappings of the atoms and update the smiles</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>exceptions</strong> (<em>Optional</em><em>[</em><em>Sequence</em><em>[</em><em>int</em><em>]</em><em>]</em>) – keep the listed atom mappings</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>None</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="aizynthfinder.chem.mol.Molecule.sanitize">
+<span class="sig-name descname"><span class="pre">sanitize</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">raise_exception</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#aizynthfinder.chem.mol.Molecule.sanitize" title="Link to this definition">¶</a></dt>
+<dd><p>Sanitizes the molecule if it has not been done before.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>raise_exception</strong> (<em>bool</em>) – if True will raise exception on failed sanitation</p>
+</dd>
+<dt class="field-even">Raises<span class="colon">:</span></dt>
+<dd class="field-even"><p><a class="reference internal" href="aizynthfinder.utils.html#aizynthfinder.utils.exceptions.MoleculeException" title="aizynthfinder.utils.exceptions.MoleculeException"><strong>MoleculeException</strong></a> – if the molecule could not be sanitized</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>None</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="aizynthfinder.chem.mol.TreeMolecule">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">aizynthfinder.chem.mol.</span></span><span class="sig-name descname"><span class="pre">TreeMolecule</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">parent</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">transform</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">rd_mol</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">smiles</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sanitize</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mapping_update_callback</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#aizynthfinder.chem.mol.TreeMolecule" title="Link to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#aizynthfinder.chem.mol.Molecule" title="aizynthfinder.chem.mol.Molecule"><code class="xref py py-class docutils literal notranslate"><span class="pre">Molecule</span></code></a></p>
+<p>A special molecule that keeps a reference to a parent molecule.</p>
+<p>If the class is instantiated without specifying the <cite>transform</cite> argument,
+it is computed by increasing the value of the <cite>parent.transform</cite> variable.</p>
+<p>If no parent is provided the atoms with atom mapping number are tracked
+and inherited to children.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Variables<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>mapped_mol</strong> – the tracked molecule with atom mappings</p></li>
+<li><p><strong>mapped_smiles</strong> – the SMILES of the tracked molecule with atom mappings</p></li>
+<li><p><strong>original_smiles</strong> – the SMILES as passed when instantiating the class</p></li>
+<li><p><strong>parent</strong> – parent molecule</p></li>
+<li><p><strong>transform</strong> – a numerical number corresponding to the depth in the tree</p></li>
+</ul>
+</dd>
+<dt class="field-even">Parameters<span class="colon">:</span></dt>
+<dd class="field-even"><ul class="simple">
+<li><p><strong>parent</strong> (<em>Optional</em><em>[</em><em>'TreeMolecule'</em><em>]</em>) – a TreeMolecule object that is the parent</p></li>
+<li><p><strong>transform</strong> (<em>Optional</em><em>[</em><em>int</em><em>]</em>) – the transform value, defaults to None</p></li>
+<li><p><strong>rd_mol</strong> (<em>Optional</em><em>[</em><em>RdMol</em><em>]</em>) – a RDKit mol object to encapsulate, defaults to None</p></li>
+<li><p><strong>smiles</strong> (<em>Optional</em><em>[</em><em>str</em><em>]</em>) – a SMILES to convert to a molecule object, defaults to None</p></li>
+<li><p><strong>sanitize</strong> (<em>bool</em>) – if True, the molecule will be immediately sanitized, defaults to False</p></li>
+<li><p><strong>mapping_update_callback</strong> (<em>Optional</em><em>[</em><em>Callable</em><em>[</em><em>[</em><em>'TreeMolecule'</em><em>]</em><em>, </em><em>None</em><em>]</em><em>]</em>) – if given will call this method before setting up the <cite>mapped_smiles</cite></p></li>
+</ul>
+</dd>
+<dt class="field-odd">Raises<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference internal" href="aizynthfinder.utils.html#aizynthfinder.utils.exceptions.MoleculeException" title="aizynthfinder.utils.exceptions.MoleculeException"><strong>MoleculeException</strong></a> – if neither rd_mol or smiles is given, or if the molecule could not be sanitized</p>
+</dd>
+</dl>
+<dl class="py property">
+<dt class="sig sig-object py" id="aizynthfinder.chem.mol.TreeMolecule.mapping_to_index">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">mapping_to_index</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Dict</span><span class="p"><span class="pre">[</span></span><span class="pre">int</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">int</span><span class="p"><span class="pre">]</span></span></em><a class="headerlink" href="#aizynthfinder.chem.mol.TreeMolecule.mapping_to_index" title="Link to this definition">¶</a></dt>
+<dd><p>Return a dictionary mapping to atom mappings to atom indices</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="aizynthfinder.chem.mol.TreeMolecule.mapped_atom_bonds">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">mapped_atom_bonds</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">Tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">int</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">int</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></em><a class="headerlink" href="#aizynthfinder.chem.mol.TreeMolecule.mapped_atom_bonds" title="Link to this definition">¶</a></dt>
+<dd><p>Return a list of atom bonds as tuples on the mapped atom indices</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="aizynthfinder.chem.mol.TreeMolecule.get_bonds_in_molecule">
+<span class="sig-name descname"><span class="pre">get_bonds_in_molecule</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">query_bonds</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#aizynthfinder.chem.mol.TreeMolecule.get_bonds_in_molecule" title="Link to this definition">¶</a></dt>
+<dd><p>Get bonds (from a list of bonds) that are present in the molecule.
+:param bonds: List of bond (atom pairs)
+:return: A list of bonds</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>query_bonds</strong> (<em>Sequence</em><em>[</em><em>Sequence</em><em>[</em><em>int</em><em>]</em><em>]</em>)</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>Sequence[Sequence[int]]</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="aizynthfinder.chem.mol.TreeMolecule.has_all_focussed_bonds">
+<span class="sig-name descname"><span class="pre">has_all_focussed_bonds</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">bonds</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#aizynthfinder.chem.mol.TreeMolecule.has_all_focussed_bonds" title="Link to this definition">¶</a></dt>
+<dd><p>Checks that the focussed bonds exist in the target molecule’s atom bonds.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>bonds</strong> (<em>Sequence</em><em>[</em><em>Sequence</em><em>[</em><em>int</em><em>]</em><em>]</em>) – Focussed bonds.</p></li>
+<li><p><strong>target_mol</strong> – The target molecule.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>A boolean indicating if the input bonds exist in the target molecule.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>bool</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="aizynthfinder.chem.mol.UniqueMolecule">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">aizynthfinder.chem.mol.</span></span><span class="sig-name descname"><span class="pre">UniqueMolecule</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">rd_mol</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">smiles</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sanitize</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#aizynthfinder.chem.mol.UniqueMolecule" title="Link to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#aizynthfinder.chem.mol.Molecule" title="aizynthfinder.chem.mol.Molecule"><code class="xref py py-class docutils literal notranslate"><span class="pre">Molecule</span></code></a></p>
+<p>A special molecule with the hash set to the id of the object.
+Therefore no two instances of this class will be comparable.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>rd_mol</strong> (<em>Optional</em><em>[</em><em>RdMol</em><em>]</em>) – a RDKit mol object to encapsulate, defaults to None</p></li>
+<li><p><strong>smiles</strong> (<em>Optional</em><em>[</em><em>str</em><em>]</em>) – a SMILES to convert to a molecule object, defaults to None</p></li>
+<li><p><strong>sanitize</strong> (<em>bool</em>) – if True, the molecule will be immediately sanitized, defaults to False</p></li>
+</ul>
+</dd>
+<dt class="field-even">Raises<span class="colon">:</span></dt>
+<dd class="field-even"><p><a class="reference internal" href="aizynthfinder.utils.html#aizynthfinder.utils.exceptions.MoleculeException" title="aizynthfinder.utils.exceptions.MoleculeException"><strong>MoleculeException</strong></a> – if neither rd_mol or smiles is given, or if the molecule could not be sanitized</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="aizynthfinder.chem.mol.none_molecule">
+<span class="sig-prename descclassname"><span class="pre">aizynthfinder.chem.mol.</span></span><span class="sig-name descname"><span class="pre">none_molecule</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#aizynthfinder.chem.mol.none_molecule" title="Link to this definition">¶</a></dt>
+<dd><p>Return an empty molecule</p>
+<dl class="field-list simple">
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference internal" href="#aizynthfinder.chem.mol.UniqueMolecule" title="aizynthfinder.chem.mol.UniqueMolecule"><em>UniqueMolecule</em></a></p>
+</dd>
+</dl>
+</dd></dl>
+
+</section>
+<section id="module-aizynthfinder.chem.reaction">
+<span id="aizynthfinder-chem-reaction-module"></span><h2>aizynthfinder.chem.reaction module<a class="headerlink" href="#module-aizynthfinder.chem.reaction" title="Link to this heading">¶</a></h2>
+<p>Module containing classes to deal with Reactions.</p>
+<dl class="py class">
+<dt class="sig sig-object py" id="aizynthfinder.chem.reaction.RetroReaction">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">aizynthfinder.chem.reaction.</span></span><span class="sig-name descname"><span class="pre">RetroReaction</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">mol</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">index</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">metadata</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#aizynthfinder.chem.reaction.RetroReaction" title="Link to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">ABC</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">_ReactionInterfaceMixin</span></code></p>
+<p>A retrosynthesis reaction. Only a single molecule is the reactant.</p>
+<p>This is an abstract class and child classes needs to implement the <cite>_apply</cite> and <cite>_make_smiles</cite> functions
+that should create the reactants molecule objects and the reaction SMILES representation, respectively.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Variables<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>mol</strong> – the TreeMolecule object that this reaction is applied to</p></li>
+<li><p><strong>index</strong> – a unique index of this reaction,
+to count for the fact that a reaction can produce more than one outcome</p></li>
+<li><p><strong>metadata</strong> – meta data associated with the reaction</p></li>
+</ul>
+</dd>
+<dt class="field-even">Parameters<span class="colon">:</span></dt>
+<dd class="field-even"><ul class="simple">
+<li><p><strong>mol</strong> (<a class="reference internal" href="#aizynthfinder.chem.mol.TreeMolecule" title="aizynthfinder.chem.mol.TreeMolecule"><em>TreeMolecule</em></a>) – the molecule</p></li>
+<li><p><strong>index</strong> (<em>int</em>) – the index, defaults to 0</p></li>
+<li><p><strong>metadata</strong> (<em>Optional</em><em>[</em><em>StrDict</em><em>]</em>) – some meta data</p></li>
+<li><p><strong>kwargs</strong> (<em>Any</em>)</p></li>
+</ul>
+</dd>
+<dt class="field-odd">Params kwargs<span class="colon">:</span></dt>
+<dd class="field-odd"><p>any extra parameters for child classes</p>
+</dd>
+</dl>
+<dl class="py method">
+<dt class="sig sig-object py" id="aizynthfinder.chem.reaction.RetroReaction.from_serialization">
+<em class="property"><span class="pre">classmethod</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">from_serialization</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">init_args</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">reactants</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#aizynthfinder.chem.reaction.RetroReaction.from_serialization" title="Link to this definition">¶</a></dt>
+<dd><p>Create an object from a serialization. It does
+1) instantiate an object using the <cite>init_args</cite> and
+2) set the reactants to a tuple-form of <a href="#id1"><span class="problematic" id="id2">`</span></a>reactants</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>init_args</strong> (<em>StrDict</em>) – the arguments passed to the <cite>__init__</cite> method</p></li>
+<li><p><strong>reactants</strong> (<em>List</em><em>[</em><em>List</em><em>[</em><a class="reference internal" href="#aizynthfinder.chem.mol.TreeMolecule" title="aizynthfinder.chem.mol.TreeMolecule"><em>TreeMolecule</em></a><em>]</em><em>]</em>) – the reactants</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>the deserialized object</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference internal" href="#aizynthfinder.chem.reaction.RetroReaction" title="aizynthfinder.chem.reaction.RetroReaction">RetroReaction</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="aizynthfinder.chem.reaction.RetroReaction.reactants">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">reactants</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">Tuple</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="#aizynthfinder.chem.mol.TreeMolecule" title="aizynthfinder.chem.mol.TreeMolecule"><span class="pre">TreeMolecule</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="p"><span class="pre">...</span></span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="p"><span class="pre">...</span></span><span class="p"><span class="pre">]</span></span></em><a class="headerlink" href="#aizynthfinder.chem.reaction.RetroReaction.reactants" title="Link to this definition">¶</a></dt>
+<dd><p>Returns the reactant molecules.
+Apply the reaction if necessary.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>the products of the reaction</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="aizynthfinder.chem.reaction.RetroReaction.smiles">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">smiles</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">str</span></em><a class="headerlink" href="#aizynthfinder.chem.reaction.RetroReaction.smiles" title="Link to this definition">¶</a></dt>
+<dd><p>The reaction as a SMILES</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>the SMILES</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="aizynthfinder.chem.reaction.RetroReaction.unqueried">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">unqueried</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">bool</span></em><a class="headerlink" href="#aizynthfinder.chem.reaction.RetroReaction.unqueried" title="Link to this definition">¶</a></dt>
+<dd><p>Return True if the reactants has never been retrieved</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="aizynthfinder.chem.reaction.RetroReaction.copy">
+<span class="sig-name descname"><span class="pre">copy</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">index</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#aizynthfinder.chem.reaction.RetroReaction.copy" title="Link to this definition">¶</a></dt>
+<dd><p>Shallow copy of this instance.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>index</strong> (<em>Optional</em><em>[</em><em>int</em><em>]</em>) – new index, defaults to None</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>the copy</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference internal" href="#aizynthfinder.chem.reaction.RetroReaction" title="aizynthfinder.chem.reaction.RetroReaction">RetroReaction</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="aizynthfinder.chem.reaction.RetroReaction.mapped_reaction_smiles">
+<span class="sig-name descname"><span class="pre">mapped_reaction_smiles</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#aizynthfinder.chem.reaction.RetroReaction.mapped_reaction_smiles" title="Link to this definition">¶</a></dt>
+<dd><p>Get the mapped reaction SMILES if it exists
+:return: the SMILES</p>
+<dl class="field-list simple">
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>str</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="aizynthfinder.chem.reaction.RetroReaction.to_dict">
+<span class="sig-name descname"><span class="pre">to_dict</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#aizynthfinder.chem.reaction.RetroReaction.to_dict" title="Link to this definition">¶</a></dt>
+<dd><p>Return the retro reaction as dictionary
+This dictionary is not suitable for serialization, but is used by other serialization routines
+The elements of the dictionary can be used to instantiate a new reaction object</p>
+<dl class="field-list simple">
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>StrDict</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="aizynthfinder.chem.reaction.TemplatedRetroReaction">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">aizynthfinder.chem.reaction.</span></span><span class="sig-name descname"><span class="pre">TemplatedRetroReaction</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">mol</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">index</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">metadata</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#aizynthfinder.chem.reaction.TemplatedRetroReaction" title="Link to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#aizynthfinder.chem.reaction.RetroReaction" title="aizynthfinder.chem.reaction.RetroReaction"><code class="xref py py-class docutils literal notranslate"><span class="pre">RetroReaction</span></code></a></p>
+<p>A retrosynthesis reaction that uses a reaction SMARTS and RDChiral to produce reactant molecules.
+The SMILES representation of the reaction is the SMARTS (modified by RDKit)</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>mol</strong> (<a class="reference internal" href="#aizynthfinder.chem.mol.TreeMolecule" title="aizynthfinder.chem.mol.TreeMolecule"><em>TreeMolecule</em></a>) – the molecule</p></li>
+<li><p><strong>index</strong> (<em>int</em>) – the index, defaults to 0</p></li>
+<li><p><strong>metadata</strong> (<em>Optional</em><em>[</em><em>StrDict</em><em>]</em>) – some meta data</p></li>
+<li><p><strong>smarts</strong> – a string representing the template</p></li>
+<li><p><strong>kwargs</strong> (<em>Any</em>)</p></li>
+</ul>
+</dd>
+</dl>
+<dl class="py property">
+<dt class="sig sig-object py" id="aizynthfinder.chem.reaction.TemplatedRetroReaction.rd_reaction">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">rd_reaction</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">RdReaction</span></em><a class="headerlink" href="#aizynthfinder.chem.reaction.TemplatedRetroReaction.rd_reaction" title="Link to this definition">¶</a></dt>
+<dd><p>Return the RDKit reaction created from the SMART</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="aizynthfinder.chem.reaction.TemplatedRetroReaction.to_dict">
+<span class="sig-name descname"><span class="pre">to_dict</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#aizynthfinder.chem.reaction.TemplatedRetroReaction.to_dict" title="Link to this definition">¶</a></dt>
+<dd><p>Return the retro reaction as dictionary
+This dictionary is not suitable for serialization, but is used by other serialization routines
+The elements of the dictionary can be used to instantiate a new reaction object</p>
+<dl class="field-list simple">
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>StrDict</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="aizynthfinder.chem.reaction.SmilesBasedRetroReaction">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">aizynthfinder.chem.reaction.</span></span><span class="sig-name descname"><span class="pre">SmilesBasedRetroReaction</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">mol</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">index</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">metadata</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#aizynthfinder.chem.reaction.SmilesBasedRetroReaction" title="Link to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#aizynthfinder.chem.reaction.RetroReaction" title="aizynthfinder.chem.reaction.RetroReaction"><code class="xref py py-class docutils literal notranslate"><span class="pre">RetroReaction</span></code></a></p>
+<p>A retrosynthesis reaction where the SMILES of the reactants are given on initiation</p>
+<p>The SMILES representation of the reaction is the reaction SMILES</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>mol</strong> (<a class="reference internal" href="#aizynthfinder.chem.mol.TreeMolecule" title="aizynthfinder.chem.mol.TreeMolecule"><em>TreeMolecule</em></a>) – the molecule</p></li>
+<li><p><strong>index</strong> (<em>int</em>) – the index, defaults to 0</p></li>
+<li><p><strong>metadata</strong> (<em>Optional</em><em>[</em><em>StrDict</em><em>]</em>) – some meta data</p></li>
+<li><p><strong>reactants_str</strong> – a dot-separated string of reactant SMILES strings</p></li>
+<li><p><strong>kwargs</strong> (<em>Any</em>)</p></li>
+</ul>
+</dd>
+</dl>
+<dl class="py method">
+<dt class="sig sig-object py" id="aizynthfinder.chem.reaction.SmilesBasedRetroReaction.to_dict">
+<span class="sig-name descname"><span class="pre">to_dict</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#aizynthfinder.chem.reaction.SmilesBasedRetroReaction.to_dict" title="Link to this definition">¶</a></dt>
+<dd><p>Return the retro reaction as dictionary
+This dictionary is not suitable for serialization, but is used by other serialization routines
+The elements of the dictionary can be used to instantiate a new reaction object</p>
+<dl class="field-list simple">
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>StrDict</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="aizynthfinder.chem.reaction.FixedRetroReaction">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">aizynthfinder.chem.reaction.</span></span><span class="sig-name descname"><span class="pre">FixedRetroReaction</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">mol</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">smiles</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">''</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">metadata</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#aizynthfinder.chem.reaction.FixedRetroReaction" title="Link to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">_ReactionInterfaceMixin</span></code></p>
+<p>A retrosynthesis reaction that has the same interface as <cite>RetroReaction</cite>
+but it is fixed so it does not support SMARTS application or any creation of reactants.</p>
+<p>The reactants are set by using the <cite>reactants</cite> property.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Variables<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>mol</strong> – the UniqueMolecule object that this reaction is applied to</p></li>
+<li><p><strong>smiles</strong> – the SMILES representation of the RDKit reaction</p></li>
+<li><p><strong>metadata</strong> – meta data associated with the reaction</p></li>
+<li><p><strong>reactants</strong> – the reactants of this reaction</p></li>
+</ul>
+</dd>
+<dt class="field-even">Parameters<span class="colon">:</span></dt>
+<dd class="field-even"><ul class="simple">
+<li><p><strong>mol</strong> (<a class="reference internal" href="#aizynthfinder.chem.mol.UniqueMolecule" title="aizynthfinder.chem.mol.UniqueMolecule"><em>UniqueMolecule</em></a>) – the molecule</p></li>
+<li><p><strong>smiles</strong> (<em>str</em>) – the SMILES of the reaction</p></li>
+<li><p><strong>metadata</strong> (<em>Optional</em><em>[</em><em>StrDict</em><em>]</em>) – some meta data</p></li>
+</ul>
+</dd>
+</dl>
+<dl class="py method">
+<dt class="sig sig-object py" id="aizynthfinder.chem.reaction.FixedRetroReaction.copy">
+<span class="sig-name descname"><span class="pre">copy</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#aizynthfinder.chem.reaction.FixedRetroReaction.copy" title="Link to this definition">¶</a></dt>
+<dd><p>Shallow copy of this instance.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>the copy</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><a class="reference internal" href="#aizynthfinder.chem.reaction.FixedRetroReaction" title="aizynthfinder.chem.reaction.FixedRetroReaction"><em>FixedRetroReaction</em></a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="aizynthfinder.chem.reaction.FixedRetroReaction.to_smiles_based_retroreaction">
+<span class="sig-name descname"><span class="pre">to_smiles_based_retroreaction</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#aizynthfinder.chem.reaction.FixedRetroReaction.to_smiles_based_retroreaction" title="Link to this definition">¶</a></dt>
+<dd><p>Convert a FixedRetroReaction to a SmilesBasedRetroReaction.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>the SmilesBasedRetroReaction.</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><a class="reference internal" href="#aizynthfinder.chem.reaction.SmilesBasedRetroReaction" title="aizynthfinder.chem.reaction.SmilesBasedRetroReaction"><em>SmilesBasedRetroReaction</em></a></p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="aizynthfinder.chem.reaction.hash_reactions">
+<span class="sig-prename descclassname"><span class="pre">aizynthfinder.chem.reaction.</span></span><span class="sig-name descname"><span class="pre">hash_reactions</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">reactions</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sort</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#aizynthfinder.chem.reaction.hash_reactions" title="Link to this definition">¶</a></dt>
+<dd><p>Creates a hash for a list of reactions</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>reactions</strong> (<em>Union</em><em>[</em><em>Iterable</em><em>[</em><a class="reference internal" href="#aizynthfinder.chem.reaction.RetroReaction" title="aizynthfinder.chem.reaction.RetroReaction"><em>RetroReaction</em></a><em>]</em><em>, </em><em>Iterable</em><em>[</em><a class="reference internal" href="#aizynthfinder.chem.reaction.FixedRetroReaction" title="aizynthfinder.chem.reaction.FixedRetroReaction"><em>FixedRetroReaction</em></a><em>]</em><em>]</em>) – the reactions to hash</p></li>
+<li><p><strong>sort</strong> (<em>bool</em>) – if True will sort all molecules, defaults to True</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>the hash string</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>str</p>
+</dd>
+</dl>
+</dd></dl>
+
+</section>
+<section id="module-aizynthfinder.chem.serialization">
+<span id="aizynthfinder-chem-serialization-module"></span><h2>aizynthfinder.chem.serialization module<a class="headerlink" href="#module-aizynthfinder.chem.serialization" title="Link to this heading">¶</a></h2>
+<p>Module containing helper classes and routines for serialization.</p>
+<dl class="py class">
+<dt class="sig sig-object py" id="aizynthfinder.chem.serialization.MoleculeSerializer">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">aizynthfinder.chem.serialization.</span></span><span class="sig-name descname"><span class="pre">MoleculeSerializer</span></span><a class="headerlink" href="#aizynthfinder.chem.serialization.MoleculeSerializer" title="Link to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<p>Utility class for serializing molecules</p>
+<p>The id of the molecule to be serialized can be obtained with:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">serializer</span> <span class="o">=</span> <span class="n">MoleculeSerializer</span><span class="p">()</span>
+<span class="n">mol</span> <span class="o">=</span> <span class="n">Molecule</span><span class="p">(</span><span class="n">smiles</span><span class="o">=</span><span class="s2">&quot;CCCO&quot;</span><span class="p">)</span>
+<span class="n">idx</span> <span class="o">=</span> <span class="n">serializer</span><span class="p">[</span><span class="n">mol</span><span class="p">]</span>
+</pre></div>
+</div>
+<p>which will take care of the serialization of the molecule.</p>
+<dl class="field-list simple">
+</dl>
+<dl class="py property">
+<dt class="sig sig-object py" id="aizynthfinder.chem.serialization.MoleculeSerializer.store">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">store</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Dict</span><span class="p"><span class="pre">[</span></span><span class="pre">int</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">Any</span><span class="p"><span class="pre">]</span></span></em><a class="headerlink" href="#aizynthfinder.chem.serialization.MoleculeSerializer.store" title="Link to this definition">¶</a></dt>
+<dd><p>Return all serialized molecules as a dictionary</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="aizynthfinder.chem.serialization.MoleculeDeserializer">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">aizynthfinder.chem.serialization.</span></span><span class="sig-name descname"><span class="pre">MoleculeDeserializer</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">store</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#aizynthfinder.chem.serialization.MoleculeDeserializer" title="Link to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<p>Utility class for deserializing molecules.
+The serialized molecules are created upon instantiation of the class.</p>
+<p>The deserialized molecules can be obtained with:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">deserializer</span> <span class="o">=</span> <span class="n">MoleculeDeserializer</span><span class="p">()</span>
+<span class="n">mol</span> <span class="o">=</span> <span class="n">deserializer</span><span class="p">[</span><span class="n">idx</span><span class="p">]</span>
+</pre></div>
+</div>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>store</strong> (<em>Dict</em><em>[</em><em>int</em><em>, </em><em>Any</em><em>]</em>)</p>
+</dd>
+</dl>
+<dl class="py method">
+<dt class="sig sig-object py" id="aizynthfinder.chem.serialization.MoleculeDeserializer.get_tree_molecules">
+<span class="sig-name descname"><span class="pre">get_tree_molecules</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ids</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#aizynthfinder.chem.serialization.MoleculeDeserializer.get_tree_molecules" title="Link to this definition">¶</a></dt>
+<dd><p>Return multiple deserialized tree molecules</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>ids</strong> (<em>Sequence</em><em>[</em><em>int</em><em>]</em>) – the list of IDs to deserialize</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>the molecule objects</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Sequence[aizynthfinder.chem.TreeMolecule]</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="aizynthfinder.chem.serialization.serialize_action">
+<span class="sig-prename descclassname"><span class="pre">aizynthfinder.chem.serialization.</span></span><span class="sig-name descname"><span class="pre">serialize_action</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">action</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">molecule_store</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#aizynthfinder.chem.serialization.serialize_action" title="Link to this definition">¶</a></dt>
+<dd><p>Serialize a retrosynthesis action</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>action</strong> (<a class="reference internal" href="#aizynthfinder.chem.reaction.RetroReaction" title="aizynthfinder.chem.reaction.RetroReaction"><em>RetroReaction</em></a>) – the (re)action to serialize</p></li>
+<li><p><strong>molecule_store</strong> (<a class="reference internal" href="#aizynthfinder.chem.serialization.MoleculeSerializer" title="aizynthfinder.chem.serialization.MoleculeSerializer"><em>MoleculeSerializer</em></a>) – the molecule serialization object</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>the action as a dictionary</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>StrDict</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="aizynthfinder.chem.serialization.deserialize_action">
+<span class="sig-prename descclassname"><span class="pre">aizynthfinder.chem.serialization.</span></span><span class="sig-name descname"><span class="pre">deserialize_action</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">dict_</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">molecule_store</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#aizynthfinder.chem.serialization.deserialize_action" title="Link to this definition">¶</a></dt>
+<dd><p>Deserialize a retrosynthesis action</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>dict</strong> – the (re)action as a dictionary</p></li>
+<li><p><strong>molecule_store</strong> (<a class="reference internal" href="#aizynthfinder.chem.serialization.MoleculeDeserializer" title="aizynthfinder.chem.serialization.MoleculeDeserializer"><em>MoleculeDeserializer</em></a>) – the molecule deserialization object</p></li>
+<li><p><strong>dict_</strong> (<em>StrDict</em>)</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>the created action object</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference internal" href="#aizynthfinder.chem.reaction.RetroReaction" title="aizynthfinder.chem.reaction.RetroReaction">RetroReaction</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+</section>
+<section id="module-aizynthfinder.chem">
+<span id="module-contents"></span><h2>Module contents<a class="headerlink" href="#module-aizynthfinder.chem" title="Link to this heading">¶</a></h2>
+<p>Sub-package containing chemistry routines</p>
+</section>
+</section>
+
+
+          </div>
+          
+        </div>
+      </div>
+    <div class="clearer"></div>
+  </div>
+    <div class="footer">
+      &#169;2020-2025, Molecular AI group.
+      
+      |
+      Powered by <a href="https://www.sphinx-doc.org/">Sphinx 7.4.7</a>
+      &amp; <a href="https://alabaster.readthedocs.io">Alabaster 0.7.16</a>
+      
+      |
+      <a href="_sources/aizynthfinder.chem.rst.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+
+    
+  </body>
+</html>

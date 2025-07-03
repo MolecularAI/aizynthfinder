@@ -1,0 +1,664 @@
+<!DOCTYPE html>
+
+<html lang="en" data-content_root="./">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <title>aizynthfinder.context.stock package &#8212; aizynthfinder 4.4.0 documentation</title>
+    <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=5ecbeea2" />
+    <link rel="stylesheet" type="text/css" href="_static/alabaster.css?v=a66d8bb5" />
+    <script src="_static/documentation_options.js?v=2f20d6c1"></script>
+    <script src="_static/doctools.js?v=9a2dae69"></script>
+    <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="aizynthfinder.interfaces package" href="aizynthfinder.interfaces.html" />
+    <link rel="prev" title="aizynthfinder.context.scoring package" href="aizynthfinder.context.scoring.html" />
+   
+  <link rel="stylesheet" href="_static/custom.css" type="text/css" />
+  
+
+  
+  
+
+  </head><body>
+  <div class="document">
+    
+      <div class="sphinxsidebar" role="navigation" aria-label="Main">
+        <div class="sphinxsidebarwrapper">
+<h1 class="logo"><a href="index.html">aizynthfinder</a></h1>
+
+
+
+<p class="blurb">A fast, robust and flexible software for retrosynthetic planning</p>
+
+
+
+
+
+
+<h3>Navigation</h3>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="gui.html">Graphical user interface</a></li>
+<li class="toctree-l1"><a class="reference internal" href="cli.html">Command-line interface</a></li>
+<li class="toctree-l1"><a class="reference internal" href="python_interface.html">Python interface</a></li>
+<li class="toctree-l1"><a class="reference internal" href="configuration.html">Configuration file</a></li>
+<li class="toctree-l1"><a class="reference internal" href="stocks.html">Stocks</a></li>
+<li class="toctree-l1"><a class="reference internal" href="scoring.html">Scoring</a></li>
+<li class="toctree-l1"><a class="reference internal" href="howto.html">How-to</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="aizynthfinder.html">aizynthfinder package</a><ul class="current">
+<li class="toctree-l2 current"><a class="reference internal" href="aizynthfinder.html#subpackages">Subpackages</a><ul class="current">
+<li class="toctree-l3"><a class="reference internal" href="aizynthfinder.analysis.html">aizynthfinder.analysis package</a></li>
+<li class="toctree-l3"><a class="reference internal" href="aizynthfinder.chem.html">aizynthfinder.chem package</a></li>
+<li class="toctree-l3 current"><a class="reference internal" href="aizynthfinder.context.html">aizynthfinder.context package</a><ul class="current">
+<li class="toctree-l4 current"><a class="reference internal" href="aizynthfinder.context.html#subpackages">Subpackages</a><ul class="current">
+<li class="toctree-l5"><a class="reference internal" href="aizynthfinder.context.policy.html">aizynthfinder.context.policy package</a></li>
+<li class="toctree-l5"><a class="reference internal" href="aizynthfinder.context.scoring.html">aizynthfinder.context.scoring package</a></li>
+<li class="toctree-l5 current"><a class="current reference internal" href="#">aizynthfinder.context.stock package</a><ul>
+<li class="toctree-l6"><a class="reference internal" href="#submodules">Submodules</a></li>
+<li class="toctree-l6"><a class="reference internal" href="#module-aizynthfinder.context.stock.queries">aizynthfinder.context.stock.queries module</a><ul>
+<li class="toctree-l7"><a class="reference internal" href="#aizynthfinder.context.stock.queries.StockQueryMixin"><code class="docutils literal notranslate"><span class="pre">StockQueryMixin</span></code></a><ul>
+<li class="toctree-l8"><a class="reference internal" href="#aizynthfinder.context.stock.queries.StockQueryMixin.amount"><code class="docutils literal notranslate"><span class="pre">StockQueryMixin.amount()</span></code></a></li>
+<li class="toctree-l8"><a class="reference internal" href="#aizynthfinder.context.stock.queries.StockQueryMixin.availability_string"><code class="docutils literal notranslate"><span class="pre">StockQueryMixin.availability_string()</span></code></a></li>
+<li class="toctree-l8"><a class="reference internal" href="#aizynthfinder.context.stock.queries.StockQueryMixin.cached_search"><code class="docutils literal notranslate"><span class="pre">StockQueryMixin.cached_search()</span></code></a></li>
+<li class="toctree-l8"><a class="reference internal" href="#aizynthfinder.context.stock.queries.StockQueryMixin.clear_cache"><code class="docutils literal notranslate"><span class="pre">StockQueryMixin.clear_cache()</span></code></a></li>
+<li class="toctree-l8"><a class="reference internal" href="#aizynthfinder.context.stock.queries.StockQueryMixin.price"><code class="docutils literal notranslate"><span class="pre">StockQueryMixin.price()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l7"><a class="reference internal" href="#aizynthfinder.context.stock.queries.InMemoryInchiKeyQuery"><code class="docutils literal notranslate"><span class="pre">InMemoryInchiKeyQuery</span></code></a><ul>
+<li class="toctree-l8"><a class="reference internal" href="#aizynthfinder.context.stock.queries.InMemoryInchiKeyQuery.stock_inchikeys"><code class="docutils literal notranslate"><span class="pre">InMemoryInchiKeyQuery.stock_inchikeys</span></code></a></li>
+<li class="toctree-l8"><a class="reference internal" href="#aizynthfinder.context.stock.queries.InMemoryInchiKeyQuery.price"><code class="docutils literal notranslate"><span class="pre">InMemoryInchiKeyQuery.price()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l7"><a class="reference internal" href="#aizynthfinder.context.stock.queries.MongoDbInchiKeyQuery"><code class="docutils literal notranslate"><span class="pre">MongoDbInchiKeyQuery</span></code></a><ul>
+<li class="toctree-l8"><a class="reference internal" href="#aizynthfinder.context.stock.queries.MongoDbInchiKeyQuery.availability_string"><code class="docutils literal notranslate"><span class="pre">MongoDbInchiKeyQuery.availability_string()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l7"><a class="reference internal" href="#aizynthfinder.context.stock.queries.MolbloomFilterQuery"><code class="docutils literal notranslate"><span class="pre">MolbloomFilterQuery</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l6"><a class="reference internal" href="#module-aizynthfinder.context.stock.stock">aizynthfinder.context.stock.stock module</a><ul>
+<li class="toctree-l7"><a class="reference internal" href="#aizynthfinder.context.stock.stock.Stock"><code class="docutils literal notranslate"><span class="pre">Stock</span></code></a><ul>
+<li class="toctree-l8"><a class="reference internal" href="#aizynthfinder.context.stock.stock.Stock.stop_criteria"><code class="docutils literal notranslate"><span class="pre">Stock.stop_criteria</span></code></a></li>
+<li class="toctree-l8"><a class="reference internal" href="#aizynthfinder.context.stock.stock.Stock.amount"><code class="docutils literal notranslate"><span class="pre">Stock.amount()</span></code></a></li>
+<li class="toctree-l8"><a class="reference internal" href="#aizynthfinder.context.stock.stock.Stock.availability_list"><code class="docutils literal notranslate"><span class="pre">Stock.availability_list()</span></code></a></li>
+<li class="toctree-l8"><a class="reference internal" href="#aizynthfinder.context.stock.stock.Stock.availability_string"><code class="docutils literal notranslate"><span class="pre">Stock.availability_string()</span></code></a></li>
+<li class="toctree-l8"><a class="reference internal" href="#aizynthfinder.context.stock.stock.Stock.exclude"><code class="docutils literal notranslate"><span class="pre">Stock.exclude()</span></code></a></li>
+<li class="toctree-l8"><a class="reference internal" href="#aizynthfinder.context.stock.stock.Stock.load"><code class="docutils literal notranslate"><span class="pre">Stock.load()</span></code></a></li>
+<li class="toctree-l8"><a class="reference internal" href="#aizynthfinder.context.stock.stock.Stock.load_from_config"><code class="docutils literal notranslate"><span class="pre">Stock.load_from_config()</span></code></a></li>
+<li class="toctree-l8"><a class="reference internal" href="#aizynthfinder.context.stock.stock.Stock.price"><code class="docutils literal notranslate"><span class="pre">Stock.price()</span></code></a></li>
+<li class="toctree-l8"><a class="reference internal" href="#aizynthfinder.context.stock.stock.Stock.reset_exclusion_list"><code class="docutils literal notranslate"><span class="pre">Stock.reset_exclusion_list()</span></code></a></li>
+<li class="toctree-l8"><a class="reference internal" href="#aizynthfinder.context.stock.stock.Stock.select"><code class="docutils literal notranslate"><span class="pre">Stock.select()</span></code></a></li>
+<li class="toctree-l8"><a class="reference internal" href="#aizynthfinder.context.stock.stock.Stock.set_stop_criteria"><code class="docutils literal notranslate"><span class="pre">Stock.set_stop_criteria()</span></code></a></li>
+<li class="toctree-l8"><a class="reference internal" href="#aizynthfinder.context.stock.stock.Stock.smiles_in_stock"><code class="docutils literal notranslate"><span class="pre">Stock.smiles_in_stock()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l6"><a class="reference internal" href="#module-aizynthfinder.context.stock">Module contents</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l4"><a class="reference internal" href="aizynthfinder.context.html#submodules">Submodules</a></li>
+<li class="toctree-l4"><a class="reference internal" href="aizynthfinder.context.html#module-aizynthfinder.context.collection">aizynthfinder.context.collection module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="aizynthfinder.context.html#module-aizynthfinder.context.config">aizynthfinder.context.config module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="aizynthfinder.context.html#module-aizynthfinder.context">Module contents</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="aizynthfinder.interfaces.html">aizynthfinder.interfaces package</a></li>
+<li class="toctree-l3"><a class="reference internal" href="aizynthfinder.search.html">aizynthfinder.search package</a></li>
+<li class="toctree-l3"><a class="reference internal" href="aizynthfinder.tools.html">aizynthfinder.tools package</a></li>
+<li class="toctree-l3"><a class="reference internal" href="aizynthfinder.utils.html">aizynthfinder.utils package</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="aizynthfinder.html#submodules">Submodules</a></li>
+<li class="toctree-l2"><a class="reference internal" href="aizynthfinder.html#module-aizynthfinder.aizynthfinder">aizynthfinder.aizynthfinder module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="aizynthfinder.html#module-aizynthfinder.reactiontree">aizynthfinder.reactiontree module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="aizynthfinder.html#module-aizynthfinder">Module contents</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="sequences.html">Sequences</a></li>
+<li class="toctree-l1"><a class="reference internal" href="relationships.html">Relationships</a></li>
+</ul>
+
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="index.html">Documentation overview</a><ul>
+  <li><a href="aizynthfinder.html">aizynthfinder package</a><ul>
+  <li><a href="aizynthfinder.context.html">aizynthfinder.context package</a><ul>
+      <li>Previous: <a href="aizynthfinder.context.scoring.html" title="previous chapter">aizynthfinder.context.scoring package</a></li>
+      <li>Next: <a href="aizynthfinder.interfaces.html" title="next chapter">aizynthfinder.interfaces package</a></li>
+  </ul></li>
+  </ul></li>
+  </ul></li>
+</ul>
+</div>
+<search id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"/>
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</search>
+<script>document.getElementById('searchbox').style.display = "block"</script>
+
+
+
+
+
+
+
+
+        </div>
+      </div>
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          
+
+          <div class="body" role="main">
+            
+  <section id="aizynthfinder-context-stock-package">
+<h1>aizynthfinder.context.stock package<a class="headerlink" href="#aizynthfinder-context-stock-package" title="Link to this heading">¶</a></h1>
+<section id="submodules">
+<h2>Submodules<a class="headerlink" href="#submodules" title="Link to this heading">¶</a></h2>
+</section>
+<section id="module-aizynthfinder.context.stock.queries">
+<span id="aizynthfinder-context-stock-queries-module"></span><h2>aizynthfinder.context.stock.queries module<a class="headerlink" href="#module-aizynthfinder.context.stock.queries" title="Link to this heading">¶</a></h2>
+<p>Module containing classes that interfaces different stocks query classes</p>
+<dl class="py class">
+<dt class="sig sig-object py" id="aizynthfinder.context.stock.queries.StockQueryMixin">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">aizynthfinder.context.stock.queries.</span></span><span class="sig-name descname"><span class="pre">StockQueryMixin</span></span><a class="headerlink" href="#aizynthfinder.context.stock.queries.StockQueryMixin" title="Link to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<p>Mixin class for all query classes, providing a default interface
+to some methods that might not be possible to implement for each
+query class.</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="aizynthfinder.context.stock.queries.StockQueryMixin.amount">
+<span class="sig-name descname"><span class="pre">amount</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">mol</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#aizynthfinder.context.stock.queries.StockQueryMixin.amount" title="Link to this definition">¶</a></dt>
+<dd><p>Returns the maximum amount of the molecule in stock</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>mol</strong> (<a class="reference internal" href="aizynthfinder.chem.html#aizynthfinder.chem.mol.Molecule" title="aizynthfinder.chem.mol.Molecule"><em>Molecule</em></a>) – the query molecule</p>
+</dd>
+<dt class="field-even">Raises<span class="colon">:</span></dt>
+<dd class="field-even"><p><a class="reference internal" href="aizynthfinder.utils.html#aizynthfinder.utils.exceptions.StockException" title="aizynthfinder.utils.exceptions.StockException"><strong>StockException</strong></a> – if the amount cannot be computed</p>
+</dd>
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>the amount</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>float</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="aizynthfinder.context.stock.queries.StockQueryMixin.availability_string">
+<span class="sig-name descname"><span class="pre">availability_string</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">mol</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#aizynthfinder.context.stock.queries.StockQueryMixin.availability_string" title="Link to this definition">¶</a></dt>
+<dd><p>Returns the sources of the molecule</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>mol</strong> (<a class="reference internal" href="aizynthfinder.chem.html#aizynthfinder.chem.mol.Molecule" title="aizynthfinder.chem.mol.Molecule"><em>Molecule</em></a>) – the query molecule</p>
+</dd>
+<dt class="field-even">Raises<span class="colon">:</span></dt>
+<dd class="field-even"><p><a class="reference internal" href="aizynthfinder.utils.html#aizynthfinder.utils.exceptions.StockException" title="aizynthfinder.utils.exceptions.StockException"><strong>StockException</strong></a> – if the string cannot be computed</p>
+</dd>
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>a comma-separated list of sources</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>str</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="aizynthfinder.context.stock.queries.StockQueryMixin.cached_search">
+<span class="sig-name descname"><span class="pre">cached_search</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">mol</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#aizynthfinder.context.stock.queries.StockQueryMixin.cached_search" title="Link to this definition">¶</a></dt>
+<dd><p>Finds the entries of the molecule in the stock and cache them
+if necessary.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>mol</strong> (<a class="reference internal" href="aizynthfinder.chem.html#aizynthfinder.chem.mol.Molecule" title="aizynthfinder.chem.mol.Molecule"><em>Molecule</em></a>) – the query molecule</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>if the molecule is in stock</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>bool</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="aizynthfinder.context.stock.queries.StockQueryMixin.clear_cache">
+<span class="sig-name descname"><span class="pre">clear_cache</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#aizynthfinder.context.stock.queries.StockQueryMixin.clear_cache" title="Link to this definition">¶</a></dt>
+<dd><p>Clear the internal search cache if available</p>
+<dl class="field-list simple">
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>None</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="aizynthfinder.context.stock.queries.StockQueryMixin.price">
+<span class="sig-name descname"><span class="pre">price</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">mol</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#aizynthfinder.context.stock.queries.StockQueryMixin.price" title="Link to this definition">¶</a></dt>
+<dd><p>Returns the minimum price of the molecule in stock</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>mol</strong> (<a class="reference internal" href="aizynthfinder.chem.html#aizynthfinder.chem.mol.Molecule" title="aizynthfinder.chem.mol.Molecule"><em>Molecule</em></a>) – the query molecule</p>
+</dd>
+<dt class="field-even">Raises<span class="colon">:</span></dt>
+<dd class="field-even"><p><a class="reference internal" href="aizynthfinder.utils.html#aizynthfinder.utils.exceptions.StockException" title="aizynthfinder.utils.exceptions.StockException"><strong>StockException</strong></a> – if the price cannot be computed</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>float</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="aizynthfinder.context.stock.queries.InMemoryInchiKeyQuery">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">aizynthfinder.context.stock.queries.</span></span><span class="sig-name descname"><span class="pre">InMemoryInchiKeyQuery</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">path</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">inchi_key_col</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'inchi_key'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">price_col</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#aizynthfinder.context.stock.queries.InMemoryInchiKeyQuery" title="Link to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#aizynthfinder.context.stock.queries.StockQueryMixin" title="aizynthfinder.context.stock.queries.StockQueryMixin"><code class="xref py py-class docutils literal notranslate"><span class="pre">StockQueryMixin</span></code></a></p>
+<p>A stock query class that is based on an in-memory list
+of pre-computed inchi-keys.</p>
+<dl class="simple">
+<dt>This list can be instantiated from</dt><dd><ul class="simple">
+<li><p>A Pandas dataframe in HDF5 or CSV format</p></li>
+<li><p>A text file with an inchi key on each row</p></li>
+</ul>
+</dd>
+</dl>
+<p>The dataframe must have a column with InChIkeys that by default is “inchi_key”.
+The HDF5 file must have a dataset called “table”.</p>
+<p>If the source is a dataframe, then optionally it can contain prices and this
+columns can be specified with the “price_column” argument.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>path</strong> (<em>str</em>) – the path to the file with inchi-keys</p></li>
+<li><p><strong>inchi_key_col</strong> (<em>str</em>) – the name of the column of the InChI keys</p></li>
+<li><p><strong>path</strong></p></li>
+<li><p><strong>inchi_key_col</strong></p></li>
+<li><p><strong>price_col</strong> (<em>Optional</em><em>[</em><em>str</em><em>]</em>)</p></li>
+</ul>
+</dd>
+<dt class="field-even">Paramater price_col<span class="colon">:</span></dt>
+<dd class="field-even"><p>the name of the column with the optional prices</p>
+</dd>
+</dl>
+<dl class="py property">
+<dt class="sig sig-object py" id="aizynthfinder.context.stock.queries.InMemoryInchiKeyQuery.stock_inchikeys">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">stock_inchikeys</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Set</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></em><a class="headerlink" href="#aizynthfinder.context.stock.queries.InMemoryInchiKeyQuery.stock_inchikeys" title="Link to this definition">¶</a></dt>
+<dd><p>Return the InChiKeys in this stock</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="aizynthfinder.context.stock.queries.InMemoryInchiKeyQuery.price">
+<span class="sig-name descname"><span class="pre">price</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">mol</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#aizynthfinder.context.stock.queries.InMemoryInchiKeyQuery.price" title="Link to this definition">¶</a></dt>
+<dd><p>Returns the minimum price of the molecule in stock</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>mol</strong> (<a class="reference internal" href="aizynthfinder.chem.html#aizynthfinder.chem.mol.Molecule" title="aizynthfinder.chem.mol.Molecule"><em>Molecule</em></a>) – the query molecule</p>
+</dd>
+<dt class="field-even">Raises<span class="colon">:</span></dt>
+<dd class="field-even"><p><a class="reference internal" href="aizynthfinder.utils.html#aizynthfinder.utils.exceptions.StockException" title="aizynthfinder.utils.exceptions.StockException"><strong>StockException</strong></a> – if the price cannot be computed</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>float</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="aizynthfinder.context.stock.queries.MongoDbInchiKeyQuery">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">aizynthfinder.context.stock.queries.</span></span><span class="sig-name descname"><span class="pre">MongoDbInchiKeyQuery</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">host</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">database</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'stock_db'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">collection</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'molecules'</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#aizynthfinder.context.stock.queries.MongoDbInchiKeyQuery" title="Link to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#aizynthfinder.context.stock.queries.StockQueryMixin" title="aizynthfinder.context.stock.queries.StockQueryMixin"><code class="xref py py-class docutils literal notranslate"><span class="pre">StockQueryMixin</span></code></a></p>
+<p>A stock query class that is looking up inchi keys in a Mongo database.</p>
+<dl class="simple">
+<dt>The documents in the database collection should have at least 2 fields:</dt><dd><ul class="simple">
+<li><p>inchi_key: the inchi key of the molecule</p></li>
+<li><p>source: the original source of the molecule</p></li>
+</ul>
+</dd>
+</dl>
+<dl class="field-list simple">
+<dt class="field-odd">Variables<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>client</strong> – the Mongo client</p></li>
+<li><p><strong>database</strong> – the database instance</p></li>
+<li><p><strong>molecules</strong> – the collection of documents</p></li>
+</ul>
+</dd>
+<dt class="field-even">Parameters<span class="colon">:</span></dt>
+<dd class="field-even"><ul class="simple">
+<li><p><strong>host</strong> (<em>Optional</em><em>[</em><em>str</em><em>]</em>) – the database host, defaults to None</p></li>
+<li><p><strong>database</strong> (<em>str</em>) – the database name, defaults to “stock_db”</p></li>
+<li><p><strong>collection</strong> (<em>str</em>) – the database collection, defaults to “molecules”</p></li>
+<li><p><strong>host</strong></p></li>
+<li><p><strong>database</strong></p></li>
+<li><p><strong>collection</strong></p></li>
+</ul>
+</dd>
+</dl>
+<dl class="py method">
+<dt class="sig sig-object py" id="aizynthfinder.context.stock.queries.MongoDbInchiKeyQuery.availability_string">
+<span class="sig-name descname"><span class="pre">availability_string</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">mol</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#aizynthfinder.context.stock.queries.MongoDbInchiKeyQuery.availability_string" title="Link to this definition">¶</a></dt>
+<dd><p>Returns the sources of the molecule</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>mol</strong> (<a class="reference internal" href="aizynthfinder.chem.html#aizynthfinder.chem.mol.Molecule" title="aizynthfinder.chem.mol.Molecule"><em>Molecule</em></a>) – the query molecule</p>
+</dd>
+<dt class="field-even">Raises<span class="colon">:</span></dt>
+<dd class="field-even"><p><a class="reference internal" href="aizynthfinder.utils.html#aizynthfinder.utils.exceptions.StockException" title="aizynthfinder.utils.exceptions.StockException"><strong>StockException</strong></a> – if the string cannot be computed</p>
+</dd>
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>a comma-separated list of sources</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>str</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="aizynthfinder.context.stock.queries.MolbloomFilterQuery">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">aizynthfinder.context.stock.queries.</span></span><span class="sig-name descname"><span class="pre">MolbloomFilterQuery</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">path</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">smiles_based</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#aizynthfinder.context.stock.queries.MolbloomFilterQuery" title="Link to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#aizynthfinder.context.stock.queries.StockQueryMixin" title="aizynthfinder.context.stock.queries.StockQueryMixin"><code class="xref py py-class docutils literal notranslate"><span class="pre">StockQueryMixin</span></code></a></p>
+<p>A stock query class that is based on an a molbloom filter
+for SMILES strings or InChI keys</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>path</strong> (<em>str</em>) – the path to the saved bloom filter</p></li>
+<li><p><strong>smiles_based</strong> (<em>bool</em>) – if True will use SMILES for lookup instead of InChI keys</p></li>
+<li><p><strong>path</strong></p></li>
+<li><p><strong>smiles_based</strong></p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+</section>
+<section id="module-aizynthfinder.context.stock.stock">
+<span id="aizynthfinder-context-stock-stock-module"></span><h2>aizynthfinder.context.stock.stock module<a class="headerlink" href="#module-aizynthfinder.context.stock.stock" title="Link to this heading">¶</a></h2>
+<p>Module containing classes that interfaces different stock classes</p>
+<dl class="py class">
+<dt class="sig sig-object py" id="aizynthfinder.context.stock.stock.Stock">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">aizynthfinder.context.stock.stock.</span></span><span class="sig-name descname"><span class="pre">Stock</span></span><a class="headerlink" href="#aizynthfinder.context.stock.stock.Stock" title="Link to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="aizynthfinder.context.html#aizynthfinder.context.collection.ContextCollection" title="aizynthfinder.context.collection.ContextCollection"><code class="xref py py-class docutils literal notranslate"><span class="pre">ContextCollection</span></code></a></p>
+<p>A collection of molecules that are in stock</p>
+<p>A molecule can be queried on the stock with:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">my_mol</span> <span class="o">=</span> <span class="n">Molecule</span><span class="p">(</span><span class="n">smiles</span><span class="o">=</span><span class="s2">&quot;CCO&quot;</span><span class="p">)</span>
+<span class="n">my_mol</span> <span class="ow">in</span> <span class="n">stock</span>
+</pre></div>
+</div>
+<p>One can obtain individual stocks with:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">sub_stock</span> <span class="o">=</span> <span class="n">stock</span><span class="p">[</span><span class="s2">&quot;key&quot;</span><span class="p">]</span>
+</pre></div>
+</div>
+<p>One can obtain the number of molecules in the selected stock with:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">number_of_molecules</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">stock</span><span class="p">)</span>
+</pre></div>
+</div>
+<dl class="field-list simple">
+</dl>
+<dl class="py property">
+<dt class="sig sig-object py" id="aizynthfinder.context.stock.stock.Stock.stop_criteria">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">stop_criteria</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">dict</span></em><a class="headerlink" href="#aizynthfinder.context.stock.stock.Stock.stop_criteria" title="Link to this definition">¶</a></dt>
+<dd><p>Return a copy of the stop criteria used by the stock</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="aizynthfinder.context.stock.stock.Stock.amount">
+<span class="sig-name descname"><span class="pre">amount</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">mol</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#aizynthfinder.context.stock.stock.Stock.amount" title="Link to this definition">¶</a></dt>
+<dd><p>Calculate the maximum amount of a molecule in stock</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>mol</strong> (<a class="reference internal" href="aizynthfinder.chem.html#aizynthfinder.chem.mol.Molecule" title="aizynthfinder.chem.mol.Molecule"><em>Molecule</em></a>) – the molecule to query</p>
+</dd>
+<dt class="field-even">Raises<span class="colon">:</span></dt>
+<dd class="field-even"><p><a class="reference internal" href="aizynthfinder.utils.html#aizynthfinder.utils.exceptions.StockException" title="aizynthfinder.utils.exceptions.StockException"><strong>StockException</strong></a> – if the amount could not be computed</p>
+</dd>
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>the maximum amount</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>float</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="aizynthfinder.context.stock.stock.Stock.availability_list">
+<span class="sig-name descname"><span class="pre">availability_list</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">mol</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#aizynthfinder.context.stock.stock.Stock.availability_list" title="Link to this definition">¶</a></dt>
+<dd><p>Return a list of what stocks a given mol is available</p>
+<p>If the molecule is not in stock it will return any empty list</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>mol</strong> (<a class="reference internal" href="aizynthfinder.chem.html#aizynthfinder.chem.mol.Molecule" title="aizynthfinder.chem.mol.Molecule"><em>Molecule</em></a>) – The molecule to query</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>string with a list of stocks that mol was found in</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>List[str]</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="aizynthfinder.context.stock.stock.Stock.availability_string">
+<span class="sig-name descname"><span class="pre">availability_string</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">mol</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#aizynthfinder.context.stock.stock.Stock.availability_string" title="Link to this definition">¶</a></dt>
+<dd><p>Return a string of what stocks a given mol is available</p>
+<p>If the molecule is not in stock it will return “Not in stock”</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>mol</strong> (<a class="reference internal" href="aizynthfinder.chem.html#aizynthfinder.chem.mol.Molecule" title="aizynthfinder.chem.mol.Molecule"><em>Molecule</em></a>) – The molecule to query</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>string with a list of stocks that mol was found in</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>str</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="aizynthfinder.context.stock.stock.Stock.exclude">
+<span class="sig-name descname"><span class="pre">exclude</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">mol</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#aizynthfinder.context.stock.stock.Stock.exclude" title="Link to this definition">¶</a></dt>
+<dd><p>Exclude a molecule from the stock.
+When this molecule is queried it will return False,
+regardless if the molecule is in the stock.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>mol</strong> (<a class="reference internal" href="aizynthfinder.chem.html#aizynthfinder.chem.mol.Molecule" title="aizynthfinder.chem.mol.Molecule"><em>Molecule</em></a>) – the molecule to exclude</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>None</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="aizynthfinder.context.stock.stock.Stock.load">
+<span class="sig-name descname"><span class="pre">load</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">source</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">key</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#aizynthfinder.context.stock.stock.Stock.load" title="Link to this definition">¶</a></dt>
+<dd><p>Add a pre-initialized stock query object to the stock</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>source</strong> (<a class="reference internal" href="#aizynthfinder.context.stock.queries.StockQueryMixin" title="aizynthfinder.context.stock.queries.StockQueryMixin"><em>StockQueryMixin</em></a>) – the item to add</p></li>
+<li><p><strong>key</strong> (<em>str</em>) – The key that will be used to select the stock</p></li>
+</ul>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>None</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="aizynthfinder.context.stock.stock.Stock.load_from_config">
+<span class="sig-name descname"><span class="pre">load_from_config</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">config</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#aizynthfinder.context.stock.stock.Stock.load_from_config" title="Link to this definition">¶</a></dt>
+<dd><p>Load one or more stock queries from a configuration</p>
+<p>The key can be “stop_criteria” in case the config is given to the
+<cite>set_stop_criteria</cite> method</p>
+<p>The format should be
+key:</p>
+<blockquote>
+<div><p>type: name of the stock class or custom_package.custom_model.CustomClass
+path: path to the stock file
+other settings or params</p>
+</div></blockquote>
+<p>or
+key: path_to_model</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>config</strong> (<em>Any</em>) – the configuration</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>None</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="aizynthfinder.context.stock.stock.Stock.price">
+<span class="sig-name descname"><span class="pre">price</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">mol</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#aizynthfinder.context.stock.stock.Stock.price" title="Link to this definition">¶</a></dt>
+<dd><p>Calculate the minimum price of a molecule in stock</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>mol</strong> (<a class="reference internal" href="aizynthfinder.chem.html#aizynthfinder.chem.mol.Molecule" title="aizynthfinder.chem.mol.Molecule"><em>Molecule</em></a>) – the molecule to query</p>
+</dd>
+<dt class="field-even">Raises<span class="colon">:</span></dt>
+<dd class="field-even"><p><a class="reference internal" href="aizynthfinder.utils.html#aizynthfinder.utils.exceptions.StockException" title="aizynthfinder.utils.exceptions.StockException"><strong>StockException</strong></a> – if the price could not be computed</p>
+</dd>
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>the minimum price</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>float</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="aizynthfinder.context.stock.stock.Stock.reset_exclusion_list">
+<span class="sig-name descname"><span class="pre">reset_exclusion_list</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#aizynthfinder.context.stock.stock.Stock.reset_exclusion_list" title="Link to this definition">¶</a></dt>
+<dd><p>Remove all molecules in the exclusion list</p>
+<dl class="field-list simple">
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>None</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="aizynthfinder.context.stock.stock.Stock.select">
+<span class="sig-name descname"><span class="pre">select</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">value</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">append</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#aizynthfinder.context.stock.stock.Stock.select" title="Link to this definition">¶</a></dt>
+<dd><p>Select one or more stock queries</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>value</strong> (<em>Union</em><em>[</em><em>str</em><em>, </em><em>List</em><em>[</em><em>str</em><em>]</em><em>]</em>) – the key of the stocks to select</p></li>
+<li><p><strong>append</strong> (<em>bool</em>) – if True and <code class="docutils literal notranslate"><span class="pre">value</span></code> is a single key append it to the current selection</p></li>
+</ul>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>None</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="aizynthfinder.context.stock.stock.Stock.set_stop_criteria">
+<span class="sig-name descname"><span class="pre">set_stop_criteria</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">criteria</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#aizynthfinder.context.stock.stock.Stock.set_stop_criteria" title="Link to this definition">¶</a></dt>
+<dd><p>Set criteria that stop the search</p>
+<p>The keys of the criteria can be “price”, “amount”, or “weight” which accepts numerical settings,
+or “counts” that should be dictionary of maximum allowed count for each atomic symbol.</p>
+<p>Example:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">criteria</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="s2">&quot;price&quot;</span><span class="p">:</span> <span class="mi">5</span><span class="p">,</span>
+    <span class="s2">&quot;amount&quot;</span><span class="p">:</span> <span class="mi">100</span><span class="p">,</span>
+    <span class="s2">&quot;weight&quot;</span><span class="p">:</span> <span class="mi">250</span><span class="p">,</span>
+    <span class="s2">&quot;counts&quot;</span><span class="p">:</span> <span class="p">{</span>
+        <span class="s2">&quot;C&quot;</span><span class="p">:</span> <span class="mi">6</span><span class="p">,</span>
+        <span class="s2">&quot;O&quot;</span><span class="p">:</span> <span class="mi">4</span>
+    <span class="p">}</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>criteria</strong> (<em>Optional</em><em>[</em><em>Dict</em><em>]</em>) – the criteria settings</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>None</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="aizynthfinder.context.stock.stock.Stock.smiles_in_stock">
+<span class="sig-name descname"><span class="pre">smiles_in_stock</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">smiles</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#aizynthfinder.context.stock.stock.Stock.smiles_in_stock" title="Link to this definition">¶</a></dt>
+<dd><p>Check if the SMILES is in the currently selected stocks</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>smiles</strong> (<em>str</em>) – SMILES string (must be RDKit sanitizable)</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>if the SMILES was on stock</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>bool</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+</section>
+<section id="module-aizynthfinder.context.stock">
+<span id="module-contents"></span><h2>Module contents<a class="headerlink" href="#module-aizynthfinder.context.stock" title="Link to this heading">¶</a></h2>
+<p>Sub-package containing stock routines</p>
+</section>
+</section>
+
+
+          </div>
+          
+        </div>
+      </div>
+    <div class="clearer"></div>
+  </div>
+    <div class="footer">
+      &#169;2020-2025, Molecular AI group.
+      
+      |
+      Powered by <a href="https://www.sphinx-doc.org/">Sphinx 7.4.7</a>
+      &amp; <a href="https://alabaster.readthedocs.io">Alabaster 0.7.16</a>
+      
+      |
+      <a href="_sources/aizynthfinder.context.stock.rst.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+
+    
+  </body>
+</html>

@@ -1,0 +1,341 @@
+<!DOCTYPE html>
+
+<html lang="en" data-content_root="./">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <title>aizynthfinder.tools package &#8212; aizynthfinder 4.4.0 documentation</title>
+    <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=5ecbeea2" />
+    <link rel="stylesheet" type="text/css" href="_static/alabaster.css?v=a66d8bb5" />
+    <script src="_static/documentation_options.js?v=2f20d6c1"></script>
+    <script src="_static/doctools.js?v=9a2dae69"></script>
+    <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="aizynthfinder.utils package" href="aizynthfinder.utils.html" />
+    <link rel="prev" title="aizynthfinder.search.retrostar package" href="aizynthfinder.search.retrostar.html" />
+   
+  <link rel="stylesheet" href="_static/custom.css" type="text/css" />
+  
+
+  
+  
+
+  </head><body>
+  <div class="document">
+    
+      <div class="sphinxsidebar" role="navigation" aria-label="Main">
+        <div class="sphinxsidebarwrapper">
+<h1 class="logo"><a href="index.html">aizynthfinder</a></h1>
+
+
+
+<p class="blurb">A fast, robust and flexible software for retrosynthetic planning</p>
+
+
+
+
+
+
+<h3>Navigation</h3>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="gui.html">Graphical user interface</a></li>
+<li class="toctree-l1"><a class="reference internal" href="cli.html">Command-line interface</a></li>
+<li class="toctree-l1"><a class="reference internal" href="python_interface.html">Python interface</a></li>
+<li class="toctree-l1"><a class="reference internal" href="configuration.html">Configuration file</a></li>
+<li class="toctree-l1"><a class="reference internal" href="stocks.html">Stocks</a></li>
+<li class="toctree-l1"><a class="reference internal" href="scoring.html">Scoring</a></li>
+<li class="toctree-l1"><a class="reference internal" href="howto.html">How-to</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="aizynthfinder.html">aizynthfinder package</a><ul class="current">
+<li class="toctree-l2 current"><a class="reference internal" href="aizynthfinder.html#subpackages">Subpackages</a><ul class="current">
+<li class="toctree-l3"><a class="reference internal" href="aizynthfinder.analysis.html">aizynthfinder.analysis package</a></li>
+<li class="toctree-l3"><a class="reference internal" href="aizynthfinder.chem.html">aizynthfinder.chem package</a></li>
+<li class="toctree-l3"><a class="reference internal" href="aizynthfinder.context.html">aizynthfinder.context package</a></li>
+<li class="toctree-l3"><a class="reference internal" href="aizynthfinder.interfaces.html">aizynthfinder.interfaces package</a></li>
+<li class="toctree-l3"><a class="reference internal" href="aizynthfinder.search.html">aizynthfinder.search package</a></li>
+<li class="toctree-l3 current"><a class="current reference internal" href="#">aizynthfinder.tools package</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#submodules">Submodules</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#module-aizynthfinder.tools.cat_output">aizynthfinder.tools.cat_output module</a><ul>
+<li class="toctree-l5"><a class="reference internal" href="#aizynthfinder.tools.cat_output.main"><code class="docutils literal notranslate"><span class="pre">main()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l4"><a class="reference internal" href="#module-aizynthfinder.tools.download_public_data">aizynthfinder.tools.download_public_data module</a><ul>
+<li class="toctree-l5"><a class="reference internal" href="#aizynthfinder.tools.download_public_data.main"><code class="docutils literal notranslate"><span class="pre">main()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l4"><a class="reference internal" href="#module-aizynthfinder.tools.make_stock">aizynthfinder.tools.make_stock module</a><ul>
+<li class="toctree-l5"><a class="reference internal" href="#aizynthfinder.tools.make_stock.extract_plain_smiles"><code class="docutils literal notranslate"><span class="pre">extract_plain_smiles()</span></code></a></li>
+<li class="toctree-l5"><a class="reference internal" href="#aizynthfinder.tools.make_stock.extract_smiles_from_module"><code class="docutils literal notranslate"><span class="pre">extract_smiles_from_module()</span></code></a></li>
+<li class="toctree-l5"><a class="reference internal" href="#aizynthfinder.tools.make_stock.make_hdf5_stock"><code class="docutils literal notranslate"><span class="pre">make_hdf5_stock()</span></code></a></li>
+<li class="toctree-l5"><a class="reference internal" href="#aizynthfinder.tools.make_stock.make_molbloom"><code class="docutils literal notranslate"><span class="pre">make_molbloom()</span></code></a></li>
+<li class="toctree-l5"><a class="reference internal" href="#aizynthfinder.tools.make_stock.make_molbloom_inchi"><code class="docutils literal notranslate"><span class="pre">make_molbloom_inchi()</span></code></a></li>
+<li class="toctree-l5"><a class="reference internal" href="#aizynthfinder.tools.make_stock.make_mongo_stock"><code class="docutils literal notranslate"><span class="pre">make_mongo_stock()</span></code></a></li>
+<li class="toctree-l5"><a class="reference internal" href="#aizynthfinder.tools.make_stock.main"><code class="docutils literal notranslate"><span class="pre">main()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l4"><a class="reference internal" href="#module-aizynthfinder.tools">Module contents</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="aizynthfinder.utils.html">aizynthfinder.utils package</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="aizynthfinder.html#submodules">Submodules</a></li>
+<li class="toctree-l2"><a class="reference internal" href="aizynthfinder.html#module-aizynthfinder.aizynthfinder">aizynthfinder.aizynthfinder module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="aizynthfinder.html#module-aizynthfinder.reactiontree">aizynthfinder.reactiontree module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="aizynthfinder.html#module-aizynthfinder">Module contents</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="sequences.html">Sequences</a></li>
+<li class="toctree-l1"><a class="reference internal" href="relationships.html">Relationships</a></li>
+</ul>
+
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="index.html">Documentation overview</a><ul>
+  <li><a href="aizynthfinder.html">aizynthfinder package</a><ul>
+      <li>Previous: <a href="aizynthfinder.search.retrostar.html" title="previous chapter">aizynthfinder.search.retrostar package</a></li>
+      <li>Next: <a href="aizynthfinder.utils.html" title="next chapter">aizynthfinder.utils package</a></li>
+  </ul></li>
+  </ul></li>
+</ul>
+</div>
+<search id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"/>
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</search>
+<script>document.getElementById('searchbox').style.display = "block"</script>
+
+
+
+
+
+
+
+
+        </div>
+      </div>
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          
+
+          <div class="body" role="main">
+            
+  <section id="aizynthfinder-tools-package">
+<h1>aizynthfinder.tools package<a class="headerlink" href="#aizynthfinder-tools-package" title="Link to this heading">¶</a></h1>
+<section id="submodules">
+<h2>Submodules<a class="headerlink" href="#submodules" title="Link to this heading">¶</a></h2>
+</section>
+<section id="module-aizynthfinder.tools.cat_output">
+<span id="aizynthfinder-tools-cat-output-module"></span><h2>aizynthfinder.tools.cat_output module<a class="headerlink" href="#module-aizynthfinder.tools.cat_output" title="Link to this heading">¶</a></h2>
+<p>Module containing a CLI for concatenating output files (hdf5/json.gz files)</p>
+<dl class="py function">
+<dt class="sig sig-object py" id="aizynthfinder.tools.cat_output.main">
+<span class="sig-prename descclassname"><span class="pre">aizynthfinder.tools.cat_output.</span></span><span class="sig-name descname"><span class="pre">main</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#aizynthfinder.tools.cat_output.main" title="Link to this definition">¶</a></dt>
+<dd><p>Entry-point for the cat_aizynth_output CLI</p>
+<dl class="field-list simple">
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>None</p>
+</dd>
+</dl>
+</dd></dl>
+
+</section>
+<section id="module-aizynthfinder.tools.download_public_data">
+<span id="aizynthfinder-tools-download-public-data-module"></span><h2>aizynthfinder.tools.download_public_data module<a class="headerlink" href="#module-aizynthfinder.tools.download_public_data" title="Link to this heading">¶</a></h2>
+<p>Module with script to download public data</p>
+<dl class="py function">
+<dt class="sig sig-object py" id="aizynthfinder.tools.download_public_data.main">
+<span class="sig-prename descclassname"><span class="pre">aizynthfinder.tools.download_public_data.</span></span><span class="sig-name descname"><span class="pre">main</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#aizynthfinder.tools.download_public_data.main" title="Link to this definition">¶</a></dt>
+<dd><p>Entry-point for CLI</p>
+<dl class="field-list simple">
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>None</p>
+</dd>
+</dl>
+</dd></dl>
+
+</section>
+<section id="module-aizynthfinder.tools.make_stock">
+<span id="aizynthfinder-tools-make-stock-module"></span><h2>aizynthfinder.tools.make_stock module<a class="headerlink" href="#module-aizynthfinder.tools.make_stock" title="Link to this heading">¶</a></h2>
+<p>Module containing classes and routines for making stock input to the tree search.</p>
+<dl class="py function">
+<dt class="sig sig-object py" id="aizynthfinder.tools.make_stock.extract_plain_smiles">
+<span class="sig-prename descclassname"><span class="pre">aizynthfinder.tools.make_stock.</span></span><span class="sig-name descname"><span class="pre">extract_plain_smiles</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">files</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#aizynthfinder.tools.make_stock.extract_plain_smiles" title="Link to this definition">¶</a></dt>
+<dd><p>Extract SMILES from plain text files, one SMILES on each line.
+The SMILES are yielded to save memory.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>files</strong> (<em>List</em><em>[</em><em>str</em><em>]</em>)</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>_StrIterator</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="aizynthfinder.tools.make_stock.extract_smiles_from_module">
+<span class="sig-prename descclassname"><span class="pre">aizynthfinder.tools.make_stock.</span></span><span class="sig-name descname"><span class="pre">extract_smiles_from_module</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">files</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#aizynthfinder.tools.make_stock.extract_smiles_from_module" title="Link to this definition">¶</a></dt>
+<dd><p>Extract SMILES by loading a custom module, containing
+the function <code class="docutils literal notranslate"><span class="pre">extract_smiles</span></code>.</p>
+<p>The first element of the input argument is taken as the module name.
+The other elements are taken as input to the <code class="docutils literal notranslate"><span class="pre">extract_smiles</span></code> method</p>
+<p>The SMILES are yielded to save memory.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>files</strong> (<em>List</em><em>[</em><em>str</em><em>]</em>)</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>_StrIterator</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="aizynthfinder.tools.make_stock.make_hdf5_stock">
+<span class="sig-prename descclassname"><span class="pre">aizynthfinder.tools.make_stock.</span></span><span class="sig-name descname"><span class="pre">make_hdf5_stock</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">inchi_keys</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">filename</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#aizynthfinder.tools.make_stock.make_hdf5_stock" title="Link to this definition">¶</a></dt>
+<dd><p>Put all the inchi keys from the given iterable in a pandas
+dataframe and save it as an HDF5 file. Only unique inchi keys
+are stored.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>inchi_keys</strong> (<em>_StrIterator</em>)</p></li>
+<li><p><strong>filename</strong> (<em>str</em>)</p></li>
+</ul>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>None</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="aizynthfinder.tools.make_stock.make_molbloom">
+<span class="sig-prename descclassname"><span class="pre">aizynthfinder.tools.make_stock.</span></span><span class="sig-name descname"><span class="pre">make_molbloom</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">smiles_list</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">filename</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">filter_size</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">approx_mols</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#aizynthfinder.tools.make_stock.make_molbloom" title="Link to this definition">¶</a></dt>
+<dd><p>Put all the unique SMILES in a new bloom filter.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Params smiles_list<span class="colon">:</span></dt>
+<dd class="field-odd"><p>the SMILES</p>
+</dd>
+<dt class="field-even">Params filename<span class="colon">:</span></dt>
+<dd class="field-even"><p>the path to the saved filter</p>
+</dd>
+<dt class="field-odd">Params filter_size<span class="colon">:</span></dt>
+<dd class="field-odd"><p>the size of the filter in bits</p>
+</dd>
+<dt class="field-even">Params approx_mols<span class="colon">:</span></dt>
+<dd class="field-even"><p>approximately the number of compounds</p>
+</dd>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>smiles_list</strong> (<em>_StrIterator</em>)</p></li>
+<li><p><strong>filename</strong> (<em>str</em>)</p></li>
+<li><p><strong>filter_size</strong> (<em>int</em>)</p></li>
+<li><p><strong>approx_mols</strong> (<em>int</em>)</p></li>
+</ul>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>None</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="aizynthfinder.tools.make_stock.make_molbloom_inchi">
+<span class="sig-prename descclassname"><span class="pre">aizynthfinder.tools.make_stock.</span></span><span class="sig-name descname"><span class="pre">make_molbloom_inchi</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">inchi_keys</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">filename</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">filter_size</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">approx_mols</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#aizynthfinder.tools.make_stock.make_molbloom_inchi" title="Link to this definition">¶</a></dt>
+<dd><p>Put all the unique InChI keys in a new bloom filter.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Params inchi_keys<span class="colon">:</span></dt>
+<dd class="field-odd"><p>the Inchi Keys</p>
+</dd>
+<dt class="field-even">Params filename<span class="colon">:</span></dt>
+<dd class="field-even"><p>the path to the saved filter</p>
+</dd>
+<dt class="field-odd">Params filter_size<span class="colon">:</span></dt>
+<dd class="field-odd"><p>the size of the filter in bits</p>
+</dd>
+<dt class="field-even">Params approx_mols<span class="colon">:</span></dt>
+<dd class="field-even"><p>approximately the number of compounds</p>
+</dd>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>inchi_keys</strong> (<em>_StrIterator</em>)</p></li>
+<li><p><strong>filename</strong> (<em>str</em>)</p></li>
+<li><p><strong>filter_size</strong> (<em>int</em>)</p></li>
+<li><p><strong>approx_mols</strong> (<em>int</em>)</p></li>
+</ul>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>None</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="aizynthfinder.tools.make_stock.make_mongo_stock">
+<span class="sig-prename descclassname"><span class="pre">aizynthfinder.tools.make_stock.</span></span><span class="sig-name descname"><span class="pre">make_mongo_stock</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">inchi_keys</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">source_tag</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">host</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#aizynthfinder.tools.make_stock.make_mongo_stock" title="Link to this definition">¶</a></dt>
+<dd><p>Put all the inchi keys from the given iterable in Mongo database as
+a molecules collection. Only unique inchi keys are stored.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>inchi_keys</strong> (<em>_StrIterator</em>)</p></li>
+<li><p><strong>source_tag</strong> (<em>str</em>)</p></li>
+<li><p><strong>host</strong> (<em>Optional</em><em>[</em><em>str</em><em>]</em>)</p></li>
+</ul>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>None</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="aizynthfinder.tools.make_stock.main">
+<span class="sig-prename descclassname"><span class="pre">aizynthfinder.tools.make_stock.</span></span><span class="sig-name descname"><span class="pre">main</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#aizynthfinder.tools.make_stock.main" title="Link to this definition">¶</a></dt>
+<dd><p>Entry-point for the smiles2stock tool</p>
+<dl class="field-list simple">
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>None</p>
+</dd>
+</dl>
+</dd></dl>
+
+</section>
+<section id="module-aizynthfinder.tools">
+<span id="module-contents"></span><h2>Module contents<a class="headerlink" href="#module-aizynthfinder.tools" title="Link to this heading">¶</a></h2>
+</section>
+</section>
+
+
+          </div>
+          
+        </div>
+      </div>
+    <div class="clearer"></div>
+  </div>
+    <div class="footer">
+      &#169;2020-2025, Molecular AI group.
+      
+      |
+      Powered by <a href="https://www.sphinx-doc.org/">Sphinx 7.4.7</a>
+      &amp; <a href="https://alabaster.readthedocs.io">Alabaster 0.7.16</a>
+      
+      |
+      <a href="_sources/aizynthfinder.tools.rst.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+
+    
+  </body>
+</html>
