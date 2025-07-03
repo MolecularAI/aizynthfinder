@@ -38,13 +38,15 @@ def test_create_gui_app(mocker):
 
 
 @pytest.mark.xfail(
-    condition=not SUPPORT_CLUSTERING, reason="route_distances not installed"
+    condition=not SUPPORT_CLUSTERING, reason="distance support not installed"
 )
 def test_create_clustering_gui(mocker, load_reaction_tree):
     collection = RouteCollection(
         reaction_trees=[
             ReactionTree.from_dict(
-                load_reaction_tree("routes_for_clustering.json", idx)
+                load_reaction_tree(
+                    "routes_for_clustering.json", idx, remove_metadata=False
+                )
             )
             for idx in range(3)
         ]
@@ -148,7 +150,9 @@ def test_cli_single_smiles(mocker, add_cli_arguments, tmpdir, capsys):
     finder_patch.return_value.extract_statistics.return_value = {"a": 1, "b": 2}
     json_patch = mocker.patch("aizynthfinder.interfaces.aizynthcli.json.dump")
     output_name = str(tmpdir / "trees.json")
-    add_cli_arguments("--smiles COO --config config_local.yml --output " + output_name)
+    add_cli_arguments(
+        "--cluster --smiles COO --config config_local.yml --output " + output_name
+    )
 
     cli_main()
 
@@ -196,7 +200,7 @@ def test_cli_multiple_smiles(
     smiles_input = create_dummy_smiles_source("txt")
     output_name = str(tmpdir / "data.json.gz")
     add_cli_arguments(
-        f"--smiles {smiles_input} --config config_local.yml --output {output_name}"
+        f"--cluster --smiles {smiles_input} --config config_local.yml --output {output_name}"
     )
 
     cli_main()

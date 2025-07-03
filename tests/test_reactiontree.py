@@ -1,6 +1,6 @@
 import pytest
 
-from aizynthfinder.reactiontree import ReactionTree, SUPPORT_DISTANCES
+from aizynthfinder.reactiontree import ReactionTree
 
 
 def test_mcts_route_to_reactiontree(setup_linear_mcts, load_reaction_tree):
@@ -106,28 +106,22 @@ def test_route_node_depth_from_json(load_reaction_tree):
         assert rt.depth(mol) == 2 * rt.graph.nodes[mol]["transform"]
 
 
-@pytest.mark.xfail(
-    condition=not SUPPORT_DISTANCES, reason="route_distances not installed"
-)
 def test_route_distance_self(load_reaction_tree):
-    dict_ = load_reaction_tree("branched_route.json", 0)
+    dict_ = load_reaction_tree("branched_route.json", 0, remove_metadata=False)
     rt = ReactionTree.from_dict(dict_)
 
     assert rt.distance_to(rt) == 0.0
 
 
-@pytest.mark.xfail(
-    condition=not SUPPORT_DISTANCES, reason="route_distances not installed"
-)
 def test_route_distance_other(load_reaction_tree):
-    dict_ = load_reaction_tree("branched_route.json")
+    dict_ = load_reaction_tree("branched_route.json", remove_metadata=False)
     rt1 = ReactionTree.from_dict(dict_)
-    dict_ = load_reaction_tree("linear_route.json")
+    dict_ = load_reaction_tree("linear_route.json", remove_metadata=False)
     rt2 = ReactionTree.from_dict(dict_)
 
-    dist = rt1.distance_to(rt2, content="molecules")
+    dist = rt1.distance_to(rt2)
 
-    assert pytest.approx(dist, abs=1e-2) == 4.000
+    assert pytest.approx(dist, abs=1e-2) == 0.6028
 
 
 @pytest.mark.parametrize(
@@ -178,3 +172,21 @@ def test_reactiontree_parent_mol(load_reaction_tree):
 
     with pytest.raises(ValueError):
         rt.parent_molecule(molecules[0])
+
+
+def test_reactiontree_child_reactions(load_reaction_tree):
+    dict_ = load_reaction_tree("branched_route.json")
+    rt = ReactionTree.from_dict(dict_)
+    reactions = list(rt.reactions())
+
+    child_reactions = rt.child_reactions(reactions[0])
+    child_reactions2 = rt.child_reactions(reactions[1])
+
+    assert len(child_reactions) == 2
+    assert len(child_reactions2) == 1
+
+    assert child_reactions[0] is reactions[1]
+    assert child_reactions[1] is reactions[3]
+
+    assert child_reactions2[0] is reactions[2]
+    assert len(rt.child_reactions(reactions[-1])) == 0

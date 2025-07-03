@@ -3,22 +3,30 @@
 
 from aizynthfinder.context.scoring.collection import ScorerCollection
 from aizynthfinder.context.scoring.scorers import (
-    AverageTemplateOccurrenceScorer,
+    SUPPORT_DISTANCES,
     BrokenBondsScorer,
     CombinedScorer,
-    DeltaSyntheticComplexityScorer,
-    FractionInStockScorer,
-    MaxTransformScorerer,
-    NumberOfPrecursorsInStockScorer,
-    NumberOfPrecursorsScorer,
-    NumberOfReactionsScorer,
-    PriceSumScorer,
-    ReactionClassMembershipScorer,
+    DeepSetScorer,
     RouteCostScorer,
     RouteSimilarityScorer,
-    Scorer,
     StateScorer,
+)
+from aizynthfinder.context.scoring.scorers_base import Scorer
+from aizynthfinder.context.scoring.scorers_mols import (
+    DeltaSyntheticComplexityScorer,
+    FractionInSourceStockScorer,
+    FractionInStockScorer,
+    FractionOfIntermediatesInStockScorer,
+    NumberOfPrecursorsInStockScorer,
+    NumberOfPrecursorsScorer,
+    PriceSumScorer,
     StockAvailabilityScorer,
-    SUPPORT_DISTANCES,
+)
+from aizynthfinder.context.scoring.scorers_reactions import (
+    AverageTemplateOccurrenceScorer,
+    MaxTransformScorer,
+    NumberOfReactionsScorer,
+    ReactionClassMembershipScorer,
+    ReactionClassRankScorer,
 )
 from aizynthfinder.utils.exceptions import ScorerException

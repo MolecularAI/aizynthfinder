@@ -30,7 +30,7 @@ from aizynthfinder.search.andor_trees import (
 )
 from aizynthfinder.search.mcts import MctsSearchTree
 from aizynthfinder.utils.exceptions import RejectionException
-from aizynthfinder.context.scoring import MaxTransformScorerer, FractionInStockScorer
+from aizynthfinder.context.scoring import MaxTransformScorer, FractionInStockScorer
 
 
 def pytest_addoption(parser):
@@ -286,14 +286,23 @@ def get_one_step_expansion():
 
 @pytest.fixture
 def load_reaction_tree(shared_datadir):
-    def wrapper(filename, index=0):
+    def _remove_metadata(tree_dict):
+        if "metadata" in tree_dict:
+            tree_dict["metadata"] = {}
+        for child in tree_dict.get("children", []):
+            _remove_metadata(child)
+
+    def wrapper(filename, index=0, remove_metadata=True):
         filename = str(shared_datadir / filename)
         with open(filename, "r") as fileobj:
             trees = json.load(fileobj)
         if isinstance(trees, dict):
-            return trees
+            ret = trees
         else:
-            return trees[index]
+            ret = trees[index]
+        if remove_metadata:
+            _remove_metadata(ret)
+        return ret
 
     return wrapper
 
@@ -516,7 +525,7 @@ def setup_mo_scorer():
     def wrapper(config):
         return [
             FractionInStockScorer(config),
-            MaxTransformScorerer(
+            MaxTransformScorer(
                 config,
                 scaler_params={
                     "name": "squash",

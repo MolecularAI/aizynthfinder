@@ -1,5 +1,6 @@
 """Module containing utility functions for GUI.
 """
+
 from __future__ import annotations
 
 from collections import defaultdict
@@ -88,9 +89,11 @@ def route_display(
     with output_widget:
         display(HTML(f"<H2>{status}"))
         table_content = "".join(
-            f"<tr><td>{name}</td><td>{score:.4f}</td></tr>"
-            if isinstance(score, (float, int))
-            else f"<tr><td>{name}</td><td>({', '.join(f'{val:.4f}' for val in score)})</td></tr>"
+            (
+                f"<tr><td>{name}</td><td>{score:.4f}</td></tr>"
+                if isinstance(score, (float, int))
+                else f"<tr><td>{name}</td><td>({', '.join(f'{val:.4f}' for val in score)})</td></tr>"
+            )
             for name, score in route["all_score"].items()
         )
         display(HTML(f"<table>{table_content}</table>"))

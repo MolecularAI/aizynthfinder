@@ -1,20 +1,24 @@
 """ Module containing classes to store and manipulate collections of synthetic routes.
 """
+
 from __future__ import annotations
 
 import copy
 from typing import TYPE_CHECKING
 
 import numpy as np
+from rxnutils.routes.comparison import simple_route_similarity
+from rxnutils.routes.readers import read_aizynthfinder_dict
 
 try:
     from route_distances.clustering import ClusteringHelper
-    from route_distances.route_distances import route_distances_calculator
 except ImportError:
-    pass
+    SUPPORT_CLUSTERING = False
+else:
+    SUPPORT_CLUSTERING = True
 
 from aizynthfinder.analysis.utils import CombinedReactionTrees, RouteSelectionArguments
-from aizynthfinder.reactiontree import SUPPORT_DISTANCES, ReactionTree
+from aizynthfinder.reactiontree import ReactionTree
 from aizynthfinder.search.mcts import MctsNode, MctsSearchTree
 
 if TYPE_CHECKING:
@@ -27,7 +31,6 @@ if TYPE_CHECKING:
         PilImage,
         Sequence,
         StrDict,
-        Union,
     )
 
 
@@ -77,7 +80,7 @@ class RouteCollection:
         self.clusters: Optional[Sequence[RouteCollection]] = self._unpack_kwarg(
             "clusters", **kwargs
         )
-        self._distance_matrix: Dict[str, np.ndarray] = {}
+        self._distance_matrix: Optional[np.ndarray] = None
         self._combined_reaction_trees: Optional[CombinedReactionTrees] = None
 
     @classmethod
@@ -142,27 +145,21 @@ class RouteCollection:
         self,
         n_clusters: int,
         max_clusters: int = 5,
-        distances_model: str = "ted",
         **kwargs: Any,
     ) -> np.ndarray:
         """
         Cluster the route collection into a number of clusters.
 
-        Additional arguments to the distance or clustering algorithm
-        can be passed in as key-word arguments.
-
-        When `distances_model` is "lstm", a key-word argument `model_path` needs to be given
-        when `distances_model` is "ted", two optional key-word arguments `timeout` and `content`
-        can be given.
+        Additional arguments to the clustering algorithm can be passed in as key-word arguments.
 
         If the number of reaction trees are less than 3, no clustering will be performed
 
         :param n_clusters: the desired number of clusters, if less than 2 triggers optimization
         :param max_clusters: the maximum number of clusters to consider
-        :param distances_model: can be ted or lstm and determines how the route distances are computed
         :return: the cluster labels
+        :raises ValueError: if the route_distance package is not installed
         """
-        if not SUPPORT_DISTANCES:
+        if not SUPPORT_CLUSTERING:
             raise ValueError(
                 "Clustering is not supported by this installation."
                 " Please install aizynthfinder with extras dependencies."
@@ -170,13 +167,8 @@ class RouteCollection:
 
         if len(self.reaction_trees) < 3:
             return np.asarray([])
-        dist_kwargs = {
-            "content": kwargs.pop("content", "both"),
-            "timeout": kwargs.pop("timeout", None),
-            "model_path": kwargs.pop("model_path", None),
-        }
         try:
-            distances = self.distance_matrix(model=distances_model, **dist_kwargs)
+            distances = self.distance_matrix()
         except ValueError:
             return np.asarray([])
 
@@ -213,7 +205,7 @@ class RouteCollection:
         for scorer in scorers:
             for idx, score in enumerate(scorer(list_)):  # type: ignore
                 self.all_scores[idx][repr(scorer)] = score
-        self._update_route_dict(self.all_scores, "all_score")
+        self._update_route_dict(self.all_scores, "all_scores")
 
     def dict_with_extra(
         self, include_scores=False, include_metadata=False
@@ -244,41 +236,19 @@ class RouteCollection:
         """
         return self.dict_with_extra(include_scores=True)
 
-    def distance_matrix(
-        self, recreate: bool = False, model: str = "ted", **kwargs: Any
-    ) -> np.ndarray:
+    def distance_matrix(self, recreate: bool = False) -> np.ndarray:
         """
         Compute the distance matrix between each pair of reaction trees
 
-        All key-word arguments are passed along to the `route_distance_calculator`
-        function from the `route_distances` package.
-
-        When `model` is "lstm", a key-word argument `model_path` needs to be given
-        when `model` is "ted", two optional key-word arguments `timeout` and `content`
-        can be given.
-
         :param recreate: if False, use a cached one if available
-        :param model: the type of model to use "ted" or "lstm"
         :return: the square distance matrix
         """
-        if not SUPPORT_DISTANCES:
-            raise ValueError(
-                "Distance calculations are not supported by this installation."
-                " Please install aizynthfinder with extras dependencies."
-            )
-
-        if model == "lstm" and not kwargs.get("model_path"):
-            raise KeyError(
-                "Need to provide 'model_path' argument when using LSTM model for computing distances"
-            )
-        content = kwargs.get("content", "both")
-        cache_key = kwargs.get("model_path", "") if model == "lstm" else content
-        if self._distance_matrix.get(cache_key) is not None and not recreate:
-            return self._distance_matrix[cache_key]
-        calculator = route_distances_calculator(model, **kwargs)
-        distances = calculator(self.dicts)
-        self._distance_matrix[cache_key] = distances
-        return distances
+        if self._distance_matrix is not None and not recreate:
+            return self._distance_matrix
+        routes = [read_aizynthfinder_dict(dict_) for dict_ in self.dicts]
+        self._distance_matrix = 1.0 - simple_route_similarity(routes)
+        assert self._distance_matrix is not None
+        return self._distance_matrix
 
     def make_dicts(self) -> Sequence[StrDict]:
         """Convert all reaction trees to dictionaries"""

@@ -5,8 +5,9 @@ import numpy as np
 import pytest
 
 from aizynthfinder.analysis import TreeAnalysis, RouteCollection
+from aizynthfinder.analysis.routes import SUPPORT_CLUSTERING
 from aizynthfinder.analysis.utils import RouteSelectionArguments
-from aizynthfinder.reactiontree import ReactionTree, SUPPORT_DISTANCES
+from aizynthfinder.reactiontree import ReactionTree
 from aizynthfinder.search.mcts import MctsSearchTree
 from aizynthfinder.context.scoring import StateScorer, NumberOfReactionsScorer
 
@@ -397,14 +398,13 @@ def test_create_combine_tree_to_visjs(load_reaction_tree, tmpdir):
         assert len([name for name in tarobj.getnames() if name.endswith(".png")]) == 8
 
 
-@pytest.mark.xfail(
-    condition=not SUPPORT_DISTANCES, reason="route_distances not installed"
-)
 def test_distance_collection(load_reaction_tree):
     collection = RouteCollection(
         reaction_trees=[
             ReactionTree.from_dict(
-                load_reaction_tree("routes_for_clustering.json", idx)
+                load_reaction_tree(
+                    "routes_for_clustering.json", idx, remove_metadata=False
+                )
             )
             for idx in range(3)
         ]
@@ -413,25 +413,23 @@ def test_distance_collection(load_reaction_tree):
     dist_mat1 = collection.distance_matrix()
     dist_mat2 = collection.distance_matrix(recreate=True)
 
-    assert (dist_mat1 - dist_mat2).sum() == 0
+    assert (dist_mat1 - dist_mat2).sum() == 0.0
 
-    dist_mat3 = collection.distance_matrix(content="molecules")
-
-    assert (dist_mat1 - dist_mat3).sum() != 0
-    assert len(dist_mat3) == 3
-    assert pytest.approx(dist_mat3[0, 1], abs=1e-2) == 2.6522
-    assert pytest.approx(dist_mat3[0, 2], abs=1e-2) == 3.0779
-    assert pytest.approx(dist_mat3[2, 1], abs=1e-2) == 0.7483
+    assert pytest.approx(dist_mat1[0, 1], abs=1e-2) == 0.4097
+    assert pytest.approx(dist_mat1[0, 2], abs=1e-2) == 1.000
+    assert pytest.approx(dist_mat1[2, 1], abs=1e-2) == 0.310
 
 
 @pytest.mark.xfail(
-    condition=not SUPPORT_DISTANCES, reason="route_distances not installed"
+    condition=not SUPPORT_CLUSTERING, reason="route_distances not installed"
 )
 def test_clustering_collection(load_reaction_tree):
     collection = RouteCollection(
         reaction_trees=[
             ReactionTree.from_dict(
-                load_reaction_tree("routes_for_clustering.json", idx)
+                load_reaction_tree(
+                    "routes_for_clustering.json", idx, remove_metadata=False
+                )
             )
             for idx in range(3)
         ]
@@ -441,21 +439,3 @@ def test_clustering_collection(load_reaction_tree):
     assert len(collection.clusters) == 2
     assert collection.clusters[0].reaction_trees == collection.reaction_trees[1:3]
     assert collection.clusters[1].reaction_trees == [collection.reaction_trees[0]]
-
-
-@pytest.mark.xfail(
-    condition=not SUPPORT_DISTANCES, reason="route_distances not installed"
-)
-def test_clustering_collection_timeout(load_reaction_tree):
-    collection = RouteCollection(
-        reaction_trees=[
-            ReactionTree.from_dict(
-                load_reaction_tree("routes_for_clustering.json", idx)
-            )
-            for idx in range(3)
-        ]
-    )
-    cluster_labels = collection.cluster(n_clusters=1, timeout=0)
-
-    assert len(cluster_labels) == 0
-    assert collection.clusters is None

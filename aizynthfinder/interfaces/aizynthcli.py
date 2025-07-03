@@ -44,14 +44,9 @@ def _do_clustering(
     finder: AiZynthFinder,
     results: StrDict,
     detailed_results: bool,
-    model_path: Optional[str] = None,
 ) -> None:
     time0 = time.perf_counter_ns()
-    if model_path:
-        kwargs = {"distances_model": "lstm", "model_path": model_path}
-    else:
-        kwargs = {"distances_model": "ted"}
-    results["cluster_labels"] = finder.routes.cluster(n_clusters=0, **kwargs)  # type: ignore
+    results["cluster_labels"] = finder.routes.cluster(n_clusters=0)  # type: ignore
     if not detailed_results:
         return
 
@@ -107,10 +102,6 @@ def _get_arguments() -> argparse.Namespace:
         action="store_true",
         default=False,
         help="if provided, perform automatic clustering",
-    )
-    parser.add_argument(
-        "--route_distance_model",
-        help="if provided, calculate route distances for clustering with this ML model",
     )
     parser.add_argument(
         "--post_processing",
@@ -194,7 +185,6 @@ def _process_single_smiles(
     finder: AiZynthFinder,
     output_name: str,
     do_clustering: bool,
-    route_distance_model: Optional[str],
     post_processing: List[_PostProcessingJob],
     pre_processing: Optional[_PreProcessingJob],
 ) -> None:
@@ -221,9 +211,7 @@ def _process_single_smiles(
 
     stats = finder.extract_statistics()
     if do_clustering:
-        _do_clustering(
-            finder, stats, detailed_results=False, model_path=route_distance_model
-        )
+        _do_clustering(finder, stats, detailed_results=False)
     _do_post_processing(finder, stats, post_processing)
     stats_str = "\n".join(
         f"{key.replace('_', ' ')}: {value}" for key, value in stats.items()
@@ -236,7 +224,6 @@ def _process_multi_smiles(
     finder: AiZynthFinder,
     output_name: str,
     do_clustering: bool,
-    route_distance_model: Optional[str],
     post_processing: List[_PostProcessingJob],
     pre_processing: Optional[_PreProcessingJob],
     checkpoint: Optional[str],
@@ -276,9 +263,7 @@ def _process_multi_smiles(
         solved_str = "is solved" if stats["is_solved"] else "is not solved"
         logger().info(f"Done with {smi} in {search_time:.3} s and {solved_str}")
         if do_clustering:
-            _do_clustering(
-                finder, stats, detailed_results=True, model_path=route_distance_model
-            )
+            _do_clustering(finder, stats, detailed_results=True)
         _do_post_processing(finder, stats, post_processing)
 
         for key, value in stats.items():
@@ -326,8 +311,6 @@ def _multiprocess_smiles(args: argparse.Namespace) -> None:
             cmd_args.extend(args.stocks)
         if args.cluster:
             cmd_args.append("--cluster")
-        if args.route_distance_model:
-            cmd_args.extend(["--route_distance_model", args.route_distance_model])
         if args.post_processing:
             cmd_args.extend(["--post_processing"] + args.post_processing)
         return cmd_args
@@ -387,7 +370,6 @@ def main() -> None:
         finder,
         args.output,
         args.cluster,
-        args.route_distance_model,
         post_processing,
         pre_processing,
         args.checkpoint,

@@ -3,14 +3,13 @@
 
 from __future__ import annotations
 
-import abc
 import json
-from collections import defaultdict
-from collections.abc import Sequence as SequenceAbc
-from dataclasses import dataclass
 from typing import TYPE_CHECKING
 
 import numpy as np
+import pandas as pd
+from rxnutils.chem.features.sc_score import SCScore
+from rxnutils.routes.scoring import DeepsetModelClient, deepset_route_score
 
 try:
     from route_distances.route_distances import route_distances_calculator
@@ -19,190 +18,98 @@ except ImportError:
 else:
     SUPPORT_DISTANCES = True
 
-from aizynthfinder.chem import TreeMolecule
-from aizynthfinder.context.stock import StockException
+from aizynthfinder.context.scoring.scorers_base import Scorer, make_rxnutils_route
+
+# pylint: disable=W0611
+from aizynthfinder.context.scoring.scorers_mols import (
+    DeltaSyntheticComplexityScorer,
+    FractionInSourceStockScorer,
+    FractionInStockScorer,
+    FractionOfIntermediatesInStockScorer,
+    NumberOfPrecursorsInStockScorer,
+    NumberOfPrecursorsScorer,
+    PriceSumScorer,
+    StockAvailabilityScorer,
+)
+from aizynthfinder.context.scoring.scorers_reactions import (
+    AverageTemplateOccurrenceScorer,
+    MaxTransformScorer,
+    NumberOfReactionsScorer,
+    ReactionClassMembershipScorer,
+    ReactionClassRankScorer,
+)
 from aizynthfinder.reactiontree import ReactionTree
 from aizynthfinder.search.mcts import MctsNode
 from aizynthfinder.utils.bonds import BrokenBonds
-from aizynthfinder.utils.exceptions import ScorerException
 from aizynthfinder.utils.logging import logger
-from aizynthfinder.utils.sc_score import SCScore
 
 if TYPE_CHECKING:
-    from aizynthfinder.chem import (
-        FixedRetroReaction,
-        Molecule,
-        RetroReaction,
-        UniqueMolecule,
-    )
+    from aizynthfinder.chem import RetroReaction
     from aizynthfinder.context.config import Configuration
-    from aizynthfinder.utils.type_utils import (
-        Iterable,
-        Optional,
-        Sequence,
-        StrDict,
-        Tuple,
-        TypeVar,
-        Union,
-    )
+    from aizynthfinder.utils.type_utils import Optional, Sequence, StrDict, TypeVar
 
-    _Molecules = Sequence[Molecule]
     _Scoreable = TypeVar("_Scoreable", MctsNode, ReactionTree)
-    _Scoreables = Sequence[_Scoreable]
-    _ScorerItemType = Union[_Scoreables, _Scoreable]
 
 
-@dataclass
-class SquashScaler:
+class CombinedScorer(Scorer):
+    """Class for scoring nodes and reaction trees by combining weighted scores from a list of scorers
+
+    If no weights are provided as input, the scorer provides default weights that are
+    equal for all input scorers.
+
+    The CombinedScorer cannot be instantiated from the config file as it requires the
+    names of the scorers to combine as input.
     """
-    Squash function loosely adapted from a sigmoid function with parameters
-    to modify and offset the shape
-
-    :param slope: the slope of the midpoint
-    :param xoffset: the offset of the midpoint along the x-axis
-    :param yoffset: the offset of the curve along the y-axis
-    """
-
-    slope: float
-    xoffset: float
-    yoffset: float
-
-    def __call__(self, val: float) -> float:
-        return 1 / (1 + np.exp(self.slope * -(val - self.xoffset))) - self.yoffset
-
-
-@dataclass
-class MinMaxScaler:
-    """
-    Scaling function that normalises the value between 0 - 1,
-    the reverse variable controls the direction of scaling,
-    reverse should set to be true for rewards that need to be minimised
-    the scale_factor could be used to adjust the scores when they are too small or too big
-
-    :param val: the value that is being scaled
-    :param min_val: minimum val param val could take
-    :param max_val: maximum val param val could take
-    :param scale_factor: scaling factor applied to the minmax scaled output
-    """
-
-    min_val: float
-    max_val: float
-    reverse: bool
-    scale_factor: float = 1
-
-    def __call__(self, val: float) -> float:
-        val = np.clip(val, self.min_val, self.max_val)
-        if self.reverse:
-            numerator = self.max_val - val
-        else:
-            numerator = val - self.min_val
-        return (numerator / (self.max_val - self.min_val)) * self.scale_factor
-
-
-_SCALERS = {"squash": SquashScaler, "min_max": MinMaxScaler}
-
-
-class Scorer(abc.ABC):
-    """
-    Abstract base class for classes that do scoring on MCTS-like nodes or reaction trees.
-
-    The actual scoring is done be calling an instance of
-    a scorer class with a ``Node`` or ``ReactionTree`` object as only argument.
-
-    .. code-block::
-
-        scorer = MyScorer()
-        score = scorer(node1)
-
-    You can also give a list of such objects to the scorer
-
-    .. code-block::
-
-        scorer = MyScorer()
-        scores = scorer([node1, node2])
-
-    :param config: the configuration the tree search
-    :param scaler_params: the parameter settings of the scaler
-    """
-
-    scorer_name = "base"
 
     def __init__(
         self,
-        config: Optional[Configuration] = None,
-        scaler_params: Optional[StrDict] = None,
+        config: Configuration,
+        scorers: Sequence[str],
+        weights: Optional[Sequence[float]] = None,
+        combine_strategy: str = "mean-arithmetic",
+        short_name: Optional[str] = None,
     ) -> None:
-        self._config = config
-        self._reverse_order: bool = True
-        self._scaler = None
-        self._scaler_name = ""
-        if scaler_params:
-            self._scaler_name = scaler_params["name"]
-            del scaler_params["name"]
-            if scaler_params:
-                self._scaler = _SCALERS[self._scaler_name](**scaler_params)
-            else:
-                # for paramterless function
-                self._scaler = _SCALERS[self._scaler_name]
+        super().__init__(config)
+        self._scorers = [config.scorers[scorer] for scorer in scorers]
+        self._weights = weights if weights else [1 / len(scorers)] * len(scorers)
 
-    def __call__(self, item: _ScorerItemType) -> Union[float, Sequence[float]]:
-        if isinstance(item, SequenceAbc):
-            return self._score_many(item)
-        if isinstance(item, (MctsNode, ReactionTree)):
-            return self._score_just_one(item)  # type: ignore
-        raise ScorerException(
-            f"Unable to score item from class {item.__class__.__name__}"
-        )
+        if combine_strategy not in ["mean-arithmetic", "mean-geometric", "product"]:
+            raise ValueError(
+                f"'combine_strategy' should be one of ['mean-arithmetic', "
+                f"'mean-geometric', 'product'], got {combine_strategy}"
+            )
+        self._combine_strategy = combine_strategy
+        self._short_name = short_name
 
     def __repr__(self) -> str:
-        repr_name = self.scorer_name
-        if self._scaler_name:
-            repr_name += f"-{self._scaler_name}"
-        return repr_name
+        if self._short_name:
+            return self._short_name
+        scorer_name = " + ".join([repr(scorer) for scorer in self._scorers])
+        if self._combine_strategy == "mean-arithmetic":
+            return scorer_name
+        return f"{scorer_name} ({self._combine_strategy})"
 
-    def sort(
-        self, items: _Scoreables
-    ) -> Tuple[_Scoreables, Sequence[float], Sequence[int]]:
-        """
-        Sort nodes or reaction trees in descending order based on the score
+    def _combine_score(self, scores: Sequence[float]) -> float:
+        if self._combine_strategy == "mean-arithmetic":
+            return sum(
+                score * weight for score, weight in zip(scores, self._weights)
+            ) / sum(self._weights)
 
-        :param items: the items to sort
-        :return: the sorted items and their scores
-        """
-        scores = self._score_many(items)
-        assert isinstance(scores, SequenceAbc)
-        sortidx = sorted(
-            range(len(scores)), key=scores.__getitem__, reverse=self._reverse_order
-        )
-        scores = [scores[idx] for idx in sortidx]
-        sorted_items = [items[idx] for idx in sortidx]
-        return sorted_items, scores, sortidx
+        product_score = 1.0
+        for score in scores:
+            product_score *= score
 
-    def _score_just_one(self, item: _Scoreable) -> float:
-        if isinstance(item, MctsNode):
-            node_score = self._score_node(item)
-            if self._scaler:
-                node_score = self._scaler(node_score)
-            return node_score
-        if isinstance(item, ReactionTree):
-            tree_score = self._score_reaction_tree(item)
-            if self._scaler:
-                tree_score = self._scaler(tree_score)
-            return tree_score
-        raise ScorerException(
-            f"Unable to score item from class {item.__class__.__name__}"
-        )
+        if self._combine_strategy == "mean-geometric":
+            return product_score ** (1 / len(scores))
+        return product_score
 
-    def _score_many(self, items: _Scoreables) -> Sequence[float]:
-        return [self._score_just_one(item) for item in items]
-
-    @abc.abstractmethod
     def _score_node(self, node: MctsNode) -> float:
-        pass
+        scores = [scorer(node) for scorer in self._scorers]
+        return self._combine_score(scores)
 
-    @abc.abstractmethod
     def _score_reaction_tree(self, tree: ReactionTree) -> float:
-        pass
+        scores = [scorer(tree) for scorer in self._scorers]
+        return self._combine_score(scores)
 
 
 class StateScorer(Scorer):
@@ -216,7 +123,7 @@ class StateScorer(Scorer):
         super().__init__(config, scaler_params)
         # This is necessary because config should not be optional for this scorer
         self._config: Configuration = config
-        self._transform_scorer = MaxTransformScorerer(
+        self._transform_scorer = MaxTransformScorer(
             config,
             scaler_params={"name": "squash", "slope": -1, "yoffset": 0, "xoffset": 4},
         )
@@ -235,179 +142,6 @@ class StateScorer(Scorer):
 
     def _score_reaction_tree(self, tree: ReactionTree) -> float:
         return self._score(tree)
-
-
-class MaxTransformScorerer(Scorer):
-    """Class for scoring nodes based on the maximum transform"""
-
-    scorer_name = "max transform"
-
-    def _score_node(self, node: MctsNode) -> float:
-        return node.state.max_transforms
-
-    def _score_reaction_tree(self, tree: ReactionTree) -> float:
-        mols = [
-            TreeMolecule(
-                parent=None, transform=tree.depth(leaf) // 2, smiles=leaf.smiles
-            )
-            for leaf in tree.leafs()
-        ]
-        return max(mol.transform for mol in mols)
-
-
-class FractionInStockScorer(Scorer):
-    """Class for scoring nodes based on the fraction in stock"""
-
-    scorer_name = "fraction in stock"
-
-    def __init__(
-        self, config: Configuration, scaler_params: Optional[StrDict] = None
-    ) -> None:
-        super().__init__(config, scaler_params)
-        # This is necessary because config should not be optional for this scorer
-        self._config: Configuration = config
-
-    def _score_node(self, node: MctsNode) -> float:
-        num_in_stock = np.sum(node.state.in_stock_list)
-        num_molecules = len(node.state.mols)
-        return float(num_in_stock) / float(num_molecules)
-
-    def _score_reaction_tree(self, tree: ReactionTree) -> float:
-        leaves = list(tree.leafs())
-        num_in_stock = sum(mol in self._config.stock for mol in leaves)
-        num_molecules = len(leaves)
-        return float(num_in_stock) / float(num_molecules)
-
-
-class NumberOfReactionsScorer(Scorer):
-    """Class for scoring nodes based on the number of reaction it took to get to a node"""
-
-    scorer_name = "number of reactions"
-
-    def __init__(
-        self,
-        config: Optional[Configuration] = None,
-        scaler_params: Optional[StrDict] = None,
-    ) -> None:
-        super().__init__(config, scaler_params)
-        self._reverse_order = False
-
-    def _score_node(self, node: MctsNode) -> float:
-        reactions = node.actions_to()
-        return len(reactions)
-
-    def _score_reaction_tree(self, tree: ReactionTree) -> float:
-        return len(list(tree.reactions()))
-
-
-class NumberOfPrecursorsScorer(Scorer):
-    """Class for scoring nodes based on the number of pre-cursors in a node or route"""
-
-    scorer_name = "number of pre-cursors"
-
-    def __init__(
-        self,
-        config: Optional[Configuration] = None,
-        scaler_params: Optional[StrDict] = None,
-    ) -> None:
-        super().__init__(config, scaler_params)
-        self._reverse_order = False
-
-    def _score_node(self, node: MctsNode) -> float:
-        return len(node.state.mols)
-
-    def _score_reaction_tree(self, tree: ReactionTree) -> float:
-        return len(list(tree.leafs()))
-
-
-class NumberOfPrecursorsInStockScorer(Scorer):
-    """Class for scoring nodes based on the number of pre-cursors in stock a
-    node or route"""
-
-    scorer_name = "number of pre-cursors in stock"
-
-    def __init__(
-        self, config: Configuration, scaler_params: Optional[StrDict] = None
-    ) -> None:
-        super().__init__(config, scaler_params)
-        self._stock = config.stock
-
-    def _score_node(self, node: MctsNode) -> float:
-        return len([mol for mol in node.state.mols if mol in self._stock])
-
-    def _score_reaction_tree(self, tree: ReactionTree) -> float:
-        return len([mol for mol in tree.leafs() if mol in self._stock])
-
-
-class AverageTemplateOccurrenceScorer(Scorer):
-    """Class for scoring the nodes based on the average occurrence of the
-    templates used to get to a node"""
-
-    scorer_name = "average template occurrence"
-
-    def _calc_average(
-        self, reactions: Sequence[Union[FixedRetroReaction, RetroReaction]]
-    ) -> float:
-        if not reactions:
-            return 0.0
-        occurrences = [self._get_occurrence(reaction) for reaction in reactions]
-        return sum(occurrences) / len(reactions)
-
-    def _score_node(self, node: MctsNode) -> float:
-        return self._calc_average(node.actions_to())
-
-    def _score_reaction_tree(self, tree: ReactionTree) -> float:
-        return self._calc_average(list(tree.reactions()))
-
-    @staticmethod
-    def _get_occurrence(reaction: Union[FixedRetroReaction, RetroReaction]) -> int:
-        return reaction.metadata.get(
-            "library_occurrence", reaction.metadata.get("library_occurence", 0)
-        )
-
-
-class PriceSumScorer(Scorer):
-    """Scorer that sums the prices of all pre-cursors"""
-
-    scorer_name = "sum of prices"
-
-    def __init__(
-        self,
-        config: Configuration,
-        scaler_params: Optional[StrDict] = None,
-        default_cost: float = 1.0,
-        not_in_stock_multiplier: int = 10,
-    ) -> None:
-        super().__init__(config, scaler_params)
-        self._config: Configuration = config
-        self.default_cost = default_cost
-        self.not_in_stock_multiplier = not_in_stock_multiplier
-        self._reverse_order = False
-
-    def _calculate_leaf_costs(
-        self, leafs: Union[Sequence[Molecule], Iterable[Molecule]]
-    ) -> dict:
-        costs = {}
-        for mol in leafs:
-            if mol not in self._config.stock:
-                continue
-            try:
-                cost = self._config.stock.price(mol)
-            except StockException:
-                costs[mol] = self.default_cost
-            else:
-                costs[mol] = cost
-
-        max_cost = max(costs.values()) if costs else self.default_cost
-        return defaultdict(lambda: max_cost * self.not_in_stock_multiplier, costs)
-
-    def _score_node(self, node: MctsNode) -> float:
-        leaf_costs = self._calculate_leaf_costs(node.state.mols)
-        return sum(leaf_costs[mol] for mol in node.state.mols)
-
-    def _score_reaction_tree(self, tree: ReactionTree) -> float:
-        leaf_costs = self._calculate_leaf_costs(tree.leafs())
-        return sum(leaf_costs[leaf] for leaf in tree.leafs())
 
 
 class RouteCostScorer(PriceSumScorer):
@@ -476,108 +210,6 @@ class RouteCostScorer(PriceSumScorer):
 
         leaf_costs = self._calculate_leaf_costs(tree.leafs())
         return _recursive_score(tree.root)
-
-
-class ReactionClassMembershipScorer(Scorer):
-    """
-    Scorer that checks if the reaction classes are in a specified set
-
-    The score is calculated as product over each reaction. For each reaction
-    the reaction classification is checked if it is in a given list of classes.
-    """
-
-    def __init__(
-        self,
-        config: Configuration,
-        reaction_class_set: Sequence[str],
-        in_set_score: float = 1.0,
-        not_in_set_score: float = 0.1,
-    ) -> None:
-        super().__init__(config)
-        self.reaction_class_set = set(item.split(" ")[0] for item in reaction_class_set)
-        self.in_set_score = in_set_score
-        self.not_in_set_score = not_in_set_score
-
-    def __repr__(self) -> str:
-        return "reaction class membership"
-
-    def _calc_product(
-        self, reactions: Sequence[Union[FixedRetroReaction, RetroReaction]]
-    ) -> float:
-        if not reactions:
-            return 1.0
-        prod = 1.0
-        for reaction in reactions:
-            membership = self._get_membership(reaction)
-            prod *= self.in_set_score if membership else self.not_in_set_score
-        return prod
-
-    def _get_membership(
-        self, reaction: Union[FixedRetroReaction, RetroReaction]
-    ) -> bool:
-        classification = reaction.metadata.get("classification")
-        if not classification:
-            return 0.0 in self.reaction_class_set
-        return classification.split(" ")[0] in self.reaction_class_set
-
-    def _score_node(self, node: MctsNode) -> float:
-        return self._calc_product(node.actions_to())
-
-    def _score_reaction_tree(self, tree: ReactionTree) -> float:
-        return self._calc_product(list(tree.reactions()))
-
-
-class StockAvailabilityScorer(Scorer):
-    """
-    Scorer that computes score based on the stock availability of the starting material
-
-    The score is calculated as a product of a stock score per starting material. The stock
-    score for each molecule is based on the source of the stock, or a default value if the
-    molecule is not in stock. The `other_source_score` parameter can be used to
-    distinguish between "not in stock" and "not in the specificed sources" cases.
-    """
-
-    def __init__(
-        self,
-        config: Configuration,
-        source_score: StrDict,
-        default_score: float = 0.1,
-        other_source_score: Optional[float] = None,
-    ) -> None:
-        super().__init__(config)
-        assert self._config is not None
-        self.source_score = source_score
-        self.default_score = default_score
-        self.other_source_score = other_source_score
-
-    def __repr__(self) -> str:
-        return "stock availability"
-
-    def _calculate_leaf_costs(
-        self, leafs: Union[Sequence[Molecule], Iterable[Molecule]]
-    ) -> float:
-        assert self._config is not None
-        prod = 1.0
-        for mol in leafs:
-            availability = self._config.stock.availability_list(mol)
-            scores = [
-                self.source_score[source]
-                for source in availability
-                if source in self.source_score
-            ]
-            if scores:
-                prod *= max(scores)
-            elif self.other_source_score and mol in self._config.stock:
-                prod *= self.other_source_score
-            else:
-                prod *= self.default_score
-        return prod
-
-    def _score_node(self, node: MctsNode) -> float:
-        return self._calculate_leaf_costs(node.state.mols)
-
-    def _score_reaction_tree(self, tree: ReactionTree) -> float:
-        return self._calculate_leaf_costs(tree.leafs())
 
 
 class BrokenBondsScorer(Scorer):
@@ -737,144 +369,67 @@ class RouteSimilarityScorer(Scorer):
         return float(norm_score)
 
 
-class DeltaSyntheticComplexityScorer(Scorer):
-    """
-    Class for scoring nodes based on the delta-synthetic-complexity of the node
-    and its parent 'horizon' steps up in the tree.
+class DeepSetScorer(Scorer):
+    """Class for scoring nodes and reaction trees by a deep learning model,
+    augmented by expert knowledge.
+
+    Wrapper for `deepset_route_score` from `rxnutils` with addition
+    of the expert knowledge correction for route length.
+
+    The raw output of the score is capped between 0 and 20.
+    0 because sometimes the deepset model return negative values, even though
+    it should be confined to >= 0
+    20 because anything large than 20 is useless and uninteresting, this
+    cap could probably be removed in the future if we retrain it.
+
+    How to interpret the score:
+    - ”Good” for scores between 0 and 5
+    - ”Plausible” for scores between 5 and 9
+    - ”Bad” for scores between 10 and 15
 
     :param config: the configuration the tree search
+    :param deepset_model: the path to the DeepSet model
     :param sc_score_model: the path to the SCScore model
-    :param scaler_params: the parameter settings of the scaler, defaults to max-min between -1.5 and 4
-    :param horizon: the number of steps backwards to look for parent molecule
+    :param class_ranks_path: the path to a file with reaction class ranks
+    :param scaler_params: the parameter settings of the scaler
     """
 
-    scorer_name: str = "delta-SC score"
+    scorer_name = "expert-augmented score"
 
     def __init__(
         self,
         config: Configuration,
+        deepset_model: str,
         sc_score_model: str,
+        class_ranks_path: str,
+        model_score_weight: float = 0.97,
+        length_weight: float = -0.43,
         scaler_params: Optional[StrDict] = None,
-        horizon: int = 3,
     ) -> None:
-        if scaler_params is None:
-            scaler_params = {
-                "name": "min_max",
-                "min_val": -1.5,
-                "max_val": 4,
-                "reverse": False,
-            }
         super().__init__(config, scaler_params)
-        ## This is necessary because config should not be optional for this scorer
-        self._config: Configuration = config
+        self._reverse_order = False
 
-        self.horizon = horizon
-        self._model = SCScore(sc_score_model)
+        data = pd.read_csv(class_ranks_path, sep=",")
+        self._reaction_class_ranks = dict(
+            zip(data["reaction_class"], data["rank_score"])
+        )
 
-    def sc_deltas(self, mols: _Molecules, parents: _Molecules) -> Sequence[float]:
-        """
-        Calculate delta SC-score among the list of mol-parent pairs.
-
-        :params mols: the leaves of the tree
-        :param parents: the parent of the leaves
-        :returns: the pair-wise difference in SCScore
-        """
-        delta_sc_scores = []
-        for mol, parent in zip(mols, parents):
-            mol.sanitize()
-            parent.sanitize()
-
-            sc_score_mol = self._model(mol.rd_mol)
-            sc_score_parent = self._model(parent.rd_mol)
-
-            delta_sc_score = sc_score_parent - sc_score_mol
-            delta_sc_scores.append(delta_sc_score)
-        return delta_sc_scores
-
-    def _get_parent_from_reaction_tree(
-        self, tree: ReactionTree, mol: UniqueMolecule, horizon: int
-    ) -> UniqueMolecule:
-        horizon = min(horizon, tree.depth(mol) // 2)
-
-        parent = mol
-        # Step up in the tree, first a reaction, then a molecule
-        for _ in range(horizon):
-            parent = tree.parent_molecule(parent)
-
-        return parent
-
-    def _get_parent_from_tree_molecule(
-        self, mol: TreeMolecule, horizon: int
-    ) -> TreeMolecule:
-        horizon = min(horizon, mol.transform)
-
-        parent = mol
-        # Step up in the tree via parent nodes
-        for _ in range(horizon):
-            grandparent = parent.parent
-            if not grandparent:
-                break
-            parent = grandparent
-
-        return parent
+        self._deepset_model = DeepsetModelClient(deepset_model)
+        self._sc_scorer = SCScore(sc_score_model)
+        self._model_score_weight = model_score_weight
+        self._length_weight = length_weight
 
     def _score_node(self, node: MctsNode) -> float:
-        expandable_mols = node.state.expandable_mols
-        if not expandable_mols:
-            expandable_mols = list(node.state.mols)
-
-        parent_mols = [
-            self._get_parent_from_tree_molecule(mol, self.horizon)
-            for mol in expandable_mols
-        ]
-        delta_sc_scores = self.sc_deltas(expandable_mols, parent_mols)
-        return min(delta_sc_scores)
+        # All rxnutils scorers are based on reaction trees
+        return self._score_reaction_tree(node.to_reaction_tree())
 
     def _score_reaction_tree(self, tree: ReactionTree) -> float:
-        expandable_mols = [node for node in tree.leafs() if not tree.in_stock(node)]
-        if not expandable_mols:
-            expandable_mols = list(tree.leafs())
-
-        parent_mols = [
-            self._get_parent_from_reaction_tree(tree, node, self.horizon)
-            for node in expandable_mols
-        ]
-        delta_sc_scores = self.sc_deltas(expandable_mols, parent_mols)
-        return min(delta_sc_scores)
-
-
-class CombinedScorer(Scorer):
-    """Class for scoring nodes and reaction trees by combining weighted scores from a list of scorers
-
-    If no weights are provided as input, the scorer provides default weights that are
-    equal for all input scorers.
-
-    The CombinedScorer cannot be instantiated from the config file as it requires the
-    names of the scorers to combine as input.
-    """
-
-    def __init__(
-        self,
-        config: Configuration,
-        scorers: Sequence[str],
-        weights: Optional[Sequence[float]] = None,
-    ) -> None:
-        super().__init__(config)
-        self._scorers = [config.scorers[scorer] for scorer in scorers]
-        self._weights = weights if weights else [1 / len(scorers)] * len(scorers)
-
-    def __repr__(self) -> str:
-        return " + ".join([repr(scorer) for scorer in self._scorers])
-
-    def _combine_score(self, scores: Sequence[float]) -> float:
-        return sum(
-            score * weight for score, weight in zip(scores, self._weights)
-        ) / sum(self._weights)
-
-    def _score_node(self, node: MctsNode) -> float:
-        scores = [scorer(node) for scorer in self._scorers]
-        return self._combine_score(scores)
-
-    def _score_reaction_tree(self, tree: ReactionTree) -> float:
-        scores = [scorer(tree) for scorer in self._scorers]
-        return self._combine_score(scores)
+        route = make_rxnutils_route(tree)
+        pred_distance = deepset_route_score(
+            route, self._deepset_model, self._sc_scorer, self._reaction_class_ranks
+        )
+        raw_score = (
+            self._model_score_weight * pred_distance
+            + self._length_weight * route.nsteps
+        )
+        return min(max(0, raw_score), 20)
