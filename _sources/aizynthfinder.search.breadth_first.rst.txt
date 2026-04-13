@@ -1,0 +1,29 @@
+aizynthfinder.search.breadth\_first package
+===========================================
+
+Submodules
+----------
+
+aizynthfinder.search.breadth\_first.nodes module
+------------------------------------------------
+
+.. automodule:: aizynthfinder.search.breadth_first.nodes
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+aizynthfinder.search.breadth\_first.search\_tree module
+-------------------------------------------------------
+
+.. automodule:: aizynthfinder.search.breadth_first.search_tree
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+Module contents
+---------------
+
+.. automodule:: aizynthfinder.search.breadth_first
+   :members:
+   :undoc-members:
+   :show-inheritance:

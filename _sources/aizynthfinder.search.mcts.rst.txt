@@ -1,0 +1,45 @@
+aizynthfinder.search.mcts package
+=================================
+
+Submodules
+----------
+
+aizynthfinder.search.mcts.node module
+-------------------------------------
+
+.. automodule:: aizynthfinder.search.mcts.node
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+aizynthfinder.search.mcts.search module
+---------------------------------------
+
+.. automodule:: aizynthfinder.search.mcts.search
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+aizynthfinder.search.mcts.state module
+--------------------------------------
+
+.. automodule:: aizynthfinder.search.mcts.state
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+aizynthfinder.search.mcts.utils module
+--------------------------------------
+
+.. automodule:: aizynthfinder.search.mcts.utils
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+Module contents
+---------------
+
+.. automodule:: aizynthfinder.search.mcts
+   :members:
+   :undoc-members:
+   :show-inheritance:

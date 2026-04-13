@@ -1,0 +1,45 @@
+aizynthfinder.context.policy package
+====================================
+
+Submodules
+----------
+
+aizynthfinder.context.policy.expansion\_strategies module
+---------------------------------------------------------
+
+.. automodule:: aizynthfinder.context.policy.expansion_strategies
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+aizynthfinder.context.policy.filter\_strategies module
+------------------------------------------------------
+
+.. automodule:: aizynthfinder.context.policy.filter_strategies
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+aizynthfinder.context.policy.policies module
+--------------------------------------------
+
+.. automodule:: aizynthfinder.context.policy.policies
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+aizynthfinder.context.policy.utils module
+-----------------------------------------
+
+.. automodule:: aizynthfinder.context.policy.utils
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+Module contents
+---------------
+
+.. automodule:: aizynthfinder.context.policy
+   :members:
+   :undoc-members:
+   :show-inheritance:

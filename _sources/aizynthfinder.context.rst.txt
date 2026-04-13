@@ -1,0 +1,39 @@
+aizynthfinder.context package
+=============================
+
+Subpackages
+-----------
+
+.. toctree::
+   :maxdepth: 4
+
+   aizynthfinder.context.policy
+   aizynthfinder.context.scoring
+   aizynthfinder.context.stock
+
+Submodules
+----------
+
+aizynthfinder.context.collection module
+---------------------------------------
+
+.. automodule:: aizynthfinder.context.collection
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+aizynthfinder.context.config module
+-----------------------------------
+
+.. automodule:: aizynthfinder.context.config
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+Module contents
+---------------
+
+.. automodule:: aizynthfinder.context
+   :members:
+   :undoc-members:
+   :show-inheritance:

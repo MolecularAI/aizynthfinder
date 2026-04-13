@@ -1,0 +1,37 @@
+aizynthfinder.analysis package
+==============================
+
+Submodules
+----------
+
+aizynthfinder.analysis.routes module
+------------------------------------
+
+.. automodule:: aizynthfinder.analysis.routes
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+aizynthfinder.analysis.tree\_analysis module
+--------------------------------------------
+
+.. automodule:: aizynthfinder.analysis.tree_analysis
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+aizynthfinder.analysis.utils module
+-----------------------------------
+
+.. automodule:: aizynthfinder.analysis.utils
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+Module contents
+---------------
+
+.. automodule:: aizynthfinder.analysis
+   :members:
+   :undoc-members:
+   :show-inheritance:

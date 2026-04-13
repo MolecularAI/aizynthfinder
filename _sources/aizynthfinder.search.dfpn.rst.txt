@@ -1,0 +1,29 @@
+aizynthfinder.search.dfpn package
+=================================
+
+Submodules
+----------
+
+aizynthfinder.search.dfpn.nodes module
+--------------------------------------
+
+.. automodule:: aizynthfinder.search.dfpn.nodes
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+aizynthfinder.search.dfpn.search\_tree module
+---------------------------------------------
+
+.. automodule:: aizynthfinder.search.dfpn.search_tree
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+Module contents
+---------------
+
+.. automodule:: aizynthfinder.search.dfpn
+   :members:
+   :undoc-members:
+   :show-inheritance:
