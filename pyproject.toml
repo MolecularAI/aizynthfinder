@@ -69,6 +69,7 @@ pytest-mccabe = "^2.0.0"
 Sphinx = "^7.3.7"
 mypy = "^1.0.0"
 pylint = "^2.16.0"
+onnx = "^1.14.0"
 
 [tool.poetry.extras]
 all = ["pymongo", "route-distances", "scipy", "timeout-decorator", "molbloom"]

@@ -50,6 +50,54 @@ TF_SERVING_HOST = os.environ.get("TF_SERVING_HOST")
 TF_SERVING_REST_PORT = os.environ.get("TF_SERVING_REST_PORT")
 TF_SERVING_GRPC_PORT = os.environ.get("TF_SERVING_GRPC_PORT")
 
+# Environment variable to control ONNX GPU usage (set to "0" to force CPU)
+ONNX_USE_GPU = os.environ.get("AIZYNTHFINDER_USE_GPU", "1") != "0"
+
+# Cache for detected providers to avoid repeated detection
+_ONNX_PROVIDERS_CACHE = None
+
+
+def _get_onnx_providers() -> list:
+    """
+    Determine the optimal ONNX Runtime execution providers.
+
+    Returns a list of providers in priority order. CUDA is preferred if available
+    and AIZYNTHFINDER_USE_GPU is not set to "0".
+
+    The result is cached for efficiency across multiple model loads.
+    """
+    global _ONNX_PROVIDERS_CACHE
+
+    if _ONNX_PROVIDERS_CACHE is not None:
+        return _ONNX_PROVIDERS_CACHE
+
+    available = onnxruntime.get_available_providers()
+    providers = []
+
+    if ONNX_USE_GPU:
+        # Prefer CUDA over TensorRT (TensorRT often has missing dependencies)
+        # TensorRT requires libnvinfer which may not be installed
+        if "CUDAExecutionProvider" in available:
+            providers.append("CUDAExecutionProvider")
+
+    # Always include CPU as fallback
+    if "CPUExecutionProvider" in available:
+        providers.append("CPUExecutionProvider")
+
+    # If nothing found (shouldn't happen), use default
+    if not providers:
+        providers = available[:1] if available else ["CPUExecutionProvider"]
+
+    _ONNX_PROVIDERS_CACHE = providers
+
+    # Log provider selection once
+    gpu_enabled = "CUDAExecutionProvider" in providers
+    _logger.info(
+        f"ONNX Runtime providers: {providers} (GPU {'enabled' if gpu_enabled else 'disabled'})"
+    )
+
+    return providers
+
 
 def load_model(
     source: str, key: str, use_remote_models: bool
@@ -140,6 +188,9 @@ class LocalOnnxModel:
 
     The size of the input vector can be determined with the len() method.
 
+    GPU acceleration is enabled by default if CUDAExecutionProvider is available.
+    Set environment variable AIZYNTHFINDER_USE_GPU=0 to force CPU execution.
+
     :ivar model: the compiled Onnx model
     :ivar output_size: the length of the output vector
 
@@ -150,8 +201,13 @@ class LocalOnnxModel:
         session_options = onnxruntime.SessionOptions()
         session_options.intra_op_num_threads = _get_thread_count_per_core()
 
+        # Get optimal providers (GPU if available, with CPU fallback)
+        providers = _get_onnx_providers()
+
         self.model = onnxruntime.InferenceSession(
-            filename, sess_options=session_options
+            filename,
+            sess_options=session_options,
+            providers=providers
         )
         self._model_inputs = self.model.get_inputs()
         self._model_output = self.model.get_outputs()[0]

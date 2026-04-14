@@ -39,6 +39,35 @@ for a smaller package, without all the functionality, you can also type
 
     python -m pip install aizynthfinder
 
+### GPU Acceleration
+
+AiZynthFinder supports GPU acceleration for ONNX model inference using CUDA. When `onnxruntime-gpu` is installed and a compatible NVIDIA GPU is available, the expansion and filter policy models will automatically use GPU acceleration, providing **3-5x speedup** for model inference.
+
+To enable GPU acceleration:
+
+1. Install the CUDA-enabled ONNX Runtime instead of the CPU version:
+
+```bash
+pip uninstall onnxruntime
+pip install onnxruntime-gpu
+```
+
+2. Ensure NVIDIA drivers and CUDA toolkit are installed on your system.
+
+3. Verify GPU acceleration is working:
+
+```python
+import onnxruntime as ort
+print(ort.get_available_providers())
+# Should include 'CUDAExecutionProvider'
+```
+
+To disable GPU acceleration (force CPU-only), set the environment variable:
+
+```bash
+export AIZYNTHFINDER_USE_GPU=0
+```
+
 ### For developers
 
 First clone the repository using Git.
