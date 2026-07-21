@@ -171,7 +171,7 @@ class AiZynthFinder:
             self._logger.debug("Excluding the target compound from the stock")
 
         if self.config.search.break_bonds or self.config.search.freeze_bonds:
-            self._setup_focussed_bonds(self.target_mol)
+            self._setup_focused_bonds(self.target_mol)
 
         self._setup_search_tree()
         self.analysis = None
@@ -249,7 +249,7 @@ class AiZynthFinder:
         self.search_stats["time"] = time_past
         return time_past
 
-    def _setup_focussed_bonds(self, target_mol: Molecule) -> None:
+    def _setup_focused_bonds(self, target_mol: Molecule) -> None:
         """
         Setup multi-objective scoring function with 'broken bonds'-scorer and
         add 'frozen bonds'-filter to filter policy.
@@ -260,7 +260,7 @@ class AiZynthFinder:
 
         bond_filter_key = "__finder_bond_filter"
         if self.config.search.freeze_bonds:
-            if not target_mol.has_all_focussed_bonds(self.config.search.freeze_bonds):
+            if not target_mol.has_all_focused_bonds(self.config.search.freeze_bonds):
                 raise ValueError("Bonds in 'freeze_bond' must exist in target molecule")
             bond_filter = BondFilter(bond_filter_key, self.config)
             self.filter_policy.load(bond_filter)
@@ -276,7 +276,7 @@ class AiZynthFinder:
             return
 
         if self.config.search.break_bonds and "broken bonds" in search_rewards:
-            if not target_mol.has_all_focussed_bonds(self.config.search.break_bonds):
+            if not target_mol.has_all_focused_bonds(self.config.search.break_bonds):
                 raise ValueError("Bonds in 'break_bonds' must exist in target molecule")
             self.scorers.load(BrokenBondsScorer(self.config))
             self._num_objectives = len(search_rewards)
