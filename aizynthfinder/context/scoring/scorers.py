@@ -215,8 +215,8 @@ class RouteCostScorer(PriceSumScorer):
 class BrokenBondsScorer(Scorer):
     """Class for scoring nodes and reaction trees based on the breaking of atom bonds
 
-    The score is a summation of the depths in the tree where the focussed bonds
-    are found to break in the reaction. If a focussed bond is found to be unbroken
+    The score is a summation of the depths in the tree where the focused bonds
+    are found to break in the reaction. If a focused bond is found to be unbroken
     in the entire tree, the total length of the tree will be added to the score.
     """
 
@@ -239,7 +239,7 @@ class BrokenBondsScorer(Scorer):
             return 0
 
         max_score = len(set(depths)) * len(self._break_bonds)
-        broken_focussed_bonds = []
+        broken_focused_bonds = []
         scores = []
 
         # The score should be 0 when no transformations were reported
@@ -249,19 +249,19 @@ class BrokenBondsScorer(Scorer):
         for reaction, depth in zip(reactions, depths):
             broken_bonds = BrokenBonds(self._break_bonds)(reaction)
             broken_untracked_bonds = [
-                bond for bond in broken_bonds if bond not in broken_focussed_bonds
+                bond for bond in broken_bonds if bond not in broken_focused_bonds
             ]
             if len(broken_untracked_bonds) > 0:
-                broken_focussed_bonds += broken_untracked_bonds
+                broken_focused_bonds += broken_untracked_bonds
                 scores.append(1 - (depth / max_score))
                 if self._break_bonds_operator == "or":
                     break
 
         if self._break_bonds_operator != "or" or (
-            self._break_bonds_operator == "or" and len(broken_focussed_bonds) == 0
+            self._break_bonds_operator == "or" and len(broken_focused_bonds) == 0
         ):
             # type: ignore
-            if unbroken_bonds := set(self._break_bonds) - set(broken_focussed_bonds):
+            if unbroken_bonds := set(self._break_bonds) - set(broken_focused_bonds):
                 scores.append(1 - (len(set(depths)) * len(unbroken_bonds)) / max_score)
         return sum(scores) / len(scores)
 
