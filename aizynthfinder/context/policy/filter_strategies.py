@@ -67,7 +67,7 @@ class FilterStrategy(abc.ABC):
 
 class BondFilter(FilterStrategy):
     """
-    Check if focussed bonds to freeze stay frozen in a reaction.
+    Check if focused bonds to freeze stay frozen in a reaction.
 
     :param key: the key or label
     :param config: the configuration of the tree search
@@ -87,7 +87,7 @@ class BondFilter(FilterStrategy):
         broken_frozen_bonds = self._broken_bonds(reaction)
         if len(broken_frozen_bonds) > 0:
             raise RejectionException(
-                f"{reaction} was filtered out as the focussed bonds "
+                f"{reaction} was filtered out as the focused bonds "
                 f"'{broken_frozen_bonds}' were found to be broken in the reaction"
             )
 
