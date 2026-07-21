@@ -410,7 +410,7 @@ def test_broken_frozen_bond_filter(default_config):
     bond_filter = BondFilter("test", default_config)
     with pytest.raises(
         RejectionException,
-        match=r"focussed bonds \'\[\(2, 3\)\]\' were found to be broken",
+        match=r"focused bonds \'\[\(2, 3\)\]\' were found to be broken",
     ):
         bond_filter(reaction)
 
