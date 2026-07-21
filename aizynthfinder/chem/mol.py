@@ -334,10 +334,10 @@ class TreeMolecule(Molecule):
         bonds_in_mol = [bond for bond in query_bonds if bond in molecule_bonds]
         return bonds_in_mol
 
-    def has_all_focussed_bonds(self, bonds: Sequence[Sequence[int]]) -> bool:
-        """Checks that the focussed bonds exist in the target molecule's atom bonds.
+    def has_all_focused_bonds(self, bonds: Sequence[Sequence[int]]) -> bool:
+        """Checks that the focused bonds exist in the target molecule's atom bonds.
 
-        :param bonds: Focussed bonds.
+        :param bonds: Focused bonds.
         :param target_mol: The target molecule.
 
         :return: A boolean indicating if the input bonds exist in the target molecule.
