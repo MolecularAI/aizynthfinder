@@ -110,7 +110,7 @@ class RetroStarCost:
                 self._dropout_prob
             )
         vec = np.matmul(vec, self._weights[-1]) + self._biases[-1]
-        return float(np.log(1 + np.exp(vec)))
+        return float(np.log(1 + np.exp(vec)).item())
 
     @staticmethod
     def _load_model(model_path: str) -> Tuple[List[np.ndarray], List[np.ndarray]]:

@@ -1,5 +1,15 @@
 # CHANGELOG
 
+## Version 4.4.2 2026-09-16
+
+### Trivial changes
+
+- Upgraded reaction-utils to 1.9.4, opening rdkit support up to <2024.9.1
+- Added Python 3.13 support
+- Upgraded numpy to 2.0 on Python 3.13
+- Upgraded tensorflow to 2.21.0
+- Restricted route-distances optional dependency to Python <3.13
+
 ## Version 4.4.1 2025-12-09
 
 ### Trivial changes

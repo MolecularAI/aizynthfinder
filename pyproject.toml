@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "aizynthfinder"
-version = "4.4.1"
+version = "4.4.2"
 description = "Retrosynthetic route finding using neural network guided Monte-Carlo tree search"
 authors = ["Molecular AI group <samuel.genheden@astrazeneca.com>"]
 license = "MIT"
@@ -26,7 +26,7 @@ exclude_also = [
 ]
 
 [tool.poetry.dependencies]
-python = ">=3.10,<3.13"
+python = ">=3.10,<3.14"
 ipywidgets = "^7.5.1"
 jinja2 = "^3.0.0"
 jupyter = "^1.0.0"
@@ -38,15 +38,15 @@ pandas = ">=1.0.0,<3.0.0"
 pillow = "^12.0.0"
 requests = "^2.23.0"
 rdchiral = "^1.0.0"
-rdkit = "^2023.9.1"
+rdkit = ">=2023.9.1"
 tables = "^3.6.1"
 tqdm = "^4.42.1"
 onnxruntime = "^1.23.0"
-tensorflow = {version = "^2.20.0", optional=true}  
+tensorflow = {version = "^2.21.0", optional=true}
 grpcio = {version = "^1.24.0", optional=true}
 tensorflow-serving-api = {version = "^2.1.0", optional=true}
 pymongo = {version = "^3.10.1", optional=true}
-route-distances = {version = "^1.2.4", optional=true}
+route-distances = {version = "^1.2.4", optional=true, python = "<3.13"}
 scipy = {version = "^1.0", optional=true}
 matplotlib = "^3.0.0"
 timeout-decorator = {version = "^0.5.0", optional=true}
@@ -54,7 +54,8 @@ molbloom = {version = "^2.1.0", optional=true}
 paretoset = "^1.2.3"
 seaborn = "^0.13.2"
 dask = ">=2024.4.1" 
-numpy = "<2.0.0"
+numpy = [{version = ">=1.0.0,<2.0.0", python = "<3.13"}, {version = ">=2.0.0", python = ">=3.13"}]
+numexpr = [{version = "*", python = "<3.13"}, {version = ">=2.10.1", python = ">=3.13"}]
 reaction-utils = "^1.9.3"
 
 [tool.poetry.dev-dependencies]
